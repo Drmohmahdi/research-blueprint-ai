@@ -1,0 +1,290 @@
+import React, { useState, useEffect } from 'react';
+import { apiGetBilling, apiSubscribe, apiListPlans, apiGetDownloadUrl } from '../../utils/api';
+import { CreditCard, Check, ArrowUpCircle, Download, Activity, HardDrive } from 'lucide-react';
+import { Card } from '../../design-system/components/Card';
+import { Button } from '../../design-system/components/Button';
+
+interface BillingDashboardProps {
+  language: 'ar' | 'en';
+}
+
+export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) => {
+  const [billing, setBilling] = useState<any | null>(null);
+  const [plans, setPlans] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const bill = await apiGetBilling();
+      if (bill) setBilling(bill);
+      
+      const list = await apiListPlans();
+      if (list) setPlans(list);
+    } catch (e) {
+      console.error("Failed to load billing data", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const handleUpgrade = async (planCode: string) => {
+    setMessage('');
+    setError('');
+    const sub = await apiSubscribe(planCode);
+    if (sub) {
+      setMessage(language === 'ar' ? 'تم تحديث اشتراكك بنجاح!' : 'Subscription upgraded successfully!');
+      loadData();
+    } else {
+      setError(language === 'ar' ? 'فشل ترقية الاشتراك.' : 'Failed to upgrade subscription.');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="p-12 text-center text-xs font-bold text-[var(--ds-text-muted)] animate-pulse">
+        {language === 'ar' ? 'جاري تحميل تفاصيل الفوترة والاشتراكات...' : 'Loading subscription and billing details...'}
+      </div>
+    );
+  }
+
+  const activeSub = billing?.subscription;
+  const activePlan = billing?.plan;
+  const usage = billing?.usage || { projects_count: 0, storage_mb: 0 };
+  const invoices = billing?.invoices || [];
+
+  const limits = activePlan?.limits_json || { max_projects: 2, max_storage_mb: 50 };
+  const projectPct = Math.min((usage.projects_count / limits.max_projects) * 100, 100);
+  const storagePct = Math.min((usage.storage_mb / limits.max_storage_mb) * 100, 100);
+
+  return (
+    <div className="space-y-8">
+      {/* Messages */}
+      {message && (
+        <div className="p-3.5 border border-emerald-500/20 bg-emerald-500/5 text-emerald-500 rounded-2xl text-xs font-bold">
+          {message}
+        </div>
+      )}
+      {error && (
+        <div className="p-3.5 border border-rose-500/20 bg-rose-500/5 text-rose-500 rounded-2xl text-xs font-bold">
+          {error}
+        </div>
+      )}
+
+      {/* Subscription and Usage Summary */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Active subscription card */}
+        <Card className="lg:col-span-1 p-6 border-[var(--ds-border-subtle)] rounded-3xl bg-gradient-to-br from-purple-500/10 via-indigo-500/5 to-transparent relative">
+          <div className="space-y-4">
+            <span className="text-[10px] font-black text-[var(--ds-text-muted)] uppercase tracking-widest block">
+              {language === 'ar' ? 'الاشتراك الحالي' : 'Current Subscription'}
+            </span>
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-purple-500/15 text-purple-600 flex items-center justify-center">
+                <CreditCard size={20} />
+              </div>
+              <div>
+                <h4 className="text-base font-black m-0">{activePlan ? activePlan.name : 'Free Plan'}</h4>
+                <div className="text-[10px] text-[var(--ds-text-muted)] font-semibold mt-0.5">
+                  {activeSub?.status === 'ACTIVE' 
+                    ? (language === 'ar' ? 'نشط وتلقائي التجديد' : 'Active / Auto-renew') 
+                    : (language === 'ar' ? 'منتهي أو ملغي' : 'Expired / Cancelled')}
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-[var(--ds-border-subtle)] pt-4 space-y-2 text-xs">
+              <div className="flex justify-between font-bold">
+                <span className="text-[var(--ds-text-muted)]">{language === 'ar' ? 'دورة الفوترة:' : 'Billing Interval:'}</span>
+                <span>{activePlan?.billing_interval || 'MONTHLY'}</span>
+              </div>
+              <div className="flex justify-between font-bold">
+                <span className="text-[var(--ds-text-muted)]">{language === 'ar' ? 'تاريخ التجديد:' : 'Renewal Date:'}</span>
+                <span>{activeSub?.current_period_end ? new Date(activeSub.current_period_end).toLocaleDateString() : 'N/A'}</span>
+              </div>
+              <div className="flex justify-between font-bold">
+                <span className="text-[var(--ds-text-muted)]">{language === 'ar' ? 'القيمة:' : 'Price:'}</span>
+                <span className="text-purple-600">{activePlan?.price} {activePlan?.currency}</span>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Usage meters card */}
+        <Card className="lg:col-span-2 p-6 border-[var(--ds-border-subtle)] rounded-3xl bg-[var(--ds-surface-primary)]">
+          <span className="text-[10px] font-black text-[var(--ds-text-muted)] uppercase tracking-widest block mb-4">
+            {language === 'ar' ? 'استهلاك الحصص والحدود' : 'Entitlements & Usage Limits'}
+          </span>
+          <div className="space-y-6">
+            {/* Projects meter */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs font-bold">
+                <span className="flex items-center gap-1.5 text-[var(--ds-text-secondary)]">
+                  <Activity size={14} className="text-purple-600" />
+                  <span>{language === 'ar' ? 'عدد المشاريع البحثية' : 'Research Projects'}</span>
+                </span>
+                <span>{usage.projects_count} / {limits.max_projects}</span>
+              </div>
+              <div className="h-2.5 w-full bg-[var(--ds-surface-secondary)] rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-500" 
+                  style={{ width: `${projectPct}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Storage meter */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs font-bold">
+                <span className="flex items-center gap-1.5 text-[var(--ds-text-secondary)]">
+                  <HardDrive size={14} className="text-purple-600" />
+                  <span>{language === 'ar' ? 'المساحة التخزينية للمستندات' : 'Cloud Document Storage'}</span>
+                </span>
+                <span>{usage.storage_mb.toFixed(2)} MB / {limits.max_storage_mb} MB</span>
+              </div>
+              <div className="h-2.5 w-full bg-[var(--ds-surface-secondary)] rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-500" 
+                  style={{ width: `${storagePct}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Available Subscriptions Tier Matrix */}
+      <div>
+        <h3 className="text-sm font-black mb-6 uppercase tracking-widest text-[var(--ds-text-muted)]">
+          {language === 'ar' ? 'خطط وباقات الاستخدام المتاحة' : 'Available Subscription Tiers'}
+        </h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          {plans.map(plan => {
+            const isCurrent = activePlan?.code === plan.code;
+            const pLimits = plan.limits_json || {};
+            const pFeatures = plan.features_json || {};
+
+            return (
+              <Card 
+                key={plan.id} 
+                className={`p-6 border-[var(--ds-border-subtle)] rounded-3xl flex flex-col justify-between relative overflow-hidden transition-all duration-180 hover:shadow-lg ${
+                  isCurrent 
+                    ? 'ring-2 ring-purple-600 bg-purple-500/[0.02] border-purple-500/30' 
+                    : 'bg-[var(--ds-surface-primary)]'
+                }`}
+              >
+                {isCurrent && (
+                  <div className="absolute top-0 right-0 left-0 h-1.5 bg-gradient-to-r from-purple-600 to-indigo-600" />
+                )}
+
+                <div className="space-y-5">
+                  <div>
+                    <h4 className="text-base font-black m-0">{plan.name}</h4>
+                    <p className="text-[10px] text-[var(--ds-text-muted)] font-semibold mt-1 leading-relaxed">
+                      {plan.description}
+                    </p>
+                  </div>
+
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-2xl font-black text-[var(--ds-text-primary)]">{plan.price}</span>
+                    <span className="text-xs font-bold text-[var(--ds-text-muted)]">{plan.currency} / {plan.billing_interval}</span>
+                  </div>
+
+                  {/* Limit specifics */}
+                  <div className="space-y-2.5 border-t border-[var(--ds-border-subtle)] pt-4 text-xs font-bold">
+                    <div className="flex items-center gap-2">
+                      <Check size={14} className="text-emerald-500 shrink-0" />
+                      <span>{pLimits.max_projects} {language === 'ar' ? 'مشاريع كحد أقصى' : 'Projects Max'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Check size={14} className="text-emerald-500 shrink-0" />
+                      <span>{pLimits.max_storage_mb} MB {language === 'ar' ? 'مساحة سحابية' : 'Cloud Storage'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Check size={14} className="text-emerald-500 shrink-0" />
+                      <span>{pFeatures.can_export ? (language === 'ar' ? 'دعم تصدير التقارير كاملة' : 'Full Blueprint Export') : (language === 'ar' ? 'لا يوجد تصدير ملفات' : 'No Blueprint Export')}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  {isCurrent ? (
+                    <Button variant="secondary" disabled className="w-full justify-center py-2 text-xs font-black rounded-xl">
+                      {language === 'ar' ? 'الخطة الحالية' : 'Current Plan'}
+                    </Button>
+                  ) : (
+                    <Button 
+                      variant="primary" 
+                      onClick={() => handleUpgrade(plan.code)}
+                      className="w-full justify-center py-2 text-xs font-black rounded-xl shadow-md flex items-center gap-1.5"
+                    >
+                      <ArrowUpCircle size={14} />
+                      <span>{language === 'ar' ? 'ترقية / اختيار' : 'Upgrade Plan'}</span>
+                    </Button>
+                  )}
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Invoice Billing History Table */}
+      {invoices.length > 0 && (
+        <div>
+          <h3 className="text-sm font-black mb-4 uppercase tracking-widest text-[var(--ds-text-muted)]">
+            {language === 'ar' ? 'سجل الفواتير والمدفوعات' : 'Billing & Invoice History'}
+          </h3>
+          <Card className="border-[var(--ds-border-subtle)] rounded-3xl overflow-hidden bg-[var(--ds-surface-primary)]">
+            <div className="overflow-x-auto">
+              <table className="w-full text-right text-xs font-bold">
+                <thead>
+                  <tr className="bg-[var(--ds-surface-secondary)] border-b border-[var(--ds-border-subtle)] text-[var(--ds-text-muted)]">
+                    <th className="px-6 py-3.5">{language === 'ar' ? 'رقم الفاتورة' : 'Invoice ID'}</th>
+                    <th className="px-6 py-3.5">{language === 'ar' ? 'تاريخ الفاتورة' : 'Invoice Date'}</th>
+                    <th className="px-6 py-3.5">{language === 'ar' ? 'المبلغ والعملة' : 'Amount'}</th>
+                    <th className="px-6 py-3.5">{language === 'ar' ? 'حالة الدفع' : 'Status'}</th>
+                    <th className="px-6 py-3.5 text-center">{language === 'ar' ? 'تحميل PDF' : 'Download'}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--ds-border-subtle)]">
+                  {invoices.map((inv: any) => (
+                    <tr key={inv.id} className="hover:bg-[var(--ds-surface-secondary)] transition-colors">
+                      <td className="px-6 py-4 font-black">{inv.id}</td>
+                      <td className="px-6 py-4">{new Date(inv.created_at).toLocaleDateString()}</td>
+                      <td className="px-6 py-4 text-purple-600">{inv.amount} {inv.currency}</td>
+                      <td className="px-6 py-4">
+                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] font-extrabold">
+                          {inv.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <a 
+                          href={apiGetDownloadUrl(inv.id)} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-purple-600 hover:text-purple-700 hover:underline cursor-pointer"
+                        >
+                          <Download size={14} />
+                          <span>PDF</span>
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+};

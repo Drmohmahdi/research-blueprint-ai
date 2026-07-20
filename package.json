@@ -1,0 +1,37 @@
+{
+  "name": "research-blueprint-ai",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "backend:dev": "cd backend && python -m uvicorn app.main:app --reload",
+    "backend:prod": "cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000",
+    "backend:migrate": "cd backend && python -m alembic upgrade head",
+    "backend:test": "cd backend && python -m pytest app/tests",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "test": "npm run backend:test",
+    "check": "npm run build && npm run backend:test",
+    "clean:test-artifacts": "node scripts/clean-test-artifacts.mjs"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "lucide-react": "^1.25.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.18.1",
+    "recharts": "^3.9.2",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "oxlint": "^1.71.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.1.1"
+  }
+}

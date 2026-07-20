@@ -1,0 +1,160 @@
+import React, { useEffect } from 'react';
+import { X } from 'lucide-react';
+import { IconButton } from './Button';
+
+export interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+  footerActions?: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+}
+
+export const Modal: React.FC<ModalProps> = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+  footerActions,
+  size = 'md'
+}) => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  const sizeClasses = {
+    sm: 'max-w-md',
+    md: 'max-w-lg',
+    lg: 'max-w-2xl',
+    xl: 'max-w-4xl'
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+      <div className="flex min-h-screen items-center justify-center p-4 text-center">
+        {/* Overlay backdrop */}
+        <div 
+          className="fixed inset-0 bg-zinc-950/40 dark:bg-zinc-950/70 backdrop-blur-sm transition-opacity" 
+          onClick={onClose}
+        />
+
+        <div className={`relative w-full transform rounded-2xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] p-6 text-left align-middle shadow-xl transition-all ${sizeClasses[size]}`}>
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-4 mb-4">
+            <h3 className="text-sm font-extrabold text-[var(--ds-text-primary)] m-0">
+              {title}
+            </h3>
+            <IconButton 
+              variant="ghost" 
+              size="sm" 
+              icon={<X size={16} />} 
+              ariaLabel="Close Modal" 
+              onClick={onClose} 
+            />
+          </div>
+
+          {/* Body */}
+          <div className="text-xs text-[var(--ds-text-secondary)] leading-relaxed min-h-[60px]">
+            {children}
+          </div>
+
+          {/* Footer */}
+          {footerActions && (
+            <div className="flex justify-end gap-3 border-t border-[var(--ds-border-subtle)] pt-4 mt-4">
+              {footerActions}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export interface DrawerProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+  placement?: 'left' | 'right';
+  footerActions?: React.ReactNode;
+}
+
+export const Drawer: React.FC<DrawerProps> = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+  placement = 'right',
+  footerActions
+}) => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  const placementClass = placement === 'left' ? 'left-0' : 'right-0';
+  const animClass = placement === 'left' ? 'animate-slide-in-left' : 'animate-slide-in-right';
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-hidden" role="dialog" aria-modal="true">
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Backdrop overlay */}
+        <div 
+          className="absolute inset-0 bg-zinc-950/40 dark:bg-zinc-950/70 backdrop-blur-sm transition-opacity" 
+          onClick={onClose}
+        />
+
+        <div className={`absolute inset-y-0 ${placementClass} flex max-w-full`}>
+          <div className={`w-screen max-w-md transform bg-[var(--ds-surface-primary)] border-l border-[var(--ds-border-subtle)] p-6 shadow-xl flex flex-col justify-between ${animClass}`}>
+            
+            <div className="space-y-6 flex-1 flex flex-col overflow-y-auto no-scrollbar">
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-4">
+                <h3 className="text-sm font-extrabold text-[var(--ds-text-primary)] m-0">
+                  {title}
+                </h3>
+                <IconButton 
+                  variant="ghost" 
+                  size="sm" 
+                  icon={<X size={16} />} 
+                  ariaLabel="Close Drawer" 
+                  onClick={onClose} 
+                />
+              </div>
+
+              {/* Body */}
+              <div className="text-xs text-[var(--ds-text-secondary)] leading-relaxed flex-1">
+                {children}
+              </div>
+            </div>
+
+            {/* Footer */}
+            {footerActions && (
+              <div className="border-t border-[var(--ds-border-subtle)] pt-4 mt-6 flex justify-end gap-3">
+                {footerActions}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

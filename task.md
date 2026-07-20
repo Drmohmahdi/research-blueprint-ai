@@ -1,0 +1,36 @@
+# Task List: Refactoring & Security Hardening
+
+- [x] Python Dependencies & Verification Setup
+  - [x] Confirm `scipy`, `numpy`, `statsmodels` are fully installed in backend virtual environment
+- [x] Section 1: Statistical Verification & Correctness
+  - [x] Write Python statistical benchmark script `backend/app/services/stats_benchmark.py` to compare SciPy against custom equations
+  - [x] Refine statistical calculators in `backend/app/services/stats_service.py` to eliminate approximations
+  - [x] Refine JavaScript statistics in `src/utils/stats.ts` to increase accuracy (e.g. using Hastings and Box-Muller precisely)
+  - [x] Implement backend CSV uploader and actual data quality inspector (calculating Skewness, Shapiro-Wilk normality, and Outliers using Z-Score)
+- [x] Section 2: Terminology Alignment
+  - [x] Apply labels `OBSERVED_ACTUAL_DATA`, `SIMULATED_SYNTHETIC_DATA`, and `PREDICTED_DATA` in code and UI layouts
+  - [x] Rename `ReviewSimulator.tsx` to `PublicationReadinessReviewer.tsx` and make outcomes advisory
+- [x] Section 3: Data Protection & Modes
+  - [x] Implement `Demo Mode` (local synthetic) vs `Secure Research Mode` (no local sensitve participant storage, auth required)
+  - [x] Add student data anonymization before external API calls
+- [x] Section 4: Auth & Roles Setup
+  - [x] Create User tables with Role column (Researcher, Student, Supervisor, Statistician, OrgAdmin, SystemAdmin) in backend models
+  - [x] Implement password hashing and secure JWT session issuance
+  - [x] Enforce project-level user isolation in FastAPI routes
+- [x] Section 5: Migrations & PostgreSQL Integration
+  - [x] Setup Alembic migrations in `/backend`
+  - [x] Test schemas and transactions against a PostgreSQL connection
+- [x] Section 6: Async Simulation Jobs
+  - [x] Create backend async Job Manager queue for long Monte Carlo simulations
+- [x] Section 7: Test Suite & Verification
+  - [x] Write test suite (Unit, Integration, Permissions, Edge cases like negative scores and empty inputs)
+  - [x] Verify build compilation for frontend and backend
+
+- [x] Section 8: Sprint 1: Security Hardening & Platform Stabilization
+  - [x] Migrate generative AI calls from deprecated `google.generativeai` to the modern `google.genai` SDK in `ai_service.py`
+  - [x] Implement `AdminGuard` component to secure developer-only routes (`DesignSystemShowcase`, `SmokeTestDashboard`) in production
+  - [x] Delete deprecated duplicate `Layout.tsx` file and unify layout system around `LayoutV2.tsx`
+  - [x] Set up API Rate Limiting using `slowapi` on all endpoints in `main.py`
+  - [x] Set up strict rate limits in `auth.py` (5/min registration, 10/min login) to protect against brute-force attacks
+  - [x] Ensure rate limiters automatically disable during pytest runs to prevent 429 errors in test pipelines
+  - [x] Validate zero compilation errors on production build (npm run build) and python test suite (13 passed tests)

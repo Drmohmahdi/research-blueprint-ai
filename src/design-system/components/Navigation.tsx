@@ -1,0 +1,275 @@
+import React from 'react';
+import { CheckCircle2, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
+import { useProject } from '../../context/ProjectContext';
+
+// ---------------------------------------------------------
+// 1. Tabs Component
+// ---------------------------------------------------------
+export interface TabItem {
+  id: string;
+  label: string;
+  icon?: React.ReactNode;
+}
+
+export interface TabsProps {
+  items: TabItem[];
+  activeId: string;
+  onChange: (id: string) => void;
+  className?: string;
+}
+
+export const Tabs: React.FC<TabsProps> = ({
+  items,
+  activeId,
+  onChange,
+  className = ''
+}) => {
+  return (
+    <div className={`flex border-b border-[var(--ds-border-subtle)] gap-4 overflow-x-auto no-scrollbar ${className}`}>
+      {items.map((item) => {
+        const isActive = activeId === item.id;
+        return (
+          <button
+            key={item.id}
+            onClick={() => onChange(item.id)}
+            className={`flex items-center gap-2 py-3 px-1 border-b-2 text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              isActive 
+                ? 'border-[var(--ds-primary)] text-[var(--ds-primary)] font-extrabold'
+                : 'border-transparent text-[var(--ds-text-secondary)] hover:text-[var(--ds-text-primary)] hover:border-[var(--ds-border-default)]'
+            }`}
+          >
+            {item.icon}
+            <span>{item.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+// ---------------------------------------------------------
+// 2. Stepper Component
+// ---------------------------------------------------------
+export interface StepItem {
+  id: string;
+  label: string;
+  status?: 'completed' | 'current' | 'available' | 'locked' | 'needs-review' | 'error';
+}
+
+export interface StepperProps {
+  steps: StepItem[];
+  currentStepId: string;
+  onStepClick?: (id: string) => void;
+  layout?: 'horizontal' | 'vertical';
+  className?: string;
+}
+
+export const Stepper: React.FC<StepperProps> = ({
+  steps,
+  currentStepId,
+  onStepClick,
+  layout = 'horizontal',
+  className = ''
+}) => {
+  const { language } = useProject();
+  const isRtl = language === 'ar';
+
+  const isVertical = layout === 'vertical';
+
+  return (
+    <div className={`flex ${isVertical ? 'flex-col gap-4' : 'items-center justify-between gap-2 overflow-x-auto py-2'} ${className}`}>
+      {steps.map((step, idx) => {
+        const isCurrent = step.id === currentStepId;
+        const isCompleted = step.status === 'completed';
+        const isLocked = step.status === 'locked';
+        const hasError = step.status === 'error';
+        const needsReview = step.status === 'needs-review';
+
+        let badgeColor = 'bg-[var(--ds-surface-tertiary)] border-[var(--ds-border-default)] text-[var(--ds-text-secondary)]';
+        if (isCurrent) {
+          badgeColor = 'bg-[var(--ds-primary)] border-[var(--ds-primary)] text-white shadow-sm';
+        } else if (isCompleted) {
+          badgeColor = 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500';
+        } else if (hasError) {
+          badgeColor = 'bg-rose-500/10 border-rose-500/30 text-rose-500';
+        } else if (needsReview) {
+          badgeColor = 'bg-amber-500/10 border-amber-500/30 text-amber-500';
+        }
+
+        const ArrowIcon = isRtl ? ChevronLeft : ChevronRight;
+
+        return (
+          <React.Fragment key={step.id}>
+            <button
+              onClick={() => onStepClick && !isLocked && onStepClick(step.id)}
+              disabled={isLocked || !onStepClick}
+              className={`flex items-center gap-2.5 text-xs font-semibold select-none text-start disabled:cursor-not-allowed ${
+                isCurrent ? 'text-[var(--ds-text-primary)] font-bold' : 'text-[var(--ds-text-secondary)]'
+              }`}
+            >
+              <div className={`h-6 w-6 rounded-full border flex items-center justify-center text-[10px] font-black shrink-0 ${badgeColor}`}>
+                {isCompleted ? <CheckCircle2 size={12} /> : needsReview ? <AlertTriangle size={12} /> : idx + 1}
+              </div>
+              <span className="truncate">{step.label}</span>
+            </button>
+
+            {!isVertical && idx < steps.length - 1 && (
+              <ArrowIcon size={14} className="text-[var(--ds-text-disabled)] shrink-0 hidden sm:block" />
+            )}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+};
+
+// ---------------------------------------------------------
+// 3. Breadcrumbs Component
+// ---------------------------------------------------------
+export interface BreadcrumbItem {
+  label: string;
+  onClick?: () => void;
+}
+
+export interface BreadcrumbsProps {
+  items: BreadcrumbItem[];
+  className?: string;
+}
+
+export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
+  items,
+  className = ''
+}) => {
+  const { language } = useProject();
+  const ArrowIcon = language === 'ar' ? ChevronLeft : ChevronRight;
+
+  return (
+    <nav className={`flex items-center gap-1.5 text-[11px] font-bold text-[var(--ds-text-secondary)] ${className}`}>
+      {items.map((item, idx) => (
+        <React.Fragment key={idx}>
+          {item.onClick ? (
+            <button 
+              onClick={item.onClick} 
+              className="hover:text-[var(--ds-primary)] transition-colors cursor-pointer"
+            >
+              {item.label}
+            </button>
+          ) : (
+            <span className="text-[var(--ds-text-primary)] font-extrabold">{item.label}</span>
+          )}
+          {idx < items.length - 1 && (
+            <ArrowIcon size={12} className="text-[var(--ds-text-disabled)]" />
+          )}
+        </React.Fragment>
+      ))}
+    </nav>
+  );
+};
+
+// ---------------------------------------------------------
+// 4. PageHeader & SectionHeader
+// ---------------------------------------------------------
+export interface PageHeaderProps {
+  title: string;
+  description?: string;
+  actions?: React.ReactNode;
+  breadcrumbs?: BreadcrumbItem[];
+  className?: string;
+}
+
+export const PageHeader: React.FC<PageHeaderProps> = ({
+  title,
+  description,
+  actions,
+  breadcrumbs,
+  className = ''
+}) => {
+  return (
+    <div className={`space-y-3 ${className}`}>
+      {breadcrumbs && <Breadcrumbs items={breadcrumbs} />}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-1">
+          <h2 className="text-xl md:text-2xl font-black text-[var(--ds-text-primary)] m-0 leading-tight">
+            {title}
+          </h2>
+          {description && (
+            <p className="text-xs text-[var(--ds-text-muted)] leading-relaxed m-0">
+              {description}
+            </p>
+          )}
+        </div>
+        {actions && (
+          <div className="flex items-center gap-2.5 shrink-0">
+            {actions}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export interface SectionHeaderProps {
+  title: string;
+  subtitle?: string;
+  actions?: React.ReactNode;
+  className?: string;
+}
+
+export const SectionHeader: React.FC<SectionHeaderProps> = ({
+  title,
+  subtitle,
+  actions,
+  className = ''
+}) => {
+  return (
+    <div className={`flex items-center justify-between gap-4 border-b border-[var(--ds-border-subtle)] pb-3 ${className}`}>
+      <div className="space-y-0.5">
+        <h3 className="text-sm font-extrabold text-[var(--ds-text-primary)] m-0">
+          {title}
+        </h3>
+        {subtitle && (
+          <p className="text-[10px] text-[var(--ds-text-muted)] m-0">
+            {subtitle}
+          </p>
+        )}
+      </div>
+      {actions && (
+        <div className="flex items-center gap-1.5 shrink-0">
+          {actions}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ---------------------------------------------------------
+// 5. Table Component
+// ---------------------------------------------------------
+export interface TableProps {
+  headers: string[];
+  children: React.ReactNode;
+  className?: string;
+}
+
+export const Table: React.FC<TableProps> = ({
+  headers,
+  children,
+  className = ''
+}) => {
+  return (
+    <div className={`w-full overflow-x-auto border border-[var(--ds-border-subtle)] rounded-lg bg-[var(--ds-surface-primary)] ${className}`}>
+      <table className="w-full text-xs text-start border-collapse">
+        <thead>
+          <tr className="border-b border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] text-[10px] text-[var(--ds-text-muted)] uppercase font-extrabold">
+            {headers.map((h, idx) => (
+              <th key={idx} className="p-3 text-start font-bold">{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-[var(--ds-border-subtle)]">
+          {children}
+        </tbody>
+      </table>
+    </div>
+  );
+};

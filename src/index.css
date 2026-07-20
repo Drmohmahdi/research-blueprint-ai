@@ -1,0 +1,29 @@
+@import "tailwindcss";
+@import "./design-system/styles/design-system.css";
+
+@layer base {
+  body {
+    @apply bg-[var(--ds-background-canvas)] text-[var(--ds-text-primary)] transition-colors duration-180 antialiased;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  }
+}
+
+/* Custom styles for our Conceptual Model Builder Canvas */
+.svg-canvas {
+  background-image: radial-gradient(circle, rgba(161, 161, 170, 0.15) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.dark .svg-canvas {
+  background-image: radial-gradient(circle, rgba(63, 63, 70, 0.3) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Hide scrollbars for a clean look but maintain scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

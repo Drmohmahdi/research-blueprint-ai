@@ -1,0 +1,68 @@
+/* Semantic color tokens mapped as CSS Custom Variables */
+
+:root {
+  /* Light Mode Semantic Tokens */
+  --ds-background-canvas: #F6F7FB;
+  --ds-background-subtle: #EEF1F7;
+  --ds-surface-primary: #FFFFFF;
+  --ds-surface-secondary: #F9FAFC;
+  --ds-surface-tertiary: #F1F3F8;
+  --ds-surface-elevated: #FFFFFF;
+
+  --ds-border-subtle: #E1E5ED;
+  --ds-border-default: #CED4DF;
+  --ds-border-strong: #AEB7C7;
+
+  --ds-text-primary: #111827;
+  --ds-text-secondary: #475569;
+  --ds-text-muted: #718096;
+  --ds-text-disabled: #A0A8B5;
+
+  /* Accent and Brand Colors */
+  --ds-primary: #8B5CF6;
+  --ds-primary-hover: #7C3AED;
+  --ds-primary-active: #6D28D9;
+  --ds-primary-soft: rgba(139, 92, 246, 0.14);
+
+  --ds-research-blue: #3B82F6;
+  --ds-research-blue-soft: rgba(59, 130, 246, 0.14);
+  --ds-data-cyan: #06B6D4;
+  --ds-data-cyan-soft: rgba(6, 182, 212, 0.14);
+  
+  --ds-success: #22C55E;
+  --ds-success-soft: rgba(34, 197, 94, 0.14);
+  --ds-warning: #F59E0B;
+  --ds-warning-soft: rgba(245, 158, 11, 0.14);
+  --ds-danger: #EF4444;
+  --ds-danger-soft: rgba(239, 68, 68, 0.14);
+  --ds-information: #0EA5E9;
+  --ds-information-soft: rgba(14, 165, 233, 0.14);
+}
+
+.dark {
+  /* Dark Mode Semantic Tokens */
+  --ds-background-canvas: #090B10;
+  --ds-background-subtle: #0D1017;
+  --ds-surface-primary: #11151E;
+  --ds-surface-secondary: #171C27;
+  --ds-surface-tertiary: #1E2431;
+  --ds-surface-elevated: #242B3A;
+
+  --ds-border-subtle: #293142;
+  --ds-border-default: #364055;
+  --ds-border-strong: #4A5770;
+
+  --ds-text-primary: #F7F9FC;
+  --ds-text-secondary: #C5CCDA;
+  --ds-text-muted: #9099AC;
+  --ds-text-disabled: #626B7D;
+
+  /* Soft adjustments for Dark Theme */
+  --ds-primary-soft: rgba(139, 92, 246, 0.2);
+  --ds-research-blue-soft: rgba(59, 130, 246, 0.2);
+  --ds-data-cyan-soft: rgba(6, 182, 212, 0.2);
+  --ds-success-soft: rgba(34, 197, 94, 0.2);
+  --ds-warning-soft: rgba(245, 158, 11, 0.2);
+  --ds-danger-soft: rgba(239, 68, 68, 0.2);
+  --ds-information-soft: rgba(14, 165, 233, 0.2);
+}
