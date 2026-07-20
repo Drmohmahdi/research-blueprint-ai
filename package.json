@@ -12,6 +12,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
+    "deploy:vercel": "npm run build && cd dist && vercel deploy --prod --yes",
     "test": "npm run backend:test",
     "check": "npm run build && npm run backend:test",
     "clean:test-artifacts": "node scripts/clean-test-artifacts.mjs"
