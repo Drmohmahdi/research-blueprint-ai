@@ -405,28 +405,28 @@ def upgrade() -> None:
             
             # 3. Associate all projects belonging to this user with this new Personal Organization
             connection.execute(
-                sa.text("UPDATE research_projects SET organizationId = :org_id WHERE userId = :user_id"),
+                sa.text('UPDATE research_projects SET "organizationId" = :org_id WHERE "userId" = :user_id'),
                 {"org_id": org_id, "user_id": user_id}
             )
-            
+
             # Associate comments, runs and audit logs
-            projects = connection.execute(sa.text("SELECT id FROM research_projects WHERE organizationId = :org_id"), {"org_id": org_id}).fetchall()
+            projects = connection.execute(sa.text('SELECT id FROM research_projects WHERE "organizationId" = :org_id'), {"org_id": org_id}).fetchall()
             project_ids = [p[0] for p in projects]
-            
+
             if project_ids:
                 # Scoping SQL helper
                 placeholders = ", ".join(f"'{pid}'" for pid in project_ids)
                 connection.execute(
-                    sa.text(f"UPDATE project_comments SET organizationId = :org_id WHERE projectId IN ({placeholders})"),
+                    sa.text(f'UPDATE project_comments SET "organizationId" = :org_id WHERE "projectId" IN ({placeholders})'),
                     {"org_id": org_id}
                 )
                 connection.execute(
-                    sa.text(f"UPDATE prediction_runs SET organizationId = :org_id WHERE projectId IN ({placeholders})"),
+                    sa.text(f'UPDATE prediction_runs SET "organizationId" = :org_id WHERE "projectId" IN ({placeholders})'),
                     {"org_id": org_id}
                 )
-                
+
             connection.execute(
-                sa.text("UPDATE audit_logs SET organizationId = :org_id WHERE userId = :user_id"),
+                sa.text('UPDATE audit_logs SET "organizationId" = :org_id WHERE "userId" = :user_id'),
                 {"org_id": org_id, "user_id": user_id}
             )
             

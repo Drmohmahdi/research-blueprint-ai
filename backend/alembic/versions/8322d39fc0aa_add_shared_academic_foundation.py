@@ -280,13 +280,12 @@ def upgrade() -> None:
     
     # Store old profiles for migration
     old_profiles = {}
-    try:
-        old_profiles_raw = connection.execute(sa.text("SELECT id, userId, preferredNameAr, preferredNameEn, nameVariants, discipline, researchInterests, keywords, shortBio, fullBio, createdAt FROM core_academic_identity_profiles")).fetchall()
+    if sa.inspect(connection).has_table('core_academic_identity_profiles'):
+        old_profiles_raw = connection.execute(sa.text(
+            'SELECT id, "userId", "preferredNameAr", "preferredNameEn", "nameVariants", discipline, "researchInterests", keywords, "shortBio", "fullBio", "createdAt" FROM core_academic_identity_profiles'
+        )).fetchall()
         for op_row in old_profiles_raw:
             old_profiles[op_row[1]] = op_row
-    except Exception:
-        # Table might not exist or empty
-        pass
 
     for user in users:
         u_id = user[0]
@@ -377,7 +376,9 @@ def upgrade() -> None:
                 pass
 
     # Seeding ScholarlyAsset for every existing ResearchProject
-    projects = connection.execute(sa.text("SELECT id, userId, organizationId, titleAr, titleEn, descriptionAr, descriptionEn FROM research_projects")).fetchall()
+    projects = connection.execute(sa.text(
+        'SELECT id, "userId", "organizationId", "titleAr", "titleEn", "descriptionAr", "descriptionEn" FROM research_projects'
+    )).fetchall()
     for proj in projects:
         proj_id = proj[0]
         u_id = proj[1]
