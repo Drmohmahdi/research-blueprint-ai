@@ -47,3 +47,5 @@ ENV/
 # Seed scripts with hardcoded demo credentials — do not commit
 backend/create_accounts.py
 backend/create_users.py
+
+.vercel
