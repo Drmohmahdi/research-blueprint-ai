@@ -227,9 +227,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
           titleAr: 'الهوية والانتشار',
           titleEn: 'Academic Visibility',
           items: [
-            { id: 'visibility', labelAr: 'لوحة الانتشار الأكاديمي', labelEn: 'Visibility Dashboard', icon: Globe },
-            { id: 'visibilityAudit', labelAr: 'تدقيق الهوية والاسم', labelEn: 'Identity & Name Audit', icon: UserIcon },
-            { id: 'visibilityPlan', labelAr: 'خطة بناء السمعة', labelEn: 'Reputation Plan', icon: CheckSquare }
+            { id: 'visibility', labelAr: 'لوحة الانتشار الأكاديمي', labelEn: 'Visibility Dashboard', icon: Globe }
           ]
         }
       ];
