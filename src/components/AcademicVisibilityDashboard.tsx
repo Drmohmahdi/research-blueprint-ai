@@ -1,88 +1,236 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
+import { apiGetMyProfile, apiUpsertProfile } from '../utils/api';
+import { ROUTES } from '../router/routes';
 import { Card } from '../design-system/components/Card';
-import { 
-  Sparkles, 
-  ExternalLink, 
-  Copy, 
-  Globe, 
+import {
+  Sparkles,
+  ExternalLink,
+  Copy,
+  Globe,
   ShieldAlert,
   User,
   Activity,
-  CheckSquare
+  CheckSquare,
+  Plus,
+  Loader2,
+  Check,
+  X
 } from 'lucide-react';
 
-interface Channel {
-  name: string;
-  url: string;
-  status: 'linked' | 'missing' | 'optional';
+interface ChannelDef {
+  type: string;
+  label: string;
   priority: 'critical' | 'important' | 'optional';
-  desc: string;
+  descAr: string;
+  descEn: string;
 }
+
+const CHANNEL_DEFS: ChannelDef[] = [
+  { type: 'ORCID', label: 'ORCID', priority: 'critical', descAr: 'المعرّف الدولي الموحد للباحثين.', descEn: 'Unified international researcher registry.' },
+  { type: 'GOOGLE_SCHOLAR', label: 'Google Scholar', priority: 'critical', descAr: 'حساب الاستشهادات ومتابعة مؤشر h-index.', descEn: 'Citation index tracker and h-index calculator.' },
+  { type: 'SCOPUS', label: 'Scopus Author ID', priority: 'critical', descAr: 'ملفك في قاعدة Elsevier للاستشهادات.', descEn: 'Elsevier citation database profile.' },
+  { type: 'RESEARCHGATE', label: 'ResearchGate', priority: 'important', descAr: 'شبكة التواصل الأكاديمية ونشر الأبحاث الكاملة.', descEn: 'Academic social network and full-text repository.' },
+  { type: 'LINKEDIN', label: 'LinkedIn', priority: 'important', descAr: 'التواصل المهني وبناء السمعة خارج الأكاديميا.', descEn: 'Professional networking and industry reputation.' },
+  { type: 'GITHUB', label: 'GitHub', priority: 'optional', descAr: 'مستودع الكود البرمجي للمحاكاة والتحليل.', descEn: 'Code repository for simulations and statistical analyses.' },
+];
+
+const emptyProfileLists = {
+  name_variants_json: [] as string[],
+  research_interests_json: [] as string[],
+  keywords_ar_json: [] as string[],
+  keywords_en_json: [] as string[],
+  identifiers: [] as any[],
+  affiliations: [] as any[],
+};
+
+const normalizeProfile = (data: any) => ({
+  ...data,
+  name_variants_json: data.name_variants_json || [],
+  research_interests_json: data.research_interests_json || [],
+  keywords_ar_json: data.keywords_ar_json || [],
+  keywords_en_json: data.keywords_en_json || [],
+  identifiers: data.identifiers || [],
+  affiliations: data.affiliations || [],
+});
 
 export const AcademicVisibilityDashboard: React.FC = () => {
   const { language } = useProject();
+  const navigate = useNavigate();
   const isAr = language === 'ar';
 
-  // State
-  const [preferredNameAr, setPreferredNameAr] = useState('أ.د. أحمد محمد الغامدي');
-  const [preferredNameEn, setPreferredNameEn] = useState('Ahmed M. Al-Ghamdi');
-  const [nameVariants, setNameVariants] = useState('A. M. Alghamdi; Ahmed Alghamdi');
-  const [discipline] = useState(isAr ? 'تقنيات التعليم والذكاء الاصطناعي' : 'Educational Technology & AI');
-  
-  const [channels] = useState<Channel[]>([
-    { name: 'ORCID', url: 'https://orcid.org/0000-0002-1823-921X', status: 'linked', priority: 'critical', desc: isAr ? 'المعرّف الدولي الموحد للباحثين.' : 'Unified international researcher registry.' },
-    { name: 'Google Scholar', url: 'https://scholar.google.com/citations?user=xyz', status: 'linked', priority: 'critical', desc: isAr ? 'حساب الاستشهادات ومتابعة مؤشر h-index.' : 'Citation index tracker and h-index calculator.' },
-    { name: 'Scopus Author ID', url: '', status: 'missing', priority: 'critical', desc: isAr ? 'ملفك في قاعدة Elsevier (يوجد ملفان مكرران).' : 'Elsevier profile (detected 2 duplicate profiles).' },
-    { name: 'ResearchGate', url: 'https://researchgate.net/profile/Ahmed_Al_Ghamdi', status: 'linked', priority: 'important', desc: isAr ? 'شبكة التواصل الأكاديمية ونشر الأبحاث الكاملة.' : 'Academic social network and full-text repository.' },
-    { name: 'LinkedIn', url: '', status: 'optional', priority: 'important', desc: isAr ? 'التواصل المهني وبناء السمعة خارج الأكاديميا.' : 'Professional networking and industry reputation.' },
-    { name: 'GitHub', url: 'https://github.com/ahmed-alghamdi', status: 'linked', priority: 'optional', desc: isAr ? 'مستودع الكود البرمجي للمحاكاة والتحليل.' : 'Code repository for simulations and statistical analyses.' },
-  ]);
+  const [profile, setProfile] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState({ ar: '', en: '', variants: '' });
 
-  // Bio Statements
-  const shortBio = isAr 
-    ? `باحث متخصص في ${discipline} يركز على الوكلاء الأذكياء وتخصيص التعلم القائم على البيانات.`
-    : `Researcher in ${discipline} specializing in intelligent agents and data-driven learning personalization.`;
+  const [editingChannel, setEditingChannel] = useState<string | null>(null);
+  const [channelDraft, setChannelDraft] = useState({ value: '', url: '' });
 
-  const mediumBio = isAr
-    ? `أستاذ متخصص في ${discipline}. تركز أبحاثه الحالية على نمذجة المتغيرات المنهجية وبناء المخططات المفاهيمية الذكية. يشرف على مشاريع محاكاة البيانات وتطبيقات التعلم التكيفي، وحائز على عدة استشهادات علمية في مجلات Q1 مفهرسة.`
-    : `Professor in ${discipline}. Active research focuses on methodological variable modeling and smart conceptual blueprints. Directs data simulation initiatives and adaptive learning systems with publications in high-impact Q1 indexed journals.`;
+  useEffect(() => {
+    (async () => {
+      const data = await apiGetMyProfile();
+      if (data) {
+        const normalized = normalizeProfile(data);
+        setProfile(normalized);
+        setNameDraft({
+          ar: normalized.preferred_name_ar || '',
+          en: normalized.preferred_name_en || '',
+          variants: (normalized.name_variants_json || []).join('؛ '),
+        });
+      } else {
+        setLoadError(true);
+      }
+      setLoading(false);
+    })();
+  }, []);
 
-  const keywords = isAr
-    ? 'تقنيات التعليم، الذكاء الاصطناعي التوليدي، الوكلاء الأذكياء، محاكاة مونت كارلو، المنهج التجريبي التعليمي'
-    : 'Educational Technology, Generative AI, Intelligent Agents, Monte Carlo Simulation, Quasi-Experimental Design';
+  const persist = async (updated: any) => {
+    setSaving(true);
+    const saved = await apiUpsertProfile(updated);
+    if (saved) {
+      setProfile(normalizeProfile(saved));
+    }
+    setSaving(false);
+    return saved;
+  };
 
-  const copyToClipboard = (text: string, index: number) => {
+  const saveName = async () => {
+    if (!profile) return;
+    const variantsArr = nameDraft.variants
+      .split(/[؛;]/)
+      .map(v => v.trim())
+      .filter(Boolean);
+    const saved = await persist({
+      ...profile,
+      preferred_name_ar: nameDraft.ar,
+      preferred_name_en: nameDraft.en,
+      name_variants_json: variantsArr,
+    });
+    if (saved) setEditingName(false);
+  };
+
+  const startEditChannel = (type: string, currentValue = '', currentUrl = '') => {
+    setEditingChannel(type);
+    setChannelDraft({ value: currentValue, url: currentUrl });
+  };
+
+  const saveChannel = async (type: string) => {
+    if (!profile || !channelDraft.value.trim()) return;
+    const rest = profile.identifiers.filter((i: any) => i.identifier_type !== type);
+    const updatedIdentifiers = [
+      ...rest,
+      { identifier_type: type, identifier_value: channelDraft.value.trim(), profile_url: channelDraft.url.trim() || null, status: 'UNVERIFIED' },
+    ];
+    const saved = await persist({ ...profile, identifiers: updatedIdentifiers });
+    if (saved) {
+      setEditingChannel(null);
+      setChannelDraft({ value: '', url: '' });
+    }
+  };
+
+  const copyToClipboard = (text: string, key: string) => {
+    if (!text) return;
     navigator.clipboard.writeText(text);
-    setCopiedIndex(index);
-    setTimeout(() => setCopiedIndex(null), 2000);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 2000);
   };
 
-  // Rep Plan
-  const [repTasks, setRepTasks] = useState([
-    { id: '1', taskAr: 'دمج ملفي Scopus Author ID المكررين لتجميع الاستشهادات.', taskEn: 'Request merge of 2 duplicate Scopus Author ID profiles.', done: false, impact: 'High' },
-    { id: '2', taskAr: 'تحديث حساب ORCID وربطه بـ DOI للأبحاث الثلاثة الأخيرة.', taskEn: 'Update ORCID with DOIs of the latest 3 publications.', done: true, impact: 'High' },
-    { id: '3', taskAr: 'تنظيف Google Scholar من الأوراق غير التابعة لي ذات الأسماء المتشابهة.', taskEn: 'Clean Google Scholar citations from same-name author publications.', done: false, impact: 'Medium' },
-    { id: '4', taskAr: 'إضافة رابط الصفحة الشخصية الجامعية إلى LinkedIn و ResearchGate.', taskEn: 'Link university homepage profile to LinkedIn and ResearchGate.', done: false, impact: 'Low' },
-  ]);
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center gap-2 py-24 text-[var(--ds-text-muted)]">
+        <Loader2 size={18} className="animate-spin" />
+        <span className="text-sm font-bold">{isAr ? 'جارِ تحميل ملفك الأكاديمي...' : 'Loading your academic profile...'}</span>
+      </div>
+    );
+  }
 
-  const toggleTask = (id: string) => {
-    setRepTasks(prev => prev.map(t => t.id === id ? { ...t, done: !t.done } : t));
-  };
+  if (loadError || !profile) {
+    return (
+      <div className="max-w-md mx-auto text-center py-24 space-y-2">
+        <ShieldAlert className="mx-auto text-rose-500" size={28} />
+        <p className="text-sm font-bold text-[var(--ds-text-secondary)]">
+          {isAr ? 'تعذّر تحميل الملف الأكاديمي. تأكد من تسجيل الدخول وحاول مجددًا.' : 'Could not load your academic profile. Make sure you are signed in and try again.'}
+        </p>
+      </div>
+    );
+  }
 
-  // Visibility calculation
-  const linkedCount = channels.filter(c => c.status === 'linked').length;
-  const tasksCompleted = repTasks.filter(t => t.done).length;
-  
-  const overallVisibilityScore = Math.round(
-    ((linkedCount / channels.length) * 60) + ((tasksCompleted / repTasks.length) * 40)
-  );
+  const displayNameAr = profile.preferred_name_ar || (isAr ? 'اسمك الأكاديمي (عربي)' : '');
+  const displayNameEn = profile.preferred_name_en || (isAr ? '' : 'Your academic name (English)');
+  const headerName = isAr ? (displayNameAr || displayNameEn || 'باحث بصيرة') : (displayNameEn || displayNameAr || 'Baseerah Researcher');
+
+  const channels = CHANNEL_DEFS.map(def => {
+    const found = profile.identifiers.find((i: any) => i.identifier_type === def.type);
+    return {
+      ...def,
+      linked: !!(found && found.identifier_value),
+      value: found?.identifier_value || '',
+      url: found?.profile_url || '',
+    };
+  });
+
+  const visibilityScore = profile.completeness_score ?? 0;
+
+  const keywordsAr = (profile.keywords_ar_json || (emptyProfileLists.keywords_ar_json)).join('، ');
+  const keywordsEn = (profile.keywords_en_json || (emptyProfileLists.keywords_en_json)).join(', ');
+  const hasShortBio = !!(profile.short_bio_ar || profile.short_bio_en);
+  const hasFullBio = !!(profile.full_bio_ar || profile.full_bio_en);
+  const hasKeywords = !!(keywordsAr || keywordsEn);
+
+  type Task = { key: string; done: boolean; impact: 'High' | 'Medium' | 'Low'; textAr: string; textEn: string; action: () => void };
+
+  const tasks: Task[] = [
+    ...channels.filter(c => c.priority === 'critical').map(c => ({
+      key: `channel-${c.type}`,
+      done: c.linked,
+      impact: 'High' as const,
+      textAr: `اربط حساب ${c.label} بملفك الأكاديمي.`,
+      textEn: `Link your ${c.label} account to your academic profile.`,
+      action: () => startEditChannel(c.type, c.value, c.url),
+    })),
+    {
+      key: 'short-bio',
+      done: hasShortBio,
+      impact: 'Medium',
+      textAr: 'اكتب نبذة مختصرة عن نفسك (لـ ORCID / Twitter).',
+      textEn: 'Write a short biography (for ORCID / Twitter).',
+      action: () => navigate(ROUTES.PROFILE),
+    },
+    {
+      key: 'full-bio',
+      done: hasFullBio,
+      impact: 'Medium',
+      textAr: 'اكتب سيرة أكاديمية كاملة (لـ ResearchGate / LinkedIn).',
+      textEn: 'Write a full academic biography (for ResearchGate / LinkedIn).',
+      action: () => navigate(ROUTES.PROFILE),
+    },
+    ...channels.filter(c => c.priority === 'important').map(c => ({
+      key: `channel-${c.type}`,
+      done: c.linked,
+      impact: 'Low' as const,
+      textAr: `اربط حساب ${c.label} بملفك الأكاديمي.`,
+      textEn: `Link your ${c.label} account to your academic profile.`,
+      action: () => startEditChannel(c.type, c.value, c.url),
+    })),
+    {
+      key: 'affiliation',
+      done: (profile.affiliations || []).length > 0,
+      impact: 'Low',
+      textAr: 'أضف انتماءً أكاديميًا واحدًا على الأقل.',
+      textEn: 'Add at least one academic affiliation.',
+      action: () => navigate(ROUTES.PROFILE_AFFILIATIONS),
+    },
+  ];
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-16">
-      
+
       {/* Top Welcome Banner */}
       <div className="bg-gradient-to-r from-indigo-950/40 via-purple-900/10 to-transparent border border-indigo-500/20 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-md">
         <div className="space-y-2">
@@ -93,7 +241,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
             </span>
           </div>
           <h2 className="text-xl md:text-2xl font-extrabold text-[var(--ds-text-primary)] m-0">
-            {isAr ? 'بصيرة للهوية والانتشار الأكاديمي' : 'Baseerah Academic Visibility'}
+            {headerName}
           </h2>
           <p className="text-sm text-[var(--ds-text-secondary)] max-w-2xl m-0 leading-relaxed">
             {isAr
@@ -102,228 +250,361 @@ export const AcademicVisibilityDashboard: React.FC = () => {
           </p>
         </div>
 
-        {/* Global visibility Score */}
+        {/* Real visibility score, from server-computed profile completeness */}
         <div className="p-4 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl flex items-center gap-3 shrink-0">
           <div className="text-right">
-            <span className="text-[9px] text-[var(--ds-text-muted)] font-black block uppercase">{isAr ? 'مؤشر الانتشار الكلي' : 'Visibility Score'}</span>
-            <span className="text-2xl font-black text-indigo-500 block">{overallVisibilityScore}%</span>
+            <span className="text-[9px] text-[var(--ds-text-muted)] font-black block uppercase">{isAr ? 'مؤشر اكتمال الملف' : 'Profile Completeness'}</span>
+            <span className="text-2xl font-black text-indigo-500 block">{visibilityScore}%</span>
           </div>
           <div className="h-10 w-[1px] bg-[var(--ds-border-subtle)]" />
-          <Activity size={24} className="text-indigo-500 animate-pulse" />
+          <Activity size={24} className="text-indigo-500" />
         </div>
       </div>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* Left column: Name audit + Bio Generator (7/12) */}
+
+        {/* Left column: Name audit + Bio (7/12) */}
         <div className="lg:col-span-7 space-y-6">
-          
+
           {/* Identity audit */}
           <Card className="p-5 space-y-4">
-            <h3 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center gap-2">
-              <User className="text-indigo-500" size={16} />
-              <span>{isAr ? 'تدقيق الاتساق والاسم الأكاديمي' : 'Academic Name Consistency Audit'}</span>
-            </h3>
+            <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-2">
+              <h3 className="text-xs font-black text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
+                <User className="text-indigo-500" size={16} />
+                <span>{isAr ? 'تدقيق الاتساق والاسم الأكاديمي' : 'Academic Name Consistency Audit'}</span>
+              </h3>
+              {!editingName && (
+                <button
+                  onClick={() => setEditingName(true)}
+                  className="text-[10px] font-black text-indigo-500 hover:underline cursor-pointer"
+                >
+                  {isAr ? 'تعديل' : 'Edit'}
+                </button>
+              )}
+            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex flex-col space-y-1">
-                <label className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">{isAr ? 'الاسم المفضّل (عربي):' : 'Preferred Name (Arabic):'}</label>
-                <input
-                  type="text"
-                  value={preferredNameAr}
-                  onChange={e => setPreferredNameAr(e.target.value)}
-                  className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none"
-                />
-              </div>
-
-              <div className="flex flex-col space-y-1">
-                <label className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">{isAr ? 'الاسم المفضل (إنجليزي):' : 'Preferred Name (English):'}</label>
-                <input
-                  type="text"
-                  value={preferredNameEn}
-                  onChange={e => setPreferredNameEn(e.target.value)}
-                  className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none"
-                />
-              </div>
-
-              <div className="flex flex-col space-y-1 sm:col-span-2">
-                <label className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">
-                  {isAr ? 'الصيغ البديلة المكتشفة في المجلات (Name Variants):' : 'Identified Name Variants in Journals:'}
-                </label>
-                <div className="flex gap-2 items-center">
-                  <input
-                    type="text"
-                    value={nameVariants}
-                    onChange={e => setNameVariants(e.target.value)}
-                    className="flex-1 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none"
-                  />
-                  <div className="flex items-center gap-1 text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 rounded-xl shrink-0">
-                    <ShieldAlert size={12} className="shrink-0" />
-                    <span>{isAr ? 'خطر تشتت الاستشهاد' : 'Citation Split Risk'}</span>
+            {editingName ? (
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex flex-col space-y-1">
+                    <label className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">{isAr ? 'الاسم المفضّل (عربي):' : 'Preferred Name (Arabic):'}</label>
+                    <input
+                      type="text"
+                      value={nameDraft.ar}
+                      onChange={e => setNameDraft(d => ({ ...d, ar: e.target.value }))}
+                      className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none"
+                    />
+                  </div>
+                  <div className="flex flex-col space-y-1">
+                    <label className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">{isAr ? 'الاسم المفضل (إنجليزي):' : 'Preferred Name (English):'}</label>
+                    <input
+                      type="text"
+                      value={nameDraft.en}
+                      onChange={e => setNameDraft(d => ({ ...d, en: e.target.value }))}
+                      className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none"
+                    />
+                  </div>
+                  <div className="flex flex-col space-y-1 sm:col-span-2">
+                    <label className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">
+                      {isAr ? 'الصيغ البديلة لاسمك في المجلات (افصل بفاصلة منقوطة):' : 'Name variants found in journals (semicolon-separated):'}
+                    </label>
+                    <input
+                      type="text"
+                      value={nameDraft.variants}
+                      onChange={e => setNameDraft(d => ({ ...d, variants: e.target.value }))}
+                      className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none"
+                    />
                   </div>
                 </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={saveName}
+                    disabled={saving}
+                    className="flex items-center gap-1.5 text-[10px] font-black text-white bg-indigo-500 hover:bg-indigo-600 disabled:opacity-60 px-3 py-1.5 rounded-lg cursor-pointer"
+                  >
+                    {saving ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+                    <span>{isAr ? 'حفظ' : 'Save'}</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditingName(false);
+                      setNameDraft({
+                        ar: profile.preferred_name_ar || '',
+                        en: profile.preferred_name_en || '',
+                        variants: (profile.name_variants_json || []).join('؛ '),
+                      });
+                    }}
+                    className="flex items-center gap-1.5 text-[10px] font-black text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-tertiary)] px-3 py-1.5 rounded-lg cursor-pointer"
+                  >
+                    <X size={12} />
+                    <span>{isAr ? 'إلغاء' : 'Cancel'}</span>
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <span className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase block mb-1">{isAr ? 'الاسم المفضّل (عربي)' : 'Preferred Name (Arabic)'}</span>
+                  <p className="text-xs font-bold text-[var(--ds-text-primary)] m-0">{profile.preferred_name_ar || '—'}</p>
+                </div>
+                <div>
+                  <span className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase block mb-1">{isAr ? 'الاسم المفضل (إنجليزي)' : 'Preferred Name (English)'}</span>
+                  <p className="text-xs font-bold text-[var(--ds-text-primary)] m-0">{profile.preferred_name_en || '—'}</p>
+                </div>
+                <div className="sm:col-span-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">{isAr ? 'الصيغ البديلة المكتشفة' : 'Identified Name Variants'}</span>
+                    {profile.name_variants_json.length > 0 && (
+                      <div className="flex items-center gap-1 text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded-xl shrink-0">
+                        <ShieldAlert size={11} className="shrink-0" />
+                        <span>{isAr ? 'خطر تشتت الاستشهاد' : 'Citation Split Risk'}</span>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs font-bold text-[var(--ds-text-primary)] m-0">
+                    {profile.name_variants_json.length > 0 ? profile.name_variants_json.join('، ') : (isAr ? 'لا توجد صيغ مسجّلة بعد.' : 'No variants recorded yet.')}
+                  </p>
+                </div>
+              </div>
+            )}
           </Card>
 
-          {/* Unified Profile Bio Generator */}
+          {/* Real bio & keywords, sourced from the unified profile */}
           <Card className="p-5 space-y-4">
-            <h3 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center gap-2">
-              <Sparkles className="text-indigo-500" size={16} />
-              <span>{isAr ? 'مولد السيرة والنبذة الأكاديمية الموحدة' : 'Unified Academic Biography Generator'}</span>
-            </h3>
-
-            <div className="space-y-4">
-              
-              {/* Short Bio */}
-              <div className="p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">
-                    {isAr ? 'النبذة المختصرة (لـ ORCID / Twitter):' : 'Short Biography (for ORCID / Twitter):'}
-                  </span>
-                  <button
-                    onClick={() => copyToClipboard(shortBio, 1)}
-                    className="p-1 rounded hover:bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-secondary)] flex items-center gap-1 text-[9px] font-bold cursor-pointer"
-                  >
-                    <Copy size={11} />
-                    <span>{copiedIndex === 1 ? (isAr ? 'تم النسخ!' : 'Copied!') : (isAr ? 'نسخ' : 'Copy')}</span>
-                  </button>
-                </div>
-                <p className="text-xs font-bold text-[var(--ds-text-secondary)] m-0 leading-relaxed">{shortBio}</p>
-              </div>
-
-              {/* Medium Bio */}
-              <div className="p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">
-                    {isAr ? 'السيرة المتوسطة (لـ ResearchGate / LinkedIn):' : 'Professional Biography (for ResearchGate / LinkedIn):'}
-                  </span>
-                  <button
-                    onClick={() => copyToClipboard(mediumBio, 2)}
-                    className="p-1 rounded hover:bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-secondary)] flex items-center gap-1 text-[9px] font-bold cursor-pointer"
-                  >
-                    <Copy size={11} />
-                    <span>{copiedIndex === 2 ? (isAr ? 'تم النسخ!' : 'Copied!') : (isAr ? 'نسخ' : 'Copy')}</span>
-                  </button>
-                </div>
-                <p className="text-xs font-bold text-[var(--ds-text-secondary)] m-0 leading-relaxed">{mediumBio}</p>
-              </div>
-
-              {/* Keywords */}
-              <div className="p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">
-                    {isAr ? 'الكلمات المفتاحية الموحدة للتخصيص المنهجي:' : 'Unified Subject Keywords & Tags:'}
-                  </span>
-                  <button
-                    onClick={() => copyToClipboard(keywords, 3)}
-                    className="p-1 rounded hover:bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-secondary)] flex items-center gap-1 text-[9px] font-bold cursor-pointer"
-                  >
-                    <Copy size={11} />
-                    <span>{copiedIndex === 3 ? (isAr ? 'تم النسخ!' : 'Copied!') : (isAr ? 'نسخ' : 'Copy')}</span>
-                  </button>
-                </div>
-                <p className="text-xs font-bold text-[var(--ds-text-secondary)] m-0 leading-relaxed font-mono">{keywords}</p>
-              </div>
-
+            <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-2">
+              <h3 className="text-xs font-black text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
+                <Sparkles className="text-indigo-500" size={16} />
+                <span>{isAr ? 'السيرة والكلمات المفتاحية للنشر' : 'Publishing Bio & Keywords'}</span>
+              </h3>
+              <button
+                onClick={() => navigate(ROUTES.PROFILE)}
+                className="text-[10px] font-black text-indigo-500 hover:underline cursor-pointer"
+              >
+                {isAr ? 'تعديل في الملف الكامل' : 'Edit in full profile'}
+              </button>
             </div>
+
+            {!hasShortBio && !hasFullBio && !hasKeywords ? (
+              <div className="text-center py-6 space-y-2">
+                <p className="text-xs font-bold text-[var(--ds-text-muted)] m-0">
+                  {isAr ? 'لم تكتب بعد سيرة أو كلمات مفتاحية. أضفها من صفحة الملف الأكاديمي لتظهر هنا جاهزة للنسخ.' : 'You haven’t written a bio or keywords yet. Add them from your academic profile to see them here, ready to copy.'}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {hasShortBio && (
+                  <div className="p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">
+                        {isAr ? 'النبذة المختصرة (لـ ORCID / Twitter):' : 'Short Biography (for ORCID / Twitter):'}
+                      </span>
+                      <button
+                        onClick={() => copyToClipboard(isAr ? (profile.short_bio_ar || profile.short_bio_en) : (profile.short_bio_en || profile.short_bio_ar), 'short')}
+                        className="p-1 rounded hover:bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-secondary)] flex items-center gap-1 text-[9px] font-bold cursor-pointer"
+                      >
+                        <Copy size={11} />
+                        <span>{copiedKey === 'short' ? (isAr ? 'تم النسخ!' : 'Copied!') : (isAr ? 'نسخ' : 'Copy')}</span>
+                      </button>
+                    </div>
+                    <p className="text-xs font-bold text-[var(--ds-text-secondary)] m-0 leading-relaxed">{isAr ? (profile.short_bio_ar || profile.short_bio_en) : (profile.short_bio_en || profile.short_bio_ar)}</p>
+                  </div>
+                )}
+
+                {hasFullBio && (
+                  <div className="p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">
+                        {isAr ? 'السيرة الكاملة (لـ ResearchGate / LinkedIn):' : 'Full Biography (for ResearchGate / LinkedIn):'}
+                      </span>
+                      <button
+                        onClick={() => copyToClipboard(isAr ? (profile.full_bio_ar || profile.full_bio_en) : (profile.full_bio_en || profile.full_bio_ar), 'full')}
+                        className="p-1 rounded hover:bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-secondary)] flex items-center gap-1 text-[9px] font-bold cursor-pointer"
+                      >
+                        <Copy size={11} />
+                        <span>{copiedKey === 'full' ? (isAr ? 'تم النسخ!' : 'Copied!') : (isAr ? 'نسخ' : 'Copy')}</span>
+                      </button>
+                    </div>
+                    <p className="text-xs font-bold text-[var(--ds-text-secondary)] m-0 leading-relaxed">{isAr ? (profile.full_bio_ar || profile.full_bio_en) : (profile.full_bio_en || profile.full_bio_ar)}</p>
+                  </div>
+                )}
+
+                {hasKeywords && (
+                  <div className="p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">
+                        {isAr ? 'الكلمات المفتاحية:' : 'Keywords & Tags:'}
+                      </span>
+                      <button
+                        onClick={() => copyToClipboard(isAr ? (keywordsAr || keywordsEn) : (keywordsEn || keywordsAr), 'kw')}
+                        className="p-1 rounded hover:bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-secondary)] flex items-center gap-1 text-[9px] font-bold cursor-pointer"
+                      >
+                        <Copy size={11} />
+                        <span>{copiedKey === 'kw' ? (isAr ? 'تم النسخ!' : 'Copied!') : (isAr ? 'نسخ' : 'Copy')}</span>
+                      </button>
+                    </div>
+                    <p className="text-xs font-bold text-[var(--ds-text-secondary)] m-0 leading-relaxed font-mono">{isAr ? (keywordsAr || keywordsEn) : (keywordsEn || keywordsAr)}</p>
+                  </div>
+                )}
+              </div>
+            )}
           </Card>
         </div>
 
         {/* Right column: Channels + Reputation Plan (5/12) */}
         <div className="lg:col-span-5 space-y-6">
-          
-          {/* Channel list */}
+
+          {/* Channel list, backed by real AcademicIdentifier rows */}
           <Card className="p-5 space-y-4">
             <h3 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center gap-2">
               <Globe className="text-indigo-500" size={16} />
               <span>{isAr ? 'قنوات وملفات الهوية العلمية' : 'Academic Identity Channels'}</span>
             </h3>
 
-            <div className="space-y-3 max-h-[260px] overflow-y-auto pr-1">
-              {channels.map((chan, idx) => (
-                <div 
-                  key={idx} 
+            <div className="space-y-3 max-h-[340px] overflow-y-auto pr-1">
+              {channels.map((chan) => (
+                <div
+                  key={chan.type}
                   className="p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl space-y-2"
                 >
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-black text-[var(--ds-text-primary)]">{chan.name}</span>
-                      {chan.status === 'linked' ? (
+                      <span className="text-xs font-black text-[var(--ds-text-primary)]">{chan.label}</span>
+                      {chan.linked ? (
                         <span className="text-[8px] font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
                           {isAr ? 'مرتبط' : 'Linked'}
                         </span>
-                      ) : chan.status === 'missing' ? (
-                        <span className="text-[8px] font-bold text-rose-500 bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.5 rounded animate-pulse">
-                          {isAr ? 'مفقود' : 'Missing'}
-                        </span>
                       ) : (
-                        <span className="text-[8px] font-bold text-[var(--ds-text-muted)] bg-[var(--ds-surface-tertiary)] border border-[var(--ds-border-subtle)] px-1.5 py-0.5 rounded">
-                          {isAr ? 'اختياري' : 'Optional'}
+                        <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded border ${
+                          chan.priority === 'critical'
+                            ? 'text-rose-500 bg-rose-500/10 border-rose-500/20'
+                            : 'text-[var(--ds-text-muted)] bg-[var(--ds-surface-tertiary)] border-[var(--ds-border-subtle)]'
+                        }`}>
+                          {isAr ? 'مفقود' : 'Missing'}
                         </span>
                       )}
                     </div>
-                    {chan.url ? (
-                      <a 
-                        href={chan.url} 
-                        target="_blank" 
-                        rel="noreferrer" 
-                        className="text-[9px] font-black text-indigo-500 hover:underline flex items-center gap-0.5"
-                      >
-                        <span>{isAr ? 'زيارة' : 'Visit'}</span>
-                        <ExternalLink size={10} />
-                      </a>
+                    {chan.linked ? (
+                      <div className="flex items-center gap-2">
+                        {chan.url && (
+                          <a
+                            href={chan.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[9px] font-black text-indigo-500 hover:underline flex items-center gap-0.5"
+                          >
+                            <span>{isAr ? 'زيارة' : 'Visit'}</span>
+                            <ExternalLink size={10} />
+                          </a>
+                        )}
+                        <button
+                          onClick={() => startEditChannel(chan.type, chan.value, chan.url)}
+                          className="text-[9px] font-black text-[var(--ds-text-muted)] hover:text-indigo-500 cursor-pointer"
+                        >
+                          {isAr ? 'تعديل' : 'Edit'}
+                        </button>
+                      </div>
                     ) : (
-                      <span className="text-[8px] font-bold text-[var(--ds-text-muted)]">{isAr ? 'لا يوجد رابط' : 'No link'}</span>
+                      <button
+                        onClick={() => startEditChannel(chan.type)}
+                        className="text-[9px] font-black text-indigo-500 hover:underline flex items-center gap-0.5 cursor-pointer"
+                      >
+                        <Plus size={11} />
+                        <span>{isAr ? 'إضافة' : 'Add'}</span>
+                      </button>
                     )}
                   </div>
-                  <p className="text-[10px] text-[var(--ds-text-muted)] font-medium leading-relaxed m-0">{chan.desc}</p>
+
+                  {editingChannel === chan.type ? (
+                    <div className="space-y-2 pt-1">
+                      <input
+                        type="text"
+                        placeholder={isAr ? 'المعرّف أو اسم المستخدم' : 'Identifier or username'}
+                        value={channelDraft.value}
+                        onChange={e => setChannelDraft(d => ({ ...d, value: e.target.value }))}
+                        className="w-full bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg px-2.5 py-1.5 text-[11px] text-[var(--ds-text-primary)] focus:outline-none"
+                      />
+                      <input
+                        type="text"
+                        placeholder={isAr ? 'رابط الملف الشخصي (اختياري)' : 'Profile URL (optional)'}
+                        value={channelDraft.url}
+                        onChange={e => setChannelDraft(d => ({ ...d, url: e.target.value }))}
+                        className="w-full bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg px-2.5 py-1.5 text-[11px] text-[var(--ds-text-primary)] focus:outline-none"
+                      />
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => saveChannel(chan.type)}
+                          disabled={saving || !channelDraft.value.trim()}
+                          className="flex items-center gap-1 text-[9px] font-black text-white bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 px-2.5 py-1 rounded-lg cursor-pointer"
+                        >
+                          {saving ? <Loader2 size={11} className="animate-spin" /> : <Check size={11} />}
+                          <span>{isAr ? 'حفظ' : 'Save'}</span>
+                        </button>
+                        <button
+                          onClick={() => { setEditingChannel(null); setChannelDraft({ value: '', url: '' }); }}
+                          className="flex items-center gap-1 text-[9px] font-black text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-tertiary)] px-2.5 py-1 rounded-lg cursor-pointer"
+                        >
+                          <X size={11} />
+                          <span>{isAr ? 'إلغاء' : 'Cancel'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-[10px] text-[var(--ds-text-muted)] font-medium leading-relaxed m-0">
+                      {isAr ? chan.descAr : chan.descEn}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
           </Card>
 
-          {/* Growth Reputation Plan */}
+          {/* Reputation plan, computed live from real profile completeness */}
           <Card className="p-5 space-y-4">
             <h3 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center gap-2">
               <CheckSquare className="text-indigo-500" size={16} />
-              <span>{isAr ? 'خطة 90 يوماً لبناء السمعة الأكاديمية' : '90-Day Academic Reputation Plan'}</span>
+              <span>{isAr ? 'خطة بناء السمعة الأكاديمية' : 'Academic Reputation Plan'}</span>
             </h3>
 
             <div className="space-y-3">
-              {repTasks.map((task) => (
-                <div 
-                  key={task.id} 
-                  onClick={() => toggleTask(task.id)}
-                  className={`p-3 border rounded-xl flex items-start gap-2.5 cursor-pointer transition-all ${
-                    task.done 
-                      ? 'bg-emerald-500/5 border-emerald-500/20 text-[var(--ds-text-muted)] line-through' 
-                      : 'bg-[var(--ds-surface-secondary)] border-[var(--ds-border-subtle)] text-[var(--ds-text-secondary)] hover:border-indigo-500/40'
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={task.done}
-                    readOnly
-                    className="mt-0.5 shrink-0 accent-indigo-500 rounded cursor-pointer"
-                  />
-                  <div className="flex-1 space-y-1">
-                    <p className="text-xs font-bold leading-normal m-0">
-                      {isAr ? task.taskAr : task.taskEn}
-                    </p>
-                    <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded border inline-block ${
-                      task.impact === 'High' 
-                        ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' 
-                        : task.impact === 'Medium'
-                          ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                          : 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20'
-                    }`}>
-                      {task.impact} Impact
-                    </span>
+              {tasks.filter(t => !t.done).length === 0 ? (
+                <p className="text-xs font-bold text-emerald-500 m-0 text-center py-3">
+                  {isAr ? 'ملفك مكتمل — لا مهام متبقية حاليًا.' : 'Your profile is complete — no tasks remaining.'}
+                </p>
+              ) : (
+                tasks.map((task) => (
+                  <div
+                    key={task.key}
+                    onClick={() => !task.done && task.action()}
+                    className={`p-3 border rounded-xl flex items-start gap-2.5 transition-all ${
+                      task.done
+                        ? 'bg-emerald-500/5 border-emerald-500/20 text-[var(--ds-text-muted)] line-through cursor-default'
+                        : 'bg-[var(--ds-surface-secondary)] border-[var(--ds-border-subtle)] text-[var(--ds-text-secondary)] hover:border-indigo-500/40 cursor-pointer'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={task.done}
+                      readOnly
+                      className="mt-0.5 shrink-0 accent-indigo-500 rounded"
+                    />
+                    <div className="flex-1 space-y-1">
+                      <p className="text-xs font-bold leading-normal m-0">
+                        {isAr ? task.textAr : task.textEn}
+                      </p>
+                      <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded border inline-block ${
+                        task.impact === 'High'
+                          ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
+                          : task.impact === 'Medium'
+                            ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                            : 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20'
+                      }`}>
+                        {task.impact} Impact
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </Card>
 
@@ -332,4 +613,3 @@ export const AcademicVisibilityDashboard: React.FC = () => {
     </div>
   );
 };
-
