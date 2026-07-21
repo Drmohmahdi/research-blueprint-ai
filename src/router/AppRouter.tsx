@@ -57,6 +57,7 @@ const PromotionDashboard        = lazy(() => import('../components/PromotionDash
 
 // Academic Visibility Module
 const AcademicVisibilityDashboard = lazy(() => import('../components/AcademicVisibilityDashboard').then(m => ({ default: m.AcademicVisibilityDashboard })));
+const AcademicVisibilityReports   = lazy(() => import('../components/AcademicVisibilityReports').then(m => ({ default: m.AcademicVisibilityReports })));
 
 // Unified Profile & Assets Components
 const UnifiedProfileEditor = lazy(() => import('../components/UnifiedProfileEditor').then(m => ({ default: m.UnifiedProfileEditor })));
@@ -125,9 +126,10 @@ export const AppRouter: React.FC = () => {
       <Route path={ROUTES.PROMOTION_REGULATIONS} element={<SafeRoute><PromotionDashboard /></SafeRoute>} />
 
       {/* Academic Visibility Module Routes */}
-      <Route path={ROUTES.VISIBILITY}       element={<SafeRoute><AcademicVisibilityDashboard /></SafeRoute>} />
-      <Route path={ROUTES.VISIBILITY_AUDIT} element={<SafeRoute><AcademicVisibilityDashboard /></SafeRoute>} />
-      <Route path={ROUTES.VISIBILITY_PLAN}  element={<SafeRoute><AcademicVisibilityDashboard /></SafeRoute>} />
+      <Route path={ROUTES.VISIBILITY}         element={<SafeRoute><AcademicVisibilityDashboard /></SafeRoute>} />
+      <Route path={ROUTES.VISIBILITY_AUDIT}   element={<SafeRoute><AcademicVisibilityDashboard /></SafeRoute>} />
+      <Route path={ROUTES.VISIBILITY_PLAN}    element={<SafeRoute><AcademicVisibilityDashboard /></SafeRoute>} />
+      <Route path={ROUTES.VISIBILITY_REPORTS} element={<SafeRoute><AcademicVisibilityReports /></SafeRoute>} />
 
       {/* Unified Profile & Assets Routes */}
       <Route path={ROUTES.PROFILE}             element={<SafeRoute><UnifiedProfileEditor /></SafeRoute>} />

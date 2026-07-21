@@ -219,7 +219,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
       ];
     }
 
-    if (pathname.startsWith('/app/visibility')) {
+    if (pathname.startsWith('/app/visibility') || pathname.startsWith('/app/assets')) {
       return [
         backToPortalItem,
         {
@@ -227,7 +227,9 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
           titleAr: 'الهوية والانتشار',
           titleEn: 'Academic Visibility',
           items: [
-            { id: 'visibility', labelAr: 'لوحة الانتشار الأكاديمي', labelEn: 'Visibility Dashboard', icon: Globe }
+            { id: 'visibility', labelAr: 'لوحة الانتشار الأكاديمي', labelEn: 'Visibility Dashboard', icon: Globe },
+            { id: 'assets', labelAr: 'الأصول العلمية', labelEn: 'Scholarly Assets', icon: FolderGit2 },
+            { id: 'visibilityReports', labelAr: 'التقارير', labelEn: 'Reports', icon: CheckSquare }
           ]
         }
       ];
@@ -338,6 +340,8 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
       visibility: { ar: 'الهوية والانتشار', en: 'Academic Visibility' },
       visibilityAudit: { ar: 'الهوية والانتشار', en: 'Academic Visibility' },
       visibilityPlan: { ar: 'الهوية والانتشار', en: 'Academic Visibility' },
+      visibilityReports: { ar: 'الهوية والانتشار', en: 'Academic Visibility' },
+      assets: { ar: 'الهوية والانتشار', en: 'Academic Visibility' },
       designSystem: { ar: 'أدوات النظام', en: 'System' },
       smokeTest: { ar: 'أدوات النظام', en: 'System' },
       saasWorkspaces: { ar: 'الاشتراك والمساحات', en: 'SaaS & Workspaces' },
@@ -375,6 +379,8 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
       visibility: { ar: 'لوحة الانتشار الأكاديمي', en: 'Visibility Dashboard' },
       visibilityAudit: { ar: 'تدقيق الهوية والاسم', en: 'Identity Audit' },
       visibilityPlan: { ar: 'خطة بناء السمعة الأكاديمية', en: 'Reputation Plan' },
+      visibilityReports: { ar: 'تقارير الانتشار الأكاديمي', en: 'Visibility Reports' },
+      assets: { ar: 'الأصول العلمية', en: 'Scholarly Assets' },
       designSystem: { ar: 'Design Showcase', en: 'Design V2' },
       smokeTest: { ar: 'Smoke Tests', en: 'Smoke Dashboard' },
       saasWorkspaces: { ar: 'مساحات العمل المشتركة', en: 'Shared Workspaces' },

@@ -40,9 +40,10 @@ export const ROUTES = {
   PROMOTION_REGULATIONS: '/app/promotion/regulations',
 
   // Academic Visibility Module (5th Module)
-  VISIBILITY:        '/app/visibility',
-  VISIBILITY_AUDIT:  '/app/visibility/audit',
-  VISIBILITY_PLAN:   '/app/visibility/plan',
+  VISIBILITY:         '/app/visibility',
+  VISIBILITY_AUDIT:   '/app/visibility/audit',
+  VISIBILITY_PLAN:    '/app/visibility/plan',
+  VISIBILITY_REPORTS: '/app/visibility/reports',
 
   // Unified Academic Profile & Assets Routes
   PROFILE:            '/app/profile',
@@ -108,6 +109,7 @@ export const VIEW_TO_PATH: Record<string, string> = {
   visibility:         ROUTES.VISIBILITY,
   visibilityAudit:    ROUTES.VISIBILITY_AUDIT,
   visibilityPlan:     ROUTES.VISIBILITY_PLAN,
+  visibilityReports:  ROUTES.VISIBILITY_REPORTS,
   profile:            ROUTES.PROFILE,
   profileIdentifiers: ROUTES.PROFILE_IDENTIFIERS,
   profileAffiliations: ROUTES.PROFILE_AFFILIATIONS,
