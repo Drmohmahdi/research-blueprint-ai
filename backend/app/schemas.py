@@ -523,6 +523,67 @@ class ScholarlyAssetResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class PublicScholarlyAssetResponse(BaseModel):
+    id: str
+    title_ar: Optional[str] = None
+    title_en: Optional[str] = None
+    abstract_ar: Optional[str] = None
+    abstract_en: Optional[str] = None
+    asset_type: str
+    journal_name: Optional[str] = None
+    publisher: Optional[str] = None
+    publication_date: Optional[str] = None
+    conference_name: Optional[str] = None
+    doi: Optional[str] = None
+    language: str
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PublicIdentifierResponse(BaseModel):
+    identifier_type: str
+    identifier_value: str
+    profile_url: Optional[str] = None
+    status: Optional[str] = "UNVERIFIED"
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PublicAffiliationResponse(BaseModel):
+    organization_name: str
+    college: Optional[str] = None
+    department: Optional[str] = None
+    position_title: Optional[str] = None
+    academic_rank: Optional[str] = None
+    is_current: Optional[bool] = False
+    country: Optional[str] = None
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PublicProfileResponse(BaseModel):
+    preferred_name_ar: Optional[str] = None
+    preferred_name_en: Optional[str] = None
+    academic_title: Optional[str] = None
+    current_rank: Optional[str] = None
+    country: Optional[str] = None
+    university: Optional[str] = None
+    college: Optional[str] = None
+    department: Optional[str] = None
+    general_specialization: Optional[str] = None
+    specific_specialization: Optional[str] = None
+    discipline: Optional[str] = None
+    research_interests_json: Optional[List[str]] = None
+    keywords_ar_json: Optional[List[str]] = None
+    keywords_en_json: Optional[List[str]] = None
+    public_email: Optional[str] = None
+    short_bio_ar: Optional[str] = None
+    short_bio_en: Optional[str] = None
+    full_bio_ar: Optional[str] = None
+    full_bio_en: Optional[str] = None
+    completeness_score: int
+    identifiers: List[PublicIdentifierResponse] = []
+    affiliations: List[PublicAffiliationResponse] = []
+    scholarly_assets: List[PublicScholarlyAssetResponse] = []
+
+
 class ScholarlyAssetCreate(BaseModel):
     title_ar: Optional[str] = None
     title_en: Optional[str] = None

@@ -14,7 +14,8 @@ from ..schemas import (
     UnifiedAcademicProfileResponse, UnifiedAcademicProfileUpsert,
     ScholarlyAssetResponse, ScholarlyAssetCreate,
     IdentifierSchema, AffiliationSchema,
-    ScholarlyAssetContributorSchema, ScholarlyAssetFileSchema
+    ScholarlyAssetContributorSchema, ScholarlyAssetFileSchema,
+    PublicProfileResponse
 )
 from ..services.tenant_context import get_tenant_context, TenantContext
 
@@ -59,6 +60,52 @@ def calculate_profile_completeness(body: UnifiedAcademicProfileUpsert) -> int:
         score += 10
 
     return score
+
+
+@router.get("/public/{username}", response_model=PublicProfileResponse)
+def get_public_profile(username: str, db: Session = Depends(get_db)):
+    """Unauthenticated, read-only profile view for sharing outside the platform."""
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Profile not found")
+
+    profile = db.query(UnifiedAcademicProfile).filter(
+        UnifiedAcademicProfile.user_id == user.id
+    ).first()
+
+    if not profile or profile.visibility_status != "PUBLIC":
+        raise HTTPException(status_code=404, detail="Profile not found")
+
+    assets = db.query(ScholarlyAsset).filter(
+        ScholarlyAsset.owner_user_id == user.id,
+        ScholarlyAsset.visibility == "PUBLIC"
+    ).order_by(ScholarlyAsset.publication_date.desc()).all()
+
+    return PublicProfileResponse(
+        preferred_name_ar=profile.preferred_name_ar,
+        preferred_name_en=profile.preferred_name_en,
+        academic_title=profile.academic_title,
+        current_rank=profile.current_rank,
+        country=profile.country,
+        university=profile.university,
+        college=profile.college,
+        department=profile.department,
+        general_specialization=profile.general_specialization,
+        specific_specialization=profile.specific_specialization,
+        discipline=profile.discipline,
+        research_interests_json=profile.research_interests_json,
+        keywords_ar_json=profile.keywords_ar_json,
+        keywords_en_json=profile.keywords_en_json,
+        public_email=profile.public_email,
+        short_bio_ar=profile.short_bio_ar,
+        short_bio_en=profile.short_bio_en,
+        full_bio_ar=profile.full_bio_ar,
+        full_bio_en=profile.full_bio_en,
+        completeness_score=profile.completeness_score,
+        identifiers=list(profile.identifiers),
+        affiliations=list(profile.affiliations),
+        scholarly_assets=list(assets),
+    )
 
 
 @router.get("/profile/me", response_model=UnifiedAcademicProfileResponse)

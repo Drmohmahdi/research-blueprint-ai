@@ -509,6 +509,16 @@ export function apiGetDownloadUrl(fileId: string): string {
   return `${API_BASE_URL}/storage/download/${activeOrg}/${fileId}`;
 }
 
+export async function apiGetPublicProfile(username: string): Promise<any | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/academic-foundation/public/${encodeURIComponent(username)}`);
+    if (res.ok) return await res.json();
+  } catch (e) {
+    console.error('Failed to fetch public profile', e);
+  }
+  return null;
+}
+
 export async function apiGetMyProfile(): Promise<any | null> {
   try {
     const res = await fetch(`${API_BASE_URL}/academic-foundation/profile/me`, { headers: getHeaders() });

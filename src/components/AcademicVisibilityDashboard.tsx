@@ -45,7 +45,7 @@ const normalizeProfile = (data: any) => ({
 });
 
 export const AcademicVisibilityDashboard: React.FC = () => {
-  const { language } = useProject();
+  const { language, user } = useProject();
   const navigate = useNavigate();
   const isAr = language === 'ar';
 
@@ -293,6 +293,26 @@ export const AcademicVisibilityDashboard: React.FC = () => {
               ? 'ابنِ حضورك الرقمي المتسق، ووحد صياغة اسمك العلمي، وراجع اتساق ملفاتك على Scopus و Google Scholar لتعظيم الاستشهادات.'
               : 'Build a consistent digital footprint, unify your academic name formats, and audit profiles on Scopus and Google Scholar to optimize citation tracking.'}
           </p>
+
+          {user?.username && (
+            profile.visibility_status === 'PUBLIC' ? (
+              <button
+                onClick={() => copyToClipboard(`${window.location.origin}/researcher/${user.username}`, 'public-link')}
+                className="inline-flex items-center gap-1.5 text-[11px] font-black text-indigo-500 hover:underline cursor-pointer"
+              >
+                <ExternalLink size={12} />
+                <span>{copiedKey === 'public-link' ? (isAr ? 'تم نسخ الرابط!' : 'Link copied!') : (isAr ? 'نسخ رابط ملفك العام' : 'Copy your public profile link')}</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate(ROUTES.PROFILE)}
+                className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-500 hover:underline cursor-pointer"
+              >
+                <ShieldAlert size={12} />
+                <span>{isAr ? 'ملفك غير عام حاليًا — فعّل الظهور العام من الملف الكامل' : 'Your profile is private — enable public visibility in the full profile'}</span>
+              </button>
+            )
+          )}
         </div>
 
         {/* Real visibility score, from server-computed profile completeness */}
