@@ -4,6 +4,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import List, Optional
 
 from ..db import get_db
@@ -42,10 +43,10 @@ def upload_file(
     # 2. Check storage limit for active plan
     # Query current total storage usage in MB
     current_period = datetime.datetime.now(datetime.UTC).strftime("%Y-%m")
-    total_bytes_used = db.query(models.UsageEvent).filter(
+    total_bytes_used = db.query(func.sum(models.UsageEvent.quantity)).filter(
         models.UsageEvent.organization_id == context.organization.id,
         models.UsageEvent.event_type == "FILE_UPLOAD_BYTES"
-    ).sum(models.UsageEvent.quantity) or 0.0
+    ).scalar() or 0.0
 
     max_storage_mb = context.limits.get("max_storage_mb", 50)
     max_storage_bytes = max_storage_mb * 1024 * 1024

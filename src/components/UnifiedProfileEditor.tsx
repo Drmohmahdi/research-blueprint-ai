@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useProject } from '../context/ProjectContext';
-import { apiGetMyProfile, apiUpsertProfile } from '../utils/api';
+import { apiGetMyProfile, apiUpsertProfile, apiUploadFile, apiGetDownloadUrl } from '../utils/api';
 import { ACADEMIC_CHANNELS, OTHER_CHANNEL_TYPE } from '../config/academicChannels';
-import { 
-  User, 
-  School, 
-  Plus, 
-  Trash2, 
-  CheckCircle, 
-  AlertCircle, 
-  Globe, 
+import {
+  User,
+  School,
+  Plus,
+  Trash2,
+  CheckCircle,
+  AlertCircle,
+  Globe,
   Award,
-  Sparkles
+  Sparkles,
+  Loader2,
+  Camera
 } from 'lucide-react';
 
 export const UnifiedProfileEditor: React.FC = () => {
@@ -20,6 +22,7 @@ export const UnifiedProfileEditor: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'general' | 'identifiers' | 'affiliations'>('general');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [msg, setMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   // Load profile
@@ -80,6 +83,35 @@ export const UnifiedProfileEditor: React.FC = () => {
       showMsg(language === 'ar' ? 'خطأ غير متوقع أثناء الحفظ' : 'Unexpected error during save', 'error');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handlePhotoUpload = async (file: File) => {
+    if (!profile) return;
+    setUploadingPhoto(true);
+    try {
+      const uploaded = await apiUploadFile(undefined, file);
+      if (!uploaded) {
+        showMsg(language === 'ar' ? 'فشل رفع الصورة' : 'Photo upload failed', 'error');
+        return;
+      }
+      const updatedProfile = { ...profile, profile_photo_file_id: uploaded.id };
+      setProfile(updatedProfile);
+      const saved = await apiUpsertProfile(updatedProfile);
+      if (saved) {
+        setProfile({
+          ...saved,
+          name_variants_json: saved.name_variants_json || [],
+          research_interests_json: saved.research_interests_json || [],
+          keywords_ar_json: saved.keywords_ar_json || [],
+          keywords_en_json: saved.keywords_en_json || [],
+          identifiers: saved.identifiers || [],
+          affiliations: saved.affiliations || []
+        });
+        showMsg(language === 'ar' ? 'تم تحديث الصورة الشخصية' : 'Profile photo updated', 'success');
+      }
+    } finally {
+      setUploadingPhoto(false);
     }
   };
 
@@ -377,7 +409,37 @@ export const UnifiedProfileEditor: React.FC = () => {
                 <h2 className="text-sm font-bold border-b border-[var(--ds-border-subtle)] pb-2 text-purple-400">
                   {language === 'ar' ? 'البيانات الشخصية والمهنية العامة' : 'General Personal & Professional Data'}
                 </h2>
-                
+
+                {/* Profile photo */}
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-full overflow-hidden bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] flex items-center justify-center shrink-0">
+                    {profile.profile_photo_file_id ? (
+                      <img
+                        src={apiGetDownloadUrl(profile.profile_photo_file_id)}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <User className="w-7 h-7 text-[var(--ds-text-muted)]" />
+                    )}
+                  </div>
+                  <label className="px-3 py-1.5 border border-[var(--ds-border-subtle)] hover:bg-[var(--ds-surface-secondary)] rounded-lg text-[11px] font-bold text-[var(--ds-text-secondary)] cursor-pointer flex items-center gap-1.5">
+                    {uploadingPhoto ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
+                    <span>{language === 'ar' ? 'تغيير الصورة الشخصية' : 'Change profile photo'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      disabled={uploadingPhoto}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handlePhotoUpload(file);
+                        e.target.value = '';
+                      }}
+                    />
+                  </label>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.prefNameAr}</label>

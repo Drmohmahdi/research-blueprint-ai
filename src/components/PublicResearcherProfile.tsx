@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { apiGetPublicProfile } from '../utils/api';
+import { apiGetPublicProfile, apiGetPublicPhotoUrl } from '../utils/api';
 import { getChannelLabel } from '../config/academicChannels';
 import {
   Loader2,
@@ -98,28 +98,37 @@ export const PublicResearcherProfile: React.FC = () => {
       </div>
 
       {/* Header */}
-      <div className="space-y-2 pb-4 border-b border-[var(--ds-border-subtle)]">
-        <div className="flex items-center gap-2">
-          <Globe size={16} className="text-indigo-400" />
-          <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
-            {isAr ? 'الملف الأكاديمي العام' : 'Public Academic Profile'}
-          </span>
-        </div>
-        <h1 className="text-2xl md:text-3xl font-extrabold">{displayName}</h1>
-        {(profile.academic_title || profile.current_rank) && (
-          <p className="text-sm text-[var(--ds-text-secondary)] font-bold">
-            {[profile.academic_title, profile.current_rank].filter(Boolean).join(' — ')}
-          </p>
+      <div className="flex items-start gap-4 pb-4 border-b border-[var(--ds-border-subtle)]">
+        {profile.has_photo && username && (
+          <img
+            src={apiGetPublicPhotoUrl(username)}
+            alt=""
+            className="w-16 h-16 rounded-full object-cover border border-[var(--ds-border-subtle)] shrink-0"
+          />
         )}
-        {(profile.university || profile.college || profile.department) && (
-          <div className="flex items-center gap-1.5 text-xs text-[var(--ds-text-muted)]">
-            <School size={13} />
-            <span>{[profile.university, profile.college, profile.department].filter(Boolean).join(' · ')}</span>
+        <div className="space-y-2 min-w-0">
+          <div className="flex items-center gap-2">
+            <Globe size={16} className="text-indigo-400" />
+            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+              {isAr ? 'الملف الأكاديمي العام' : 'Public Academic Profile'}
+            </span>
           </div>
-        )}
-        {profile.public_email && (
-          <p className="text-xs text-[var(--ds-text-muted)]">{profile.public_email}</p>
-        )}
+          <h1 className="text-2xl md:text-3xl font-extrabold">{displayName}</h1>
+          {(profile.academic_title || profile.current_rank) && (
+            <p className="text-sm text-[var(--ds-text-secondary)] font-bold">
+              {[profile.academic_title, profile.current_rank].filter(Boolean).join(' — ')}
+            </p>
+          )}
+          {(profile.university || profile.college || profile.department) && (
+            <div className="flex items-center gap-1.5 text-xs text-[var(--ds-text-muted)]">
+              <School size={13} />
+              <span>{[profile.university, profile.college, profile.department].filter(Boolean).join(' · ')}</span>
+            </div>
+          )}
+          {profile.public_email && (
+            <p className="text-xs text-[var(--ds-text-muted)]">{profile.public_email}</p>
+          )}
+        </div>
       </div>
 
       {/* Bio */}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
-import { apiGetMyProfile, apiUpsertProfile } from '../utils/api';
+import { apiGetMyProfile, apiUpsertProfile, apiGetDownloadUrl } from '../utils/api';
 import { ROUTES } from '../router/routes';
 import { ACADEMIC_CHANNELS } from '../config/academicChannels';
 import { Card } from '../design-system/components/Card';
@@ -278,7 +278,15 @@ export const AcademicVisibilityDashboard: React.FC = () => {
 
       {/* Top Welcome Banner */}
       <div className="bg-gradient-to-r from-indigo-950/40 via-purple-900/10 to-transparent border border-indigo-500/20 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-md">
-        <div className="space-y-2">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-full overflow-hidden bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] flex items-center justify-center shrink-0">
+            {profile.profile_photo_file_id ? (
+              <img src={apiGetDownloadUrl(profile.profile_photo_file_id)} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <User className="w-6 h-6 text-[var(--ds-text-muted)]" />
+            )}
+          </div>
+          <div className="space-y-2">
           <div className="flex items-center gap-2 mb-1">
             <Globe size={20} className="text-indigo-400" />
             <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
@@ -313,6 +321,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
               </button>
             )
           )}
+          </div>
         </div>
 
         {/* Real visibility score, from server-computed profile completeness */}

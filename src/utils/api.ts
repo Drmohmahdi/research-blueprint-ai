@@ -477,11 +477,11 @@ export async function apiListPlans(): Promise<any[] | null> {
 }
 
 // ── Cloud Storage File Operations ───────────────────────────────────────────
-export async function apiUploadFile(projectId: string, file: File): Promise<any | null> {
+export async function apiUploadFile(projectId: string | undefined, file: File): Promise<any | null> {
   try {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('project_id', projectId);
+    if (projectId) formData.append('project_id', projectId);
     const res = await fetch(`${API_BASE_URL}/storage/upload`, {
       method: 'POST',
       headers: getHeaders(),
@@ -517,6 +517,10 @@ export async function apiGetPublicProfile(username: string): Promise<any | null>
     console.error('Failed to fetch public profile', e);
   }
   return null;
+}
+
+export function apiGetPublicPhotoUrl(username: string): string {
+  return `${API_BASE_URL}/academic-foundation/public/${encodeURIComponent(username)}/photo`;
 }
 
 export async function apiGetMyProfile(): Promise<any | null> {

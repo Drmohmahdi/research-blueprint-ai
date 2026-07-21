@@ -559,6 +559,7 @@ class PublicAffiliationResponse(BaseModel):
 
 
 class PublicProfileResponse(BaseModel):
+    has_photo: bool = False
     preferred_name_ar: Optional[str] = None
     preferred_name_en: Optional[str] = None
     academic_title: Optional[str] = None

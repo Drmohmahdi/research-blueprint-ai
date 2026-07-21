@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Header
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional
+import os
 import uuid
 import datetime
 
@@ -82,6 +84,7 @@ def get_public_profile(username: str, db: Session = Depends(get_db)):
     ).order_by(ScholarlyAsset.publication_date.desc()).all()
 
     return PublicProfileResponse(
+        has_photo=bool(profile.profile_photo_file_id),
         preferred_name_ar=profile.preferred_name_ar,
         preferred_name_en=profile.preferred_name_en,
         academic_title=profile.academic_title,
@@ -106,6 +109,34 @@ def get_public_profile(username: str, db: Session = Depends(get_db)):
         affiliations=list(profile.affiliations),
         scholarly_assets=list(assets),
     )
+
+
+@router.get("/public/{username}/photo")
+def get_public_profile_photo(username: str, db: Session = Depends(get_db)):
+    """Unauthenticated photo fetch for the public profile page only -
+    does not use the shared, authenticated /storage/download endpoint."""
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Photo not found")
+
+    profile = db.query(UnifiedAcademicProfile).filter(
+        UnifiedAcademicProfile.user_id == user.id
+    ).first()
+
+    if not profile or profile.visibility_status != "PUBLIC" or not profile.profile_photo_file_id:
+        raise HTTPException(status_code=404, detail="Photo not found")
+
+    db_file = db.query(UploadedFile).filter(
+        UploadedFile.id == profile.profile_photo_file_id
+    ).first()
+    if not db_file:
+        raise HTTPException(status_code=404, detail="Photo not found")
+
+    full_path = os.path.join("storage_files", db_file.storage_key)
+    if not os.path.exists(full_path):
+        raise HTTPException(status_code=404, detail="Photo not found")
+
+    return FileResponse(path=full_path, media_type=db_file.mime_type)
 
 
 @router.get("/profile/me", response_model=UnifiedAcademicProfileResponse)
