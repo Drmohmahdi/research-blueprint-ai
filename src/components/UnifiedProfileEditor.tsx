@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useProject } from '../context/ProjectContext';
 import { apiGetMyProfile, apiUpsertProfile } from '../utils/api';
+import { ACADEMIC_CHANNELS, OTHER_CHANNEL_TYPE } from '../config/academicChannels';
 import { 
   User, 
   School, 
@@ -554,21 +555,29 @@ export const UnifiedProfileEditor: React.FC = () => {
                   ) : (
                     profile.identifiers.map((ident: any, idx: number) => (
                       <div key={idx} className="p-4 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl flex flex-col md:flex-row gap-3 items-start md:items-center">
-                        <div className="w-full md:w-1/4">
+                        <div className="w-full md:w-1/4 space-y-1.5">
                           <label className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
                             {language === 'ar' ? 'نوع المنصة / المعرف' : 'Channel / Platform Type'}
                           </label>
                           <select
-                            value={ident.identifier_type}
-                            onChange={(e) => updateIdentifier(idx, 'identifier_type', e.target.value)}
+                            value={ACADEMIC_CHANNELS.some(c => c.type === ident.identifier_type) ? ident.identifier_type : OTHER_CHANNEL_TYPE}
+                            onChange={(e) => updateIdentifier(idx, 'identifier_type', e.target.value === OTHER_CHANNEL_TYPE ? '' : e.target.value)}
                             className="w-full px-2.5 py-1.5 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs"
                           >
-                            <option value="ORCID">ORCID</option>
-                            <option value="GoogleScholar">Google Scholar</option>
-                            <option value="ScopusID">Scopus ID</option>
-                            <option value="ResearcherID">Researcher ID</option>
-                            <option value="ResearchGate">ResearchGate</option>
+                            {ACADEMIC_CHANNELS.map(c => (
+                              <option key={c.type} value={c.type}>{c.label}</option>
+                            ))}
+                            <option value={OTHER_CHANNEL_TYPE}>{language === 'ar' ? 'أخرى...' : 'Other...'}</option>
                           </select>
+                          {!ACADEMIC_CHANNELS.some(c => c.type === ident.identifier_type) && (
+                            <input
+                              type="text"
+                              placeholder={language === 'ar' ? 'اكتب اسم المنصة' : 'Enter platform name'}
+                              value={ident.identifier_type}
+                              onChange={(e) => updateIdentifier(idx, 'identifier_type', e.target.value)}
+                              className="w-full px-2.5 py-1.5 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:outline-none"
+                            />
+                          )}
                         </div>
 
                         <div className="w-full md:w-1/4">

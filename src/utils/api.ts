@@ -557,6 +557,20 @@ export async function apiCreateScholarlyAsset(asset: any): Promise<any | null> {
   return null;
 }
 
+export async function apiUpdateScholarlyAsset(assetId: string, asset: any): Promise<any | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/academic-foundation/scholarly-assets/${assetId}`, {
+      method: 'PUT',
+      headers: getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(asset)
+    });
+    if (res.ok) return await res.json();
+  } catch (e) {
+    console.error('Failed to update asset', e);
+  }
+  return null;
+}
+
 export async function apiDeleteScholarlyAsset(assetId: string): Promise<boolean> {
   try {
     const res = await fetch(`${API_BASE_URL}/academic-foundation/scholarly-assets/${assetId}`, {

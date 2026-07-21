@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { apiGetMyProfile, apiListScholarlyAssets } from '../utils/api';
 import { ROUTES } from '../router/routes';
+import { ACADEMIC_CHANNELS, getChannelLabel } from '../config/academicChannels';
 import { Card } from '../design-system/components/Card';
 import {
   FileBarChart,
@@ -12,7 +13,8 @@ import {
   ShieldAlert,
   Link as LinkIcon,
   Calendar,
-  Globe
+  Globe,
+  School
 } from 'lucide-react';
 
 const ASSET_TYPE_LABELS: Record<string, { ar: string; en: string }> = {
@@ -24,7 +26,15 @@ const ASSET_TYPE_LABELS: Record<string, { ar: string; en: string }> = {
   THESIS: { ar: 'رسالة علمية', en: 'Thesis / Dissertation' },
 };
 
-const CHANNEL_TYPES = ['ORCID', 'GOOGLE_SCHOLAR', 'SCOPUS', 'RESEARCHGATE', 'LINKEDIN', 'GITHUB'];
+const LIFECYCLE_STATUS_LABELS: Record<string, { ar: string; en: string }> = {
+  DRAFT: { ar: 'مسودة', en: 'Draft' },
+  UNDER_REVIEW: { ar: 'قيد المراجعة', en: 'Under Review' },
+  ACCEPTED: { ar: 'مقبول', en: 'Accepted' },
+  PUBLISHED: { ar: 'منشور', en: 'Published' },
+  ARCHIVED: { ar: 'مؤرشف', en: 'Archived' },
+};
+
+const CHANNEL_TYPES = ACADEMIC_CHANNELS.map(c => c.type);
 
 export const AcademicVisibilityReports: React.FC = () => {
   const { language } = useProject();
@@ -85,6 +95,8 @@ export const AcademicVisibilityReports: React.FC = () => {
     .filter(a => a.publication_date)
     .sort((a, b) => (b.publication_date > a.publication_date ? 1 : -1));
 
+  const affiliations: any[] = profile.affiliations || [];
+
   const displayName = isAr
     ? (profile.preferred_name_ar || profile.preferred_name_en || '—')
     : (profile.preferred_name_en || profile.preferred_name_ar || '—');
@@ -108,6 +120,15 @@ export const AcademicVisibilityReports: React.FC = () => {
       lines.push(`  - ${label}: ${count}`);
     }
     lines.push(isAr ? `تحمل معرّف DOI: ${withDoi} من ${assets.length}` : `With DOI: ${withDoi} of ${assets.length}`);
+    for (const [status, count] of Object.entries(byStatus)) {
+      const label = LIFECYCLE_STATUS_LABELS[status] ? (isAr ? LIFECYCLE_STATUS_LABELS[status].ar : LIFECYCLE_STATUS_LABELS[status].en) : status;
+      lines.push(`  - ${label}: ${count}`);
+    }
+    lines.push('');
+    lines.push(isAr ? `الانتماءات الأكاديمية: ${affiliations.length}` : `Academic affiliations: ${affiliations.length}`);
+    for (const aff of affiliations) {
+      lines.push(`  - ${aff.organization_name}${aff.position_title ? ` — ${aff.position_title}` : ''}${aff.is_current ? (isAr ? ' (حالي)' : ' (current)') : ''}`);
+    }
     if (timeline.length > 0) {
       lines.push('');
       lines.push(isAr ? 'أحدث المنشورات:' : 'Recent publications:');
@@ -204,7 +225,7 @@ export const AcademicVisibilityReports: React.FC = () => {
                 const linked = linkedChannels.includes(type);
                 return (
                   <div key={type} className="flex items-center justify-between text-xs py-1">
-                    <span className="font-bold text-[var(--ds-text-secondary)]">{type.replace('_', ' ')}</span>
+                    <span className="font-bold text-[var(--ds-text-secondary)]">{getChannelLabel(type, isAr)}</span>
                     <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${
                       linked
                         ? 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20'
@@ -247,6 +268,57 @@ export const AcademicVisibilityReports: React.FC = () => {
               className="text-[10px] font-black text-indigo-500 hover:underline cursor-pointer print:hidden"
             >
               {isAr ? 'إدارة الأصول العلمية ←' : '← Manage scholarly assets'}
+            </button>
+          </Card>
+
+          <Card className="p-5 space-y-3">
+            <h3 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0">
+              {isAr ? 'الأصول حسب حالة النشر' : 'Assets by Publication Status'}
+            </h3>
+            {Object.keys(byStatus).length === 0 ? (
+              <p className="text-xs text-[var(--ds-text-muted)] m-0">{isAr ? 'لا توجد أصول علمية مسجّلة بعد.' : 'No scholarly assets registered yet.'}</p>
+            ) : (
+              <div className="space-y-1.5">
+                {Object.entries(byStatus).map(([status, count]) => (
+                  <div key={status} className="flex items-center justify-between text-xs py-1">
+                    <span className="font-bold text-[var(--ds-text-secondary)]">
+                      {LIFECYCLE_STATUS_LABELS[status] ? (isAr ? LIFECYCLE_STATUS_LABELS[status].ar : LIFECYCLE_STATUS_LABELS[status].en) : status}
+                    </span>
+                    <span className="font-black text-[var(--ds-text-primary)]">{count}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+
+          <Card className="p-5 space-y-3">
+            <h3 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center gap-2">
+              <School className="text-indigo-500" size={16} />
+              <span>{isAr ? 'الانتماءات الأكاديمية' : 'Academic Affiliations'}</span>
+            </h3>
+            {affiliations.length === 0 ? (
+              <p className="text-xs text-[var(--ds-text-muted)] m-0">{isAr ? 'لا توجد انتماءات مسجّلة بعد.' : 'No affiliations recorded yet.'}</p>
+            ) : (
+              <div className="space-y-1.5">
+                {affiliations.map((aff: any, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between text-xs py-1 gap-2">
+                    <span className="font-bold text-[var(--ds-text-secondary)] truncate">
+                      {aff.organization_name}{aff.position_title ? ` — ${aff.position_title}` : ''}
+                    </span>
+                    {aff.is_current && (
+                      <span className="text-[8px] font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded shrink-0">
+                        {isAr ? 'حالي' : 'Current'}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            <button
+              onClick={() => navigate(ROUTES.PROFILE_AFFILIATIONS)}
+              className="text-[10px] font-black text-indigo-500 hover:underline cursor-pointer print:hidden"
+            >
+              {isAr ? 'إدارة الانتماءات ←' : '← Manage affiliations'}
             </button>
           </Card>
         </div>

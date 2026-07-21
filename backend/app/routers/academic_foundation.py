@@ -297,6 +297,67 @@ def create_scholarly_asset(
     return asset
 
 
+@router.put("/scholarly-assets/{asset_id}", response_model=ScholarlyAssetResponse)
+def update_scholarly_asset(
+    asset_id: str,
+    body: ScholarlyAssetCreate,
+    db: Session = Depends(get_db),
+    context: TenantContext = Depends(get_tenant_context)
+):
+    asset = db.query(ScholarlyAsset).filter(ScholarlyAsset.id == asset_id).first()
+    if not asset:
+        raise HTTPException(status_code=404, detail="Asset not found")
+
+    if asset.owner_user_id != context.user.id:
+        raise HTTPException(status_code=403, detail="Only the owner can edit this asset")
+
+    now_str = datetime.datetime.now(datetime.UTC).isoformat()
+
+    asset.title_ar = body.title_ar
+    asset.title_en = body.title_en
+    asset.abstract_ar = body.abstract_ar
+    asset.abstract_en = body.abstract_en
+    asset.asset_type = body.asset_type
+    asset.lifecycle_status = body.lifecycle_status or "DRAFT"
+    asset.primary_discipline = body.primary_discipline
+    asset.secondary_disciplines_json = body.secondary_disciplines_json or []
+    asset.keywords_json = body.keywords_json or []
+    asset.doi = body.doi
+    asset.issn = body.issn
+    asset.isbn = body.isbn
+    asset.journal_name = body.journal_name
+    asset.publisher = body.publisher
+    asset.publication_date = body.publication_date
+    asset.acceptance_date = body.acceptance_date
+    asset.conference_name = body.conference_name
+    asset.language = body.language or "ar"
+    asset.visibility = body.visibility or "PUBLIC"
+    asset.metadata_json = body.metadata_json or {}
+    asset.updated_at = now_str
+    db.commit()
+
+    # Replace contributors wholesale, mirroring the profile upsert pattern
+    db.query(ScholarlyAssetContributor).filter(ScholarlyAssetContributor.asset_id == asset.id).delete()
+    for cont in body.contributors:
+        db.add(ScholarlyAssetContributor(
+            id=str(uuid.uuid4()),
+            asset_id=asset.id,
+            user_id=cont.user_id,
+            external_name=cont.external_name,
+            orcid=cont.orcid,
+            author_order=cont.author_order or 1,
+            is_corresponding_author=cont.is_corresponding_author or False,
+            contribution_roles_json=cont.contribution_roles_json or [],
+            affiliation_text=cont.affiliation_text,
+            contribution_percentage=cont.contribution_percentage,
+            verified_status=cont.verified_status or "UNVERIFIED"
+        ))
+
+    db.commit()
+    db.refresh(asset)
+    return asset
+
+
 @router.get("/scholarly-assets/{asset_id}", response_model=ScholarlyAssetResponse)
 def get_scholarly_asset(
     asset_id: str,

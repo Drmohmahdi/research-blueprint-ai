@@ -1,31 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { useProject } from '../context/ProjectContext';
-import { 
-  apiListScholarlyAssets, 
-  apiCreateScholarlyAsset, 
-  apiDeleteScholarlyAsset 
+import {
+  apiListScholarlyAssets,
+  apiCreateScholarlyAsset,
+  apiUpdateScholarlyAsset,
+  apiDeleteScholarlyAsset
 } from '../utils/api';
-import { 
-  Plus, 
-  Trash2, 
-  Search, 
-  Users, 
-  ExternalLink, 
-  BookOpen, 
-  Calendar, 
-  X, 
+import {
+  Plus,
+  Trash2,
+  Search,
+  Users,
+  ExternalLink,
+  BookOpen,
+  Calendar,
+  X,
   Layers,
   Sparkles,
-  Link
+  Link,
+  Pencil,
+  ArrowUpDown
 } from 'lucide-react';
+
+const LIFECYCLE_STATUSES = ['DRAFT', 'UNDER_REVIEW', 'ACCEPTED', 'PUBLISHED', 'ARCHIVED'] as const;
 
 export const ScholarlyAssetsList: React.FC = () => {
   const { language } = useProject();
   const [assets, setAssets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingAssetId, setEditingAssetId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTypeFilter, setSelectedTypeFilter] = useState<string>('ALL');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
   // Form states for creating asset
   const [newAsset, setNewAsset] = useState<any>({
@@ -122,41 +129,80 @@ export const ScholarlyAssetsList: React.FC = () => {
     });
   };
 
-  const handleCreateAsset = async (e: React.FormEvent) => {
+  const emptyAssetForm = {
+    title_ar: '',
+    title_en: '',
+    abstract_ar: '',
+    abstract_en: '',
+    asset_type: 'JOURNAL_PAPER',
+    lifecycle_status: 'PUBLISHED',
+    primary_discipline: '',
+    secondary_disciplines_json: [],
+    keywords_json: [],
+    doi: '',
+    issn: '',
+    isbn: '',
+    journal_name: '',
+    publisher: '',
+    publication_date: '',
+    acceptance_date: '',
+    conference_name: '',
+    language: 'ar',
+    visibility: 'PUBLIC',
+    source_module: 'FOUNDATION',
+    contributors: [],
+    files: []
+  };
+
+  const openAddModal = () => {
+    setEditingAssetId(null);
+    setNewAsset(emptyAssetForm);
+    setShowAddModal(true);
+  };
+
+  const openEditModal = (asset: any) => {
+    setEditingAssetId(asset.id);
+    setNewAsset({
+      title_ar: asset.title_ar || '',
+      title_en: asset.title_en || '',
+      abstract_ar: asset.abstract_ar || '',
+      abstract_en: asset.abstract_en || '',
+      asset_type: asset.asset_type || 'JOURNAL_PAPER',
+      lifecycle_status: asset.lifecycle_status || 'PUBLISHED',
+      primary_discipline: asset.primary_discipline || '',
+      secondary_disciplines_json: asset.secondary_disciplines_json || [],
+      keywords_json: asset.keywords_json || [],
+      doi: asset.doi || '',
+      issn: asset.issn || '',
+      isbn: asset.isbn || '',
+      journal_name: asset.journal_name || '',
+      publisher: asset.publisher || '',
+      publication_date: asset.publication_date || '',
+      acceptance_date: asset.acceptance_date || '',
+      conference_name: asset.conference_name || '',
+      language: asset.language || 'ar',
+      visibility: asset.visibility || 'PUBLIC',
+      source_module: asset.source_module || 'FOUNDATION',
+      contributors: asset.contributors || [],
+      files: asset.files || []
+    });
+    setShowAddModal(true);
+  };
+
+  const handleSaveAsset = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await apiCreateScholarlyAsset(newAsset);
+      const res = editingAssetId
+        ? await apiUpdateScholarlyAsset(editingAssetId, newAsset)
+        : await apiCreateScholarlyAsset(newAsset);
       if (res) {
         setShowAddModal(false);
-        // Reset form
-        setNewAsset({
-          title_ar: '',
-          title_en: '',
-          abstract_ar: '',
-          abstract_en: '',
-          asset_type: 'JOURNAL_PAPER',
-          lifecycle_status: 'PUBLISHED',
-          primary_discipline: '',
-          secondary_disciplines_json: [],
-          keywords_json: [],
-          doi: '',
-          issn: '',
-          isbn: '',
-          journal_name: '',
-          publisher: '',
-          publication_date: '',
-          acceptance_date: '',
-          conference_name: '',
-          language: 'ar',
-          visibility: 'PUBLIC',
-          source_module: 'FOUNDATION',
-          contributors: [],
-          files: []
-        });
+        setEditingAssetId(null);
+        setNewAsset(emptyAssetForm);
         loadAssets();
       }
     } catch (e) {
-      console.error("Failed to create asset", e);
+      console.error("Failed to save asset", e);
     }
   };
 
@@ -172,15 +218,49 @@ export const ScholarlyAssetsList: React.FC = () => {
     }
   };
 
-  const filteredAssets = assets.filter((asset) => {
-    const matchesSearch = 
-      (asset.title_ar && asset.title_ar.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (asset.title_en && asset.title_en.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (asset.journal_name && asset.journal_name.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesType = selectedTypeFilter === 'ALL' || asset.asset_type === selectedTypeFilter;
-    return matchesSearch && matchesType;
-  });
+  const filteredAssets = assets
+    .filter((asset) => {
+      const matchesSearch =
+        (asset.title_ar && asset.title_ar.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (asset.title_en && asset.title_en.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (asset.journal_name && asset.journal_name.toLowerCase().includes(searchTerm.toLowerCase()));
+
+      const matchesType = selectedTypeFilter === 'ALL' || asset.asset_type === selectedTypeFilter;
+      return matchesSearch && matchesType;
+    })
+    .sort((a, b) => {
+      const dateA = a.publication_date || a.created_at || '';
+      const dateB = b.publication_date || b.created_at || '';
+      return sortOrder === 'newest' ? (dateB > dateA ? 1 : -1) : (dateA > dateB ? 1 : -1);
+    });
+
+  const getLifecycleStatusLabel = (status: string) => {
+    const mapAr: Record<string, string> = {
+      DRAFT: 'مسودة',
+      UNDER_REVIEW: 'قيد المراجعة',
+      ACCEPTED: 'مقبول',
+      PUBLISHED: 'منشور',
+      ARCHIVED: 'مؤرشف'
+    };
+    const mapEn: Record<string, string> = {
+      DRAFT: 'Draft',
+      UNDER_REVIEW: 'Under Review',
+      ACCEPTED: 'Accepted',
+      PUBLISHED: 'Published',
+      ARCHIVED: 'Archived'
+    };
+    return language === 'ar' ? (mapAr[status] || status) : (mapEn[status] || status);
+  };
+
+  const getLifecycleStatusColor = (status: string) => {
+    switch (status) {
+      case 'PUBLISHED': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+      case 'ACCEPTED': return 'bg-sky-500/10 text-sky-500 border-sky-500/20';
+      case 'UNDER_REVIEW': return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+      case 'ARCHIVED': return 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20';
+      default: return 'bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-muted)] border-[var(--ds-border-subtle)]';
+    }
+  };
 
   const getAssetTypeBadgeLabel = (type: string) => {
     const typesMapAr: Record<string, string> = {
@@ -213,10 +293,17 @@ export const ScholarlyAssetsList: React.FC = () => {
     book: language === 'ar' ? 'كتاب / مؤلف' : 'Book / Monograph',
     patent: language === 'ar' ? 'براءة اختراع' : 'Patent',
     thesis: language === 'ar' ? 'رسالة علمية' : 'Thesis',
+    conferencePaper: language === 'ar' ? 'ورقة مؤتمر' : 'Conference Paper',
     noAssets: language === 'ar' ? 'لا توجد أصول علمية مضافة حالياً.' : 'No scholarly assets registered currently.',
-    modalTitle: language === 'ar' ? 'تسجيل أصل علمي جديد بالسجل الموحد' : 'Register New Scholarly Asset',
-    save: language === 'ar' ? 'تسجيل الأصل' : 'Register Asset',
+    modalTitleAdd: language === 'ar' ? 'تسجيل أصل علمي جديد بالسجل الموحد' : 'Register New Scholarly Asset',
+    modalTitleEdit: language === 'ar' ? 'تعديل الأصل العلمي' : 'Edit Scholarly Asset',
+    saveNew: language === 'ar' ? 'تسجيل الأصل' : 'Register Asset',
+    saveEdit: language === 'ar' ? 'حفظ التعديلات' : 'Save Changes',
     cancel: language === 'ar' ? 'إلغاء' : 'Cancel',
+    status: language === 'ar' ? 'حالة النشر' : 'Publication Status',
+    sortNewest: language === 'ar' ? 'الأحدث أولاً' : 'Newest first',
+    sortOldest: language === 'ar' ? 'الأقدم أولاً' : 'Oldest first',
+    edit: language === 'ar' ? 'تعديل' : 'Edit',
     titleAr: language === 'ar' ? 'العنوان الرئيسي (بالعربية)' : 'Main Title (Arabic)',
     titleEn: language === 'ar' ? 'العنوان الرئيسي (بالإنجليزية)' : 'Main Title (English)',
     abstractAr: language === 'ar' ? 'الملخص العلمي (بالعربية)' : 'Abstract (Arabic)',
@@ -247,7 +334,7 @@ export const ScholarlyAssetsList: React.FC = () => {
         </div>
         
         <button
-          onClick={() => setShowAddModal(true)}
+          onClick={openAddModal}
           className="w-full md:w-auto px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-bold shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
         >
           <Plus className="w-4 h-4" />
@@ -259,7 +346,7 @@ export const ScholarlyAssetsList: React.FC = () => {
       <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
         {/* Type Filter tabs */}
         <div className="flex flex-wrap gap-1.5 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] p-1 rounded-xl shadow-sm max-w-fit">
-          {['ALL', 'JOURNAL_PAPER', 'RESEARCH_PROJECT', 'BOOK', 'PATENT', 'THESIS'].map((filter) => (
+          {['ALL', 'JOURNAL_PAPER', 'CONFERENCE_PAPER', 'RESEARCH_PROJECT', 'BOOK', 'PATENT', 'THESIS'].map((filter) => (
             <button
               key={filter}
               onClick={() => setSelectedTypeFilter(filter)}
@@ -271,6 +358,7 @@ export const ScholarlyAssetsList: React.FC = () => {
             >
               {filter === 'ALL' && t.all}
               {filter === 'JOURNAL_PAPER' && t.journalPaper}
+              {filter === 'CONFERENCE_PAPER' && t.conferencePaper}
               {filter === 'RESEARCH_PROJECT' && t.researchProject}
               {filter === 'BOOK' && t.book}
               {filter === 'PATENT' && t.patent}
@@ -278,6 +366,15 @@ export const ScholarlyAssetsList: React.FC = () => {
             </button>
           ))}
         </div>
+
+        {/* Sort */}
+        <button
+          onClick={() => setSortOrder(o => o === 'newest' ? 'oldest' : 'newest')}
+          className="flex items-center gap-1.5 px-3 py-2 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-xl text-[11px] font-bold text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-secondary)] shadow-sm cursor-pointer shrink-0"
+        >
+          <ArrowUpDown className="w-3.5 h-3.5" />
+          <span>{sortOrder === 'newest' ? t.sortNewest : t.sortOldest}</span>
+        </button>
 
         {/* Search */}
         <div className="relative flex-1 max-w-md">
@@ -305,7 +402,7 @@ export const ScholarlyAssetsList: React.FC = () => {
           <BookOpen className="w-12 h-12 text-purple-400/40 mx-auto mb-4" />
           <p className="font-semibold">{t.noAssets}</p>
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={openAddModal}
             className="mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-bold transition-all inline-flex items-center gap-1.5 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
@@ -325,7 +422,13 @@ export const ScholarlyAssetsList: React.FC = () => {
                   <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
                     {getAssetTypeBadgeLabel(asset.asset_type)}
                   </span>
-                  
+
+                  {asset.lifecycle_status && (
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${getLifecycleStatusColor(asset.lifecycle_status)}`}>
+                      {getLifecycleStatusLabel(asset.lifecycle_status)}
+                    </span>
+                  )}
+
                   {asset.source_module && (
                     <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] border border-[var(--ds-border-subtle)]">
                       {language === 'ar' ? `المصدر: ${asset.source_module}` : `Source: ${asset.source_module}`}
@@ -401,16 +504,25 @@ export const ScholarlyAssetsList: React.FC = () => {
                     <ExternalLink className="w-4 h-4" />
                   </a>
                 )}
-                
-                {/* Delete button: only for FOUNDATION source assets to prevent deleting core system records */}
+
+                {/* Edit/Delete: only for FOUNDATION source assets to prevent modifying core system records */}
                 {asset.source_module === 'FOUNDATION' && (
-                  <button
-                    onClick={() => handleDeleteAsset(asset.id)}
-                    className="p-2 text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer"
-                    title="Delete Asset"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <>
+                    <button
+                      onClick={() => openEditModal(asset)}
+                      className="p-2 text-purple-400 hover:bg-purple-500/10 rounded-xl transition-all cursor-pointer"
+                      title={t.edit}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteAsset(asset.id)}
+                      className="p-2 text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer"
+                      title="Delete Asset"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </>
                 )}
               </div>
             </div>
@@ -426,20 +538,20 @@ export const ScholarlyAssetsList: React.FC = () => {
             <div className="flex justify-between items-center border-b border-[var(--ds-border-subtle)] pb-3">
               <h3 className="text-base font-black flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-purple-500" />
-                <span>{t.modalTitle}</span>
+                <span>{editingAssetId ? t.modalTitleEdit : t.modalTitleAdd}</span>
               </h3>
-              <button 
-                onClick={() => setShowAddModal(false)}
+              <button
+                onClick={() => { setShowAddModal(false); setEditingAssetId(null); }}
                 className="p-1 hover:bg-[var(--ds-surface-secondary)] rounded-lg text-[var(--ds-text-secondary)] transition-all cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateAsset} className="space-y-5">
-              
-              {/* Asset Type */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form onSubmit={handleSaveAsset} className="space-y-5">
+
+              {/* Asset Type + Status */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">نوع الأصل العلمي</label>
                   <select
@@ -450,9 +562,22 @@ export const ScholarlyAssetsList: React.FC = () => {
                     <option value="JOURNAL_PAPER">{t.journalPaper}</option>
                     <option value="RESEARCH_PROJECT">{t.researchProject}</option>
                     <option value="BOOK">{t.book}</option>
-                    <option value="CONFERENCE_PAPER">{t.patent}</option>
+                    <option value="CONFERENCE_PAPER">{t.conferencePaper}</option>
                     <option value="PATENT">{t.patent}</option>
                     <option value="THESIS">{t.thesis}</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.status}</label>
+                  <select
+                    value={newAsset.lifecycle_status}
+                    onChange={(e) => setNewAsset({ ...newAsset, lifecycle_status: e.target.value })}
+                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none"
+                  >
+                    {LIFECYCLE_STATUSES.map(status => (
+                      <option key={status} value={status}>{getLifecycleStatusLabel(status)}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -695,7 +820,7 @@ export const ScholarlyAssetsList: React.FC = () => {
               <div className="flex justify-end gap-2.5 border-t border-[var(--ds-border-subtle)] pt-4">
                 <button
                   type="button"
-                  onClick={() => setShowAddModal(false)}
+                  onClick={() => { setShowAddModal(false); setEditingAssetId(null); }}
                   className="px-4 py-2 border border-[var(--ds-border-subtle)] hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] rounded-xl text-xs font-bold transition-all cursor-pointer"
                 >
                   {t.cancel}
@@ -704,7 +829,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                   type="submit"
                   className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all cursor-pointer"
                 >
-                  {t.save}
+                  {editingAssetId ? t.saveEdit : t.saveNew}
                 </button>
               </div>
 

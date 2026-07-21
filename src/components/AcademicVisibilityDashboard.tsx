@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { apiGetMyProfile, apiUpsertProfile } from '../utils/api';
 import { ROUTES } from '../router/routes';
+import { ACADEMIC_CHANNELS } from '../config/academicChannels';
 import { Card } from '../design-system/components/Card';
 import {
   Sparkles,
@@ -16,25 +17,13 @@ import {
   Plus,
   Loader2,
   Check,
-  X
+  X,
+  School,
+  Award,
+  Trash2,
+  CheckCircle,
+  AlertCircle
 } from 'lucide-react';
-
-interface ChannelDef {
-  type: string;
-  label: string;
-  priority: 'critical' | 'important' | 'optional';
-  descAr: string;
-  descEn: string;
-}
-
-const CHANNEL_DEFS: ChannelDef[] = [
-  { type: 'ORCID', label: 'ORCID', priority: 'critical', descAr: 'المعرّف الدولي الموحد للباحثين.', descEn: 'Unified international researcher registry.' },
-  { type: 'GOOGLE_SCHOLAR', label: 'Google Scholar', priority: 'critical', descAr: 'حساب الاستشهادات ومتابعة مؤشر h-index.', descEn: 'Citation index tracker and h-index calculator.' },
-  { type: 'SCOPUS', label: 'Scopus Author ID', priority: 'critical', descAr: 'ملفك في قاعدة Elsevier للاستشهادات.', descEn: 'Elsevier citation database profile.' },
-  { type: 'RESEARCHGATE', label: 'ResearchGate', priority: 'important', descAr: 'شبكة التواصل الأكاديمية ونشر الأبحاث الكاملة.', descEn: 'Academic social network and full-text repository.' },
-  { type: 'LINKEDIN', label: 'LinkedIn', priority: 'important', descAr: 'التواصل المهني وبناء السمعة خارج الأكاديميا.', descEn: 'Professional networking and industry reputation.' },
-  { type: 'GITHUB', label: 'GitHub', priority: 'optional', descAr: 'مستودع الكود البرمجي للمحاكاة والتحليل.', descEn: 'Code repository for simulations and statistical analyses.' },
-];
 
 const emptyProfileLists = {
   name_variants_json: [] as string[],
@@ -72,6 +61,15 @@ export const AcademicVisibilityDashboard: React.FC = () => {
   const [editingChannel, setEditingChannel] = useState<string | null>(null);
   const [channelDraft, setChannelDraft] = useState({ value: '', url: '' });
 
+  const [addingCustomChannel, setAddingCustomChannel] = useState(false);
+  const [customChannelDraft, setCustomChannelDraft] = useState({ type: '', value: '', url: '' });
+
+  const [msg, setMsg] = useState<{ text: string; kind: 'success' | 'error' } | null>(null);
+  const showMsg = (text: string, kind: 'success' | 'error') => {
+    setMsg({ text, kind });
+    setTimeout(() => setMsg(null), 4000);
+  };
+
   useEffect(() => {
     (async () => {
       const data = await apiGetMyProfile();
@@ -95,6 +93,8 @@ export const AcademicVisibilityDashboard: React.FC = () => {
     const saved = await apiUpsertProfile(updated);
     if (saved) {
       setProfile(normalizeProfile(saved));
+    } else {
+      showMsg(isAr ? 'فشل الحفظ. تحقق من الاتصال بالخادم.' : 'Save failed. Check your connection.', 'error');
     }
     setSaving(false);
     return saved;
@@ -112,7 +112,10 @@ export const AcademicVisibilityDashboard: React.FC = () => {
       preferred_name_en: nameDraft.en,
       name_variants_json: variantsArr,
     });
-    if (saved) setEditingName(false);
+    if (saved) {
+      setEditingName(false);
+      showMsg(isAr ? 'تم حفظ الاسم بنجاح' : 'Name saved successfully', 'success');
+    }
   };
 
   const startEditChannel = (type: string, currentValue = '', currentUrl = '') => {
@@ -131,7 +134,29 @@ export const AcademicVisibilityDashboard: React.FC = () => {
     if (saved) {
       setEditingChannel(null);
       setChannelDraft({ value: '', url: '' });
+      showMsg(isAr ? 'تم حفظ القناة بنجاح' : 'Channel saved successfully', 'success');
     }
+  };
+
+  const saveCustomChannel = async () => {
+    if (!profile || !customChannelDraft.type.trim() || !customChannelDraft.value.trim()) return;
+    const updatedIdentifiers = [
+      ...profile.identifiers,
+      { identifier_type: customChannelDraft.type.trim(), identifier_value: customChannelDraft.value.trim(), profile_url: customChannelDraft.url.trim() || null, status: 'UNVERIFIED' },
+    ];
+    const saved = await persist({ ...profile, identifiers: updatedIdentifiers });
+    if (saved) {
+      setAddingCustomChannel(false);
+      setCustomChannelDraft({ type: '', value: '', url: '' });
+      showMsg(isAr ? 'تم إضافة القناة بنجاح' : 'Channel added successfully', 'success');
+    }
+  };
+
+  const removeCustomChannel = async (identifierType: string) => {
+    if (!profile) return;
+    const updatedIdentifiers = profile.identifiers.filter((i: any) => i.identifier_type !== identifierType);
+    const saved = await persist({ ...profile, identifiers: updatedIdentifiers });
+    if (saved) showMsg(isAr ? 'تم حذف القناة' : 'Channel removed', 'success');
   };
 
   const copyToClipboard = (text: string, key: string) => {
@@ -165,7 +190,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
   const displayNameEn = profile.preferred_name_en || (isAr ? '' : 'Your academic name (English)');
   const headerName = isAr ? (displayNameAr || displayNameEn || 'باحث بصيرة') : (displayNameEn || displayNameAr || 'Baseerah Researcher');
 
-  const channels = CHANNEL_DEFS.map(def => {
+  const channels = ACADEMIC_CHANNELS.map(def => {
     const found = profile.identifiers.find((i: any) => i.identifier_type === def.type);
     return {
       ...def,
@@ -175,7 +200,13 @@ export const AcademicVisibilityDashboard: React.FC = () => {
     };
   });
 
+  const knownTypes = ACADEMIC_CHANNELS.map(c => c.type);
+  const customChannels = profile.identifiers.filter((i: any) => !knownTypes.includes(i.identifier_type) && i.identifier_value);
+
   const visibilityScore = profile.completeness_score ?? 0;
+
+  const affiliations: any[] = profile.affiliations || [];
+  const hasInstitutionInfo = !!(profile.university || profile.college || profile.department || profile.academic_title || profile.current_rank);
 
   const keywordsAr = (profile.keywords_ar_json || (emptyProfileLists.keywords_ar_json)).join('، ');
   const keywordsEn = (profile.keywords_en_json || (emptyProfileLists.keywords_en_json)).join(', ');
@@ -230,6 +261,20 @@ export const AcademicVisibilityDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-16">
+
+      {/* Save feedback toast */}
+      {msg && (
+        <div className={`fixed top-4 inset-x-0 z-50 flex justify-center px-4 pointer-events-none`}>
+          <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl shadow-lg text-xs font-bold pointer-events-auto ${
+            msg.kind === 'success'
+              ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-500'
+              : 'bg-rose-500/15 border border-rose-500/30 text-rose-500'
+          }`}>
+            {msg.kind === 'success' ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
+            <span>{msg.text}</span>
+          </div>
+        </div>
+      )}
 
       {/* Top Welcome Banner */}
       <div className="bg-gradient-to-r from-indigo-950/40 via-purple-900/10 to-transparent border border-indigo-500/20 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-md">
@@ -366,6 +411,73 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                     {profile.name_variants_json.length > 0 ? profile.name_variants_json.join('، ') : (isAr ? 'لا توجد صيغ مسجّلة بعد.' : 'No variants recorded yet.')}
                   </p>
                 </div>
+              </div>
+            )}
+          </Card>
+
+          {/* Institution & affiliations, read-only summary from the unified profile */}
+          <Card className="p-5 space-y-4">
+            <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-2">
+              <h3 className="text-xs font-black text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
+                <School className="text-indigo-500" size={16} />
+                <span>{isAr ? 'المؤسسة والانتماء الأكاديمي' : 'Institution & Affiliation'}</span>
+              </h3>
+              <button
+                onClick={() => navigate(ROUTES.PROFILE_AFFILIATIONS)}
+                className="text-[10px] font-black text-indigo-500 hover:underline cursor-pointer"
+              >
+                {isAr ? 'إدارة الانتماءات' : 'Manage affiliations'}
+              </button>
+            </div>
+
+            {!hasInstitutionInfo && affiliations.length === 0 ? (
+              <p className="text-xs font-bold text-[var(--ds-text-muted)] m-0 text-center py-4">
+                {isAr ? 'لم تُضِف بيانات مؤسسية بعد. أضفها من الملف الكامل ليظهر انتماؤك بوضوح لزوار ملفك.' : 'No institutional details yet. Add them in the full profile so your affiliation is clear to visitors.'}
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {hasInstitutionInfo && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {(profile.academic_title || profile.current_rank) && (
+                      <div className="flex items-center gap-2">
+                        <Award size={13} className="text-indigo-400 shrink-0" />
+                        <span className="text-xs font-bold text-[var(--ds-text-primary)]">
+                          {[profile.academic_title, profile.current_rank].filter(Boolean).join(' — ') || '—'}
+                        </span>
+                      </div>
+                    )}
+                    {(profile.university || profile.college || profile.department) && (
+                      <div className="flex items-center gap-2">
+                        <School size={13} className="text-indigo-400 shrink-0" />
+                        <span className="text-xs font-bold text-[var(--ds-text-primary)]">
+                          {[profile.university, profile.college, profile.department].filter(Boolean).join(' · ')}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {affiliations.length > 0 && (
+                  <div className="space-y-1.5 pt-1">
+                    {affiliations.slice(0, 3).map((aff: any, idx: number) => (
+                      <div key={idx} className="flex items-center justify-between text-xs p-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg">
+                        <span className="font-bold text-[var(--ds-text-secondary)]">
+                          {aff.organization_name}{aff.position_title ? ` — ${aff.position_title}` : ''}
+                        </span>
+                        {aff.is_current && (
+                          <span className="text-[8px] font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded shrink-0">
+                            {isAr ? 'حالي' : 'Current'}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                    {affiliations.length > 3 && (
+                      <p className="text-[10px] text-[var(--ds-text-muted)] m-0">
+                        {isAr ? `و${affiliations.length - 3} انتماءات أخرى...` : `+${affiliations.length - 3} more...`}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </Card>
@@ -556,7 +668,90 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                   )}
                 </div>
               ))}
+
+              {customChannels.map((chan: any) => (
+                <div
+                  key={chan.identifier_type}
+                  className="p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl space-y-1.5"
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black text-[var(--ds-text-primary)]">{chan.identifier_type}</span>
+                      <span className="text-[8px] font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
+                        {isAr ? 'مرتبط' : 'Linked'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {chan.profile_url && (
+                        <a href={chan.profile_url} target="_blank" rel="noreferrer" className="text-[9px] font-black text-indigo-500 hover:underline flex items-center gap-0.5">
+                          <span>{isAr ? 'زيارة' : 'Visit'}</span>
+                          <ExternalLink size={10} />
+                        </a>
+                      )}
+                      <button
+                        onClick={() => removeCustomChannel(chan.identifier_type)}
+                        className="text-[var(--ds-text-muted)] hover:text-rose-500 cursor-pointer"
+                        title={isAr ? 'حذف' : 'Remove'}
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-[var(--ds-text-muted)] font-medium m-0">{chan.identifier_value}</p>
+                </div>
+              ))}
             </div>
+
+            {addingCustomChannel ? (
+              <div className="space-y-2 pt-1 border-t border-[var(--ds-border-subtle)]">
+                <input
+                  type="text"
+                  placeholder={isAr ? 'اسم المنصة (مثال: Academia.edu)' : 'Platform name (e.g. Academia.edu)'}
+                  value={customChannelDraft.type}
+                  onChange={e => setCustomChannelDraft(d => ({ ...d, type: e.target.value }))}
+                  className="w-full bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg px-2.5 py-1.5 text-[11px] text-[var(--ds-text-primary)] focus:outline-none"
+                />
+                <input
+                  type="text"
+                  placeholder={isAr ? 'المعرّف أو اسم المستخدم' : 'Identifier or username'}
+                  value={customChannelDraft.value}
+                  onChange={e => setCustomChannelDraft(d => ({ ...d, value: e.target.value }))}
+                  className="w-full bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg px-2.5 py-1.5 text-[11px] text-[var(--ds-text-primary)] focus:outline-none"
+                />
+                <input
+                  type="text"
+                  placeholder={isAr ? 'رابط الملف الشخصي (اختياري)' : 'Profile URL (optional)'}
+                  value={customChannelDraft.url}
+                  onChange={e => setCustomChannelDraft(d => ({ ...d, url: e.target.value }))}
+                  className="w-full bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg px-2.5 py-1.5 text-[11px] text-[var(--ds-text-primary)] focus:outline-none"
+                />
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={saveCustomChannel}
+                    disabled={saving || !customChannelDraft.type.trim() || !customChannelDraft.value.trim()}
+                    className="flex items-center gap-1 text-[9px] font-black text-white bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 px-2.5 py-1 rounded-lg cursor-pointer"
+                  >
+                    {saving ? <Loader2 size={11} className="animate-spin" /> : <Check size={11} />}
+                    <span>{isAr ? 'حفظ' : 'Save'}</span>
+                  </button>
+                  <button
+                    onClick={() => { setAddingCustomChannel(false); setCustomChannelDraft({ type: '', value: '', url: '' }); }}
+                    className="flex items-center gap-1 text-[9px] font-black text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-tertiary)] px-2.5 py-1 rounded-lg cursor-pointer"
+                  >
+                    <X size={11} />
+                    <span>{isAr ? 'إلغاء' : 'Cancel'}</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setAddingCustomChannel(true)}
+                className="w-full flex items-center justify-center gap-1.5 text-[10px] font-black text-indigo-500 border border-dashed border-indigo-500/30 hover:bg-indigo-500/5 py-2 rounded-xl cursor-pointer"
+              >
+                <Plus size={12} />
+                <span>{isAr ? 'إضافة قناة أخرى (مثل Academia.edu أو موقعك الشخصي)' : 'Add another channel (e.g. Academia.edu or personal site)'}</span>
+              </button>
+            )}
           </Card>
 
           {/* Reputation plan, computed live from real profile completeness */}
