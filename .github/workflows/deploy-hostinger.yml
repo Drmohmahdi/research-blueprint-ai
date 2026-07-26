@@ -1,0 +1,51 @@
+name: Deploy to Hostinger VPS
+
+# Runs on every push to main: SSHs into the VPS and re-deploys both halves
+# of Research Blueprint AI (the static frontend build and the FastAPI
+# backend, which run as two separate PM2 processes behind one Traefik
+# router).
+#
+# Requires these repository secrets (Settings → Secrets and variables → Actions):
+#   VPS_HOST      — server IP or hostname
+#   VPS_USER      — SSH user (e.g. root)
+#   VPS_SSH_KEY   — private key with access to that user (PEM format)
+#   VPS_APP_DIR   — absolute path to the cloned repo on the server, e.g. /var/www/research-blueprint-ai
+#   VPS_SSH_PORT  — SSH port (optional, defaults to 22)
+#
+# Assumes backend/venv already exists on the server (created once during
+# initial setup) — this workflow only re-installs into it, it doesn't
+# create it from scratch.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_SSH_PORT || 22 }}
+          script: |
+            set -e
+            cd "${{ secrets.VPS_APP_DIR }}"
+            BRANCH=$(git symbolic-ref --short HEAD)
+            git fetch origin
+            git reset --hard "origin/${BRANCH}"
+
+            npm install
+            npm run build
+
+            cd backend
+            source venv/bin/activate
+            pip install -r requirements.txt
+            python -m alembic upgrade head
+            cd ..
+
+            pm2 reload ecosystem.config.cjs --update-env
