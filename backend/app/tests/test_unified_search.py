@@ -13,6 +13,7 @@ import time
 import threading
 import datetime
 import pytest
+from sqlalchemy.dialects import postgresql
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -987,3 +988,27 @@ def test_runtime_scenario_xss_rendered_safely(db_session: Session):
         blob = json.dumps(item).lower()
         assert "<script" not in blob
     assert data["total"] == 0
+def test_search_backfill_quotes_postgresql_mixed_case_identifiers():
+    from app.services.search.backfill import backfill_all_search_text
+
+    class EmptyResult:
+        def fetchall(self):
+            return []
+
+    class RecordingConnection:
+        dialect = postgresql.dialect()
+
+        def __init__(self):
+            self.statements = []
+
+        def execute(self, statement, *_args, **_kwargs):
+            self.statements.append(str(statement))
+            return EmptyResult()
+
+    connection = RecordingConnection()
+    backfill_all_search_text(connection, lambda value: value)
+
+    project_query = connection.statements[0]
+    assert '"titleAr"' in project_query
+    assert '"studyDesign"' in project_query
+    assert 'FROM research_projects' in project_query

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Float, ForeignKey, JSON, Boolean, UniqueConstraint
+from sqlalchemy import Column, String, Integer, Float, ForeignKey, JSON, Boolean, UniqueConstraint, Index, text
 from sqlalchemy.orm import relationship
 from .db import Base
 
@@ -1275,6 +1275,16 @@ class AIRun(Base):
     prompts, full source content, full model responses, or secrets.
     """
     __tablename__ = "ai_runs"
+    __table_args__ = (
+        Index(
+            "uq_ai_runs_org_idempotency",
+            "organization_id",
+            "idempotency_key",
+            unique=True,
+            postgresql_where=text("idempotency_key IS NOT NULL"),
+            sqlite_where=text("idempotency_key IS NOT NULL"),
+        ),
+    )
 
     id = Column(String, primary_key=True, index=True)
     organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
@@ -1292,7 +1302,6 @@ class AIRun(Base):
     retrieval_count = Column(Integer, nullable=True)
     idempotency_key = Column(String, nullable=True, index=True)
     created_at = Column(String, nullable=False, index=True)
-
 
 
 

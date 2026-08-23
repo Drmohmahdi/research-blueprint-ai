@@ -43,12 +43,16 @@ def backfill_all_search_text(conn, normalize):
          ["filename", "mime_type", "classification"]),
     ]
 
+    quote = conn.dialect.identifier_preparer.quote
     for table, id_col, search_col, fields in tables:
-        try:
-            col_list = ", ".join([id_col] + fields)
-            rows = conn.execute(__import__("sqlalchemy").text(f"SELECT {col_list} FROM {table}")).fetchall()
-        except Exception:
-            continue  # table may not exist in a fresh DB
+        # PostgreSQL folds unquoted mixed-case identifiers to lowercase. These
+        # legacy columns are intentionally camelCase, so every identifier must
+        # be quoted using the active SQLAlchemy dialect. Do not swallow DDL/data
+        # errors here: on PostgreSQL that leaves Alembic's transaction aborted.
+        col_list = ", ".join(quote(column) for column in [id_col] + fields)
+        rows = conn.execute(
+            __import__("sqlalchemy").text(f"SELECT {col_list} FROM {quote(table)}")
+        ).fetchall()
         for row in rows:
             parts = []
             for idx, field in enumerate(fields):
@@ -59,7 +63,8 @@ def backfill_all_search_text(conn, normalize):
             normalized = normalize(" ".join(parts))
             conn.execute(
                 __import__("sqlalchemy").text(
-                    f"UPDATE {table} SET {search_col} = :norm WHERE {id_col} = :rid"
+                    f"UPDATE {quote(table)} SET {quote(search_col)} = :norm "
+                    f"WHERE {quote(id_col)} = :rid"
                 ),
                 {"norm": normalized, "rid": row[0]},
             )

@@ -5,6 +5,7 @@ import secrets
 from typing import Dict, Any, Tuple
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from ... import models
 from .types import SubscriptionStatus, InvoiceStatus, PaymentTransactionStatus, DEFAULT_CURRENCY
 from .provider_adapter import get_payment_provider_adapter
@@ -77,7 +78,23 @@ class WebhookHandler:
             payload_summary_json={"event_type": event_type, "org_id": data.get("organization_id")}
         )
         db.add(webhook_log)
-        db.flush()
+        try:
+            db.flush()
+        except IntegrityError:
+            # A concurrent delivery with the same provider event won the unique
+            # key. PostgreSQL waits for that transaction before raising, so the
+            # authoritative event is visible after rollback.
+            db.rollback()
+            existing_event = db.query(models.PaymentWebhookEvent).filter(
+                models.PaymentWebhookEvent.provider_event_id == provider_event_id
+            ).first()
+            if existing_event:
+                return {
+                    "status": "ALREADY_PROCESSED",
+                    "event_id": provider_event_id,
+                    "message": "تمت معالجة الحدث مسبقاً / Event already processed idempotently",
+                }
+            raise
 
         try:
             # 3. Handle specific event types

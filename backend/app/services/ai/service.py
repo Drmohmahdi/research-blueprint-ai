@@ -22,6 +22,7 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import text as sql_text
 
 from ... import models
 from ...services.tenant_context import TenantContext
@@ -132,6 +133,13 @@ class GovernedAIService:
         # 2b. Idempotency: a completed run with the same idempotency key is
         # returned without a second provider call (no duplicate charges).
         if idempotency_key:
+            if db.bind is not None and db.bind.dialect.name == "postgresql":
+                # Serialize equal organization/key operations across independent
+                # PostgreSQL connections until the run is committed.
+                db.execute(
+                    sql_text("SELECT pg_advisory_xact_lock(hashtextextended(:key, 0))"),
+                    {"key": f"{ctx.organization.id}:{idempotency_key}"},
+                )
             existing = (
                 db.query(models.AIRun)
                 .filter(

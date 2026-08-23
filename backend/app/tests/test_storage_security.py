@@ -384,6 +384,7 @@ def test_historical_manuscript_immutability_and_delete_protection(db_session: Se
         created_at="2026-08-23T00:00:00Z"
     )
     db_session.add(round1)
+    db_session.flush()
 
     rev1 = models.ManuscriptRevision(
         id="rev-storage-immut-1",
@@ -1478,4 +1479,3 @@ def test_manuscript_historical_round_retrieves_own_version(db_session: Session):
     # Delete protection applies to historical rounds (v1 tied to COMPLETED round 1)
     del_resp = client.delete(f"/api/storage/files/{f1_id}", headers=headers_author)
     assert del_resp.status_code == 403
-

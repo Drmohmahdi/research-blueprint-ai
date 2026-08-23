@@ -30,6 +30,10 @@ Run migrations as a distinct deployment step before starting new application pro
 
 Optional AI, payment, email, S3, malware scanning, and external error monitoring are not readiness dependencies unless a deployment policy explicitly makes them mandatory.
 
+The documented monitoring dashboard is `https://status.ehaastore.com` (Uptime Kuma). Its existing `/health` check is not sufficient for release authorization by itself. The on-call SRE must also verify a `/readiness` check, a real alert destination, consecutive-failure noise protection, and recovery notifications. Dashboard credentials and notification URLs remain outside this repository.
+
+For a readiness incident, remove new traffic, verify database connectivity and Alembic current/head, then correlate application logs by request ID. For repeated 5xx, isolate the failing route and roll back the application artifact if needed. At 90% disk usage, stop nonessential uploads and restore capacity. For backup failure or staleness, preserve the last verified artifact, rerun the backup, and restore it into an isolated database before clearing the alert.
+
 ## Logs and first incident checks
 
 Application logs are JSON on stdout. Collect them with systemd/journald or the deployment platform. Never log request bodies, cookies, authorization headers, AI prompts, reviewer comments, file content, or provider secrets.

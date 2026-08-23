@@ -196,9 +196,12 @@ class EventDispatcher:
     @staticmethod
     def process_pending_events(db: Session, limit: int = 50) -> int:
         """Processes all pending outbox events in chronological order."""
-        events = db.query(models.WorkflowEvent).filter(
+        query = db.query(models.WorkflowEvent).filter(
             models.WorkflowEvent.status.in_([EventStatus.PENDING.value, EventStatus.FAILED.value])
-        ).order_by(models.WorkflowEvent.created_at.asc()).limit(limit).all()
+        ).order_by(models.WorkflowEvent.created_at.asc()).limit(limit)
+        if db.bind is not None and db.bind.dialect.name == "postgresql":
+            query = query.with_for_update(skip_locked=True)
+        events = query.all()
 
         processed_count = 0
         for evt in events:
