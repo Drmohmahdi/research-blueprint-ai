@@ -4,7 +4,24 @@
 @layer base {
   body {
     @apply bg-[var(--ds-background-canvas)] text-[var(--ds-text-primary)] transition-colors duration-180 antialiased;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-family: "Noto Sans Arabic", "Segoe UI", Tahoma, Arial, system-ui, sans-serif;
+    line-height: 1.65;
+    min-width: 320px;
+    overflow-x: hidden;
+  }
+
+  :lang(en) body {
+    font-family: Inter, "Segoe UI", Arial, system-ui, sans-serif;
+    line-height: 1.5;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--ds-focus-ring);
+    outline-offset: 3px;
+  }
+
+  button, a, input, select, textarea {
+    scroll-margin-block: 6rem;
   }
 }
 

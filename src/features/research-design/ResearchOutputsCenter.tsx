@@ -33,7 +33,7 @@ const REPORT_TYPES: ReportMetadata[] = [
   { id: 'prediction_report', nameAr: 'تقرير التنبؤ العلمي والتوقع الإحصائي', nameEn: 'Scientific Prediction Report', descriptionAr: 'التنبؤ باحتمال دعم الفرضيات في الدراسة الحقيقية.', descriptionEn: 'Bayesian support forecasts and post-test values.' },
   { id: 'consistency_report', nameAr: 'تقرير الاتساق المنهجي والمنطقي', nameEn: 'Consistency Audit Report', descriptionAr: 'فحص الاتساق الداخلي والتعارضات بالمسار.', descriptionEn: 'System integrity audit and mismatch check results.' },
   { id: 'ethics_feasibility', nameAr: 'الأخلاقيات والجدوى الإجرائية والزمنية', nameEn: 'Ethics & Feasibility Report', descriptionAr: 'موافقة IRB، ميزانية الدراسة والمخاطر.', descriptionEn: 'IRB safety checklist, timeline Gantt, and risk mitigation.' },
-  { id: 'prereg_draft', nameAr: 'مسودة التسجيل المسبق والهاش الرقمي', nameEn: 'Pre-Registration Draft', descriptionAr: 'الخطة المجمدة الموقعة رقمياً.', descriptionEn: 'Preregistration specifications with cryptographic checksum.' },
+  { id: 'prereg_draft', nameAr: 'مسودة التسجيل المسبق وبصمة التحقق', nameEn: 'Pre-Registration Draft', descriptionAr: 'الخطة المجمدة مع بصمة تحقق تشفيرية.', descriptionEn: 'Preregistration specifications with cryptographic checksum.' },
   { id: 'final_research_plan', nameAr: 'خطة البحث النهائية المتكاملة', nameEn: 'Final Research Plan (Blueprint)', descriptionAr: 'الوثيقة النهائية الشاملة الجاهزة للاعتماد.', descriptionEn: 'Consolidated final exportable research blueprint.' }
 ];
 
@@ -152,11 +152,7 @@ export const ResearchOutputsCenter: React.FC<ResearchOutputsCenterProps> = ({ pr
 
           {/* Preview Window */}
           <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-3 h-48 overflow-y-auto font-mono text-[11px] text-[var(--ds-text-secondary)]">
-            {previewFormat === 'HTML' ? (
-              <div dangerouslySetInnerHTML={{ __html: generateReportContent(selectedReportId, 'HTML') }} />
-            ) : (
-              <pre className="whitespace-pre-wrap">{generateReportContent(selectedReportId, previewFormat)}</pre>
-            )}
+            <pre className="whitespace-pre-wrap">{generateReportContent(selectedReportId, previewFormat)}</pre>
           </div>
 
           {/* Action Buttons */}

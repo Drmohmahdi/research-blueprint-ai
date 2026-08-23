@@ -5,6 +5,7 @@ import { useProject } from '../context/ProjectContext';
 import { Button } from '../design-system/components/Button';
 import { ROUTES } from '../router/routes';
 import { calculateProtocolHash } from '../utils/protocolIntegrity';
+import { researchStorage } from '../utils/researchStorage';
 
 type SessionRow = {
   sessionAr: string;
@@ -23,7 +24,7 @@ const getEnrollmentStorageKey = (projectId: string) => `rb_monitoring_enrolled_$
 
 const loadSessionRows = (projectId: string): SessionRow[] => {
   try {
-    const stored = localStorage.getItem(getMonitoringStorageKey(projectId));
+    const stored = researchStorage.getItem(getMonitoringStorageKey(projectId));
     if (!stored) return [];
     const parsed: unknown = JSON.parse(stored);
     if (!Array.isArray(parsed)) return [];
@@ -53,7 +54,7 @@ const loadSessionRows = (projectId: string): SessionRow[] => {
 
 const loadEnrolledCount = (projectId: string, target: number, protocolHash?: string) => {
   try {
-    const stored = localStorage.getItem(getEnrollmentStorageKey(projectId));
+    const stored = researchStorage.getItem(getEnrollmentStorageKey(projectId));
     if (!stored) return 0;
     const parsed: unknown = JSON.parse(stored);
     if (!parsed || typeof parsed !== 'object') return 0;
@@ -84,9 +85,13 @@ export const FieldMonitoring: React.FC = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [protocolStatus, setProtocolStatus] = useState<'checking' | 'verified' | 'missing' | 'mismatch' | 'unavailable'>('checking');
 
+  const projectId = activeProject?.id;
+  const populationTarget = activeProject?.sampleSettings.populationSize || 60;
+  const preregHash = activeProject?.preRegistrationHash;
+
   useEffect(() => {
-    setSessionRows(activeProject ? loadSessionRows(activeProject.id) : []);
-    const loadedEnrolled = activeProject ? loadEnrolledCount(activeProject.id, activeProject.sampleSettings.populationSize || 60, activeProject.preRegistrationHash) : 0;
+    setSessionRows(projectId ? loadSessionRows(projectId) : []);
+    const loadedEnrolled = projectId ? loadEnrolledCount(projectId, populationTarget, preregHash) : 0;
     setEnrolled(loadedEnrolled);
     setEnrolledDraft(String(loadedEnrolled));
     setSessionName('');
@@ -95,11 +100,11 @@ export const FieldMonitoring: React.FC = () => {
     setCompliance('');
     setFormError(null);
     setEnrollmentError(null);
-  }, [activeProject?.id]);
+  }, [projectId, populationTarget, preregHash]);
 
   useEffect(() => {
     let cancelled = false;
-    if (!activeProject?.preRegistrationHash) {
+    if (!preregHash || !activeProject) {
       setProtocolStatus('missing');
       return () => { cancelled = true; };
     }
@@ -107,13 +112,13 @@ export const FieldMonitoring: React.FC = () => {
     setProtocolStatus('checking');
     calculateProtocolHash(activeProject)
       .then(hash => {
-        if (!cancelled) setProtocolStatus(hash === activeProject.preRegistrationHash ? 'verified' : 'mismatch');
+        if (!cancelled) setProtocolStatus(hash === preregHash ? 'verified' : 'mismatch');
       })
       .catch(() => {
         if (!cancelled) setProtocolStatus('unavailable');
       });
     return () => { cancelled = true; };
-  }, [activeProject?.id, activeProject?.version, activeProject?.preRegistrationHash]);
+  }, [activeProject, preregHash]);
 
   const target = activeProject?.sampleSettings.populationSize || 60;
   const progressPercent = Math.min(100, Math.round((enrolled / target) * 100));
@@ -149,7 +154,6 @@ export const FieldMonitoring: React.FC = () => {
       return;
     }
 
-    const sessionNumber = sessionRows.length + 1;
     const needsFollowUp = parsedAttendance < 90 || parsedCompliance < 90;
     const nextRows: SessionRow[] = [...sessionRows, {
       sessionAr: sessionName.trim(),
@@ -163,7 +167,7 @@ export const FieldMonitoring: React.FC = () => {
       protocolHash: activeProject.preRegistrationHash
     }];
     setSessionRows(nextRows);
-    localStorage.setItem(getMonitoringStorageKey(activeProject.id), JSON.stringify(nextRows));
+    researchStorage.setItem(getMonitoringStorageKey(activeProject.id), JSON.stringify(nextRows));
     setSessionName('');
     setSessionDate('');
     setAttendance('');
@@ -186,7 +190,7 @@ export const FieldMonitoring: React.FC = () => {
       return;
     }
     setEnrolled(parsedEnrolled);
-    localStorage.setItem(getEnrollmentStorageKey(activeProject.id), JSON.stringify({ count: parsedEnrolled, protocolHash: activeProject.preRegistrationHash }));
+    researchStorage.setItem(getEnrollmentStorageKey(activeProject.id), JSON.stringify({ count: parsedEnrolled, protocolHash: activeProject.preRegistrationHash }));
   };
 
   if (!activeProject) {

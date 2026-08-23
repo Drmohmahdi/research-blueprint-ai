@@ -1,16 +1,32 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useProject } from '../context/ProjectContext';
-import { Download } from 'lucide-react';
+import { Download, Cloud, Database, RefreshCw, CheckCircle2, AlertCircle, RotateCcw } from 'lucide-react';
 import { Button } from '../design-system/components/Button';
+import { apiGetPrismaFlow, apiSavePrismaFlow, apiResetPrismaFlow } from '../utils/api';
+import { researchStorage } from '../utils/researchStorage';
 
 export const PrismaBuilder: React.FC = () => {
-  const { activeProject, language } = useProject();
+  const { activeProject, language, isSecureMode } = useProject();
 
   const [identified, setIdentified] = useState(0);
   const [duplicates, setDuplicates] = useState(0);
   const [excludedScreening, setExcludedScreening] = useState(0);
   const [excludedEligibility, setExcludedEligibility] = useState(0);
   const [loadedProjectId, setLoadedProjectId] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const activeProjectIdRef = useRef<string | undefined>(activeProject?.id);
+  const saveSequenceRef = useRef(0);
+  const isInitialLoadRef = useRef(true);
+
+  const projectId = activeProject?.id;
+
+  useEffect(() => {
+    activeProjectIdRef.current = projectId;
+  }, [projectId]);
+
   const screened = Math.max(0, identified - duplicates);
   const eligible = Math.max(0, screened - excludedScreening);
   const included = Math.max(0, eligible - excludedEligibility);
@@ -26,6 +42,7 @@ export const PrismaBuilder: React.FC = () => {
   useEffect(() => {
     setExcludedEligibility(current => Math.min(current, eligible));
   }, [eligible]);
+
   const inputClass = 'bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 font-bold text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]';
   const chartColors = {
     primary: 'var(--ds-primary)',
@@ -58,52 +75,238 @@ export const PrismaBuilder: React.FC = () => {
     return Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : 0;
   };
 
-  useEffect(() => {
-    if (!activeProject) return;
-    const storageKey = `rb_prisma_counts_${activeProject.id}`;
+  const loadPrismaData = useCallback(async (pId: string) => {
+    const seq = ++saveSequenceRef.current;
+    isInitialLoadRef.current = true;
+    const storageKey = `rb_prisma_counts_${pId}`;
+    let localCounts = { identified: 0, duplicates: 0, excludedScreening: 0, excludedEligibility: 0 };
     try {
-      const stored: unknown = JSON.parse(localStorage.getItem(storageKey) ?? 'null');
+      const stored: unknown = JSON.parse(researchStorage.getItem(storageKey) ?? 'null');
       if (stored && typeof stored === 'object') {
         const candidate = stored as Record<string, unknown>;
-        const isManualRecord = candidate.source === 'manual';
-        const nextIdentified = isManualRecord && typeof candidate.identified === 'number' && Number.isFinite(candidate.identified) ? Math.max(0, Math.floor(candidate.identified)) : 0;
-        const nextDuplicates = isManualRecord && typeof candidate.duplicates === 'number' && Number.isFinite(candidate.duplicates) ? Math.min(nextIdentified, Math.max(0, Math.floor(candidate.duplicates))) : 0;
-        const nextScreened = nextIdentified - nextDuplicates;
-        const nextExcludedScreening = isManualRecord && typeof candidate.excludedScreening === 'number' && Number.isFinite(candidate.excludedScreening) ? Math.min(nextScreened, Math.max(0, Math.floor(candidate.excludedScreening))) : 0;
-        const nextEligible = nextScreened - nextExcludedScreening;
-        const nextExcludedEligibility = isManualRecord && typeof candidate.excludedEligibility === 'number' && Number.isFinite(candidate.excludedEligibility) ? Math.min(nextEligible, Math.max(0, Math.floor(candidate.excludedEligibility))) : 0;
-        setIdentified(nextIdentified);
-        setDuplicates(nextDuplicates);
-        setExcludedScreening(nextExcludedScreening);
-        setExcludedEligibility(nextExcludedEligibility);
-      } else {
-        setIdentified(0);
-        setDuplicates(0);
-        setExcludedScreening(0);
-        setExcludedEligibility(0);
+        const isManual = candidate.source === 'manual';
+        if (isManual) {
+          const nextIdentified = typeof candidate.identified === 'number' && Number.isFinite(candidate.identified) ? Math.max(0, Math.floor(candidate.identified)) : 0;
+          const nextDuplicates = typeof candidate.duplicates === 'number' && Number.isFinite(candidate.duplicates) ? Math.min(nextIdentified, Math.max(0, Math.floor(candidate.duplicates))) : 0;
+          const nextScreened = nextIdentified - nextDuplicates;
+          const nextExcludedScreening = typeof candidate.excludedScreening === 'number' && Number.isFinite(candidate.excludedScreening) ? Math.min(nextScreened, Math.max(0, Math.floor(candidate.excludedScreening))) : 0;
+          const nextEligible = nextScreened - nextExcludedScreening;
+          const nextExcludedEligibility = typeof candidate.excludedEligibility === 'number' && Number.isFinite(candidate.excludedEligibility) ? Math.min(nextEligible, Math.max(0, Math.floor(candidate.excludedEligibility))) : 0;
+          localCounts = {
+            identified: nextIdentified,
+            duplicates: nextDuplicates,
+            excludedScreening: nextExcludedScreening,
+            excludedEligibility: nextExcludedEligibility
+          };
+        }
       }
     } catch {
-      setIdentified(0);
-      setDuplicates(0);
-      setExcludedScreening(0);
-      setExcludedEligibility(0);
+      // ignore
     }
-    setLoadedProjectId(activeProject.id);
-  }, [activeProject?.id]);
+
+    if (isSecureMode) {
+      setIsSyncing(true);
+      setSyncStatus('idle');
+      try {
+        const remote = await apiGetPrismaFlow(pId);
+        if (activeProjectIdRef.current !== pId || saveSequenceRef.current !== seq) return;
+
+        if (remote) {
+          if (remote.identified === 0 && localCounts.identified > 0) {
+            // Auto-migrate legacy local counts to server
+            const saved = await apiSavePrismaFlow(pId, {
+              identified: localCounts.identified,
+              duplicates: localCounts.duplicates,
+              excludedScreening: localCounts.excludedScreening,
+              excludedEligibility: localCounts.excludedEligibility
+            });
+            if (activeProjectIdRef.current !== pId || saveSequenceRef.current !== seq) return;
+            if (saved) {
+              setIdentified(saved.identified);
+              setDuplicates(saved.duplicates);
+              setExcludedScreening(saved.excludedScreening);
+              setExcludedEligibility(saved.excludedEligibility);
+              setSyncStatus('success');
+              setLoadedProjectId(pId);
+              isInitialLoadRef.current = false;
+              setIsSyncing(false);
+              return;
+            }
+          }
+
+          setIdentified(remote.identified);
+          setDuplicates(remote.duplicates);
+          setExcludedScreening(remote.excludedScreening);
+          setExcludedEligibility(remote.excludedEligibility);
+          setSyncStatus('success');
+        } else {
+          setIdentified(localCounts.identified);
+          setDuplicates(localCounts.duplicates);
+          setExcludedScreening(localCounts.excludedScreening);
+          setExcludedEligibility(localCounts.excludedEligibility);
+          setSyncStatus('error');
+        }
+      } catch (err) {
+        console.error('Failed to load PRISMA flow from server', err);
+        if (activeProjectIdRef.current === pId && saveSequenceRef.current === seq) {
+          setIdentified(localCounts.identified);
+          setDuplicates(localCounts.duplicates);
+          setExcludedScreening(localCounts.excludedScreening);
+          setExcludedEligibility(localCounts.excludedEligibility);
+          setSyncStatus('error');
+        }
+      } finally {
+        if (activeProjectIdRef.current === pId && saveSequenceRef.current === seq) {
+          setIsSyncing(false);
+          isInitialLoadRef.current = false;
+        }
+      }
+    } else {
+      setIdentified(localCounts.identified);
+      setDuplicates(localCounts.duplicates);
+      setExcludedScreening(localCounts.excludedScreening);
+      setExcludedEligibility(localCounts.excludedEligibility);
+      setSyncStatus('idle');
+      isInitialLoadRef.current = false;
+    }
+    setLoadedProjectId(pId);
+  }, [isSecureMode]);
 
   useEffect(() => {
-    if (!activeProject || loadedProjectId !== activeProject.id) return;
-    localStorage.setItem(`rb_prisma_counts_${activeProject.id}`, JSON.stringify({
+    if (!projectId) return;
+    loadPrismaData(projectId);
+  }, [projectId, loadPrismaData]);
+
+  // Save to localStorage and debounce save to server
+  useEffect(() => {
+    if (!projectId || loadedProjectId !== projectId || isInitialLoadRef.current) return;
+    const payload = {
       identified,
       duplicates,
       excludedScreening,
       excludedEligibility,
       source: 'manual'
-    }));
-  }, [activeProject?.id, duplicates, excludedEligibility, excludedScreening, identified, loadedProjectId]);
+    };
+    researchStorage.setItem(`rb_prisma_counts_${projectId}`, JSON.stringify(payload));
+
+    if (isSecureMode) {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      debounceTimerRef.current = setTimeout(async () => {
+        const seq = ++saveSequenceRef.current;
+        setIsSyncing(true);
+        try {
+          const res = await apiSavePrismaFlow(projectId, payload);
+          if (activeProjectIdRef.current !== projectId || saveSequenceRef.current !== seq) return;
+          if (res) {
+            setSyncStatus('success');
+          } else {
+            setSyncStatus('error');
+          }
+        } catch (e) {
+          console.error('Failed to auto-save PRISMA to server', e);
+          if (activeProjectIdRef.current === projectId && saveSequenceRef.current === seq) {
+            setSyncStatus('error');
+          }
+        } finally {
+          if (activeProjectIdRef.current === projectId && saveSequenceRef.current === seq) {
+            setIsSyncing(false);
+          }
+        }
+      }, 750);
+    }
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [projectId, duplicates, excludedEligibility, excludedScreening, identified, loadedProjectId, isSecureMode]);
+
+  const handleReset = async () => {
+    setIdentified(0);
+    setDuplicates(0);
+    setExcludedScreening(0);
+    setExcludedEligibility(0);
+    if (projectId) {
+      researchStorage.removeItem(`rb_prisma_counts_${projectId}`);
+      if (isSecureMode) {
+        setIsSyncing(true);
+        try {
+          const ok = await apiResetPrismaFlow(projectId);
+          if (activeProjectIdRef.current !== projectId) return;
+          if (ok) {
+            setSyncStatus('success');
+          } else {
+            setSyncStatus('error');
+          }
+        } catch (e) {
+          console.error('Failed to reset PRISMA on server', e);
+          if (activeProjectIdRef.current === projectId) {
+            setSyncStatus('error');
+          }
+        } finally {
+          if (activeProjectIdRef.current === projectId) {
+            setIsSyncing(false);
+          }
+        }
+      }
+    }
+  };
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto animate-fade-in">
+      {/* Persistence Status Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg px-4 py-2.5 text-xs">
+        <div className="flex items-center gap-2">
+          {isSecureMode ? (
+            <>
+              <Cloud size={16} className="text-[var(--ds-primary)]" />
+              <span className="font-semibold text-[var(--ds-text-primary)]">
+                {language === 'ar' ? 'نمط البحث المؤمّن (حفظ PRISMA بقاعدة البيانات)' : 'Secure Research Mode (PRISMA Database Persistence)'}
+              </span>
+            </>
+          ) : (
+            <>
+              <Database size={16} className="text-[var(--ds-warning)]" />
+              <span className="font-semibold text-[var(--ds-text-secondary)]">
+                {language === 'ar' ? 'النمط التجريبي (تخزين محلي بالمتصفح)' : 'Demo Mode (Browser Local Storage)'}
+              </span>
+            </>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          {isSyncing && (
+            <span className="flex items-center gap-1.5 text-[var(--ds-primary)] font-medium">
+              <RefreshCw size={13} className="animate-spin" />
+              {language === 'ar' ? 'جارٍ المزامنة...' : 'Syncing...'}
+            </span>
+          )}
+          {syncStatus === 'success' && !isSyncing && (
+            <span className="flex items-center gap-1 text-[var(--ds-success)] font-medium">
+              <CheckCircle2 size={13} />
+              {language === 'ar' ? 'متزامن مع الخادم' : 'Server Synced'}
+            </span>
+          )}
+          {syncStatus === 'error' && !isSyncing && (
+            <span className="flex items-center gap-1 text-[var(--ds-danger)] font-medium">
+              <AlertCircle size={13} />
+              {language === 'ar' ? 'تعذر المزامنة مع الخادم (حفظ مؤقت)' : 'Server sync failed (scratch cache)'}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={handleReset}
+            className="flex items-center gap-1 text-[11px] text-[var(--ds-danger)] hover:underline ml-2 cursor-pointer"
+          >
+            <RotateCcw size={11} />
+            {language === 'ar' ? 'إعادة تعيين' : 'Reset'}
+          </button>
+        </div>
+      </div>
+
       {/* Settings Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
@@ -193,7 +396,7 @@ export const PrismaBuilder: React.FC = () => {
           {identified === 0 && <p className="m-0 text-xs text-[var(--ds-text-muted)]">{language === 'ar' ? 'أدخل أعداد البحث والفحص الفعلية لإنشاء مخطط تدفق موثق.' : 'Enter actual search and screening counts to create a documented flow diagram.'}</p>}
 
           {/* SVG Diagram Canvas */}
-          <div className="w-full h-[450px] bg-zinc-50 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 flex items-center justify-center overflow-x-auto">
+          <div className="w-full h-[450px] bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 flex items-center justify-center overflow-x-auto">
             <svg id="prisma-svg" width="460" height="420" viewBox="0 0 460 420" className="max-w-full">
               <defs>
                 <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">

@@ -1,12 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useProject } from '../../context/ProjectContext';
-import { Brain, Send, User, Bot, Sparkles, Loader2, Trash2 } from 'lucide-react';
+import { Brain, Send, User, Bot, Sparkles, Loader2, Trash2, FileText, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { apiAIAssist } from '../../utils/api';
+import type { AIAssistResponse, AISourceRef } from '../../utils/api';
+import { researchStorage } from '../../utils/researchStorage';
 
 interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: string;
+  sources?: AISourceRef[];
+  grounded?: boolean;
+  aiGenerated?: boolean;
+  requiresVerification?: boolean;
+  humanAuthority?: boolean;
+  provider?: string;
+  sourceError?: string;
 }
 
 // ── Local AI Engine (rule-based methodology assistant) ─────────────────────────
@@ -83,7 +93,7 @@ export const MethodologyChat: React.FC = () => {
 
   // Load chat history
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY + projectId);
+    const saved = researchStorage.getItem(STORAGE_KEY + projectId);
     if (saved) setMessages(JSON.parse(saved));
     else setMessages([]);
   }, [projectId]);
@@ -94,7 +104,7 @@ export const MethodologyChat: React.FC = () => {
   }, [messages, isTyping]);
 
   const persist = (msgs: ChatMessage[]) => {
-    localStorage.setItem(STORAGE_KEY + projectId, JSON.stringify(msgs));
+    researchStorage.setItem(STORAGE_KEY + projectId, JSON.stringify(msgs));
     setMessages(msgs);
   };
 
@@ -113,16 +123,53 @@ export const MethodologyChat: React.FC = () => {
     setInput('');
     setIsTyping(true);
 
-    // Simulate AI thinking delay
-    await new Promise(r => setTimeout(r, 800 + Math.random() * 1200));
+    // Preferred path: governed backend AI (entitlement-enforced). If the org
+    // lacks AI_ASSISTANCE or the provider fails, fall back to the local
+    // rule-based engine — clearly labeled as a local fallback.
+    let content: string;
+    let sources: AISourceRef[] = [];
+    let grounded = false;
+    let provider = 'local-rule-engine';
+    let sourceError: string | undefined;
+    let aiGenerated = false;
 
-    const response = generateLocalResponse(input, activeProject, language);
+    try {
+      const aiResp: AIAssistResponse | null = await apiAIAssist({
+        use_case: 'METHODOLOGY_EXPLANATION',
+        question: input,
+        project_id: activeProject?.id,
+      });
+      if (aiResp) {
+        content = aiResp.text;
+        sources = aiResp.sources ?? [];
+        grounded = aiResp.grounded;
+        provider = aiResp.provider;
+        aiGenerated = aiResp.ai_generated;
+      } else {
+        sourceError = isAr
+          ? 'تعذر الوصول إلى الذكاء الاصطناعي المرخص؛ استخدم المحرك المحلي.'
+          : 'Governed AI unavailable; using the local rule engine.';
+        content = generateLocalResponse(input, activeProject, language);
+      }
+    } catch {
+      sourceError = isAr
+        ? 'تعذر الوصول إلى الذكاء الاصطناعي المرخص؛ استخدم المحرك المحلي.'
+        : 'Governed AI unavailable; using the local rule engine.';
+      content = generateLocalResponse(input, activeProject, language);
+    }
 
     const assistantMsg: ChatMessage = {
       id: `msg-${Date.now()}`,
       role: 'assistant',
-      content: response,
+      content,
       timestamp: new Date().toISOString(),
+      sources,
+      grounded,
+      aiGenerated,
+      requiresVerification: true,
+      humanAuthority: true,
+      provider,
+      sourceError,
     };
 
     persist([...updatedWithUser, assistantMsg]);
@@ -175,7 +222,7 @@ export const MethodologyChat: React.FC = () => {
                   <button
                     key={i}
                     onClick={() => { setInput(s); }}
-                    className="px-3 py-1.5 rounded-xl bg-purple-500/5 border border-purple-500/15 text-[10px] font-bold text-purple-600 hover:bg-purple-500/10 transition-colors cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-purple-500/5 border border-purple-500/15 text-[10px] font-bold text-[var(--ds-text-primary)] hover:bg-purple-500/10 transition-colors cursor-pointer"
                   >
                     {s}
                   </button>
@@ -191,18 +238,63 @@ export const MethodologyChat: React.FC = () => {
               }`}>
                 {msg.role === 'user' ? <User size={13} className="text-white" /> : <Bot size={13} className="text-emerald-500" />}
               </div>
-              <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-xs leading-relaxed whitespace-pre-wrap ${
-                msg.role === 'user'
-                  ? 'bg-purple-600 text-white rounded-tr-sm'
-                  : 'bg-[var(--ds-surface-secondary)] text-[var(--ds-text-primary)] border border-[var(--ds-border-subtle)] rounded-tl-sm'
+              <div className={`max-w-[80%] space-y-2 ${
+                msg.role === 'user' ? '' : ''
               }`}>
-                {msg.content}
+                <div className={`px-4 py-3 rounded-2xl text-xs leading-relaxed whitespace-pre-wrap ${
+                  msg.role === 'user'
+                    ? 'bg-purple-600 text-white rounded-tr-sm'
+                    : 'bg-[var(--ds-surface-secondary)] text-[var(--ds-text-primary)] border border-[var(--ds-border-subtle)] rounded-tl-sm'
+                }`}>
+                  {msg.content}
+                </div>
+
+                {/* Source display */}
+                {msg.role === 'assistant' && msg.sources && msg.sources.length > 0 && (
+                  <div className="px-3 py-2 rounded-lg bg-[var(--ds-surface-tertiary)] text-[10px] space-y-1">
+                    <div className="font-bold text-[var(--ds-text-muted)] flex items-center gap-1">
+                      <FileText size={10} />
+                      <span>{isAr ? 'المصادر المستخدمة' : 'Sources used'}</span>
+                    </div>
+                    {msg.sources.map((s, i) => (
+                      <div key={i} className="text-[var(--ds-text-secondary)]">
+                        {s.title || s.source_id} <span className="text-[var(--ds-text-muted)]">({s.type})</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Integrity notice */}
+                {msg.role === 'assistant' && msg.aiGenerated && (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/5 border border-amber-500/15 text-[9px] font-bold text-amber-600">
+                    <AlertTriangle size={10} />
+                    <span>{isAr
+                      ? 'محتوى منشأ بالذكاء الاصطناعي — يتطلب مراجعة أكاديمية والتحقق من المصادر.'
+                      : 'AI-generated content — requires academic review and source verification.'}
+                    </span>
+                  </div>
+                )}
+
+                {/* Provider status */}
+                {msg.role === 'assistant' && !msg.aiGenerated && (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/5 border border-purple-500/15 text-[9px] font-bold text-[var(--ds-text-primary)]">
+                    <CheckCircle2 size={10} />
+                    <span>{isAr ? 'محرك القواعد المحلي' : 'Local rule engine'}</span>
+                  </div>
+                )}
+
+                {/* Source error */}
+                {msg.role === 'assistant' && msg.sourceError && (
+                  <div className="text-[9px] text-amber-600 font-semibold">
+                    {msg.sourceError}
+                  </div>
+                )}
               </div>
             </div>
           ))}
 
           {isTyping && (
-            <div className="flex gap-3">
+            <div className="flex gap-3" role="status" aria-live="polite" aria-label={isAr ? 'المساعد ينشئ ردًا' : 'Assistant is generating a response'}>
               <div className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center bg-emerald-600/10">
                 <Bot size={13} className="text-emerald-500" />
               </div>
@@ -224,10 +316,12 @@ export const MethodologyChat: React.FC = () => {
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
             placeholder={isAr ? 'اكتب سؤالك المنهجي هنا...' : 'Type your methodology question...'}
+            aria-label={isAr ? 'سؤال منهجي للمساعد' : 'Methodology question for the assistant'}
             className="flex-1 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2.5 text-xs text-[var(--ds-text-primary)] placeholder:text-[var(--ds-text-muted)] focus:outline-none focus:ring-1 focus:ring-purple-500/50"
           />
           <button
             onClick={handleSend}
+            aria-label={isAr ? 'إرسال السؤال المنهجي' : 'Send methodology question'}
             disabled={!input.trim() || isTyping}
             className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-40 cursor-pointer transition-colors flex items-center gap-1.5"
           >

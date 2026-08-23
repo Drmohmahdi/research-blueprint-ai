@@ -43,6 +43,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
+      type={props.type ?? 'button'}
       className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${widthStyles} ${className}`}
       disabled={disabled || loading}
       {...props}
@@ -95,6 +96,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
 
   return (
     <button
+      type={props.type ?? 'button'}
       className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
       disabled={disabled || loading}
       aria-label={ariaLabel}

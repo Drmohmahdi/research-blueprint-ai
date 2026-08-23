@@ -57,6 +57,10 @@ def get_tenant_context(
 ) -> TenantContext:
     now = datetime.datetime.now(datetime.UTC).isoformat()
 
+    # Ensure commercial plans are always seeded (idempotent, fast if already seeded)
+    from .billing.bootstrap import ensure_plans_and_pricing_seeded
+    ensure_plans_and_pricing_seeded(db)
+
     # 1. Resolve organization_id
     if not x_organization_id:
         # Fallback: Find the user's first active membership
@@ -158,15 +162,17 @@ def get_tenant_context(
         curr_org = db.query(Organization).filter(Organization.id == curr_org.parent_id).first()
 
     if not subscription:
-        # Fallback to FREE plan if no subscription
+        # Fallback to FREE plan if no subscription — resolve plan ID dynamically
+        free_plan_row = db.query(Plan).filter(Plan.code == "FREE").first()
+        free_plan_id = free_plan_row.id if free_plan_row else "pln-free"
         subscription = Subscription(
             id=f"sub-{str(uuid.uuid4())[:8]}",
             organization_id=org.id,
-            plan_id="pln-free",
+            plan_id=free_plan_id,
             status="ACTIVE",
             provider="MOCK",
             current_period_start=now,
-            current_period_end=now,
+            current_period_end=(datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=3650)).isoformat(),
             created_at=now
         )
         db.add(subscription)

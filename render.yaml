@@ -17,6 +17,10 @@ services:
         value: "7"
       - key: CORS_ORIGINS
         value: https://research-blueprint-ai.vercel.app
+      - key: TRUSTED_HOSTS
+        value: research-blueprint-backend.onrender.com
+      - key: APP_URL
+        value: https://research-blueprint-ai.vercel.app
       - key: DATABASE_URL
         sync: false
       - key: GEMINI_API_KEY

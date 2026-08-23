@@ -30,7 +30,30 @@ backend/.env
 
 # Databases
 *.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+*.db-journal
 backend/research_blueprint.db
+
+# Runtime storage and backups
+storage_files/
+backend/storage_files/
+backups/
+*.bak
+*.backup
+
+# Test, coverage, and build output
+playwright-report/
+test-results/
+coverage/
+htmlcov/
+.coverage
+.nyc_output/
+build/
+tmp/
+temp/
 
 # Python cache
 __pycache__/
@@ -43,6 +66,9 @@ ENV/
 
 # Pytest cache
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
 
 # Seed scripts with hardcoded demo credentials — do not commit
 backend/create_accounts.py

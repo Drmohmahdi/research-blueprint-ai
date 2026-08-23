@@ -263,9 +263,9 @@ export const PortalGateway: React.FC = () => {
           <LayoutGrid size={13} />
           <span>{isAr ? 'منظومة الذكاء الأكاديمي' : 'Academic Intelligence Suite'}</span>
         </div>
-        <h1 className="text-3xl md:text-4xl font-black text-[var(--ds-text-primary)] m-0 leading-tight">
+        <h2 className="text-3xl md:text-4xl font-black text-[var(--ds-text-primary)] m-0 leading-tight">
           {isAr ? 'مرحبًا بك في منظومة بصيرة الأكاديمية' : 'Welcome to Baseerah Academic Suite'}
-        </h1>
+        </h2>
         <p className="text-sm text-[var(--ds-text-secondary)] font-medium max-w-xl mx-auto m-0 leading-relaxed">
           {isAr 
             ? 'اختر مساحة العمل أو الموديول العلمي الذي ترغب بالبدء فيه الآن للتكامل مع الأصل البحثي الموحد.' 

@@ -20,6 +20,7 @@ from ..schemas import (
     PublicProfileResponse
 )
 from ..services.tenant_context import get_tenant_context, TenantContext
+from ..services.storage import get_storage_provider, StorageProvider
 
 router = APIRouter(prefix="/api/academic-foundation", tags=["academic-foundation"])
 
@@ -112,7 +113,11 @@ def get_public_profile(username: str, db: Session = Depends(get_db)):
 
 
 @router.get("/public/{username}/photo")
-def get_public_profile_photo(username: str, db: Session = Depends(get_db)):
+def get_public_profile_photo(
+    username: str,
+    db: Session = Depends(get_db),
+    storage: StorageProvider = Depends(get_storage_provider)
+):
     """Unauthenticated photo fetch for the public profile page only -
     does not use the shared, authenticated /storage/download endpoint."""
     user = db.query(User).filter(User.username == username).first()
@@ -132,11 +137,15 @@ def get_public_profile_photo(username: str, db: Session = Depends(get_db)):
     if not db_file:
         raise HTTPException(status_code=404, detail="Photo not found")
 
-    full_path = os.path.join("storage_files", db_file.storage_key)
-    if not os.path.exists(full_path):
+    if not storage.file_exists(db_file.storage_key):
         raise HTTPException(status_code=404, detail="Photo not found")
 
-    return FileResponse(path=full_path, media_type=db_file.mime_type)
+    full_path = storage.get_file_path(db_file.storage_key)
+    return FileResponse(
+        path=full_path,
+        media_type=db_file.mime_type,
+        headers={"X-Content-Type-Options": "nosniff"}
+    )
 
 
 @router.get("/profile/me", response_model=UnifiedAcademicProfileResponse)

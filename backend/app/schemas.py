@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from typing import List, Optional, Dict, Any
 
 class SampleSettingsSchema(BaseModel):
@@ -612,6 +612,673 @@ class ScholarlyAssetCreate(BaseModel):
     contributors: List[ScholarlyAssetContributorSchema] = []
     files: List[ScholarlyAssetFileSchema] = []
 
+
+# ── Literature Synthesis & Studies Schemas ──────────────────────────────────
+class LiteratureStudyBase(BaseModel):
+    author: str
+    year: int
+    sampleSize: int = Field(gt=0, description="Sample size must be positive")
+    effectSize: float
+    ciLower: float
+    ciUpper: float
+    source: Optional[str] = "manual"
+    doi: Optional[str] = None
+    notes: Optional[str] = None
+
+    @model_validator(mode="after")
+    def validate_study_bounds(self):
+        if self.ciLower > self.ciUpper:
+            raise ValueError("Confidence interval lower bound cannot exceed upper bound")
+        return self
+
+
+class LiteratureStudyCreate(LiteratureStudyBase):
+    id: Optional[str] = None
+
+
+class LiteratureStudySchema(LiteratureStudyBase):
+    id: str
+    projectId: str
+    organizationId: Optional[str] = None
+    createdAt: str
+    updatedAt: str
+    model_config = ConfigDict(from_attributes=True)
+
+
+class LiteratureStudyBatchSyncRequest(BaseModel):
+    studies: List[LiteratureStudyCreate]
+
+
+class LiteratureSynthesisResponse(BaseModel):
+    projectId: str
+    studies: List[LiteratureStudySchema]
+    totalStudies: int
+    totalSampleCount: int
+    pooledEffectSize: float
+    pooledLower: float
+    pooledUpper: float
+    heterogeneityQ: float
+    heterogeneityI2: float
+
+
+# ── PRISMA Flow Schemas ─────────────────────────────────────────────────────
+class PrismaFlowBase(BaseModel):
+    identified: int = Field(ge=0, default=0)
+    duplicates: int = Field(ge=0, default=0)
+    excludedScreening: int = Field(ge=0, default=0)
+    excludedEligibility: int = Field(ge=0, default=0)
+    source: Optional[str] = "manual"
+    notes: Optional[str] = None
+
+    @model_validator(mode="after")
+    def validate_prisma_counts(self):
+        if self.duplicates > self.identified:
+            raise ValueError("Duplicates removed cannot exceed identified records")
+        screened = self.identified - self.duplicates
+        if self.excludedScreening > screened:
+            raise ValueError("Records excluded during screening cannot exceed screened records")
+        eligible = screened - self.excludedScreening
+        if self.excludedEligibility > eligible:
+            raise ValueError("Full-text reports excluded cannot exceed eligible reports sought")
+        return self
+
+
+class PrismaFlowUpsertRequest(PrismaFlowBase):
+    pass
+
+
+class PrismaFlowResponse(PrismaFlowBase):
+    id: str
+    projectId: str
+    organizationId: Optional[str] = None
+    screened: int = 0
+    eligible: int = 0
+    included: int = 0
+    createdAt: str
+    updatedAt: str
+    model_config = ConfigDict(from_attributes=True)
+
+
+# ── Academic Promotion Schemas ──────────────────────────────────────────────
+
+class PromotionCriterionBase(BaseModel):
+    code: str
+    title_ar: str
+    title_en: str
+    criterion_type: str = "RESEARCH_OUTPUT"
+    required_points: float = 0.0
+    min_asset_count: int = 0
+    rule_definition_json: Dict[str, Any] = {}
+    weight: float = 1.0
+    is_mandatory: bool = True
+    sort_order: int = 1
+
+
+class PromotionCriterionCreate(PromotionCriterionBase):
+    id: Optional[str] = None
+
+
+class PromotionCriterionResponse(PromotionCriterionBase):
+    id: str
+    policy_id: str
+    organization_id: str
+    created_at: str
+    model_config = ConfigDict(from_attributes=True)
+
+
+
+class PromotionPolicyCreate(BaseModel):
+    name_ar: str
+    name_en: str
+    description_ar: Optional[str] = None
+    description_en: Optional[str] = None
+    target_rank: str
+    status: str = "ACTIVE"
+    is_default: bool = False
+    rules_json: Optional[Dict[str, Any]] = None
+    criteria: Optional[List[PromotionCriterionCreate]] = None
+
+
+class PromotionPolicyUpdate(BaseModel):
+    name_ar: Optional[str] = None
+    name_en: Optional[str] = None
+    description_ar: Optional[str] = None
+    description_en: Optional[str] = None
+    target_rank: Optional[str] = None
+    status: Optional[str] = None
+    is_default: Optional[bool] = None
+    rules_json: Optional[Dict[str, Any]] = None
+
+
+class PromotionPolicyResponse(BaseModel):
+    id: str
+    organization_id: str
+    name_ar: str
+    name_en: str
+    description_ar: Optional[str] = None
+    description_en: Optional[str] = None
+    target_rank: str
+    version: int
+    status: str
+    is_default: bool
+    rules_json: Optional[Dict[str, Any]] = None
+    created_by: Optional[str] = None
+    created_at: str
+    updated_at: str
+    criteria: List[PromotionCriterionResponse] = []
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PromotionEvidenceSelectRequest(BaseModel):
+    scholarly_asset_ids: List[str]
+    criterion_id: Optional[str] = None
+
+
+class PromotionEvidenceItemResponse(BaseModel):
+    id: str
+    promotion_application_id: str
+    scholarly_asset_id: str
+    criterion_id: Optional[str] = None
+    eligibility_status: str
+    calculated_points: float
+    evidence_status: str
+    evidence_snapshot_json: Optional[Dict[str, Any]] = None
+    verification_status: str
+    notes: Optional[str] = None
+    created_at: Optional[str] = None
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CriterionEvaluationResult(BaseModel):
+    criterion_id: str
+    code: str
+    title_ar: str
+    title_en: str
+    criterion_type: str
+    is_mandatory: bool
+    status: str # SATISFIED, PARTIALLY_SATISFIED, NOT_SATISFIED, MISSING_EVIDENCE
+    required_value: float
+    actual_value: float
+    required_count: int
+    actual_count: int
+    points_earned: float
+    evidence_asset_ids: List[str] = []
+    explanation_ar: str
+    explanation_en: str
+    missing_items: List[str] = []
+
+
+class PromotionEvaluationResult(BaseModel):
+    application_id: str
+    policy_id: str
+    policy_name_ar: str
+    policy_name_en: str
+    policy_version: int
+    target_rank: str
+    readiness_percentage: int
+    is_fully_ready: bool
+    total_calculated_points: float
+    total_required_points: float
+    total_evidence_count: int
+    mandatory_criteria_satisfied: bool
+    criteria_results: List[CriterionEvaluationResult]
+    recommendations_ar: List[str] = []
+    recommendations_en: List[str] = []
+    evaluated_at: str
+    is_stale: bool = False
+    evaluation_fingerprint: str
+    disclaimer_ar: str = "هذا التقييم استرشادي لدعم القرار ولا يعتبر قرار ترقية نهائي؛ القرار النهائي معقود للجنة الأكاديمية المختصة."
+    disclaimer_en: str = "This readiness evaluation is a decision-support advisory tool and does not constitute a final promotion decision. Final determination is strictly reserved for the institutional academic committee."
+
+
+class PromotionApplicationCreate(BaseModel):
+    policy_id: Optional[str] = None
+    target_rank: str
+    current_rank: Optional[str] = None
+
+
+class PromotionApplicationResponse(BaseModel):
+    id: str
+    organization_id: str
+    user_id: str
+    policy_id: str
+    policy_version: int
+    current_rank: Optional[str] = None
+    target_rank: str
+    status: str
+    readiness_percentage: int
+    total_calculated_points: float
+    evaluation_summary_json: Optional[Dict[str, Any]] = None
+    evaluation_fingerprint: Optional[str] = None
+    human_review_decision: Optional[str] = None
+    human_review_notes: Optional[str] = None
+    reviewer_user_id: Optional[str] = None
+    reviewed_at: Optional[str] = None
+    submitted_at: Optional[str] = None
+    created_at: str
+    updated_at: str
+    evidence_selections: List[PromotionEvidenceItemResponse] = []
+    policy: Optional[PromotionPolicyResponse] = None
+    model_config = ConfigDict(from_attributes=True)
+
+
+class HumanReviewDecisionRequest(BaseModel):
+    decision: str # ELIGIBLE_RECOMMENDED, INELIGIBLE_DEFICIENT, REQUIRES_FURTHER_DOCS
+    notes: str
+
+
+# ── Peer Review Workflow Schemas ───────────────────────────────────────────────
+
+class ReviewCriterionBase(BaseModel):
+    code: str
+    title_ar: str
+    title_en: str
+    desc_ar: Optional[str] = None
+    desc_en: Optional[str] = None
+    response_type: str = "SCORE" # SCORE, YES_NO, TEXT, CHOICE
+    weight: float = 1.0
+    is_mandatory: bool = True
+    sort_order: int = 1
+    options_json: Optional[Dict[str, Any]] = None
+
+
+class ReviewCriterionCreate(ReviewCriterionBase):
+    pass
+
+
+class ReviewCriterionResponse(ReviewCriterionBase):
+    id: str
+    rubric_id: str
+    created_at: str
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ReviewRubricCreate(BaseModel):
+    name_ar: str
+    name_en: str
+    rubric_type: str = "GENERAL_MANUSCRIPT"
+    is_default: bool = False
+    criteria: List[ReviewCriterionCreate] = []
+
+
+class ReviewRubricResponse(BaseModel):
+    id: str
+    organization_id: str
+    name_ar: str
+    name_en: str
+    rubric_type: str
+    version: int
+    is_default: bool
+    status: str
+    created_at: str
+    criteria: List[ReviewCriterionResponse] = []
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PeerReviewCaseCreate(BaseModel):
+    title_ar: str
+    title_en: str
+    abstract_ar: Optional[str] = None
+    abstract_en: Optional[str] = None
+    discipline: Optional[str] = None
+    case_type: str = "MANUSCRIPT"  # MANUSCRIPT, PROPOSAL, STUDY_DESIGN, PROMOTION_DOSSIER
+    blind_type: str = "DOUBLE_BLIND"  # SINGLE_BLIND, DOUBLE_BLIND, OPEN
+    project_id: Optional[str] = None
+    scholarly_asset_id: Optional[str] = None
+    rubric_id: Optional[str] = None
+
+
+class ReviewCommentResponse(BaseModel):
+    id: str
+    submission_id: str
+    case_id: str
+    round_id: str
+    section_key: Optional[str] = None
+    comment_type: str
+    comment_text: str
+    author_response_text: Optional[str] = None
+    is_resolved: bool = False
+    created_at: str
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ReviewCommentCreate(BaseModel):
+    section_key: Optional[str] = None
+    comment_type: str = "AUTHOR_VISIBLE" # AUTHOR_VISIBLE, CONFIDENTIAL_TO_EDITOR
+    comment_text: str
+
+
+class ReviewCriterionResponseItem(BaseModel):
+    criterion_id: str
+    score_value: Optional[float] = None
+    text_value: Optional[str] = None
+    choice_value: Optional[str] = None
+    comments: Optional[str] = None
+
+
+class ReviewCriterionResponseSchema(BaseModel):
+    id: str
+    criterion_id: str
+    score_value: Optional[float] = None
+    text_value: Optional[str] = None
+    choice_value: Optional[str] = None
+    comments: Optional[str] = None
+    created_at: str
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ReviewSubmissionResponse(BaseModel):
+    id: str
+    assignment_id: str
+    round_id: str
+    case_id: str
+    status: str # DRAFT, SUBMITTED
+    recommendation: str # ACCEPT, MINOR_REVISION, MAJOR_REVISION, REJECT
+    summary_evaluation_ar: Optional[str] = None
+    summary_evaluation_en: Optional[str] = None
+    total_weighted_score: float
+    is_confidential_to_editor: bool
+    submitted_at: Optional[str] = None
+    created_at: str
+    updated_at: str
+    responses: List[ReviewCriterionResponseSchema] = []
+    comments: List[ReviewCommentResponse] = []
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ReviewSubmissionDraftRequest(BaseModel):
+    recommendation: Optional[str] = "MINOR_REVISION"
+    summary_evaluation_ar: Optional[str] = None
+    summary_evaluation_en: Optional[str] = None
+    is_confidential_to_editor: Optional[bool] = False
+    responses: List[ReviewCriterionResponseItem] = []
+    comments: List[ReviewCommentCreate] = []
+
+
+class ReviewSubmissionFinalRequest(BaseModel):
+    recommendation: str # ACCEPT, MINOR_REVISION, MAJOR_REVISION, REJECT
+    summary_evaluation_ar: Optional[str] = None
+    summary_evaluation_en: Optional[str] = None
+    is_confidential_to_editor: Optional[bool] = False
+    responses: List[ReviewCriterionResponseItem] = []
+    comments: List[ReviewCommentCreate] = []
+
+
+class ReviewerAssignmentCreate(BaseModel):
+    reviewer_type: str = "INTERNAL_REVIEWER" # INTERNAL_REVIEWER, EXTERNAL_REVIEWER
+    reviewer_user_id: Optional[str] = None
+    external_email: Optional[str] = None
+    external_name: Optional[str] = None
+    due_at: Optional[str] = None
+
+
+class ReviewerAssignmentResponse(BaseModel):
+    id: str
+    case_id: str
+    round_id: str
+    reviewer_type: str
+    reviewer_user_id: Optional[str] = None
+    external_email: Optional[str] = None
+    external_name: Optional[str] = None
+    status: str
+    conflict_status: str
+    conflict_notes: Optional[str] = None
+    decline_reason: Optional[str] = None
+    due_at: Optional[str] = None
+    invited_at: str
+    accepted_at: Optional[str] = None
+    submitted_at: Optional[str] = None
+    created_at: str
+    submission: Optional[ReviewSubmissionResponse] = None
+    magic_link_url: Optional[str] = None
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ReviewerAcceptRequest(BaseModel):
+    conflict_status: str = "NO_CONFLICT" # NO_CONFLICT, POTENTIAL_CONFLICT, CONFLICT_DECLARED
+    conflict_notes: Optional[str] = None
+
+
+class ReviewerDeclineRequest(BaseModel):
+    decline_reason: Optional[str] = None
+
+
+class ManuscriptRevisionCreate(BaseModel):
+    title_ar: str
+    title_en: str
+    abstract_ar: Optional[str] = None
+    abstract_en: Optional[str] = None
+    response_to_reviewers: Optional[str] = None
+    file_id: Optional[str] = None
+
+
+class ManuscriptRevisionResponse(BaseModel):
+    id: str
+    case_id: str
+    round_id: Optional[str] = None
+    version_number: int
+    title_ar: str
+    title_en: str
+    abstract_ar: Optional[str] = None
+    abstract_en: Optional[str] = None
+    response_to_reviewers: Optional[str] = None
+    file_id: Optional[str] = None
+    uploaded_by: Optional[str] = None
+    created_at: str
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PeerReviewRoundResponse(BaseModel):
+    id: str
+    case_id: str
+    round_number: int
+    manuscript_version: int
+    status: str
+    manuscript_snapshot_json: Optional[Dict[str, Any]] = None
+    rubric_id: Optional[str] = None
+    rubric_snapshot_json: Optional[Dict[str, Any]] = None
+    decision: str
+    decision_notes: Optional[str] = None
+    decision_by_user_id: Optional[str] = None
+    decision_at: Optional[str] = None
+    created_at: str
+    rubric: Optional[ReviewRubricResponse] = None
+    assignments: List[ReviewerAssignmentResponse] = []
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PeerReviewCaseResponse(BaseModel):
+    id: str
+    organization_id: str
+    owner_user_id: Optional[str] = None # Masked in double-blind for reviewers
+    author_name: Optional[str] = None # Masked in double-blind for reviewers
+    project_id: Optional[str] = None
+    scholarly_asset_id: Optional[str] = None
+    title_ar: str
+    title_en: str
+    abstract_ar: Optional[str] = None
+    abstract_en: Optional[str] = None
+    discipline: Optional[str] = None
+    case_type: str
+    blind_type: str
+    status: str
+    current_round_number: int
+    created_at: str
+    updated_at: str
+    rounds: List[PeerReviewRoundResponse] = []
+    revisions: List[ManuscriptRevisionResponse] = []
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PeerReviewCaseSummaryResponse(BaseModel):
+    id: str
+    organization_id: str
+    title_ar: str
+    title_en: str
+    case_type: str
+    blind_type: str
+    status: str
+    current_round_number: int
+    active_assignments_count: int = 0
+    completed_reviews_count: int = 0
+    created_at: str
+    updated_at: str
+    model_config = ConfigDict(from_attributes=True)
+
+
+class EditorialDecisionRequest(BaseModel):
+    decision: str # ACCEPTED, REVISION_REQUIRED, REJECTED
+    decision_notes: str
+
+
+class ExternalReviewerPortalResponse(BaseModel):
+    assignment_id: str
+    case_id: str
+    round_id: str
+    round_number: int
+    manuscript_version: int
+    manuscript_title: str
+    manuscript_abstract: Optional[str] = None
+    case_type: str
+    blind_type: str
+    due_at: Optional[str] = None
+    assignment_status: str
+    conflict_status: str
+    reviewer_name: Optional[str] = None
+    rubric: Optional[ReviewRubricResponse] = None
+    submission: Optional[ReviewSubmissionResponse] = None
+
+
+# --- Phase 05: Academic Reporting & Export Schemas ---
+
+class ReportExportRequest(BaseModel):
+    report_type: str = Field(..., description="RESEARCH_PROJECT, LITERATURE_SYNTHESIS, PRISMA_FLOW, PROMOTION_READINESS, PEER_REVIEW, ACADEMIC_PROFILE")
+    source_id: str = Field(..., description="ID of the underlying domain entity")
+    format: str = Field("PDF", description="PDF, DOCX, JSON")
+    language: str = Field("ar", description="ar, en, bilingual")
+    audience: str = Field("RESEARCHER", description="RESEARCHER, AUTHOR, SUPERVISOR, COMMITTEE, ADMIN, PUBLIC")
+    template_version: str = Field("academic-standard-v1", description="Report template version")
+
+
+class ReportVerificationResponse(BaseModel):
+    valid: bool
+    verification_code: str
+    report_type: Optional[str] = None
+    organization_name: Optional[str] = None
+    generated_at: Optional[str] = None
+    document_hash: Optional[str] = None
+    message: str
+
+
+# --- Phase 06: Academic Workflow Events & Notification Schemas ---
+
+class NotificationResponse(BaseModel):
+    id: str
+    organization_id: str
+    recipient_user_id: str
+    category: str
+    title_ar: str
+    title_en: str
+    message_ar: str
+    message_en: str
+    target_type: Optional[str] = None
+    target_id: Optional[str] = None
+    read_at: Optional[str] = None
+    created_at: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class NotificationListResponse(BaseModel):
+    items: List[NotificationResponse]
+    total: int
+    unread_count: int
+    page: int
+    limit: int
+
+
+class UnreadCountResponse(BaseModel):
+    unread_count: int
+
+
+class NotificationPreferenceItem(BaseModel):
+    category: str
+    in_app_enabled: bool = True
+    email_enabled: bool = True
+    updated_at: Optional[str] = None
+
+
+class NotificationPreferencesResponse(BaseModel):
+    preferences: List[NotificationPreferenceItem]
+
+
+class NotificationPreferencesUpdateRequest(BaseModel):
+    preferences: List[NotificationPreferenceItem]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PHASE 09 — UNIFIED SEARCH & ACADEMIC DISCOVERY
+# ─────────────────────────────────────────────────────────────────────────────
+
+ALLOWED_SEARCH_DOMAINS = [
+    "PROJECT", "LITERATURE", "ASSET", "PROFILE",
+    "PROMOTION", "PEER_REVIEW", "FILE"
+]
+
+ALLOWED_SEARCH_SORTS = ["relevance", "newest", "oldest", "title", "year"]
+
+class SearchResultItem(BaseModel):
+    domain: str
+    entity_id: str
+    title: str
+    subtitle: Optional[str] = None
+    snippet: Optional[str] = None
+    status: Optional[str] = None
+    updated_at: Optional[str] = None
+    target: Optional[str] = None
+    metadata: Dict[str, Any] = {}
+
+class SearchResponse(BaseModel):
+    query: str
+    domains: List[str]
+    total: int
+    page: int
+    limit: int
+    total_pages: int
+    results: List[SearchResultItem]
+    domain_counts: Dict[str, int]
+    hidden_domains: List[str] = []
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PHASE 10 — GOVERNED ACADEMIC AI
+# ─────────────────────────────────────────────────────────────────────────────
+
+class AISource(BaseModel):
+    type: str
+    source_id: str
+    title: Optional[str] = None
+
+
+class AIUsageSummary(BaseModel):
+    input_tokens: Optional[int] = None
+    output_tokens: Optional[int] = None
+    estimated_tokens: Optional[int] = None
+
+
+class AIResponse(BaseModel):
+    use_case: str
+    prompt_version: int
+    provider: str
+    model: Optional[str] = None
+    text: str
+    structured: Optional[Dict[str, Any]] = None
+    sources: List[AISource] = []
+    grounded: bool = False
+    requires_verification: bool = True
+    human_authority: bool = True
+    ai_generated: bool = True
+    usage: Optional[AIUsageSummary] = None
 
 
 

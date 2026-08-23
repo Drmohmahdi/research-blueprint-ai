@@ -103,7 +103,7 @@ export const Alert: React.FC<AlertProps> = ({
         <div className="m-0 text-inherit">{children}</div>
       </div>
       {onClose && (
-        <button onClick={onClose} className="text-inherit hover:opacity-75 cursor-pointer ml-auto font-bold">×</button>
+        <button type="button" onClick={onClose} aria-label="Close alert" className="text-inherit hover:opacity-75 cursor-pointer ml-auto font-bold">×</button>
       )}
     </div>
   );
@@ -132,7 +132,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   return (
     <div className={`relative group inline-block ${className}`}>
       {children}
-      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block z-50 bg-zinc-950 text-white text-[10px] p-2.5 rounded-xl shadow-lg border border-zinc-800 leading-normal select-none pointer-events-none">
+      <div role="tooltip" className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block group-focus-within:block z-50 bg-zinc-950 text-white text-[10px] p-2.5 rounded-xl shadow-lg border border-zinc-800 leading-normal select-none pointer-events-none">
         {content}
       </div>
     </div>
@@ -154,14 +154,14 @@ export const Progress: React.FC<ProgressProps> = ({
   className = ''
 }) => {
   const barColors = {
-    primary: 'bg-[#8B5CF6]',
-    success: 'bg-emerald-500',
-    warning: 'bg-amber-500',
-    danger: 'bg-rose-500',
+    primary: 'bg-[var(--ds-primary)]',
+    success: 'bg-[var(--ds-success)]',
+    warning: 'bg-[var(--ds-warning)]',
+    danger: 'bg-[var(--ds-danger)]',
   };
 
   return (
-    <div className={`h-2 w-full bg-[var(--ds-background-subtle)] rounded-full overflow-hidden ${className}`}>
+    <div role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.max(0, Math.min(100, value))} className={`h-2 w-full bg-[var(--ds-background-subtle)] rounded-full overflow-hidden ${className}`}>
       <div 
         className={`h-full transition-all duration-300 ${barColors[variant]}`}
         style={{ width: `${Math.max(0, Math.min(100, value))}%` }}
@@ -189,7 +189,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
       : 'rounded-xl';
 
   return (
-    <div className={`animate-pulse bg-[var(--ds-surface-tertiary)] ${shapeClass} ${className}`} />
+    <div aria-hidden="true" className={`animate-pulse bg-[var(--ds-surface-tertiary)] ${shapeClass} ${className}`} />
   );
 };
 

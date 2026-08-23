@@ -45,7 +45,7 @@ export const MeasurementInstruments: React.FC = () => {
   useEffect(() => {
     setInstruments(activeProject?.measurementInstruments || []);
     setStatus(null);
-  }, [activeProject?.id, activeProject?.version]);
+  }, [activeProject?.id, activeProject?.version, activeProject?.measurementInstruments]);
 
   if (!activeProject) {
     return (

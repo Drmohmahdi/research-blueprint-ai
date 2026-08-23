@@ -77,6 +77,12 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
         </div>
       )}
 
+      <div role="status" className="rounded-2xl border border-[var(--ds-information)]/25 bg-[var(--ds-information-soft)] p-3.5 text-xs font-semibold text-[var(--ds-text-primary)]">
+        {language === 'ar'
+          ? 'بيئة الدفع الحالية تجريبية؛ لا تُحصّل أي مبالغ حقيقية من هذه الشاشة ما لم ينقلك الخادم صراحةً إلى بوابة دفع حية.'
+          : 'The current payment environment is sandboxed. No real charge is collected from this screen unless the server explicitly redirects you to a live payment gateway.'}
+      </div>
+
       {/* Subscription and Usage Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
@@ -94,7 +100,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
                 <h4 className="text-base font-black m-0">{activePlan ? activePlan.name : 'Free Plan'}</h4>
                 <div className="text-[10px] text-[var(--ds-text-muted)] font-semibold mt-0.5">
                   {activeSub?.status === 'ACTIVE' 
-                    ? (language === 'ar' ? 'نشط وتلقائي التجديد' : 'Active / Auto-renew') 
+                    ? (language === 'ar' ? 'استحقاقات الخطة نشطة' : 'Plan entitlements active') 
                     : (language === 'ar' ? 'منتهي أو ملغي' : 'Expired / Cancelled')}
                 </div>
               </div>
@@ -145,7 +151,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
               <div className="flex justify-between text-xs font-bold">
                 <span className="flex items-center gap-1.5 text-[var(--ds-text-secondary)]">
                   <HardDrive size={14} className="text-purple-600" />
-                  <span>{language === 'ar' ? 'المساحة التخزينية للمستندات' : 'Cloud Document Storage'}</span>
+                  <span>{language === 'ar' ? 'مساحة ملفات المستندات' : 'Document File Storage'}</span>
                 </span>
                 <span>{usage.storage_mb.toFixed(2)} MB / {limits.max_storage_mb} MB</span>
               </div>
@@ -206,7 +212,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
                     </div>
                     <div className="flex items-center gap-2">
                       <Check size={14} className="text-emerald-500 shrink-0" />
-                      <span>{pLimits.max_storage_mb} MB {language === 'ar' ? 'مساحة سحابية' : 'Cloud Storage'}</span>
+                      <span>{pLimits.max_storage_mb} MB {language === 'ar' ? 'مساحة ملفات' : 'File Storage'}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Check size={14} className="text-emerald-500 shrink-0" />

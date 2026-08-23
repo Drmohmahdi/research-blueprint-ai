@@ -55,19 +55,22 @@ export const SampleSizeCalc: React.FC = () => {
     }
   }, [activeProject]);
 
+  const projectId = activeProject?.id;
+  const studyDesign = activeProject?.studyDesign;
+
   useEffect(() => {
     if (activeProject) {
-      if (activeProject.studyDesign === 'descriptive') {
+      if (studyDesign === 'descriptive') {
         setTestType('descriptive_survey');
-      } else if (activeProject.studyDesign === 'correlational' || activeProject.studyDesign === 'predictive') {
+      } else if (studyDesign === 'correlational' || studyDesign === 'predictive') {
         setTestType('correlation');
-      } else if (activeProject.studyDesign === 'single_group_pre_post') {
+      } else if (studyDesign === 'single_group_pre_post') {
         setTestType('t_test_paired');
       } else {
         setTestType('t_test_independent');
       }
     }
-  }, [activeProject?.id]);
+  }, [activeProject, projectId, studyDesign]);
 
   useEffect(() => {
     if (testType === 'correlation') {

@@ -58,7 +58,7 @@ export const AnalysisPlan: React.FC = () => {
   useEffect(() => {
     setPlans(activeProject?.hypothesisAnalysisPlans || []);
     setStatus(null);
-  }, [activeProject?.id, activeProject?.version]);
+  }, [activeProject?.id, activeProject?.version, activeProject?.hypothesisAnalysisPlans]);
 
   if (!activeProject) {
     return <EmptyState illustration={<BarChart3 size={40} />} title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No Active Project'} description={language === 'ar' ? 'اختر مشروعاً نشطاً لتوثيق خطة التحليل.' : 'Select an active project to document an analysis plan.'} actionButton={<Button type="button" variant="primary" size="sm" onClick={() => navigate(VIEW_TO_PATH.wizard)}>{language === 'ar' ? 'فتح معالج البحث' : 'Open Research Wizard'}</Button>} />;

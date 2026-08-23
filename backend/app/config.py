@@ -9,10 +9,23 @@ class Settings:
     HOST: str = os.getenv("HOST", "127.0.0.1")
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./research_blueprint.db")
+    APP_URL: str = os.getenv("APP_URL", "http://localhost:5173")
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+    AI_PROVIDER: str = os.getenv("AI_PROVIDER", "auto")  # auto | fake | gemini
     COOKIE_SECURE: bool = os.getenv("COOKIE_SECURE", "").lower() in ("1", "true", "yes") or os.getenv("ENVIRONMENT") == "production"
     SESSION_TTL_DAYS: int = int(os.getenv("SESSION_TTL_DAYS", "7"))
-    AUTO_CREATE_TABLES: bool = os.getenv("AUTO_CREATE_TABLES", "").lower() in ("1", "true", "yes") or os.getenv("ENVIRONMENT", "development") != "production"
+    _auto_create_raw = os.getenv("AUTO_CREATE_TABLES")
+    AUTO_CREATE_TABLES: bool = (
+        _auto_create_raw.lower() in ("1", "true", "yes")
+        if _auto_create_raw is not None
+        else os.getenv("ENVIRONMENT", "development") != "production"
+    )
+    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO").upper()
+    SLOW_REQUEST_MS: int = max(1, int(os.getenv("SLOW_REQUEST_MS", "1000")))
+    TRUSTED_HOSTS: list[str] = [host.strip() for host in os.getenv("TRUSTED_HOSTS", "localhost,127.0.0.1").split(",") if host.strip()]
+    if os.getenv("TESTING") == "True" and "testserver" not in TRUSTED_HOSTS:
+        TRUSTED_HOSTS.append("testserver")
     CORS_ORIGINS: list[str] = [
         origin.strip()
         for origin in os.getenv(
@@ -21,5 +34,24 @@ class Settings:
         ).split(",")
         if origin.strip()
     ]
+
+    def validate_production(self) -> None:
+        if self.ENVIRONMENT != "production":
+            return
+        errors: list[str] = []
+        if self.AUTO_CREATE_TABLES:
+            errors.append("AUTO_CREATE_TABLES must be false")
+        if not self.COOKIE_SECURE:
+            errors.append("COOKIE_SECURE must be true")
+        if self.DATABASE_URL.startswith("sqlite"):
+            errors.append("DATABASE_URL must use the production database")
+        if not self.APP_URL.startswith("https://"):
+            errors.append("APP_URL must use HTTPS")
+        if not self.CORS_ORIGINS or any(origin == "*" or not origin.startswith("https://") for origin in self.CORS_ORIGINS):
+            errors.append("CORS_ORIGINS must contain explicit HTTPS origins")
+        if not self.TRUSTED_HOSTS or "*" in self.TRUSTED_HOSTS:
+            errors.append("TRUSTED_HOSTS must contain explicit hosts")
+        if errors:
+            raise RuntimeError("Unsafe production configuration: " + "; ".join(errors))
 
 settings = Settings()

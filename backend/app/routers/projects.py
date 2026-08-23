@@ -141,16 +141,13 @@ def create_project(
     context: TenantContext = Depends(get_tenant_context)
 ):
     project = sanitize_project_data(project)
-    # Verify project limit for active plan
+    
+    # Enforce atomic project limit for organization's active plan
+    from ..services.billing import EntitlementService
     project_count = db.query(models.ResearchProject).filter(
         models.ResearchProject.organizationId == context.organization.id
     ).count()
-    max_projects = context.limits.get("max_projects", 2)
-    if project_count >= max_projects:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"لقد تجاوزت الحد الأقصى للمشاريع في باقتك الحالية ({project_count}/{max_projects}). يرجى ترقية الحساب."
-        )
+    EntitlementService.require_limit(db, context.organization.id, "MAX_PROJECTS", project_count)
 
     # Generate unique ID
     project_id = f"proj-{int(db.query(models.ResearchProject).count() + 1)}"

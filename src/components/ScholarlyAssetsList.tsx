@@ -326,10 +326,10 @@ export const ScholarlyAssetsList: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] p-6 rounded-2xl shadow-sm">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <h2 className="text-2xl font-bold flex items-center gap-2">
             <Layers className="w-7 h-7 text-purple-500" />
             <span>{t.title}</span>
-          </h1>
+          </h2>
           <p className="text-xs text-[var(--ds-text-secondary)] mt-1">{t.desc}</p>
         </div>
         

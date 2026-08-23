@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useProject } from '../../context/ProjectContext';
 import { MessageSquare, Send, Check, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { researchStorage } from '../../utils/researchStorage';
 
 interface Comment {
   id: string;
@@ -31,14 +32,14 @@ export const SupervisorPanel: React.FC = () => {
   // Load comments from localStorage
   useEffect(() => {
     if (!projectId) return;
-    const saved = localStorage.getItem(STORAGE_KEY + projectId);
+    const saved = researchStorage.getItem(STORAGE_KEY + projectId);
     if (saved) setComments(JSON.parse(saved));
   }, [projectId]);
 
   // Save to localStorage
   const persist = (updated: Comment[]) => {
     if (!projectId) return;
-    localStorage.setItem(STORAGE_KEY + projectId, JSON.stringify(updated));
+    researchStorage.setItem(STORAGE_KEY + projectId, JSON.stringify(updated));
     setComments(updated);
   };
 

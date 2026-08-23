@@ -24,13 +24,20 @@ export const ResearchPlanning: React.FC = () => {
   const [ethicsPlan, setEthicsPlan] = useState<EthicsFeasibilityPlan>(blankEthicsPlan);
   const [status, setStatus] = useState<SaveStatus>(null);
 
+  const projectId = activeProject?.id;
+  const projectVersion = activeProject?.version;
+  const projectObjectives = activeProject?.objectives;
+  const projectTimeline = activeProject?.timeline;
+  const projectEthics = activeProject?.ethics;
+  const projectEthicsPlan = activeProject?.ethicsFeasibilityPlan;
+
   useEffect(() => {
-    setObjectives(activeProject?.objectives || '');
-    setTimeline(activeProject?.timeline || '');
-    setEthics(activeProject?.ethics || '');
-    setEthicsPlan(activeProject?.ethicsFeasibilityPlan || blankEthicsPlan);
+    setObjectives(projectObjectives || '');
+    setTimeline(projectTimeline || '');
+    setEthics(projectEthics || '');
+    setEthicsPlan(projectEthicsPlan || blankEthicsPlan);
     setStatus(null);
-  }, [activeProject?.id, activeProject?.version]);
+  }, [projectId, projectVersion, projectObjectives, projectTimeline, projectEthics, projectEthicsPlan]);
 
   if (!activeProject) {
     return (

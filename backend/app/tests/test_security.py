@@ -25,6 +25,7 @@ def override_get_db():
 
 @pytest.fixture(autouse=True, scope="module")
 def setup_db():
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)

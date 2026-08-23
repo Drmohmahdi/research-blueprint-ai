@@ -35,9 +35,27 @@ const SmokeTestDashboard        = lazy(() => import('../components/SmokeTestDash
 
 const DesignSystemUnavailable: React.FC = () => (
   <div className="p-6">
-    <h1 className="text-xl font-semibold">Design system is available in development only.</h1>
+    <h2 className="text-xl font-semibold">Design system is available in development only.</h2>
   </div>
 );
+
+const NotFound: React.FC = () => {
+  const { language } = useProject();
+  return (
+    <section className="mx-auto flex min-h-[45vh] max-w-xl flex-col items-center justify-center gap-4 text-center" aria-labelledby="not-found-title">
+      <span className="text-5xl font-black text-[var(--ds-primary)]" aria-hidden="true">404</span>
+      <h2 id="not-found-title" className="m-0 text-2xl font-extrabold text-[var(--ds-text-primary)]">
+        {language === 'ar' ? 'الصفحة غير موجودة' : 'Page not found'}
+      </h2>
+      <p className="m-0 text-sm text-[var(--ds-text-secondary)]">
+        {language === 'ar' ? 'قد يكون الرابط قد تغير أو لا يتوفر ضمن مساحة عملك.' : 'The link may have changed or may not be available in your workspace.'}
+      </p>
+      <a href={ROUTES.PORTAL} className="rounded-lg bg-[var(--ds-primary)] px-4 py-2.5 font-bold text-white">
+        {language === 'ar' ? 'العودة إلى البوابة' : 'Return to portal'}
+      </a>
+    </section>
+  );
+};
 
 const DesignSystemShowcase = import.meta.env.DEV
   ? lazy(() => import('../components/DesignSystemShowcase').then(m => ({ default: m.DesignSystemShowcase })))
@@ -62,6 +80,7 @@ const AcademicVisibilityReports   = lazy(() => import('../components/AcademicVis
 // Unified Profile & Assets Components
 const UnifiedProfileEditor = lazy(() => import('../components/UnifiedProfileEditor').then(m => ({ default: m.UnifiedProfileEditor })));
 const ScholarlyAssetsList  = lazy(() => import('../components/ScholarlyAssetsList').then(m => ({ default: m.ScholarlyAssetsList })));
+const SearchPage           = lazy(() => import('../components/SearchPage').then(m => ({ default: m.SearchPage })));
 
 // ── Fallback loading UI ───────────────────────────────────────────────────────
 const PageLoader: React.FC = () => (
@@ -87,6 +106,7 @@ export const AppRouter: React.FC = () => {
 
   return (
     <Routes>
+      <Route path="/" element={<Navigate to={ROUTES.PORTAL} replace />} />
       {/* Portal Gateway Route */}
       <Route path={ROUTES.PORTAL}           element={<SafeRoute><PortalGateway /></SafeRoute>} />
       
@@ -118,7 +138,7 @@ export const AppRouter: React.FC = () => {
       <Route path={ROUTES.EXPORT}           element={<SafeRoute><ExportPanel /></SafeRoute>} />
 
       {/* Peer Review Module Routes */}
-      <Route path={ROUTES.PEER_REVIEW}      element={<SafeRoute><ReviewerDashboard /></SafeRoute>} />
+      <Route path={ROUTES.PEER_REVIEW}             element={<SafeRoute><ReviewerDashboard /></SafeRoute>} />
       <Route path={ROUTES.PEER_REVIEW_ASSIGNMENTS} element={<SafeRoute><ReviewerDashboard /></SafeRoute>} />
 
       {/* Promotion Module Routes */}
@@ -138,6 +158,9 @@ export const AppRouter: React.FC = () => {
       <Route path={ROUTES.ASSETS}              element={<SafeRoute><ScholarlyAssetsList /></SafeRoute>} />
       <Route path={ROUTES.ASSET_DETAILS}       element={<SafeRoute><ScholarlyAssetsList /></SafeRoute>} />
 
+
+      {/* Phase 09 — Unified Search */}
+      <Route path={ROUTES.SEARCH}             element={<SafeRoute><SearchPage /></SafeRoute>} />
 
       {/* System — Admin/Dev only routes */}
       <Route path={ROUTES.DESIGN_SYSTEM} element={
@@ -179,8 +202,8 @@ export const AppRouter: React.FC = () => {
       <Route path={ROUTES.THESIS_DEFENSE} element={<SafeRoute><ThesisDefenseWorkspace /></SafeRoute>} />
       <Route path={ROUTES.THESIS_DEFENSE_STEP} element={<SafeRoute><ThesisDefenseWorkspace /></SafeRoute>} />
 
-      {/* Fallback to Portal Gateway */}
-      <Route path="*" element={<Navigate to={ROUTES.PORTAL} replace />} />
+      {/* Explicit not-found experience; does not reveal resource existence. */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };

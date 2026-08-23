@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Float, ForeignKey, JSON, Boolean
+from sqlalchemy import Column, String, Integer, Float, ForeignKey, JSON, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
 from .db import Base
 
@@ -48,6 +48,7 @@ class ResearchProject(Base):
     organizationId = Column(String, ForeignKey("organizations.id", ondelete="SET NULL"), nullable=True)
     titleAr = Column(String, nullable=False)
     titleEn = Column(String, nullable=False)
+    search_text = Column(String, nullable=True)
     departmentAr = Column(String, nullable=True)
     departmentEn = Column(String, nullable=True)
     institutionAr = Column(String, nullable=True)
@@ -83,6 +84,8 @@ class ResearchProject(Base):
     variables = relationship("ResearchVariable", back_populates="project", cascade="all, delete-orphan")
     questions = relationship("ResearchQuestion", back_populates="project", cascade="all, delete-orphan")
     hypotheses = relationship("Hypothesis", back_populates="project", cascade="all, delete-orphan")
+    literature_studies = relationship("LiteratureStudy", back_populates="project", cascade="all, delete-orphan")
+    prisma_flow = relationship("PrismaFlow", back_populates="project", uselist=False, cascade="all, delete-orphan")
 
 
 
@@ -386,11 +389,16 @@ class Plan(Base):
     __tablename__ = "plans"
 
     id = Column(String, primary_key=True, index=True)
-    code = Column(String, unique=True, index=True, nullable=False) # PERSONAL_FREE, RESEARCHER_PRO, etc.
+    code = Column(String, unique=True, index=True, nullable=False) # FREE, STARTER, PROFESSIONAL, INSTITUTIONAL (or legacy PERSONAL_FREE, RESEARCHER_PRO)
     name = Column(String, nullable=False)
+    name_ar = Column(String, nullable=True)
+    name_en = Column(String, nullable=True)
     description = Column(String, nullable=True)
+    description_ar = Column(String, nullable=True)
+    description_en = Column(String, nullable=True)
     billing_interval = Column(String, nullable=False, default="MONTHLY") # MONTHLY, YEARLY
-    price = Column(Float, nullable=False, default=0.0)
+    price = Column(Float, nullable=False, default=0.0) # Legacy float
+    price_minor_units = Column(Integer, nullable=False, default=0) # Integer minor units (halalas)
     currency = Column(String, nullable=False, default="SAR")
     is_active = Column(Boolean, default=True)
     is_public = Column(Boolean, default=True)
@@ -400,17 +408,24 @@ class Plan(Base):
     created_at = Column(String, nullable=False)
     updated_at = Column(String, nullable=True)
 
+    prices = relationship("CommercialPlanPrice", back_populates="plan", cascade="all, delete-orphan")
+    entitlements = relationship("CommercialPlanEntitlement", back_populates="plan", cascade="all, delete-orphan")
+
 
 class Subscription(Base):
     __tablename__ = "subscriptions"
 
     id = Column(String, primary_key=True, index=True)
-    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
-    plan_id = Column(String, ForeignKey("plans.id", ondelete="CASCADE"), nullable=False)
-    status = Column(String, nullable=False, default="ACTIVE") # TRIALING, ACTIVE, PAST_DUE, PAUSED, CANCELLED, EXPIRED
-    provider = Column(String, nullable=False, default="MOCK") # MOCK, MANUAL, STRIPE
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    plan_id = Column(String, ForeignKey("plans.id", ondelete="CASCADE"), nullable=False, index=True)
+    plan_price_id = Column(String, nullable=True)
+    status = Column(String, nullable=False, default="ACTIVE") # TRIALING, ACTIVE, PAST_DUE, PAUSED, CANCELLED, EXPIRED, SUSPENDED
+    provider = Column(String, nullable=False, default="MOCK") # MOCK, NULL_ADAPTER, SANDBOX, MOYASAR, STRIPE
     provider_customer_id = Column(String, nullable=True)
     provider_subscription_id = Column(String, nullable=True)
+    unit_amount_minor_units = Column(Integer, nullable=False, default=0)
+    currency = Column(String, nullable=False, default="SAR")
+    billing_interval = Column(String, nullable=False, default="MONTHLY")
     current_period_start = Column(String, nullable=False)
     current_period_end = Column(String, nullable=False)
     trial_ends_at = Column(String, nullable=True)
@@ -419,25 +434,39 @@ class Subscription(Base):
     created_at = Column(String, nullable=False)
     updated_at = Column(String, nullable=True)
 
+    plan = relationship("Plan")
+    organization = relationship("Organization")
+
 
 class Invoice(Base):
     __tablename__ = "invoices"
 
     id = Column(String, primary_key=True, index=True)
-    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
-    subscription_id = Column(String, ForeignKey("subscriptions.id", ondelete="CASCADE"), nullable=False)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    subscription_id = Column(String, ForeignKey("subscriptions.id", ondelete="CASCADE"), nullable=False, index=True)
     provider_invoice_id = Column(String, nullable=True)
-    invoice_number = Column(String, nullable=False)
-    amount_subtotal = Column(Float, nullable=False)
+    invoice_number = Column(String, nullable=False, index=True)
+    amount_subtotal = Column(Float, nullable=False, default=0.0)
     amount_tax = Column(Float, nullable=False, default=0.0)
-    amount_total = Column(Float, nullable=False)
+    amount_total = Column(Float, nullable=False, default=0.0)
+    amount_subtotal_minor_units = Column(Integer, nullable=False, default=0)
+    tax_rate_basis_points = Column(Integer, nullable=False, default=1500) # 15% VAT default
+    amount_tax_minor_units = Column(Integer, nullable=False, default=0)
+    amount_total_minor_units = Column(Integer, nullable=False, default=0)
     currency = Column(String, nullable=False, default="SAR")
-    status = Column(String, nullable=False, default="PAID") # DRAFT, OPEN, PAID, VOID, UNCOLLECTIBLE
+    status = Column(String, nullable=False, default="PAID") # DRAFT, ISSUED, PAID, VOID, UNCOLLECTIBLE
     issued_at = Column(String, nullable=False)
     due_at = Column(String, nullable=True)
     paid_at = Column(String, nullable=True)
     invoice_url = Column(String, nullable=True)
+    pdf_asset_id = Column(String, nullable=True)
+    seller_snapshot_json = Column(JSON, nullable=True)
+    buyer_snapshot_json = Column(JSON, nullable=True)
     metadata_json = Column(JSON, nullable=True)
+
+    subscription = relationship("Subscription")
+    organization = relationship("Organization")
+    lines = relationship("CommercialInvoiceLine", back_populates="invoice", cascade="all, delete-orphan")
 
 
 class UsageEvent(Base):
@@ -470,8 +499,23 @@ class UploadedFile(Base):
     checksum = Column(String, nullable=True)
     classification = Column(String, nullable=False, default="INTERNAL") # PUBLIC, INTERNAL, CONFIDENTIAL_RESEARCH, RESTRICTED_PARTICIPANT_DATA
     scan_status = Column(String, nullable=False, default="UNSCANNED") # UNSCANNED, CLEAN, INFECTED
+    search_text = Column(String, nullable=True)
     created_at = Column(String, nullable=False)
     deleted_at = Column(String, nullable=True)
+
+
+class StorageQuotaUsage(Base):
+    """
+    Atomic per-organization storage usage counter used for concurrency-safe
+    storage quota enforcement (reserve -> upload -> commit usage).
+    One row per organization; updated atomically with a conditional UPDATE so
+    concurrent uploads cannot exceed the plan's storage limit.
+    """
+    __tablename__ = "storage_quota_usage"
+
+    organization_id = Column(String, primary_key=True, index=True)
+    used_bytes = Column(Integer, nullable=False, default=0)
+    updated_at = Column(String, nullable=True)
 
 
 class AcademicIdentityProfile(Base):
@@ -536,6 +580,7 @@ class UnifiedAcademicProfile(Base):
     profile_photo_file_id = Column(String, ForeignKey("uploaded_files.id", ondelete="SET NULL"), nullable=True)
     visibility_status = Column(String, default="PUBLIC")
     completeness_score = Column(Integer, default=0)
+    search_text = Column(String, nullable=True)
     created_at = Column(String, nullable=False)
     updated_at = Column(String, nullable=True)
 
@@ -614,6 +659,7 @@ class ScholarlyAsset(Base):
     parent_asset_id = Column(String, ForeignKey("core_scholarly_assets.id", ondelete="SET NULL"), nullable=True)
     version_number = Column(Integer, default=1)
     metadata_json = Column(JSON, nullable=True)
+    search_text = Column(String, nullable=True)
     created_at = Column(String, nullable=False)
     updated_at = Column(String, nullable=True)
     deleted_at = Column(String, nullable=True)
@@ -660,19 +706,123 @@ class ScholarlyAssetFile(Base):
     uploaded_file = relationship("UploadedFile")
 
 
+class PromotionPolicy(Base):
+    __tablename__ = "promotion_policies"
+
+    id = Column(String, primary_key=True, index=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    name_ar = Column(String, nullable=False)
+    name_en = Column(String, nullable=False)
+    description_ar = Column(String, nullable=True)
+    description_en = Column(String, nullable=True)
+    target_rank = Column(String, nullable=False, index=True)
+    version = Column(Integer, default=1, nullable=False)
+    status = Column(String, default="ACTIVE", nullable=False) # DRAFT, ACTIVE, RETIRED
+    is_default = Column(Boolean, default=False)
+    rules_json = Column(JSON, nullable=True)
+    created_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+    updated_at = Column(String, nullable=False)
+
+    organization = relationship("Organization")
+    creator = relationship("User")
+    criteria = relationship("PromotionCriterion", back_populates="policy", cascade="all, delete-orphan")
+    applications = relationship("PromotionApplication", back_populates="policy")
+
+
+class PromotionCriterion(Base):
+    __tablename__ = "promotion_criteria"
+
+    id = Column(String, primary_key=True, index=True)
+    policy_id = Column(String, ForeignKey("promotion_policies.id", ondelete="CASCADE"), nullable=False, index=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    code = Column(String, nullable=False)
+    title_ar = Column(String, nullable=False)
+    title_en = Column(String, nullable=False)
+    criterion_type = Column(String, default="RESEARCH_OUTPUT", nullable=False)
+    required_points = Column(Float, default=0.0)
+    min_asset_count = Column(Integer, default=0)
+    rule_definition_json = Column(JSON, nullable=False)
+    weight = Column(Float, default=1.0)
+    is_mandatory = Column(Boolean, default=True)
+    sort_order = Column(Integer, default=1)
+    created_at = Column(String, nullable=False)
+
+    policy = relationship("PromotionPolicy", back_populates="criteria")
+    organization = relationship("Organization")
+
+
+class PromotionApplication(Base):
+    __tablename__ = "promotion_applications"
+
+    id = Column(String, primary_key=True, index=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    policy_id = Column(String, ForeignKey("promotion_policies.id", ondelete="RESTRICT"), nullable=False, index=True)
+    policy_version = Column(Integer, default=1, nullable=False)
+    current_rank = Column(String, nullable=True)
+    target_rank = Column(String, nullable=False)
+    status = Column(String, default="DRAFT", nullable=False) # DRAFT, READY_FOR_REVIEW, SUBMITTED, UNDER_REVIEW, RETURNED_FOR_CHANGES, COMPLETED
+    readiness_percentage = Column(Integer, default=0)
+    total_calculated_points = Column(Float, default=0.0)
+    evaluation_summary_json = Column(JSON, nullable=True)
+    evaluation_fingerprint = Column(String, nullable=True)
+    search_text = Column(String, nullable=True)
+    human_review_decision = Column(String, nullable=True) # ELIGIBLE_RECOMMENDED, INELIGIBLE_DEFICIENT, REQUIRES_FURTHER_DOCS, PENDING_COMMITTEE
+    human_review_notes = Column(String, nullable=True)
+    reviewer_user_id = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    reviewed_at = Column(String, nullable=True)
+    submitted_at = Column(String, nullable=True)
+    created_at = Column(String, nullable=False)
+    updated_at = Column(String, nullable=False)
+
+    organization = relationship("Organization")
+    applicant = relationship("User", foreign_keys=[user_id])
+    policy = relationship("PromotionPolicy", back_populates="applications")
+    reviewer = relationship("User", foreign_keys=[reviewer_user_id])
+    evidence_selections = relationship("PromotionAssetSelection", back_populates="application", cascade="all, delete-orphan")
+    snapshots = relationship("PromotionEvaluationSnapshot", back_populates="application", cascade="all, delete-orphan")
+
+
 class PromotionAssetSelection(Base):
     __tablename__ = "core_promotion_asset_selections"
 
     id = Column(String, primary_key=True, index=True)
-    promotion_application_id = Column(String, nullable=False)
-    scholarly_asset_id = Column(String, ForeignKey("core_scholarly_assets.id", ondelete="CASCADE"), nullable=False)
+    promotion_application_id = Column(String, ForeignKey("promotion_applications.id", ondelete="CASCADE"), nullable=False, index=True)
+    scholarly_asset_id = Column(String, ForeignKey("core_scholarly_assets.id", ondelete="CASCADE"), nullable=False, index=True)
+    criterion_id = Column(String, ForeignKey("promotion_criteria.id", ondelete="SET NULL"), nullable=True)
     eligibility_status = Column(String, default="PENDING")
     rule_set_id = Column(String, nullable=True)
     calculated_points = Column(Float, default=0.0)
     evidence_status = Column(String, default="PENDING")
+    evidence_snapshot_json = Column(JSON, nullable=True)
+    verification_status = Column(String, default="UNVERIFIED")
     notes = Column(String, nullable=True)
+    created_at = Column(String, nullable=True)
 
+    application = relationship("PromotionApplication", back_populates="evidence_selections")
     asset = relationship("ScholarlyAsset")
+    criterion = relationship("PromotionCriterion")
+
+
+class PromotionEvaluationSnapshot(Base):
+    __tablename__ = "promotion_evaluation_snapshots"
+
+    id = Column(String, primary_key=True, index=True)
+    application_id = Column(String, ForeignKey("promotion_applications.id", ondelete="CASCADE"), nullable=False, index=True)
+    policy_id = Column(String, ForeignKey("promotion_policies.id", ondelete="SET NULL"), nullable=True)
+    policy_version = Column(Integer, nullable=False)
+    readiness_percentage = Column(Integer, nullable=False)
+    total_points = Column(Float, nullable=False)
+    criteria_results_json = Column(JSON, nullable=False)
+    evaluation_fingerprint = Column(String, nullable=False)
+    evaluated_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    evaluated_at = Column(String, nullable=False)
+
+    application = relationship("PromotionApplication", back_populates="snapshots")
+    policy = relationship("PromotionPolicy")
+    evaluator = relationship("User")
+
 
 
 class DataProvenance(Base):
@@ -695,5 +845,454 @@ class DataProvenance(Base):
     organization = relationship("Organization")
     imported_file = relationship("UploadedFile")
     importer = relationship("User")
+
+
+class LiteratureStudy(Base):
+    __tablename__ = "project_literature_studies"
+
+    id = Column(String, primary_key=True, index=True)
+    projectId = Column(String, ForeignKey("research_projects.id", ondelete="CASCADE"), nullable=False, index=True)
+    organizationId = Column(String, ForeignKey("organizations.id", ondelete="SET NULL"), nullable=True, index=True)
+    author = Column(String, nullable=False)
+    year = Column(Integer, nullable=False)
+    sampleSize = Column(Integer, nullable=False)
+    effectSize = Column(Float, nullable=False) # Cohen's d
+    ciLower = Column(Float, nullable=False)
+    ciUpper = Column(Float, nullable=False)
+    source = Column(String, default="manual")
+    doi = Column(String, nullable=True)
+    notes = Column(String, nullable=True)
+    search_text = Column(String, nullable=True)
+    createdAt = Column(String, nullable=False)
+    updatedAt = Column(String, nullable=False)
+
+    project = relationship("ResearchProject", back_populates="literature_studies")
+    organization = relationship("Organization")
+
+
+class PrismaFlow(Base):
+    __tablename__ = "project_prisma_flows"
+
+    id = Column(String, primary_key=True, index=True)
+    projectId = Column(String, ForeignKey("research_projects.id", ondelete="CASCADE"), unique=True, nullable=False, index=True)
+    organizationId = Column(String, ForeignKey("organizations.id", ondelete="SET NULL"), nullable=True, index=True)
+    identified = Column(Integer, default=0, nullable=False)
+    duplicates = Column(Integer, default=0, nullable=False)
+    excludedScreening = Column(Integer, default=0, nullable=False)
+    excludedEligibility = Column(Integer, default=0, nullable=False)
+    source = Column(String, default="manual")
+    notes = Column(String, nullable=True)
+    createdAt = Column(String, nullable=False)
+    updatedAt = Column(String, nullable=False)
+
+    project = relationship("ResearchProject", back_populates="prisma_flow")
+    organization = relationship("Organization")
+
+
+# ── Peer Review Domain Models ──────────────────────────────────────────────────
+
+class PeerReviewCase(Base):
+    __tablename__ = "peer_review_cases"
+
+    id = Column(String, primary_key=True, index=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    owner_user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    project_id = Column(String, ForeignKey("research_projects.id", ondelete="SET NULL"), nullable=True, index=True)
+    scholarly_asset_id = Column(String, ForeignKey("core_scholarly_assets.id", ondelete="SET NULL"), nullable=True, index=True)
+    title_ar = Column(String, nullable=False)
+    title_en = Column(String, nullable=False)
+    abstract_ar = Column(String, nullable=True)
+    abstract_en = Column(String, nullable=True)
+    discipline = Column(String, nullable=True)
+    case_type = Column(String, default="MANUSCRIPT", nullable=False)  # MANUSCRIPT, PROPOSAL, STUDY_DESIGN, PROMOTION_DOSSIER
+    blind_type = Column(String, default="DOUBLE_BLIND", nullable=False)  # SINGLE_BLIND, DOUBLE_BLIND, OPEN
+    status = Column(String, default="DRAFT", nullable=False)  # DRAFT, IN_REVIEW, REVISION_REQUESTED, DECIDED, WITHDRAWN
+    current_round_number = Column(Integer, default=1, nullable=False)
+    search_text = Column(String, nullable=True)
+    created_at = Column(String, nullable=False)
+    updated_at = Column(String, nullable=False)
+
+    organization = relationship("Organization")
+    owner = relationship("User", foreign_keys=[owner_user_id])
+    project = relationship("ResearchProject")
+    scholarly_asset = relationship("ScholarlyAsset")
+    rounds = relationship("PeerReviewRound", back_populates="case", cascade="all, delete-orphan")
+    revisions = relationship("ManuscriptRevision", back_populates="case", cascade="all, delete-orphan")
+
+
+class PeerReviewRound(Base):
+    __tablename__ = "peer_review_rounds"
+
+    id = Column(String, primary_key=True, index=True)
+    case_id = Column(String, ForeignKey("peer_review_cases.id", ondelete="CASCADE"), nullable=False, index=True)
+    round_number = Column(Integer, nullable=False)
+    manuscript_version = Column(Integer, default=1, nullable=False)
+    status = Column(String, default="ACTIVE", nullable=False)  # ACTIVE, COMPLETED, CANCELLED
+    manuscript_snapshot_json = Column(JSON, nullable=True)
+    rubric_id = Column(String, ForeignKey("review_rubrics.id", ondelete="SET NULL"), nullable=True)
+    rubric_snapshot_json = Column(JSON, nullable=True)
+    decision = Column(String, default="PENDING", nullable=False)  # PENDING, ACCEPTED, REVISION_REQUIRED, REJECTED
+    decision_notes = Column(String, nullable=True)
+    decision_by_user_id = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    decision_at = Column(String, nullable=True)
+    created_at = Column(String, nullable=False)
+
+    case = relationship("PeerReviewCase", back_populates="rounds")
+    rubric = relationship("ReviewRubric")
+    decision_maker = relationship("User", foreign_keys=[decision_by_user_id])
+    assignments = relationship("ReviewerAssignment", back_populates="round", cascade="all, delete-orphan")
+
+
+class ReviewRubric(Base):
+    __tablename__ = "review_rubrics"
+
+    id = Column(String, primary_key=True, index=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    name_ar = Column(String, nullable=False)
+    name_en = Column(String, nullable=False)
+    rubric_type = Column(String, default="GENERAL_MANUSCRIPT", nullable=False)
+    version = Column(Integer, default=1, nullable=False)
+    is_default = Column(Boolean, default=False)
+    status = Column(String, default="ACTIVE", nullable=False)  # ACTIVE, ARCHIVED
+    created_at = Column(String, nullable=False)
+
+    organization = relationship("Organization")
+    criteria = relationship("ReviewCriterion", back_populates="rubric", cascade="all, delete-orphan")
+
+
+class ReviewCriterion(Base):
+    __tablename__ = "review_criteria"
+
+    id = Column(String, primary_key=True, index=True)
+    rubric_id = Column(String, ForeignKey("review_rubrics.id", ondelete="CASCADE"), nullable=False, index=True)
+    code = Column(String, nullable=False)
+    title_ar = Column(String, nullable=False)
+    title_en = Column(String, nullable=False)
+    desc_ar = Column(String, nullable=True)
+    desc_en = Column(String, nullable=True)
+    response_type = Column(String, default="SCORE", nullable=False)  # SCORE, YES_NO, TEXT, CHOICE
+    weight = Column(Float, default=1.0, nullable=False)
+    is_mandatory = Column(Boolean, default=True, nullable=False)
+    sort_order = Column(Integer, default=1, nullable=False)
+    options_json = Column(JSON, nullable=True)
+    created_at = Column(String, nullable=False)
+
+    rubric = relationship("ReviewRubric", back_populates="criteria")
+
+
+class ReviewerAssignment(Base):
+    __tablename__ = "reviewer_assignments"
+
+    id = Column(String, primary_key=True, index=True)
+    case_id = Column(String, ForeignKey("peer_review_cases.id", ondelete="CASCADE"), nullable=False, index=True)
+    round_id = Column(String, ForeignKey("peer_review_rounds.id", ondelete="CASCADE"), nullable=False, index=True)
+    reviewer_type = Column(String, default="INTERNAL_REVIEWER", nullable=False)  # INTERNAL_REVIEWER, EXTERNAL_REVIEWER
+    reviewer_user_id = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    external_email = Column(String, nullable=True, index=True)
+    external_name = Column(String, nullable=True)
+    status = Column(String, default="INVITED", nullable=False)  # INVITED, ACCEPTED, DECLINED, IN_PROGRESS, SUBMITTED, EXPIRED, REVOKED
+    conflict_status = Column(String, default="NO_CONFLICT", nullable=False)  # NO_CONFLICT, POTENTIAL_CONFLICT, CONFLICT_DECLARED
+    conflict_notes = Column(String, nullable=True)
+    decline_reason = Column(String, nullable=True)
+    due_at = Column(String, nullable=True)
+    invited_at = Column(String, nullable=False)
+    accepted_at = Column(String, nullable=True)
+    submitted_at = Column(String, nullable=True)
+    created_at = Column(String, nullable=False)
+
+    round = relationship("PeerReviewRound", back_populates="assignments")
+    reviewer_user = relationship("User", foreign_keys=[reviewer_user_id])
+    tokens = relationship("ExternalReviewerToken", back_populates="assignment", cascade="all, delete-orphan")
+    submission = relationship("ReviewSubmission", back_populates="assignment", uselist=False, cascade="all, delete-orphan")
+
+
+class ExternalReviewerToken(Base):
+    __tablename__ = "external_reviewer_tokens"
+
+    id = Column(String, primary_key=True, index=True)
+    assignment_id = Column(String, ForeignKey("reviewer_assignments.id", ondelete="CASCADE"), nullable=False, index=True)
+    token_hash = Column(String, nullable=False, index=True)
+    expires_at = Column(String, nullable=False)
+    used_at = Column(String, nullable=True)
+    revoked_at = Column(String, nullable=True)
+    revoked_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+
+    assignment = relationship("ReviewerAssignment", back_populates="tokens")
+    revoker = relationship("User")
+
+
+class ReviewSubmission(Base):
+    __tablename__ = "review_submissions"
+
+    id = Column(String, primary_key=True, index=True)
+    assignment_id = Column(String, ForeignKey("reviewer_assignments.id", ondelete="CASCADE"), unique=True, nullable=False, index=True)
+    round_id = Column(String, ForeignKey("peer_review_rounds.id", ondelete="CASCADE"), nullable=False, index=True)
+    case_id = Column(String, ForeignKey("peer_review_cases.id", ondelete="CASCADE"), nullable=False, index=True)
+    status = Column(String, default="DRAFT", nullable=False)  # DRAFT, SUBMITTED
+    recommendation = Column(String, default="MINOR_REVISION", nullable=False)  # ACCEPT, MINOR_REVISION, MAJOR_REVISION, REJECT
+    summary_evaluation_ar = Column(String, nullable=True)
+    summary_evaluation_en = Column(String, nullable=True)
+    total_weighted_score = Column(Float, default=0.0, nullable=False)
+    is_confidential_to_editor = Column(Boolean, default=False, nullable=False)
+    submitted_at = Column(String, nullable=True)
+    created_at = Column(String, nullable=False)
+    updated_at = Column(String, nullable=False)
+
+    assignment = relationship("ReviewerAssignment", back_populates="submission")
+    responses = relationship("ReviewCriterionResponse", back_populates="submission", cascade="all, delete-orphan")
+    comments = relationship("ReviewComment", back_populates="submission", cascade="all, delete-orphan")
+
+
+class ReviewCriterionResponse(Base):
+    __tablename__ = "review_criterion_responses"
+
+    id = Column(String, primary_key=True, index=True)
+    submission_id = Column(String, ForeignKey("review_submissions.id", ondelete="CASCADE"), nullable=False, index=True)
+    criterion_id = Column(String, ForeignKey("review_criteria.id", ondelete="CASCADE"), nullable=False, index=True)
+    score_value = Column(Float, nullable=True)
+    text_value = Column(String, nullable=True)
+    choice_value = Column(String, nullable=True)
+    comments = Column(String, nullable=True)
+    created_at = Column(String, nullable=False)
+
+    submission = relationship("ReviewSubmission", back_populates="responses")
+    criterion = relationship("ReviewCriterion")
+
+
+class ReviewComment(Base):
+    __tablename__ = "review_comments"
+
+    id = Column(String, primary_key=True, index=True)
+    submission_id = Column(String, ForeignKey("review_submissions.id", ondelete="CASCADE"), nullable=False, index=True)
+    case_id = Column(String, ForeignKey("peer_review_cases.id", ondelete="CASCADE"), nullable=False, index=True)
+    round_id = Column(String, ForeignKey("peer_review_rounds.id", ondelete="CASCADE"), nullable=False, index=True)
+    section_key = Column(String, nullable=True)
+    comment_type = Column(String, default="AUTHOR_VISIBLE", nullable=False)  # AUTHOR_VISIBLE, CONFIDENTIAL_TO_EDITOR
+    comment_text = Column(String, nullable=False)
+    author_response_text = Column(String, nullable=True)
+    is_resolved = Column(Boolean, default=False, nullable=False)
+    created_at = Column(String, nullable=False)
+
+    submission = relationship("ReviewSubmission", back_populates="comments")
+
+
+class ManuscriptRevision(Base):
+    __tablename__ = "manuscript_revisions"
+
+    id = Column(String, primary_key=True, index=True)
+    case_id = Column(String, ForeignKey("peer_review_cases.id", ondelete="CASCADE"), nullable=False, index=True)
+    round_id = Column(String, ForeignKey("peer_review_rounds.id", ondelete="SET NULL"), nullable=True, index=True)
+    version_number = Column(Integer, default=1, nullable=False)
+    title_ar = Column(String, nullable=False)
+    title_en = Column(String, nullable=False)
+    abstract_ar = Column(String, nullable=True)
+    abstract_en = Column(String, nullable=True)
+    response_to_reviewers = Column(String, nullable=True)
+    file_id = Column(String, ForeignKey("uploaded_files.id", ondelete="SET NULL"), nullable=True)
+    uploaded_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+
+    case = relationship("PeerReviewCase", back_populates="revisions")
+    uploader = relationship("User")
+    file = relationship("UploadedFile")
+
+
+class WorkflowEvent(Base):
+    __tablename__ = "workflow_events"
+
+    id = Column(String, primary_key=True, index=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    event_type = Column(String, nullable=False, index=True)
+    aggregate_type = Column(String, nullable=False, index=True)
+    aggregate_id = Column(String, nullable=False, index=True)
+    actor_user_id = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    payload_json = Column(JSON, default=dict, nullable=False)
+    idempotency_key = Column(String, unique=True, index=True, nullable=False)
+    status = Column(String, default="PENDING", nullable=False, index=True)  # PENDING, PROCESSING, PROCESSED, FAILED
+    attempt_count = Column(Integer, default=0, nullable=False)
+    next_attempt_at = Column(String, nullable=True)
+    occurred_at = Column(String, nullable=False)
+    processed_at = Column(String, nullable=True)
+    created_at = Column(String, nullable=False)
+
+    organization = relationship("Organization")
+    actor = relationship("User")
+    notifications = relationship("Notification", back_populates="workflow_event", cascade="all, delete-orphan")
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id = Column(String, primary_key=True, index=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    recipient_user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    workflow_event_id = Column(String, ForeignKey("workflow_events.id", ondelete="SET NULL"), nullable=True, index=True)
+    category = Column(String, nullable=False, index=True)  # PROMOTION, PEER_REVIEW, RESEARCH_WORKFLOW, SYSTEM
+    title_ar = Column(String, nullable=False)
+    title_en = Column(String, nullable=False)
+    message_ar = Column(String, nullable=False)
+    message_en = Column(String, nullable=False)
+    target_type = Column(String, nullable=True)  # PROMOTION_APPLICATION, PEER_REVIEW_CASE, RESEARCH_PROJECT
+    target_id = Column(String, nullable=True)
+    read_at = Column(String, nullable=True, index=True)
+    created_at = Column(String, nullable=False, index=True)
+
+    organization = relationship("Organization")
+    recipient = relationship("User")
+    workflow_event = relationship("WorkflowEvent", back_populates="notifications")
+
+
+class NotificationPreference(Base):
+    __tablename__ = "notification_preferences"
+    __table_args__ = (
+        UniqueConstraint("user_id", "organization_id", "category", name="uq_user_org_category_pref"),
+    )
+
+    id = Column(String, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    category = Column(String, nullable=False, index=True)  # PROMOTION, PEER_REVIEW, RESEARCH_WORKFLOW, SYSTEM
+    in_app_enabled = Column(Boolean, default=True, nullable=False)
+    email_enabled = Column(Boolean, default=True, nullable=False)
+    updated_at = Column(String, nullable=False)
+
+    user = relationship("User")
+    organization = relationship("Organization")
+
+
+class NotificationDelivery(Base):
+    __tablename__ = "notification_deliveries"
+
+    id = Column(String, primary_key=True, index=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    notification_id = Column(String, ForeignKey("notifications.id", ondelete="SET NULL"), nullable=True, index=True)
+    workflow_event_id = Column(String, ForeignKey("workflow_events.id", ondelete="CASCADE"), nullable=False, index=True)
+    channel = Column(String, nullable=False)  # IN_APP, EMAIL
+    recipient_address = Column(String, nullable=True)
+    status = Column(String, default="DELIVERED", nullable=False, index=True)  # DELIVERED, NOT_CONFIGURED, FAILED, SKIPPED_PREFERENCE
+    attempt_count = Column(Integer, default=1, nullable=False)
+    last_attempt_at = Column(String, nullable=True)
+    failure_code = Column(String, nullable=True)
+    created_at = Column(String, nullable=False)
+
+    organization = relationship("Organization")
+    notification = relationship("Notification")
+    workflow_event = relationship("WorkflowEvent")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PHASE 07 — COMMERCIAL SAAS BILLING, PRICING & PAYMENT MODELS
+# ─────────────────────────────────────────────────────────────────────────────
+
+class CommercialPlanPrice(Base):
+    __tablename__ = "commercial_plan_prices"
+
+    id = Column(String, primary_key=True, index=True)
+    plan_id = Column(String, ForeignKey("plans.id", ondelete="CASCADE"), nullable=False, index=True)
+    billing_interval = Column(String, nullable=False, default="MONTHLY")  # MONTHLY, YEARLY
+    price_minor_units = Column(Integer, nullable=False, default=0)  # Integer minor units (Halalas / cents)
+    currency = Column(String, nullable=False, default="SAR")
+    is_active = Column(Boolean, nullable=False, default=True)
+    provider_price_ref = Column(String, nullable=True)
+    created_at = Column(String, nullable=False)
+    updated_at = Column(String, nullable=True)
+
+    plan = relationship("Plan", back_populates="prices")
+
+
+class CommercialPlanEntitlement(Base):
+    __tablename__ = "commercial_plan_entitlements"
+    __table_args__ = (
+        UniqueConstraint("plan_id", "feature_key", name="uq_plan_feature_entitlement"),
+    )
+
+    id = Column(String, primary_key=True, index=True)
+    plan_id = Column(String, ForeignKey("plans.id", ondelete="CASCADE"), nullable=False, index=True)
+    feature_key = Column(String, nullable=False, index=True)  # ADVANCED_REPORTING, PEER_REVIEW, PROMOTION_ENGINE, AI_ASSISTANCE, EXPORT_PDF, EXPORT_DOCX, EXTERNAL_REVIEWERS, MAX_PROJECTS, MAX_MEMBERS, MAX_REPORTS_MONTHLY, MAX_STORAGE_MB
+    is_enabled = Column(Boolean, nullable=False, default=True)
+    limit_value = Column(Integer, nullable=True, default=None)  # integer limit or null/-1 for unlimited
+    created_at = Column(String, nullable=False)
+
+    plan = relationship("Plan", back_populates="entitlements")
+
+
+class CommercialInvoiceLine(Base):
+    __tablename__ = "commercial_invoice_lines"
+
+    id = Column(String, primary_key=True, index=True)
+    invoice_id = Column(String, ForeignKey("invoices.id", ondelete="CASCADE"), nullable=False, index=True)
+    description_ar = Column(String, nullable=False)
+    description_en = Column(String, nullable=False)
+    quantity = Column(Integer, nullable=False, default=1)
+    unit_amount_minor_units = Column(Integer, nullable=False, default=0)
+    line_total_minor_units = Column(Integer, nullable=False, default=0)
+
+    invoice = relationship("Invoice", back_populates="lines")
+
+
+class PaymentTransaction(Base):
+    __tablename__ = "payment_transactions"
+
+    id = Column(String, primary_key=True, index=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    invoice_id = Column(String, ForeignKey("invoices.id", ondelete="SET NULL"), nullable=True, index=True)
+    provider = Column(String, nullable=False, default="NULL_ADAPTER")  # NULL_ADAPTER, SANDBOX, MOYASAR, STRIPE
+    provider_transaction_ref = Column(String, nullable=True, unique=True, index=True)
+    amount_minor_units = Column(Integer, nullable=False)
+    currency = Column(String, nullable=False, default="SAR")
+    status = Column(String, nullable=False, default="PENDING", index=True)  # PENDING, AUTHORIZED, PAID, FAILED, REFUNDED
+    failure_code = Column(String, nullable=True)
+    created_at = Column(String, nullable=False)
+    confirmed_at = Column(String, nullable=True)
+
+    organization = relationship("Organization")
+    invoice = relationship("Invoice")
+
+
+class PaymentWebhookEvent(Base):
+    __tablename__ = "payment_webhook_events"
+
+    id = Column(String, primary_key=True, index=True)
+    provider = Column(String, nullable=False, index=True)
+    provider_event_id = Column(String, nullable=False, unique=True, index=True)
+    event_type = Column(String, nullable=False, index=True)
+    received_at = Column(String, nullable=False)
+    processed_at = Column(String, nullable=True)
+    status = Column(String, nullable=False, default="RECEIVED", index=True)  # RECEIVED, PROCESSED, IGNORED, FAILED
+    signature_valid = Column(Boolean, nullable=False, default=True)
+    error_details = Column(String, nullable=True)
+    payload_summary_json = Column(JSON, nullable=True)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PHASE 10 — GOVERNED ACADEMIC AI LAYER
+# ─────────────────────────────────────────────────────────────────────────────
+
+class AIRun(Base):
+    """
+    AI usage / audit record. Stores safe operational metadata only — never raw
+    prompts, full source content, full model responses, or secrets.
+    """
+    __tablename__ = "ai_runs"
+
+    id = Column(String, primary_key=True, index=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    use_case = Column(String, nullable=False, index=True)
+    provider = Column(String, nullable=False)
+    model = Column(String, nullable=True)
+    prompt_version = Column(Integer, nullable=True)
+    input_token_count = Column(Integer, nullable=True)
+    output_token_count = Column(Integer, nullable=True)
+    estimated_tokens = Column(Integer, nullable=True)
+    status = Column(String, nullable=False, default="COMPLETED")  # COMPLETED, FAILED, RATE_LIMITED, TIMEOUT, ENTITLEMENT_DENIED
+    latency_ms = Column(Integer, nullable=True)
+    error_code = Column(String, nullable=True)
+    retrieval_count = Column(Integer, nullable=True)
+    idempotency_key = Column(String, nullable=True, index=True)
+    created_at = Column(String, nullable=False, index=True)
+
+
 
 

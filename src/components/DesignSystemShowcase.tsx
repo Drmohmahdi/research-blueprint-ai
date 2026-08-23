@@ -180,7 +180,7 @@ export const DesignSystemShowcase: React.FC = () => {
             <div className="space-y-3 p-6 border border-[var(--ds-border-subtle)] rounded-2xl bg-[var(--ds-surface-primary)]">
               <div>
                 <span className="text-[9px] text-[var(--ds-text-muted)] uppercase block font-bold">display-xl (800)</span>
-                <h1 className="text-3xl md:text-4xl font-extrabold m-0 text-[var(--ds-text-primary)]">بصيرة للبحث العلمي</h1>
+                <h2 className="text-3xl md:text-4xl font-extrabold m-0 text-[var(--ds-text-primary)]">بصيرة للبحث العلمي</h2>
               </div>
               <div className="pt-2 border-t border-[var(--ds-border-subtle)]">
                 <span className="text-[9px] text-[var(--ds-text-muted)] uppercase block font-bold">section-title (600)</span>

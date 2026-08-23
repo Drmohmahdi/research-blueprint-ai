@@ -1,429 +1,330 @@
 import React, { useState } from 'react';
 import { useProject } from '../../context/ProjectContext';
 import { Card } from '../../design-system/components/Card';
-import { FileText, Printer } from 'lucide-react';
-import { generateStatisticalSyntax } from '../../utils/syntaxGenerator';
+import { FileText, Download, ShieldCheck, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { apiExportAcademicReport, apiVerifyReport, type ReportVerificationResult } from '../../utils/api';
 
 export const ExportPanel: React.FC = () => {
   const { activeProject, language } = useProject();
-  const [sections, setSections] = useState({
-    info: true,
-    methodology: true,
-    variables: true,
-    hypotheses: true,
-    syntax: true,
-    reviews: true,
-  });
+  const isAr = language === 'ar';
+
+  const [reportType, setReportType] = useState<'RESEARCH_PROJECT' | 'LITERATURE_SYNTHESIS' | 'PRISMA_FLOW' | 'PROMOTION_READINESS' | 'PEER_REVIEW' | 'ACADEMIC_PROFILE'>('RESEARCH_PROJECT');
+  const [format, setFormat] = useState<'PDF' | 'DOCX' | 'JSON'>('PDF');
+  const [reportLang, setReportLang] = useState<'ar' | 'en' | 'bilingual'>('ar');
+  const [audience, setAudience] = useState<'RESEARCHER' | 'AUTHOR' | 'SUPERVISOR' | 'COMMITTEE' | 'ADMIN'>('RESEARCHER');
+
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [lastGenerated, setLastGenerated] = useState<{ filename: string; integrityHash?: string } | null>(null);
+
+  // Verification state
+  const [verifCode, setVerifCode] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifResult, setVerifResult] = useState<ReportVerificationResult | null>(null);
 
   if (!activeProject) {
     return (
       <div className="flex items-center justify-center h-64 text-[var(--ds-text-muted)] text-sm">
-        {language === 'ar' ? 'يرجى اختيار مشروع بحثي لعرض مصدّر التقارير' : 'Please select a research project to show the report compiler'}
+        {isAr ? 'يرجى اختيار مشروع بحثي لعرض مصدّر التقارير الأكاديمية' : 'Please select a research project to show the academic report compiler'}
       </div>
     );
   }
 
-  const handleToggle = (sec: keyof typeof sections) => {
-    setSections(prev => ({ ...prev, [sec]: !prev[sec] }));
+  const handleExport = async () => {
+    setIsGenerating(true);
+    setErrorMsg(null);
+    setLastGenerated(null);
+
+    try {
+      const res = await apiExportAcademicReport({
+        report_type: reportType,
+        source_id: activeProject.id,
+        format,
+        language: reportLang,
+        audience,
+        template_version: 'academic-standard-v1'
+      });
+
+      if (!res) {
+        setErrorMsg(isAr ? 'فشل توليد التقرير من الخادم. يرجى التحقق من الصلاحيات والاتصال.' : 'Failed to generate report from server. Please verify permissions and connection.');
+        return;
+      }
+
+      // Trigger browser download
+      const url = window.URL.createObjectURL(res.blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = res.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      setLastGenerated({
+        filename: res.filename,
+        integrityHash: res.integrityHash
+      });
+    } catch (e: any) {
+      setErrorMsg(e?.message || (isAr ? 'حدث خطأ أثناء تنزيل الملف' : 'An error occurred during file download'));
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
-  const syntax = generateStatisticalSyntax(activeProject);
-  const isAr = language === 'ar';
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!verifCode.trim()) return;
+    setIsVerifying(true);
+    setVerifResult(null);
 
-  const handlePrint = () => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    // Build the compiled HTML content for printing
-    const title = isAr ? activeProject.titleAr : activeProject.titleEn;
-    const inst = isAr ? activeProject.institutionAr : activeProject.institutionEn;
-    const dept = isAr ? activeProject.departmentAr : activeProject.departmentEn;
-    const desc = isAr ? activeProject.descriptionAr : activeProject.descriptionEn;
-    const prob = isAr ? activeProject.problemStatementAr : activeProject.problemStatementEn;
-
-    let contentHtml = `
-      <div class="print-document" dir="${isAr ? 'rtl' : 'ltr'}">
-        <!-- Title Page -->
-        <div class="title-page">
-          <div class="header-info">
-            <p>${inst || ''}</p>
-            <p>${dept || ''}</p>
-          </div>
-          <div class="main-title">
-            <h1>${title || ''}</h1>
-            <p class="subtitle">${isAr ? 'تقرير منهجي إحصائي شامل لدراسة مقترحة' : 'Comprehensive Methodological & Statistical Research Blueprint'}</p>
-          </div>
-          <div class="footer-info">
-            <p>${isAr ? 'منصة بصيرة للبحث العلمي' : 'Baseerah Research Platform'}</p>
-            <p>${new Date().toLocaleDateString(isAr ? 'ar-SA' : 'en-US')}</p>
-          </div>
-        </div>
-
-        <div class="page-break"></div>
-    `;
-
-    if (sections.info) {
-      contentHtml += `
-        <div class="section">
-          <h2>${isAr ? '1. البيانات الأساسية وملخص الفكرة' : '1. Basic Information & Abstract'}</h2>
-          <table class="data-table">
-            <tr>
-              <th>${isAr ? 'العنوان بالعربية' : 'Arabic Title'}</th>
-              <td>${activeProject.titleAr || '—'}</td>
-            </tr>
-            <tr>
-              <th>${isAr ? 'العنوان بالإنجليزية' : 'English Title'}</th>
-              <td>${activeProject.titleEn || '—'}</td>
-            </tr>
-            <tr>
-              <th>${isAr ? 'المؤسسة الأكاديمية' : 'Institution'}</th>
-              <td>${activeProject.institutionAr || '—'}</td>
-            </tr>
-          </table>
-          <h3>${isAr ? 'الملخص العلمي للبحث' : 'Research Abstract'}</h3>
-          <p>${desc || '—'}</p>
-          <h3>${isAr ? 'المشكلة البحثية والفجوة المعرفية' : 'Problem Statement'}</h3>
-          <p>${prob || '—'}</p>
-        </div>
-      `;
+    try {
+      const res = await apiVerifyReport(verifCode.trim());
+      setVerifResult(res);
+    } catch {
+      setVerifResult({
+        valid: false,
+        verification_code: verifCode,
+        message: isAr ? 'تعذر الاتصال بخادم التحقق' : 'Unable to connect to verification server'
+      });
+    } finally {
+      setIsVerifying(false);
     }
-
-    if (sections.methodology) {
-      contentHtml += `
-        <div class="section">
-          <h2>${isAr ? '2. المنهج وتصميم الدراسة' : '2. Study Design & Methodology'}</h2>
-          <p>${isAr ? 'منهج الدراسة المعتمد:' : 'Primary methodology design:'} <strong>${activeProject.studyDesign.toUpperCase()}</strong></p>
-          <table class="data-table">
-            <tr>
-              <th>${isAr ? 'مستوى الدلالة (α)' : 'Significance Level (α)'}</th>
-              <td>${activeProject.sampleSettings?.marginOfError || 0.05}</td>
-            </tr>
-            <tr>
-              <th>${isAr ? 'القوة الإحصائية المستهدفة' : 'Target Power (1-β)'}</th>
-              <td>${activeProject.sampleSettings?.expectedPower || 0.80}</td>
-            </tr>
-            <tr>
-              <th>${isAr ? 'حجم الأثر المتوقع (d)' : 'Expected Effect Size (d)'}</th>
-              <td>${activeProject.sampleSettings?.expectedEffectSize || 0.5}</td>
-            </tr>
-          </table>
-        </div>
-      `;
-    }
-
-    if (sections.variables && activeProject.variables?.length > 0) {
-      contentHtml += `
-        <div class="section">
-          <h2>${isAr ? '3. متغيرات وأدوات القياس' : '3. Variables & Measurement Tools'}</h2>
-          <table class="items-table">
-            <thead>
-              <tr>
-                <th>${isAr ? 'اسم المتغير' : 'Variable Name'}</th>
-                <th>${isAr ? 'النوع' : 'Type'}</th>
-                <th>${isAr ? 'مستوى القياس' : 'Scale'}</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${activeProject.variables.map((v: any) => `
-                <tr>
-                  <td>${isAr ? v.nameAr || v.nameEn : v.nameEn || v.nameAr}</td>
-                  <td>${v.type}</td>
-                  <td>${v.scale}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      `;
-    }
-
-    if (sections.hypotheses && activeProject.hypotheses?.length > 0) {
-      contentHtml += `
-        <div class="section">
-          <h2>${isAr ? '4. الفروض الإحصائية وأسئلة الدراسة' : '4. Research Hypotheses & Questions'}</h2>
-          <ul>
-            ${activeProject.hypotheses.map((h: any) => `
-              <li>${isAr ? h.textAr || h.textEn : h.textEn || h.textAr} (Type: ${h.type})</li>
-            `).join('')}
-          </ul>
-        </div>
-      `;
-    }
-
-    if (sections.syntax) {
-      contentHtml += `
-        <div class="section">
-          <h2>${isAr ? '5. أكواد وبروتوكولات التحليل الجاهزة' : '5. Statistical Analysis Syntax'}</h2>
-          <h3>SPSS Syntax</h3>
-          <pre class="code-block">${syntax.spss}</pre>
-          <h3>R Code</h3>
-          <pre class="code-block">${syntax.r}</pre>
-        </div>
-      `;
-    }
-
-    contentHtml += `</div>`;
-
-    // Write printable document shell
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>${title || 'Research Blueprint'}</title>
-          <style>
-            @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Outfit:wght@400;700&display=swap');
-            
-            body {
-              font-family: ${isAr ? "'Cairo', sans-serif" : "'Outfit', sans-serif"};
-              background-color: white;
-              color: #1a1a1a;
-              margin: 0;
-              padding: 0;
-            }
-
-            .print-document {
-              max-width: 800px;
-              margin: 0 auto;
-              padding: 40px;
-              line-height: 1.8;
-            }
-
-            .title-page {
-              min-height: 90vh;
-              display: flex;
-              flex-direction: column;
-              justify-content: space-between;
-              text-align: center;
-              padding: 40px 0;
-            }
-
-            .header-info {
-              font-size: 14px;
-              font-weight: bold;
-              text-align: right;
-            }
-
-            .main-title {
-              margin: auto 0;
-            }
-
-            .main-title h1 {
-              font-size: 32px;
-              font-weight: 900;
-              color: #2e1065;
-              line-height: 1.4;
-            }
-
-            .subtitle {
-              font-size: 16px;
-              color: #6b7280;
-              margin-top: 10px;
-            }
-
-            .footer-info {
-              font-size: 12px;
-              color: #6b7280;
-            }
-
-            .section {
-              margin-bottom: 40px;
-            }
-
-            .section h2 {
-              font-size: 20px;
-              border-bottom: 2px solid #2e1065;
-              padding-bottom: 8px;
-              color: #2e1065;
-              margin-top: 30px;
-            }
-
-            .data-table, .items-table {
-              width: 100%;
-              border-collapse: collapse;
-              margin: 15px 0;
-            }
-
-            .data-table th, .data-table td, .items-table th, .items-table td {
-              border: 1px solid #e5e7eb;
-              padding: 12px;
-              font-size: 13px;
-            }
-
-            .data-table th {
-              background-color: #f9fafb;
-              width: 30%;
-              text-align: right;
-            }
-
-            .items-table th {
-              background-color: #2e1065;
-              color: white;
-              text-align: right;
-            }
-
-            .code-block {
-              background-color: #f3f4f6;
-              border: 1px solid #e5e7eb;
-              padding: 15px;
-              border-radius: 8px;
-              font-family: monospace;
-              font-size: 11px;
-              white-space: pre-wrap;
-              direction: ltr;
-              text-align: left;
-            }
-
-            .page-break {
-              page-break-after: always;
-            }
-
-            @media print {
-              body {
-                padding: 0;
-              }
-              .print-document {
-                padding: 0;
-                max-width: 100%;
-              }
-              .title-page {
-                min-height: 100%;
-                page-break-after: always;
-              }
-              .code-block {
-                page-break-inside: avoid;
-              }
-            }
-          </style>
-        </head>
-        <body>
-          ${contentHtml}
-          <script>
-            window.onload = function() {
-              window.print();
-            };
-          </script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-12">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-purple-900/30 via-violet-900/15 to-transparent border border-purple-500/15 rounded-2xl p-6 shadow-md">
+    <div className="space-y-6 max-w-5xl mx-auto pb-12">
+      {/* Header Banner */}
+      <div className="bg-gradient-to-r from-purple-900/30 via-indigo-900/20 to-transparent border border-purple-500/20 rounded-2xl p-6 shadow-md">
         <div className="flex items-center gap-3 mb-2">
-          <div className="p-2.5 rounded-2xl bg-purple-600/10">
-            <FileText size={22} className="text-purple-500" />
+          <div className="p-3 rounded-2xl bg-purple-600/20 text-purple-400">
+            <FileText size={24} />
           </div>
           <div>
-            <h2 className="text-lg font-extrabold text-[var(--ds-text-primary)] m-0">
-              {isAr ? 'مصدّر التقارير الأكاديمية والمناهج' : 'Academic Report Exporter'}
+            <h2 className="text-xl font-black text-[var(--ds-text-primary)] m-0">
+              {isAr ? 'محرك التقارير والتصدير الأكاديمي المؤسسي' : 'Institutional Academic Export & Reporting Engine'}
             </h2>
-            <p className="text-xs text-[var(--ds-text-secondary)] m-0">
-              {isAr ? 'تجميع وتصدير مخطط الدراسة بالكامل وطباعته أو حفظه كـ PDF وفقاً للمقاييس الأكاديمية' : 'Compile, customize, and export your research blueprint to print or save as PDF'}
+            <p className="text-xs text-[var(--ds-text-secondary)] m-0 mt-1">
+              {isAr
+                ? 'تصدير وثائق وتقارير أكاديمية محكمة بصيغ (PDF, DOCX, JSON) مع الحفاظ على النزاهة الرقمية والخصوصية وعزل المؤسسات'
+                : 'Generate verified academic reports in PDF, DOCX, and JSON with digital integrity, role-based redaction, and multi-tenant isolation'}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Settings */}
-        <Card className="p-5 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl space-y-4 md:col-span-1">
-          <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
-            {isAr ? 'خيارات التجميع' : 'Compilation Options'}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Form: Export Configuration */}
+        <Card className="p-6 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-3xl space-y-5 lg:col-span-2">
+          <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)] flex items-center justify-between">
+            <span>{isAr ? 'إعدادات وثيقة التقرير' : 'Report Document Configuration'}</span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 font-mono">
+              Phase 05 Engine
+            </span>
           </h3>
-          <div className="space-y-3">
-            {[
-              { key: 'info', labelAr: 'البيانات الأساسية وملخص الدراسة', labelEn: 'Basic Info & Abstract' },
-              { key: 'methodology', labelAr: 'المنهجية وحجم العينة', labelEn: 'Methodology & Sample' },
-              { key: 'variables', labelAr: 'جدول المتغيرات ومستويات القياس', labelEn: 'Variables & Scales' },
-              { key: 'hypotheses', labelAr: 'الأسئلة والفروض البحثية', labelEn: 'Questions & Hypotheses' },
-              { key: 'syntax', labelAr: 'أكواد التحليل المقترحة (SPSS/R)', labelEn: 'Statistical Syntax' },
-            ].map(sec => (
-              <label key={sec.key} className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-[var(--ds-text-secondary)]">
-                <input
-                  type="checkbox"
-                  checked={sections[sec.key as keyof typeof sections]}
-                  onChange={() => handleToggle(sec.key as keyof typeof sections)}
-                  className="rounded accent-purple-600"
-                />
-                <span>{isAr ? sec.labelAr : sec.labelEn}</span>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Report Type */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[var(--ds-text-secondary)]">
+                {isAr ? 'نوع التقرير الأكاديمي' : 'Report Type'}
               </label>
-            ))}
+              <select
+                value={reportType}
+                onChange={e => setReportType(e.target.value as any)}
+                className="w-full text-xs font-medium p-2.5 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] focus:outline-none focus:border-purple-500"
+              >
+                <option value="RESEARCH_PROJECT">{isAr ? 'مخطط البحث العلمي (Research Blueprint)' : 'Research Blueprint'}</option>
+                <option value="LITERATURE_SYNTHESIS">{isAr ? 'توليف الأدبيات والتحليل البعدي (Meta-Analysis)' : 'Literature Synthesis & Meta-Analysis'}</option>
+                <option value="PRISMA_FLOW">{isAr ? 'مخطط تدفق المراجعة المنهجية (PRISMA 2020)' : 'PRISMA 2020 Flow Diagram'}</option>
+                <option value="PROMOTION_READINESS">{isAr ? 'تقرير الجاهزية للترقية الأكاديمية (Promotion Readiness)' : 'Promotion Readiness'}</option>
+                <option value="PEER_REVIEW">{isAr ? 'ملف التحكيم العلمي ومراجعة الأقران (Peer Review)' : 'Peer Review Evaluation'}</option>
+                <option value="ACADEMIC_PROFILE">{isAr ? 'السجل الأكاديمي الموحد (Academic Profile)' : 'Academic Profile'}</option>
+              </select>
+            </div>
+
+            {/* Output Format */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[var(--ds-text-secondary)]">
+                {isAr ? 'صيغة التصدير المستهدفة' : 'Output Format'}
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { id: 'PDF', label: 'PDF (Vector/RTL)' },
+                  { id: 'DOCX', label: 'DOCX (Word)' },
+                  { id: 'JSON', label: 'JSON (Canonical)' },
+                ].map(fmt => (
+                  <button
+                    key={fmt.id}
+                    type="button"
+                    onClick={() => setFormat(fmt.id as any)}
+                    className={`py-2 px-1 text-center text-xs font-bold rounded-xl border transition-all cursor-pointer ${
+                      format === fmt.id
+                        ? 'bg-purple-600/20 border-purple-500 text-purple-400 shadow-sm'
+                        : 'bg-[var(--ds-surface-secondary)] border-[var(--ds-border-subtle)] text-[var(--ds-text-muted)] hover:border-[var(--ds-border-default)]'
+                    }`}
+                  >
+                    {fmt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Language Selection */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[var(--ds-text-secondary)]">
+                {isAr ? 'لغة المستند' : 'Document Language'}
+              </label>
+              <select
+                value={reportLang}
+                onChange={e => setReportLang(e.target.value as any)}
+                className="w-full text-xs font-medium p-2.5 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] focus:outline-none focus:border-purple-500"
+              >
+                <option value="ar">{isAr ? 'العربية (RTL كامل)' : 'Arabic (Full RTL)'}</option>
+                <option value="en">{isAr ? 'الإنجليزية (LTR)' : 'English (LTR)'}</option>
+                <option value="bilingual">{isAr ? 'ثنائي اللغة (Bilingual AR/EN)' : 'Bilingual (AR/EN)'}</option>
+              </select>
+            </div>
+
+            {/* Audience / Redaction Scope */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[var(--ds-text-secondary)]">
+                {isAr ? 'الجمهور المستهدف ومستوى الحجب' : 'Audience & Redaction Scope'}
+              </label>
+              <select
+                value={audience}
+                onChange={e => setAudience(e.target.value as any)}
+                className="w-full text-xs font-medium p-2.5 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] focus:outline-none focus:border-purple-500"
+              >
+                <option value="RESEARCHER">{isAr ? 'الباحث الرئيسي (Researcher Standard)' : 'Principal Researcher'}</option>
+                <option value="AUTHOR">{isAr ? 'المؤلف (مع حجب هوية المحكمين والملاحظات السرية)' : 'Author (Double-Blind Redacted)'}</option>
+                <option value="COMMITTEE">{isAr ? 'اللجنة الأكاديمية وهيئة التحرير (Full Committee Access)' : 'Academic / Editorial Committee'}</option>
+                <option value="SUPERVISOR">{isAr ? 'المشرف الأكاديمي (Supervisor View)' : 'Supervisor View'}</option>
+                <option value="ADMIN">{isAr ? 'مدير المؤسسة الأكاديمية (Institutional Admin)' : 'Institutional Admin'}</option>
+              </select>
+            </div>
           </div>
 
-          <div className="pt-4 border-t border-[var(--ds-border-subtle)]">
-            <button
-              onClick={handlePrint}
-              className="w-full flex items-center justify-center gap-1.5 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition-all shadow-md cursor-pointer"
-            >
-              <Printer size={14} />
-              <span>{isAr ? 'طباعة وحفظ كـ PDF' : 'Print & Save to PDF'}</span>
-            </button>
+          {/* Project Details Snapshot */}
+          <div className="p-4 rounded-2xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-xs space-y-1.5">
+            <div className="font-bold text-[var(--ds-text-primary)]">
+              {isAr ? 'المصدر الأكاديمي المرتبط:' : 'Linked Academic Source:'}
+            </div>
+            <div className="text-[var(--ds-text-secondary)] truncate">
+              {isAr ? activeProject.titleAr : activeProject.titleEn}
+            </div>
+            <div className="text-[10px] text-[var(--ds-text-muted)] flex gap-4 pt-1">
+              <span>ID: <code className="font-mono">{activeProject.id}</code></span>
+              <span>Design: {activeProject.studyDesign}</span>
+            </div>
           </div>
+
+          {/* Actions */}
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <button
+              onClick={handleExport}
+              disabled={isGenerating}
+              className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-600/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  <span>{isAr ? 'جارٍ توليد الوثيقة وحساب النزاهة...' : 'Generating & Computing Hash...'}</span>
+                </>
+              ) : (
+                <>
+                  <Download size={16} />
+                  <span>{isAr ? `تصدير المستند بصيغة ${format}` : `Export Document as ${format}`}</span>
+                </>
+              )}
+            </button>
+
+            {lastGenerated && (
+              <div className="flex items-center gap-2 text-emerald-400 text-xs font-semibold">
+                <CheckCircle2 size={16} />
+                <span>{isAr ? 'تم تنزيل المستند بنجاح' : 'Document exported successfully'}</span>
+              </div>
+            )}
+          </div>
+
+          {errorMsg && (
+            <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2">
+              <AlertCircle size={16} className="shrink-0" />
+              <span>{errorMsg}</span>
+            </div>
+          )}
+
+          {lastGenerated?.integrityHash && (
+            <div className="p-3 rounded-xl bg-indigo-950/40 border border-indigo-500/20 text-[10px] text-indigo-300 font-mono flex items-center gap-2 break-all">
+              <ShieldCheck size={14} className="shrink-0 text-indigo-400" />
+              <span>SHA-256 Integrity: {lastGenerated.integrityHash}</span>
+            </div>
+          )}
         </Card>
 
-        {/* Live Preview compilation */}
-        <Card className="p-6 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-3xl md:col-span-2 space-y-6 max-h-[600px] overflow-y-auto">
-          <div className="flex justify-between items-center pb-3 border-b border-[var(--ds-border-subtle)]">
-            <span className="text-xs font-black text-purple-500 uppercase tracking-widest">
-              {isAr ? 'معاينة حية للمستند المجمع' : 'Document Live Preview'}
-            </span>
-            <span className="text-[10px] font-bold text-[var(--ds-text-muted)]">A4 Draft</span>
+        {/* Right Panel: Academic Verification & Document Integrity */}
+        <Card className="p-6 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-3xl space-y-4">
+          <div className="flex items-center gap-2 pb-3 border-b border-[var(--ds-border-subtle)]">
+            <ShieldCheck size={18} className="text-purple-400" />
+            <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0">
+              {isAr ? 'التحقق من نزاهة الوثائق' : 'Document Verification'}
+            </h3>
           </div>
 
-          {/* Simulated Page */}
-          <div className="space-y-6 text-xs text-[var(--ds-text-primary)] leading-relaxed select-none opacity-80">
-            {sections.info && (
-              <div className="space-y-2">
-                <h4 className="text-sm font-bold text-purple-600 border-b border-[var(--ds-border-subtle)] pb-1 m-0">
-                  {isAr ? '1. البيانات الأساسية للبحث وملخص الدراسة' : '1. Basic Info & Abstract'}
-                </h4>
-                <p><strong>{isAr ? 'عنوان البحث:' : 'Title:'}</strong> {isAr ? activeProject.titleAr : activeProject.titleEn}</p>
-                <p><strong>{isAr ? 'المؤسسة:' : 'Institution:'}</strong> {isAr ? activeProject.institutionAr : activeProject.institutionEn}</p>
-                <p><strong>{isAr ? 'الملخص العلمي:' : 'Abstract:'}</strong> {isAr ? activeProject.descriptionAr : activeProject.descriptionEn}</p>
-              </div>
-            )}
+          <p className="text-xs text-[var(--ds-text-secondary)] leading-relaxed">
+            {isAr
+              ? 'تتيح هذه الأداة التحقق من صحة ومطابقة أي وثيقة أكاديمية صادرة عبر رمز التحقق المشفر المرفق بالتقرير.'
+              : 'Verify the authenticity and integrity of any issued academic document using its verification code.'}
+          </p>
 
-            {sections.methodology && (
-              <div className="space-y-2">
-                <h4 className="text-sm font-bold text-purple-600 border-b border-[var(--ds-border-subtle)] pb-1 m-0">
-                  {isAr ? '2. المنهج وتصميم الدراسة' : '2. Study Design & Methodology'}
-                </h4>
-                <p><strong>{isAr ? 'المنهج المعتمد:' : 'Methodology:'}</strong> {activeProject.studyDesign.toUpperCase()}</p>
-                <p><strong>{isAr ? 'حجم العينة المقترح:' : 'Suggested sample:'}</strong> {activeProject.sampleSettings?.populationSize || 100} ({isAr ? 'بدرجة دقة' : 'margin of error'} {activeProject.sampleSettings?.marginOfError})</p>
-              </div>
-            )}
+          <form onSubmit={handleVerify} className="space-y-3">
+            <div>
+              <label className="text-[11px] font-bold text-[var(--ds-text-secondary)] block mb-1">
+                {isAr ? 'رمز التحقق (Verification Code)' : 'Verification Code'}
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. BSR-A1B2-C3D4"
+                value={verifCode}
+                onChange={e => setVerifCode(e.target.value)}
+                className="w-full text-xs font-mono p-2.5 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] focus:outline-none focus:border-purple-500 uppercase"
+              />
+            </div>
 
-            {sections.variables && activeProject.variables?.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="text-sm font-bold text-purple-600 border-b border-[var(--ds-border-subtle)] pb-1 m-0">
-                  {isAr ? '3. متغيرات الدراسة وأدوات القياس' : '3. Variables & Measurement Tools'}
-                </h4>
-                <div className="border border-[var(--ds-border-subtle)] rounded-xl overflow-hidden">
-                  {activeProject.variables.map((v: any) => (
-                    <div key={v.id} className="p-2 border-b border-[var(--ds-border-subtle)] flex justify-between bg-[var(--ds-surface-secondary)] text-[10px]">
-                      <span>{isAr ? v.nameAr || v.nameEn : v.nameEn || v.nameAr}</span>
-                      <span className="font-bold uppercase opacity-65">{v.type} ({v.scale})</span>
-                    </div>
-                  ))}
+            <button
+              type="submit"
+              disabled={isVerifying || !verifCode.trim()}
+              className="w-full py-2.5 rounded-xl bg-purple-600/10 hover:bg-purple-600/20 text-purple-400 border border-purple-500/20 text-xs font-bold transition-all cursor-pointer disabled:opacity-40"
+            >
+              {isVerifying ? (
+                <span className="flex items-center justify-center gap-1.5">
+                  <Loader2 size={14} className="animate-spin" />
+                  {isAr ? 'جارٍ التحقق...' : 'Verifying...'}
+                </span>
+              ) : (
+                <span>{isAr ? 'فحص السجل الأكاديمي' : 'Verify Authenticity'}</span>
+              )}
+            </button>
+          </form>
+
+          {verifResult && (
+            <div className={`p-3.5 rounded-xl border text-xs space-y-2 ${
+              verifResult.valid
+                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
+                : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+            }`}>
+              <div className="font-bold flex items-center gap-1.5">
+                {verifResult.valid ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                <span>{verifResult.message}</span>
+              </div>
+              {verifResult.valid && (
+                <div className="space-y-1 text-[11px] opacity-90 pt-1 border-t border-emerald-500/20">
+                  <div><strong>{isAr ? 'الجهة:' : 'Issuer:'}</strong> {verifResult.organization_name}</div>
+                  <div><strong>{isAr ? 'نوع التقرير:' : 'Type:'}</strong> {verifResult.report_type}</div>
+                  <div><strong>{isAr ? 'تاريخ الإصدار:' : 'Issued:'}</strong> {verifResult.generated_at?.slice(0, 10)}</div>
                 </div>
-              </div>
-            )}
-
-            {sections.hypotheses && activeProject.hypotheses?.length > 0 && (
-              <div className="space-y-2">
-                <h4 className="text-sm font-bold text-purple-600 border-b border-[var(--ds-border-subtle)] pb-1 m-0">
-                  {isAr ? '4. الفروض الإحصائية والأسئلة' : '4. Hypotheses & Questions'}
-                </h4>
-                <ul className="list-disc pl-4 space-y-1">
-                  {activeProject.hypotheses.map((h: any) => (
-                    <li key={h.id}>{isAr ? h.textAr || h.textEn : h.textEn || h.textAr}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </Card>
       </div>
     </div>

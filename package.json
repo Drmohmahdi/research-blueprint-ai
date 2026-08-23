@@ -9,12 +9,15 @@
     "backend:prod": "cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000",
     "backend:migrate": "cd backend && python -m alembic upgrade head",
     "backend:test": "cd backend && python -m pytest app/tests",
+    "e2e:test": "playwright test",
+    "e2e:critical": "playwright test --grep @critical",
+    "e2e:a11y": "playwright test --grep @a11y",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
     "deploy:vercel": "npm run build && cd dist && vercel deploy --prod --yes",
     "test": "npm run backend:test",
-    "check": "npm run build && npm run backend:test",
+    "check": "npm run build && npm run backend:test && npm run e2e:test",
     "clean:test-artifacts": "node scripts/clean-test-artifacts.mjs"
   },
   "dependencies": {
@@ -27,6 +30,8 @@
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.62.1",
     "@types/node": "^24.13.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",

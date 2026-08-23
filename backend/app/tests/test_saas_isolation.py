@@ -23,6 +23,7 @@ def override_get_db():
 
 @pytest.fixture(autouse=True, scope="module")
 def setup_db():
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     db = TestingSessionLocal()
     # Seed free and pro plans for testing limit enforcement
@@ -95,7 +96,7 @@ def test_saas_workspace_provisioning_and_isolation(client):
     # Add active workspace header
     headers_a["X-Organization-ID"] = org_a_id
 
-    # 3. Create 2 Projects (within limit of 2)
+    # 3. Create Projects within Free limit (3 projects)
     project_payload = {
         "titleAr": "مشروع أ", "titleEn": "Project A",
         "studyDesign": "quasi_experimental_pre_post", "variables": [], "questions": [], "hypotheses": [],
@@ -109,11 +110,15 @@ def test_saas_workspace_provisioning_and_isolation(client):
     res_p2 = client.post("/api/projects", json=project_payload, headers=headers_a)
     assert res_p2.status_code == 200
 
-    # 4. Attempt to create 3rd Project -> should fail due to FREE plan limit (max_projects=2)
     project_payload["titleEn"] = "Project C"
     res_p3 = client.post("/api/projects", json=project_payload, headers=headers_a)
-    assert res_p3.status_code == 403
-    assert "لقد تجاوزت الحد الأقصى للمشاريع" in res_p3.json()["detail"]
+    assert res_p3.status_code == 200
+
+    # 4. Attempt to create 4th Project -> should fail due to FREE plan limit (max_projects=3)
+    project_payload["titleEn"] = "Project D"
+    res_p4 = client.post("/api/projects", json=project_payload, headers=headers_a)
+    assert res_p4.status_code == 403
+    assert "PLAN_LIMIT_REACHED" in res_p4.json()["detail"] or "الحد الأقصى" in res_p4.json()["detail"]
 
     # 5. Register User B
     reg_data_b = {

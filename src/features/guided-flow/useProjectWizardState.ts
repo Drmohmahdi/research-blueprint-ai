@@ -249,7 +249,7 @@ export const useProjectWizardState = () => {
       delete errors.groupsCount;
     }
     return errors;
-  }, [formData, language, validateCoreDetails, validateSampleSettings, validateVariables, validateResearchStatements, validateResearchRelationships]);
+  }, [validateCoreDetails, validateSampleSettings, validateVariables, validateResearchStatements, validateResearchRelationships]);
 
   const isStepValid = useCallback((s: number) => Object.keys(validateStep(s)).length === 0, [validateStep]);
 

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useId, useRef } from 'react';
 import { X } from 'lucide-react';
 import { IconButton } from './Button';
 
@@ -19,9 +19,18 @@ export const Modal: React.FC<ModalProps> = ({
   footerActions,
   size = 'md'
 }) => {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  const openerRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
     if (isOpen) {
+      openerRef.current = document.activeElement as HTMLElement;
       document.body.style.overflow = 'hidden';
+      requestAnimationFrame(() => {
+        const firstFocusable = dialogRef.current?.querySelector<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        (firstFocusable ?? dialogRef.current)?.focus();
+      });
     } else {
       document.body.style.overflow = '';
     }
@@ -29,6 +38,34 @@ export const Modal: React.FC<ModalProps> = ({
       document.body.style.overflow = '';
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key !== 'Tab' || !dialogRef.current) return;
+      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'));
+      if (focusable.length === 0) {
+        event.preventDefault();
+        dialogRef.current.focus();
+      } else if (event.shiftKey && document.activeElement === focusable[0]) {
+        event.preventDefault();
+        focusable.at(-1)?.focus();
+      } else if (!event.shiftKey && document.activeElement === focusable.at(-1)) {
+        event.preventDefault();
+        focusable[0].focus();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      openerRef.current?.focus();
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -40,7 +77,7 @@ export const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4 text-center">
         {/* Overlay backdrop */}
         <div 
@@ -48,10 +85,10 @@ export const Modal: React.FC<ModalProps> = ({
           onClick={onClose}
         />
 
-        <div className={`relative w-full transform rounded-2xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] p-6 text-left align-middle shadow-xl transition-all ${sizeClasses[size]}`}>
+        <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={titleId} className={`relative w-full transform rounded-2xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] p-6 text-start align-middle shadow-xl transition-all ${sizeClasses[size]}`}>
           {/* Header */}
           <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-4 mb-4">
-            <h3 className="text-sm font-extrabold text-[var(--ds-text-primary)] m-0">
+            <h3 id={titleId} className="text-sm font-extrabold text-[var(--ds-text-primary)] m-0">
               {title}
             </h3>
             <IconButton 
@@ -97,9 +134,15 @@ export const Drawer: React.FC<DrawerProps> = ({
   placement = 'right',
   footerActions
 }) => {
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  const openerRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
     if (isOpen) {
+      openerRef.current = document.activeElement as HTMLElement;
       document.body.style.overflow = 'hidden';
+      requestAnimationFrame(() => drawerRef.current?.querySelector<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')?.focus());
     } else {
       document.body.style.overflow = '';
     }
@@ -108,13 +151,41 @@ export const Drawer: React.FC<DrawerProps> = ({
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key !== 'Tab' || !drawerRef.current) return;
+      const focusable = Array.from(drawerRef.current.querySelectorAll<HTMLElement>('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'));
+      if (focusable.length === 0) {
+        event.preventDefault();
+        drawerRef.current.focus();
+      } else if (event.shiftKey && document.activeElement === focusable[0]) {
+        event.preventDefault();
+        focusable.at(-1)?.focus();
+      } else if (!event.shiftKey && document.activeElement === focusable.at(-1)) {
+        event.preventDefault();
+        focusable[0].focus();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      openerRef.current?.focus();
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const placementClass = placement === 'left' ? 'left-0' : 'right-0';
   const animClass = placement === 'left' ? 'animate-slide-in-left' : 'animate-slide-in-right';
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden" role="dialog" aria-modal="true">
+    <div className="fixed inset-0 z-50 overflow-hidden">
       <div className="absolute inset-0 overflow-hidden">
         {/* Backdrop overlay */}
         <div 
@@ -123,12 +194,12 @@ export const Drawer: React.FC<DrawerProps> = ({
         />
 
         <div className={`absolute inset-y-0 ${placementClass} flex max-w-full`}>
-          <div className={`w-screen max-w-md transform bg-[var(--ds-surface-primary)] border-l border-[var(--ds-border-subtle)] p-6 shadow-xl flex flex-col justify-between ${animClass}`}>
+          <div ref={drawerRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={titleId} className={`w-screen max-w-md transform bg-[var(--ds-surface-primary)] border-l border-[var(--ds-border-subtle)] p-6 shadow-xl flex flex-col justify-between ${animClass}`}>
             
             <div className="space-y-6 flex-1 flex flex-col overflow-y-auto no-scrollbar">
               {/* Header */}
               <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-4">
-                <h3 className="text-sm font-extrabold text-[var(--ds-text-primary)] m-0">
+                <h3 id={titleId} className="text-sm font-extrabold text-[var(--ds-text-primary)] m-0">
                   {title}
                 </h3>
                 <IconButton 

@@ -5,6 +5,7 @@ import { getTranslation } from '../utils/translations';
 import { checkConsistency } from '../utils/ruleEngine';
 import { VIEW_TO_PATH } from '../router/routes';
 import { apiGetActiveOrganization } from '../utils/api';
+import { researchStorage } from '../utils/researchStorage';
 import { Badge, Progress, EmptyState, Alert, Button } from '../design-system';
 import { 
   FolderGit2, 
@@ -60,7 +61,7 @@ export const Dashboard: React.FC = () => {
       setDbComments([]);
       return;
     }
-    const saved = localStorage.getItem('rb_comments_' + activeProject.id);
+    const saved = researchStorage.getItem('rb_comments_' + activeProject.id);
     if (!saved) {
       setDbComments([]);
       return;

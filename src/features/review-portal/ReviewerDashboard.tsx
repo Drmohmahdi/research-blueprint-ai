@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useProject } from '../../context/ProjectContext';
 import { Card } from '../../design-system/components/Card';
 import { Button } from '../../design-system/components/Button';
@@ -6,617 +6,829 @@ import {
   CheckCircle2, 
   Send, 
   AlertTriangle, 
-  Award, 
   FileText, 
   ListChecks, 
-  Settings2, 
-  Sparkles
+  Clock,
+  Save,
+  MessageSquare,
+  Lock,
+  Plus,
+  RefreshCw,
+  Award,
+  Layers
 } from 'lucide-react';
-
-interface ReviewCriterion {
-  id: string;
-  nameAr: string;
-  nameEn: string;
-  descAr: string;
-  descEn: string;
-  weight: number;
-}
-
-const CRITERIA: ReviewCriterion[] = [
-  {
-    id: 'methodology',
-    nameAr: 'المنهجية العلمية وتصميم الدراسة',
-    nameEn: 'Scientific Methodology & Design',
-    descAr: 'مدى سلامة تصميم البحث واتساق المنهج المختار مع الأهداف والفروض.',
-    descEn: 'Soundness of study design and alignment of methodology with hypotheses.',
-    weight: 0.30,
-  },
-  {
-    id: 'statistics',
-    nameAr: 'التحليل الإحصائي والعينة',
-    nameEn: 'Statistical Analysis & Sample',
-    descAr: 'كفاية حجم العينة إحصائياً وملاءمة الاختبارات الإحصائية المفترضة.',
-    descEn: 'Statistical power of the sample and appropriateness of planned tests.',
-    weight: 0.25,
-  },
-  {
-    id: 'literature',
-    nameAr: 'التأصيل النظري والدراسات السابقة',
-    nameEn: 'Literature Review & Theoretical Base',
-    descAr: 'كفاية مراجعة الدراسات السابقة وتحديد الفجوة البحثية بوضوح.',
-    descEn: 'Adequacy of prior literature synthesis and clarity of the research gap.',
-    weight: 0.20,
-  },
-  {
-    id: 'ethics',
-    nameAr: 'الأخلاقيات والنزاهة الأكاديمية',
-    nameEn: 'Ethics & Academic Integrity',
-    descAr: 'الالتزام بضوابط التسجيل المسبق وحماية البيانات والموافقة المستنيرة.',
-    descEn: 'Adherence to pre-registration protocols, data protection, and consent.',
-    weight: 0.15,
-  },
-  {
-    id: 'originality',
-    nameAr: 'الأصالة والإضافة المعرفية',
-    nameEn: 'Originality & Contribution',
-    descAr: 'مدى أصالة الفكرة البحثية والقيمة المضافة للمعرفة العلمية.',
-    descEn: 'Novelty of the research question and expected contribution to science.',
-    weight: 0.10,
-  },
-];
-
-const MOCK_ITEMS: Record<string, { ar: string; en: string }[]> = {
-  'v-2': [
-    { ar: 'يستطيع الطالب تحديد الافتراضات الضمنية في النصوص المقروءة.', en: 'The student can identify implicit assumptions in read texts.' },
-    { ar: 'يميز الطالب بين الاستنتاجات المنطقية وغير المنطقية للمسألة.', en: 'The student distinguishes between logical and illogical conclusions of the problem.' },
-    { ar: 'يقيم الطالب مدى قوة الحجج والأدلة المؤيدة والمعارضة للظاهرة.', en: 'The student evaluates the strength of arguments supporting and opposing the phenomenon.' }
-  ],
-  'v-3': [
-    { ar: 'يجيب الطالب عن الأسئلة التحصيلية للمقرر بدقة وسرعة.', en: 'The student answers the achievement questions of the course accurately and quickly.' },
-    { ar: 'يطبق الطالب المهارات العملية المكتسبة في حل مواقف مشكلة جديدة.', en: 'Applies practical skills learned in solving new problem situations.' },
-    { ar: 'يسترجع الطالب المفاهيم الأساسية للمادة العلمية بشكل صحيح.', en: 'Recalls the basic concepts of the scientific material correctly.' }
-  ],
-  'v-4': [
-    { ar: 'يشعر الطالب بالمتعة والرغبة أثناء دراسة المحتوى التعليمي.', en: 'The student feels enjoyment and desire while studying the educational content.' },
-    { ar: 'يبادر الطالب بالمشاركة الفعالة في الأنشطة والتدريبات الصفية.', en: 'The student initiates active participation in classroom activities and exercises.' },
-    { ar: 'يسعى الفرد لتجاوز الصعاب الأكاديمية لتحقيق التفوق الدراسي.', en: 'The individual seeks to overcome academic difficulties to achieve academic excellence.' }
-  ]
-};
-
-const getMockItemsForVariable = (varId: string, nameAr: string, nameEn: string) => {
-  if (MOCK_ITEMS[varId]) return MOCK_ITEMS[varId];
-  return [
-    { ar: `يقيس هذا البند الدرجة الخاصة بـ ${nameAr} لدى أفراد العينة.`, en: `This item measures the degree of ${nameEn} among sample members.` },
-    { ar: `يظهر الفرد سلوكاً يعكس مستويات عالية من ${nameAr} في الميدان.`, en: `The individual shows behavior reflecting high levels of ${nameEn} in the field.` }
-  ];
-};
+import { 
+  apiGetMyReviewerAssignments, 
+  apiListPeerReviewCases,
+  apiGetPeerReviewCase,
+  apiCreatePeerReviewCase,
+  apiAcceptReviewAssignment,
+  apiDeclineReviewAssignment,
+  apiSaveReviewDraft,
+  apiSubmitCompletedReview,
+  apiRecordEditorialDecision,
+  type ReviewerAssignmentData,
+  type PeerReviewCaseData,
+  type PeerReviewCriterion
+} from '../../utils/api';
 
 export const ReviewerDashboard: React.FC = () => {
   const { activeProject, language } = useProject();
-  const [activeTab, setActiveTab] = useState<'proposal' | 'instrument'>('proposal');
-  
-  const [scores, setScores] = useState<Record<string, number>>({
-    methodology: 8,
-    statistics: 7,
-    literature: 8,
-    ethics: 9,
-    originality: 8,
-  });
-
-  const [comments, setComments] = useState<Record<string, string>>({
-    methodology: '',
-    statistics: '',
-    literature: '',
-    ethics: '',
-    originality: '',
-  });
-
-  const [toolRatings, setToolRatings] = useState<Record<string, {
-    alignment: 'appropriate' | 'needs_modification' | 'inappropriate';
-    clarity: 'clear' | 'unclear';
-    amendment: string;
-  }>>({});
-
-  const [overallDecision, setOverallDecision] = useState<'ACCEPT' | 'MINOR_REVISION' | 'MAJOR_REVISION' | 'REJECT'>('MINOR_REVISION');
-  const [reviewSubmitted, setReviewSubmitted] = useState(false);
-  const [reviewerName, setReviewerName] = useState('');
-
-  // ── Prepopulate tool ratings when project loads ───────────────────────────
-  useEffect(() => {
-    if (!activeProject) return;
-    const initialRatings: Record<string, {
-      alignment: 'appropriate' | 'needs_modification' | 'inappropriate';
-      clarity: 'clear' | 'unclear';
-      amendment: string;
-    }> = {};
-
-    activeProject.variables
-      .filter(v => v.scale === 'interval' || v.scale === 'ratio')
-      .forEach(v => {
-        const items = getMockItemsForVariable(v.id, v.nameAr, v.nameEn);
-        items.forEach((_, idx) => {
-          initialRatings[`${v.id}-item-${idx}`] = {
-            alignment: 'appropriate',
-            clarity: 'clear',
-            amendment: ''
-          };
-        });
-      });
-
-    setToolRatings(initialRatings);
-  }, [activeProject]);
-
-  if (!activeProject) {
-    return (
-      <div className="flex items-center justify-center h-64 text-[var(--ds-text-muted)] text-sm">
-        {language === 'ar' ? 'يرجى اختيار مشروع بحثي لعرض لوحة التحكيم' : 'Please select a research project to show the peer review dashboard'}
-      </div>
-    );
-  }
-
-  const handleScoreChange = (criterionId: string, val: number) => {
-    setScores(prev => ({ ...prev, [criterionId]: val }));
-  };
-
-  const handleCommentChange = (criterionId: string, val: string) => {
-    setComments(prev => ({ ...prev, [criterionId]: val }));
-  };
-
-  const handleToolRatingChange = (key: string, field: 'alignment' | 'clarity' | 'amendment', val: string) => {
-    setToolRatings(prev => ({
-      ...prev,
-      [key]: {
-        ...prev[key] || { alignment: 'appropriate', clarity: 'clear', amendment: '' },
-        [field]: val as any
-      }
-    }));
-  };
-
-  // Weighted average score
-  const totalWeightedScore = Object.entries(scores).reduce((acc, [id, val]) => {
-    const criterion = CRITERIA.find(c => c.id === id);
-    return acc + val * (criterion?.weight || 0) * 10;
-  }, 0);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setReviewSubmitted(true);
-  };
-
   const isAr = language === 'ar';
 
-  const decisions = [
-    { value: 'ACCEPT', labelAr: 'قبول البحث للنشر دون تعديل', labelEn: 'Accept without Revisions', color: 'text-emerald-500' },
-    { value: 'MINOR_REVISION', labelAr: 'قبول مشروط بتعديلات طفيفة', labelEn: 'Accept with Minor Revisions', color: 'text-blue-500' },
-    { value: 'MAJOR_REVISION', labelAr: 'تعديلات جوهرية وإعادة تحكيم', labelEn: 'Major Revisions Required', color: 'text-amber-500' },
-    { value: 'REJECT', labelAr: 'رفض البحث بالكامل', labelEn: 'Reject manuscript', color: 'text-rose-500' },
-  ];
+  const [activeTab, setActiveTab] = useState<'my_reviews' | 'editorial_cases' | 'instrument_referee'>('my_reviews');
 
-  // Tool referee calculation summary
-  const ratedItemsCount = Object.keys(toolRatings).length;
-  const appropriateCount = Object.values(toolRatings).filter(
-    r => r.alignment === 'appropriate' && r.clarity === 'clear'
-  ).length;
-  const needsModCount = Object.values(toolRatings).filter(
-    r => r.alignment === 'needs_modification' || r.clarity === 'unclear'
-  ).length;
+  // ── State for My Assignments ───────────────────────────────────────────────
+  const [assignments, setAssignments] = useState<ReviewerAssignmentData[]>([]);
+  const [selectedAssignment, setSelectedAssignment] = useState<ReviewerAssignmentData | null>(null);
+  const [activeCaseDetails, setActiveCaseDetails] = useState<PeerReviewCaseData | null>(null);
+
+  const [loadingAssignments, setLoadingAssignments] = useState(false);
+  const [loadingCase, setLoadingCase] = useState(false);
+  const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Form State
+  const [scores, setScores] = useState<Record<string, number>>({});
+  const [criterionComments, setCriterionComments] = useState<Record<string, string>>({});
+  const [generalComment, setGeneralComment] = useState('');
+  const [confidentialComment, setConfidentialComment] = useState('');
+  const [recommendation, setRecommendation] = useState<'ACCEPT' | 'MINOR_REVISION' | 'MAJOR_REVISION' | 'REJECT'>('MINOR_REVISION');
+  const [savingDraft, setSavingDraft] = useState(false);
+  const [submittingReview, setSubmittingReview] = useState(false);
+
+  // ── State for Editorial Cases ──────────────────────────────────────────────
+  const [editorialCases, setEditorialCases] = useState<any[]>([]);
+  const [loadingCases, setLoadingCases] = useState(false);
+  const [showNewCaseModal, setShowNewCaseModal] = useState(false);
+  const [newCaseTitleAr, setNewCaseTitleAr] = useState('');
+  const [newCaseTitleEn, setNewCaseTitleEn] = useState('');
+  const [newCaseAbstractAr, setNewCaseAbstractAr] = useState('');
+  const [newCaseBlindType, setNewCaseBlindType] = useState('DOUBLE_BLIND');
+
+  // Editorial Decision Modal
+  const [decisionCaseId, setDecisionCaseId] = useState<string | null>(null);
+  const [editorialDecision, setEditorialDecision] = useState<'ACCEPTED' | 'REVISION_REQUIRED' | 'REJECTED'>('ACCEPTED');
+  const [editorialNotes, setEditorialNotes] = useState('');
+
+  // ── Load My Review Assignments ─────────────────────────────────────────────
+  const loadMyAssignments = useCallback(async () => {
+    setLoadingAssignments(true);
+    try {
+      const data = await apiGetMyReviewerAssignments();
+      if (data) {
+        setAssignments(data);
+        if (data.length > 0 && !selectedAssignment) {
+          selectAssignment(data[0]);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load assignments', e);
+    } finally {
+      setLoadingAssignments(false);
+    }
+  }, [selectedAssignment]);
+
+  const loadEditorialCases = useCallback(async () => {
+    setLoadingCases(true);
+    try {
+      const data = await apiListPeerReviewCases();
+      if (data) setEditorialCases(data);
+    } catch (e) {
+      console.error('Failed to load editorial cases', e);
+    } finally {
+      setLoadingCases(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadMyAssignments();
+    loadEditorialCases();
+  }, [loadMyAssignments, loadEditorialCases]);
+
+  const selectAssignment = async (asg: ReviewerAssignmentData) => {
+    setSelectedAssignment(asg);
+    setLoadingCase(true);
+    setActionMessage(null);
+    try {
+      const caseData = await apiGetPeerReviewCase(asg.case_id);
+      if (caseData) {
+        setActiveCaseDetails(caseData);
+      }
+      // Populate review submission if draft/submitted
+      if (asg.submission) {
+        setRecommendation(asg.submission.recommendation || 'MINOR_REVISION');
+        const sc: Record<string, number> = {};
+        const cm: Record<string, string> = {};
+        asg.submission.responses.forEach(r => {
+          if (r.score_value !== undefined) sc[r.criterion_id] = r.score_value;
+          if (r.comments) cm[r.criterion_id] = r.comments;
+        });
+        setScores(sc);
+        setCriterionComments(cm);
+
+        const gen = asg.submission.comments.find(c => c.comment_type === 'AUTHOR_VISIBLE');
+        if (gen) setGeneralComment(gen.comment_text);
+
+        const conf = asg.submission.comments.find(c => c.comment_type === 'CONFIDENTIAL_TO_EDITOR');
+        if (conf) setConfidentialComment(conf.comment_text);
+      } else {
+        setScores({});
+        setCriterionComments({});
+        setGeneralComment('');
+        setConfidentialComment('');
+      }
+    } catch (e) {
+      console.error('Failed to load case details', e);
+    } finally {
+      setLoadingCase(false);
+    }
+  };
+
+  const handleAcceptAssignment = async () => {
+    if (!selectedAssignment) return;
+    try {
+      const updated = await apiAcceptReviewAssignment(selectedAssignment.id, 'NO_CONFLICT');
+      if (updated) {
+        setSelectedAssignment(updated);
+        await loadMyAssignments();
+        setActionMessage({ type: 'success', text: isAr ? 'تم قبول مهمة التحكيم بنجاح.' : 'Review assignment accepted.' });
+      }
+    } catch (e) {
+      console.error('handleAcceptAssignment error', e);
+      setActionMessage({ type: 'error', text: isAr ? 'فشل قبول مهمة التحكيم.' : 'Failed to accept assignment.' });
+    }
+  };
+
+  const handleDeclineAssignment = async () => {
+    if (!selectedAssignment) return;
+    try {
+      const updated = await apiDeclineReviewAssignment(selectedAssignment.id, 'الاعتذار عن التحكيم لضيق الوقت');
+      if (updated) {
+        setSelectedAssignment(updated);
+        await loadMyAssignments();
+        setActionMessage({ type: 'success', text: isAr ? 'تم الاعتذار عن مهمة التحكيم.' : 'Assignment declined.' });
+      }
+    } catch (e) {
+      console.error('handleDeclineAssignment error', e);
+      setActionMessage({ type: 'error', text: isAr ? 'فشل تسجيل الاعتذار.' : 'Failed to decline assignment.' });
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    if (!selectedAssignment || !activeCaseDetails) return;
+    const currentRound = activeCaseDetails.rounds.find(r => r.id === selectedAssignment.round_id);
+    const rubricCriteria = currentRound?.rubric?.criteria || [];
+
+    setSavingDraft(true);
+    setActionMessage(null);
+    try {
+      const responses = rubricCriteria.map(c => ({
+        criterion_id: c.id,
+        score_value: scores[c.id] !== undefined ? scores[c.id] : 8,
+        comments: criterionComments[c.id] || ''
+      }));
+
+      const comments = [];
+      if (generalComment) comments.push({ comment_type: 'AUTHOR_VISIBLE' as const, comment_text: generalComment });
+      if (confidentialComment) comments.push({ comment_type: 'CONFIDENTIAL_TO_EDITOR' as const, comment_text: confidentialComment });
+
+      const res = await apiSaveReviewDraft(selectedAssignment.id, {
+        recommendation,
+        responses,
+        comments
+      });
+
+      if (res) {
+        setActionMessage({ type: 'success', text: isAr ? 'تم حفظ مسودة التحكيم بنجاح.' : 'Draft saved successfully.' });
+        await loadMyAssignments();
+      }
+    } catch (e) {
+      console.error('handleSaveDraft error', e);
+      setActionMessage({ type: 'error', text: isAr ? 'فشل حفظ المسودة.' : 'Failed to save draft.' });
+    } finally {
+      setSavingDraft(false);
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (!selectedAssignment || !activeCaseDetails) return;
+    const currentRound = activeCaseDetails.rounds.find(r => r.id === selectedAssignment.round_id);
+    const rubricCriteria = currentRound?.rubric?.criteria || [];
+
+    setSubmittingReview(true);
+    setActionMessage(null);
+    try {
+      const responses = rubricCriteria.map(c => ({
+        criterion_id: c.id,
+        score_value: scores[c.id] !== undefined ? scores[c.id] : 8,
+        comments: criterionComments[c.id] || ''
+      }));
+
+      const comments = [];
+      if (generalComment) comments.push({ comment_type: 'AUTHOR_VISIBLE' as const, comment_text: generalComment });
+      if (confidentialComment) comments.push({ comment_type: 'CONFIDENTIAL_TO_EDITOR' as const, comment_text: confidentialComment });
+
+      const res = await apiSubmitCompletedReview(selectedAssignment.id, {
+        recommendation,
+        responses,
+        comments
+      });
+
+      if (res) {
+        setActionMessage({ type: 'success', text: isAr ? 'تم تسليم تقرير التحكيم بنجاح وبصورة نهائية.' : 'Review submitted successfully.' });
+        await loadMyAssignments();
+        if (selectedAssignment) {
+          selectAssignment({ ...selectedAssignment, status: 'SUBMITTED' });
+        }
+      }
+    } catch (e: any) {
+      console.error('handleSubmitReview error', e);
+      setActionMessage({ type: 'error', text: isAr ? 'تعذر تسليم التقرير. يرجى استكمال كافة المعايير الإلزامية.' : 'Failed to submit review.' });
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  const handleCreateNewCase = async () => {
+    if (!newCaseTitleAr) return;
+    try {
+      const res = await apiCreatePeerReviewCase({
+        title_ar: newCaseTitleAr,
+        title_en: newCaseTitleEn || newCaseTitleAr,
+        abstract_ar: newCaseAbstractAr,
+        blind_type: newCaseBlindType,
+        project_id: activeProject?.id
+      });
+      if (res) {
+        setShowNewCaseModal(false);
+        setNewCaseTitleAr('');
+        setNewCaseTitleEn('');
+        setNewCaseAbstractAr('');
+        await loadEditorialCases();
+        setActionMessage({ type: 'success', text: isAr ? 'تم إنشاء ملف التحكيم وبدء الجولة الأولى بنجاح.' : 'Review case created.' });
+      }
+    } catch (e) {
+      console.error('handleCreateNewCase error', e);
+      setActionMessage({ type: 'error', text: isAr ? 'فشل إنشاء ملف التحكيم.' : 'Failed to create case.' });
+    }
+  };
+
+  const handleRecordEditorialDecision = async () => {
+    if (!decisionCaseId || !editorialNotes) return;
+    try {
+      const res = await apiRecordEditorialDecision(decisionCaseId, editorialDecision, editorialNotes);
+      if (res) {
+        setDecisionCaseId(null);
+        setEditorialNotes('');
+        await loadEditorialCases();
+        setActionMessage({ type: 'success', text: isAr ? 'تم تسجيل القرار الأكاديمي النهائي بنجاح.' : 'Editorial decision recorded.' });
+      }
+    } catch (e) {
+      console.error('handleRecordEditorialDecision error', e);
+      setActionMessage({ type: 'error', text: isAr ? 'فشل تسجيل القرار.' : 'Failed to record decision.' });
+    }
+  };
+
+  const currentRound = activeCaseDetails?.rounds.find(r => r.id === selectedAssignment?.round_id);
+  const rubric = currentRound?.rubric;
+  const isSubmitted = selectedAssignment?.status === 'SUBMITTED';
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-16">
+    <div className="space-y-6 max-w-7xl mx-auto pb-12" dir={isAr ? 'rtl' : 'ltr'}>
       
-      {/* Header Banner */}
-      <div className="bg-gradient-to-r from-purple-900/30 via-violet-900/15 to-transparent border border-purple-500/15 rounded-2xl p-6 shadow-md">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2.5 rounded-2xl bg-purple-600/10">
-            <Award size={22} className="text-purple-500" />
-          </div>
-          <div>
-            <h2 className="text-lg font-extrabold text-[var(--ds-text-primary)] m-0">
-              {isAr ? 'بوابة التحكيم العلمي وتحكيم أدوات الدراسة' : 'Scientific Peer Review & Instruments Refereeing'}
+      {/* Top Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[var(--ds-surface-card)] p-6 rounded-2xl border border-[var(--ds-border-subtle)] shadow-sm">
+        <div>
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-[var(--ds-text-primary)]">
+              {isAr ? 'منظومة التحكيم العلمي ومراجعة الأقران' : 'Academic Peer Review System'}
             </h2>
-            <p className="text-xs text-[var(--ds-text-secondary)] m-0">
-              {isAr ? 'تحكيم المخططات المنهجية وتقييم عبارات الاستبانات والمقاييس للباحثين إلكترونياً.' : 'Double-blind refereeing for research blueprints and questionnaire statements.'}
-            </p>
+            <span className="text-xs px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/20">
+              {isAr ? 'إصدار مؤسسي معتمد' : 'Enterprise Verified'}
+            </span>
           </div>
+          <p className="text-sm text-[var(--ds-text-muted)] mt-1">
+            {isAr 
+              ? 'إدارة لجان التحكيم، مراجعة المخطوطات العلمية، وضمان معايير النزاهة الأكاديمية والتعمية المزدوجة' 
+              : 'Manage peer review rounds, referee academic manuscripts, and ensure double-blind integrity'}
+          </p>
+        </div>
+
+        {/* Tab Switcher */}
+        <div className="flex bg-[var(--ds-surface-sunken)] p-1 rounded-xl border border-[var(--ds-border-subtle)]">
+          <button
+            onClick={() => setActiveTab('my_reviews')}
+            className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
+              activeTab === 'my_reviews'
+                ? 'bg-[var(--ds-surface-card)] text-emerald-600 dark:text-emerald-400 shadow-sm'
+                : 'text-[var(--ds-text-muted)] hover:text-[var(--ds-text-primary)]'
+            }`}
+          >
+            {isAr ? 'مهام التحكيم المسندة إليّ' : 'My Review Assignments'}
+          </button>
+          <button
+            onClick={() => setActiveTab('editorial_cases')}
+            className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
+              activeTab === 'editorial_cases'
+                ? 'bg-[var(--ds-surface-card)] text-emerald-600 dark:text-emerald-400 shadow-sm'
+                : 'text-[var(--ds-text-muted)] hover:text-[var(--ds-text-primary)]'
+            }`}
+          >
+            {isAr ? 'متابعة ملفات التحكيم (هيئة التحرير)' : 'Editorial Review Cases'}
+          </button>
         </div>
       </div>
 
-      {reviewSubmitted ? (
-        <Card className="p-8 text-center space-y-6 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-3xl">
-          <div className="mx-auto w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center">
-            <CheckCircle2 size={24} className="text-emerald-500" />
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-base font-extrabold text-[var(--ds-text-primary)]">
-              {isAr ? 'تم إرسال واعتماد تقرير التحكيم بنجاح' : 'Peer Review Report Certified Successfully'}
-            </h3>
-            <p className="text-xs text-[var(--ds-text-muted)] max-w-md mx-auto leading-relaxed">
-              {isAr
-                ? 'شكراً لمساهمتك العلمية. تم قفل التقرير وتوقيعه رقمياً وإرساله للباحث لتعديل المخطط وبنود الاستبانة وفق مرئياتكم.'
-                : 'Thank you for your valuable contribution. The referee report is locked and sent to the investigator for amendments.'}
-            </p>
-          </div>
+      {actionMessage && (
+        <div className={`p-4 rounded-xl text-sm flex items-center gap-3 border ${
+          actionMessage.type === 'success'
+            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+            : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+        }`}>
+          {actionMessage.type === 'success' ? <CheckCircle2 className="w-5 h-5 flex-shrink-0" /> : <AlertTriangle className="w-5 h-5 flex-shrink-0" />}
+          <span>{actionMessage.text}</span>
+        </div>
+      )}
 
-          <div className="p-5 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-2xl max-w-lg mx-auto text-right space-y-3.5">
-            <h4 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 mb-2">
-              {isAr ? 'ملخص التقرير المعتمد:' : 'Review Summary:'}
-            </h4>
-            <div className="flex justify-between text-xs font-bold">
-              <span className="text-[var(--ds-text-secondary)]">{isAr ? 'الدرجة الكلية الممنوحة للمخطط:' : 'Overall Rating:'}</span>
-              <span className="text-purple-500">{totalWeightedScore.toFixed(1)} / 100</span>
+      {/* ── TAB 1: MY REVIEW ASSIGNMENTS ──────────────────────────────────────── */}
+      {activeTab === 'my_reviews' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          {/* Left Sidebar: Assignments List */}
+          <div className="lg:col-span-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-bold text-[var(--ds-text-primary)] flex items-center gap-2">
+                <ListChecks className="w-4 h-4 text-emerald-500" />
+                <span>{isAr ? 'قائمة المهام المسندة' : 'Assigned Manuscripts'}</span>
+              </h2>
+              <button 
+                onClick={loadMyAssignments}
+                className="text-xs text-[var(--ds-text-muted)] hover:text-emerald-500 flex items-center gap-1"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>{isAr ? 'تحديث' : 'Refresh'}</span>
+              </button>
             </div>
-            <div className="flex justify-between text-xs font-bold">
-              <span className="text-[var(--ds-text-secondary)]">{isAr ? 'قرار المحكّم:' : 'Referee Decision:'}</span>
-              <span className={decisions.find(d => d.value === overallDecision)?.color}>
-                {isAr ? decisions.find(d => d.value === overallDecision)?.labelAr : decisions.find(d => d.value === overallDecision)?.labelEn}
-              </span>
-            </div>
-            
-            {ratedItemsCount > 0 && (
-              <div className="pt-2 border-t border-[var(--ds-border-subtle)] space-y-1">
-                <div className="flex justify-between text-xs font-bold text-[var(--ds-text-secondary)]">
-                  <span>{isAr ? 'بنود الأدوات المحكّمة:' : 'Referee Instruments Items:'}</span>
-                  <span className="text-[var(--ds-text-primary)]">{ratedItemsCount} {isAr ? 'بنداً' : 'items'}</span>
-                </div>
-                <div className="flex justify-between text-[11px] font-medium text-emerald-600">
-                  <span>{isAr ? '← بنود مقبولة دون تعديل:' : '← Accepted without edits:'}</span>
-                  <span>{appropriateCount} ({Math.round((appropriateCount / ratedItemsCount) * 100)}%)</span>
-                </div>
-                <div className="flex justify-between text-[11px] font-medium text-amber-500">
-                  <span>{isAr ? '← بنود تحتاج تعديل/غير ملائمة:' : '← Needs edits/inappropriate:'}</span>
-                  <span>{needsModCount} ({Math.round((needsModCount / ratedItemsCount) * 100)}%)</span>
-                </div>
+
+            {loadingAssignments ? (
+              <div className="p-8 text-center text-sm text-[var(--ds-text-muted)]">
+                {isAr ? 'جارٍ تحميل المهام...' : 'Loading assignments...'}
+              </div>
+            ) : assignments.length === 0 ? (
+              <Card className="p-6 text-center text-[var(--ds-text-muted)] text-sm">
+                <FileText className="w-10 h-10 mx-auto mb-2 text-slate-400 opacity-50" />
+                <p>{isAr ? 'لا توجد مهام تحكيم مسندة إليك حالياً.' : 'No review assignments found.'}</p>
+              </Card>
+            ) : (
+              <div className="space-y-3">
+                {assignments.map(asg => {
+                  const isSelected = selectedAssignment?.id === asg.id;
+                  return (
+                    <div
+                      key={asg.id}
+                      onClick={() => selectAssignment(asg)}
+                      className={`p-4 rounded-xl border cursor-pointer transition-all ${
+                        isSelected
+                          ? 'bg-[var(--ds-surface-card)] border-emerald-500 ring-1 ring-emerald-500'
+                          : 'bg-[var(--ds-surface-sunken)] border-[var(--ds-border-subtle)] hover:border-slate-400'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold ${
+                          asg.status === 'SUBMITTED' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' :
+                          asg.status === 'ACCEPTED' ? 'bg-blue-500/10 text-blue-600 border border-blue-500/20' :
+                          asg.status === 'DECLINED' ? 'bg-rose-500/10 text-rose-600 border border-rose-500/20' :
+                          'bg-amber-500/10 text-amber-600 border border-amber-500/20'
+                        }`}>
+                          {asg.status}
+                        </span>
+                        {asg.due_at && (
+                          <span className="text-xs text-[var(--ds-text-muted)] flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            <span>{new Date(asg.due_at).toLocaleDateString(isAr ? 'ar-SA' : 'en-US')}</span>
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs font-bold text-[var(--ds-text-primary)] line-clamp-2">
+                        {asg.case_id}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
-            
-            {reviewerName && (
-              <div className="flex justify-between text-xs font-bold pt-2 border-t border-[var(--ds-border-subtle)]">
-                <span className="text-[var(--ds-text-secondary)]">{isAr ? 'المحكّم المعتمد للمشروع:' : 'Certified Referee:'}</span>
-                <span className="text-[var(--ds-text-primary)]">{reviewerName}</span>
+          </div>
+
+          {/* Right Area: Active Review Form & Manuscript */}
+          <div className="lg:col-span-8 space-y-6">
+            {loadingCase ? (
+              <div className="p-12 text-center text-sm text-[var(--ds-text-muted)]">
+                {isAr ? 'جارٍ تحميل تفاصيل المخطوطة والنموذج...' : 'Loading manuscript details...'}
+              </div>
+            ) : !selectedAssignment || !activeCaseDetails ? (
+              <Card className="p-12 text-center text-[var(--ds-text-muted)] text-sm">
+                <FileText className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                <p>{isAr ? 'اختر مهمة تحكيم من القائمة للبدء بالتقييم' : 'Select a review assignment to begin evaluation'}</p>
+              </Card>
+            ) : (
+              <div className="space-y-6">
+                
+                {/* Manuscript Card */}
+                <Card className="p-6 space-y-4">
+                  <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-3">
+                    <h3 className="text-base font-bold text-[var(--ds-text-primary)] flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-emerald-500" />
+                      <span>{activeCaseDetails.title_ar}</span>
+                    </h3>
+                    <span className="text-xs px-2.5 py-1 rounded bg-[var(--ds-surface-sunken)] text-[var(--ds-text-muted)] border border-[var(--ds-border-subtle)]">
+                      {activeCaseDetails.blind_type}
+                    </span>
+                  </div>
+                  {activeCaseDetails.abstract_ar && (
+                    <p className="text-sm text-[var(--ds-text-secondary)] bg-[var(--ds-surface-sunken)] p-4 rounded-xl leading-relaxed">
+                      {activeCaseDetails.abstract_ar}
+                    </p>
+                  )}
+                </Card>
+
+                {/* Invitation Action if INVITED */}
+                {selectedAssignment.status === 'INVITED' && (
+                  <Card className="p-6 bg-amber-500/5 border-amber-500/20 space-y-4">
+                    <h3 className="text-base font-bold text-amber-700 dark:text-amber-300 flex items-center gap-2">
+                      <AlertTriangle className="w-5 h-5" />
+                      <span>{isAr ? 'دعوة تحكيم جديدة — يرجى تأكيد القبول أو الاعتذار' : 'New Review Invitation'}</span>
+                    </h3>
+                    <p className="text-sm text-[var(--ds-text-secondary)]">
+                      {isAr ? 'يرجى مراجعة ملخص البحث أعلاه وتأكيد خلو التحكيم من أي تضارب للمصالح قبل البدء.' : 'Please confirm acceptance and absence of conflict of interest.'}
+                    </p>
+                    <div className="flex gap-3 pt-2">
+                      <Button onClick={handleAcceptAssignment} className="bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>{isAr ? 'قبول التحكيم والبدء' : 'Accept Assignment'}</span>
+                      </Button>
+                      <Button onClick={handleDeclineAssignment} variant="secondary" className="border-rose-300 text-rose-600 hover:bg-rose-50">
+                        <span>{isAr ? 'الاعتذار' : 'Decline'}</span>
+                      </Button>
+                    </div>
+                  </Card>
+                )}
+
+                {/* Rubric Review Form if ACCEPTED or IN_PROGRESS or SUBMITTED */}
+                {selectedAssignment.status !== 'INVITED' && rubric && (
+                  <Card className="p-6 space-y-6">
+                    <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-3">
+                      <h3 className="text-base font-bold text-[var(--ds-text-primary)] flex items-center gap-2">
+                        <ListChecks className="w-5 h-5 text-emerald-500" />
+                        <span>{rubric.name_ar}</span>
+                      </h3>
+                      {isSubmitted && (
+                        <span className="text-xs px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+                          <Lock className="w-3.5 h-3.5" />
+                          <span>{isAr ? 'تم تسليم التقرير بنجاح' : 'Submitted'}</span>
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="space-y-6">
+                      {rubric.criteria.map((criterion: PeerReviewCriterion, idx: number) => (
+                        <div key={criterion.id} className="p-4 rounded-xl bg-[var(--ds-surface-sunken)] border border-[var(--ds-border-subtle)] space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="font-semibold text-sm text-[var(--ds-text-primary)]">
+                              {idx + 1}. {criterion.title_ar}
+                              {criterion.is_mandatory && <span className="text-rose-500 text-xs mr-2">*</span>}
+                            </div>
+                            <span className="text-xs text-[var(--ds-text-muted)] bg-[var(--ds-surface-card)] px-2 py-0.5 rounded border border-[var(--ds-border-subtle)]">
+                              {criterion.weight * 100}%
+                            </span>
+                          </div>
+                          {criterion.desc_ar && <p className="text-xs text-[var(--ds-text-muted)]">{criterion.desc_ar}</p>}
+
+                          {/* Score Selector */}
+                          <div className="flex items-center gap-2 pt-2">
+                            <span className="text-xs text-[var(--ds-text-muted)] ml-2">{isAr ? 'الدرجة (من 10):' : 'Score (1-10):'}</span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(val => {
+                                const currentVal = scores[criterion.id] !== undefined ? scores[criterion.id] : 8;
+                                const isSelected = currentVal === val;
+                                return (
+                                  <button
+                                    key={val}
+                                    type="button"
+                                    disabled={isSubmitted}
+                                    onClick={() => setScores(prev => ({ ...prev, [criterion.id]: val }))}
+                                    className={`w-7 h-7 rounded-lg text-xs font-bold transition-all ${
+                                      isSelected
+                                        ? 'bg-emerald-600 text-white ring-2 ring-emerald-400'
+                                        : 'bg-[var(--ds-surface-card)] text-[var(--ds-text-secondary)] hover:bg-slate-200 dark:hover:bg-slate-700 border border-[var(--ds-border-subtle)]'
+                                    } ${isSubmitted ? 'opacity-70 cursor-not-allowed' : ''}`}
+                                  >
+                                    {val}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          <div className="pt-2">
+                            <textarea
+                              disabled={isSubmitted}
+                              value={criterionComments[criterion.id] || ''}
+                              onChange={e => setCriterionComments(prev => ({ ...prev, [criterion.id]: e.target.value }))}
+                              placeholder={isAr ? 'ملاحظات المحكم التفصيلية حول هذا المعيار...' : 'Criterion specific comments...'}
+                              className="w-full p-2.5 rounded-lg bg-[var(--ds-surface-card)] border border-[var(--ds-border-subtle)] text-xs text-[var(--ds-text-primary)] focus:ring-1 focus:ring-emerald-500"
+                              rows={2}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* General and Confidential Comments */}
+                    <div className="space-y-4 pt-4 border-t border-[var(--ds-border-subtle)]">
+                      <div>
+                        <label className="block text-xs font-bold text-[var(--ds-text-primary)] mb-1.5 flex items-center gap-2">
+                          <MessageSquare className="w-4 h-4 text-emerald-500" />
+                          <span>{isAr ? 'ملاحظات عامة موجهة للمؤلف (مرئية للباحث):' : 'Comments to Author:'}</span>
+                        </label>
+                        <textarea
+                          disabled={isSubmitted}
+                          value={generalComment}
+                          onChange={e => setGeneralComment(e.target.value)}
+                          placeholder={isAr ? 'اكتب الملاحظات والتعديلات المطلوبة من الباحث بالتفصيل...' : 'Write detailed feedback for the author...'}
+                          className="w-full p-3 rounded-xl bg-[var(--ds-surface-sunken)] border border-[var(--ds-border-subtle)] text-xs text-[var(--ds-text-primary)] focus:ring-1 focus:ring-emerald-500 leading-relaxed"
+                          rows={4}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-amber-600 dark:text-amber-400 mb-1.5 flex items-center gap-2">
+                          <Lock className="w-4 h-4" />
+                          <span>{isAr ? 'ملاحظات سرية لهيئة التحرير (محجوبة تماماً عن المؤلف):' : 'Confidential Comments to Editor:'}</span>
+                        </label>
+                        <textarea
+                          disabled={isSubmitted}
+                          value={confidentialComment}
+                          onChange={e => setConfidentialComment(e.target.value)}
+                          placeholder={isAr ? 'ملاحظات خاصة بهيئة التحرير ولجنة التحكيم...' : 'Confidential editorial notes...'}
+                          className="w-full p-3 rounded-xl bg-[var(--ds-surface-sunken)] border border-amber-500/20 text-xs text-[var(--ds-text-primary)] focus:ring-1 focus:ring-amber-500 leading-relaxed"
+                          rows={2}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Recommendation Picker */}
+                    <div className="space-y-3 pt-4 border-t border-[var(--ds-border-subtle)]">
+                      <label className="block text-xs font-bold text-[var(--ds-text-primary)]">
+                        {isAr ? 'توصية المحكم الأكاديمية (Recommendation):' : 'Reviewer Recommendation:'}
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        {[
+                          { id: 'ACCEPT', label: isAr ? 'قبول النشر' : 'Accept', color: 'border-emerald-500 text-emerald-600 bg-emerald-500/10' },
+                          { id: 'MINOR_REVISION', label: isAr ? 'تعديلات طفيفة' : 'Minor Revision', color: 'border-blue-500 text-blue-600 bg-blue-500/10' },
+                          { id: 'MAJOR_REVISION', label: isAr ? 'تعديلات جوهرية' : 'Major Revision', color: 'border-amber-500 text-amber-600 bg-amber-500/10' },
+                          { id: 'REJECT', label: isAr ? 'رفض المخطوطة' : 'Reject', color: 'border-rose-500 text-rose-600 bg-rose-500/10' },
+                        ].map(opt => {
+                          const isSelected = recommendation === opt.id;
+                          return (
+                            <button
+                              key={opt.id}
+                              type="button"
+                              disabled={isSubmitted}
+                              onClick={() => setRecommendation(opt.id as any)}
+                              className={`p-3 rounded-xl border text-xs font-bold transition-all text-center ${
+                                isSelected ? `${opt.color} ring-2 ring-emerald-500` : 'border-[var(--ds-border-subtle)] bg-[var(--ds-surface-sunken)] text-[var(--ds-text-muted)] hover:bg-[var(--ds-surface-card)]'
+                              } ${isSubmitted ? 'opacity-70 cursor-not-allowed' : ''}`}
+                            >
+                              {opt.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    {!isSubmitted && (
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-[var(--ds-border-subtle)]">
+                        <Button
+                          onClick={handleSaveDraft}
+                          disabled={savingDraft || submittingReview}
+                          variant="secondary"
+                          className="w-full sm:w-auto flex items-center justify-center gap-2"
+                        >
+                          <Save className="w-4 h-4" />
+                          <span>{savingDraft ? (isAr ? 'جارٍ الحفظ...' : 'Saving...') : (isAr ? 'حفظ كمسودة' : 'Save Draft')}</span>
+                        </Button>
+
+                        <Button
+                          onClick={handleSubmitReview}
+                          disabled={submittingReview || savingDraft}
+                          className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 flex items-center justify-center gap-2"
+                        >
+                          <Send className="w-4 h-4" />
+                          <span>{submittingReview ? (isAr ? 'جارٍ التسليم...' : 'Submitting...') : (isAr ? 'تسليم التقرير النهائي' : 'Submit Review')}</span>
+                        </Button>
+                      </div>
+                    )}
+                  </Card>
+                )}
+
               </div>
             )}
           </div>
+        </div>
+      )}
 
-          <Button onClick={() => setReviewSubmitted(false)} variant="secondary" className="font-bold text-xs rounded-xl">
-            {isAr ? 'تعديل أو كتابة تقرير جديد' : 'Edit or Write New Report'}
-          </Button>
-        </Card>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Metadata Card */}
-          <Card className="p-5 space-y-4">
-            <h3 className="text-sm font-bold text-[var(--ds-text-primary)] pb-2 border-b border-[var(--ds-border-subtle)] m-0">
-              {isAr ? 'بيانات البحث الخاضع للتحكيم' : 'Manuscript details'}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-medium">
-              <div>
-                <span className="text-[var(--ds-text-muted)] font-bold">{isAr ? 'عنوان البحث (بالعربية):' : 'Title (AR):'}</span>
-                <p className="text-[var(--ds-text-primary)] font-extrabold m-0 mt-1">{activeProject.titleAr || '—'}</p>
-              </div>
-              <div>
-                <span className="text-[var(--ds-text-muted)] font-bold">{isAr ? 'عنوان البحث (بالإنجليزية):' : 'Title (EN):'}</span>
-                <p className="text-[var(--ds-text-primary)] font-extrabold m-0 mt-1">{activeProject.titleEn || '—'}</p>
-              </div>
-              <div>
-                <span className="text-[var(--ds-text-muted)] font-bold">{isAr ? 'منهج وتصميم الدراسة:' : 'Study Design:'}</span>
-                <p className="text-[var(--ds-text-primary)] font-extrabold m-0 mt-1 uppercase">{activeProject.studyDesign}</p>
-              </div>
-              <div>
-                <span className="text-[var(--ds-text-muted)] font-bold">{isAr ? 'تكامل العينات والمتغيرات:' : 'Samples & Variables:'}</span>
-                <p className="text-[var(--ds-text-primary)] font-extrabold m-0 mt-1">
-                  {activeProject.variables?.length || 0} {isAr ? 'متغيرات' : 'variables'} | {activeProject.hypotheses?.length || 0} {isAr ? 'فروض' : 'hypotheses'}
-                </p>
-              </div>
+      {/* ── TAB 2: EDITORIAL REVIEW CASES OVERSIGHT ───────────────────────────── */}
+      {activeTab === 'editorial_cases' && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-[var(--ds-text-primary)] flex items-center gap-2">
+                <Layers className="w-5 h-5 text-emerald-500" />
+                <span>{isAr ? 'ملفات التحكيم العلمي والمخطوطات قيد المراجعة' : 'Editorial Peer Review Cases'}</span>
+              </h2>
+              <p className="text-xs text-[var(--ds-text-muted)] mt-0.5">
+                {isAr ? 'متابعة جولات التحكيم، توزيع المحكمين، وتسجيل القرارات الأكاديمية النهائية' : 'Oversee rounds, reviewer assignments, and record human decisions'}
+              </p>
             </div>
-          </Card>
-
-          {/* Premium Tab Bar for Multi-D Refereeing */}
-          <div className="flex border-b border-[var(--ds-border-subtle)]">
-            <button
-              type="button"
-              onClick={() => setActiveTab('proposal')}
-              className={`pb-3 px-6 text-xs font-black transition-all cursor-pointer border-b-2 ${
-                activeTab === 'proposal'
-                  ? 'border-purple-600 text-purple-500'
-                  : 'border-transparent text-[var(--ds-text-muted)] hover:text-[var(--ds-text-secondary)]'
-              }`}
+            <Button
+              onClick={() => setShowNewCaseModal(true)}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-2 text-xs"
             >
-              <div className="flex items-center gap-1.5">
-                <FileText size={14} />
-                <span>{isAr ? '1. تحكيم المخطط المنهجي العام' : '1. Scientific Proposal Review'}</span>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('instrument')}
-              className={`pb-3 px-6 text-xs font-black transition-all cursor-pointer border-b-2 ${
-                activeTab === 'instrument'
-                  ? 'border-purple-600 text-purple-500'
-                  : 'border-transparent text-[var(--ds-text-muted)] hover:text-[var(--ds-text-secondary)]'
-              }`}
-            >
-              <div className="flex items-center gap-1.5">
-                <ListChecks size={14} />
-                <span>{isAr ? '2. تحكيم أدوات الدراسة (الاستبانات)' : '2. Research Instruments Review'}</span>
-              </div>
-            </button>
+              <Plus className="w-4 h-4" />
+              <span>{isAr ? 'فتح ملف تحكيم جديد' : 'New Review Case'}</span>
+            </Button>
           </div>
 
-          {/* Tab 1: Proposal Review */}
-          {activeTab === 'proposal' && (
-            <div className="space-y-4 animate-fade-in">
-              {CRITERIA.map(criterion => (
-                <Card key={criterion.id} className="p-5 space-y-4">
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="space-y-1">
-                      <h4 className="text-xs font-black text-[var(--ds-text-primary)] m-0">
-                        {isAr ? criterion.nameAr : criterion.nameEn}
-                      </h4>
-                      <p className="text-[10px] text-[var(--ds-text-secondary)] m-0">
-                        {isAr ? criterion.descAr : criterion.descEn}
-                      </p>
+          {loadingCases ? (
+            <div className="p-12 text-center text-sm text-[var(--ds-text-muted)]">
+              {isAr ? 'جارٍ تحميل ملفات التحكيم...' : 'Loading cases...'}
+            </div>
+          ) : editorialCases.length === 0 ? (
+            <Card className="p-12 text-center text-[var(--ds-text-muted)] text-sm">
+              <FileText className="w-12 h-12 mx-auto mb-3 opacity-30" />
+              <p>{isAr ? 'لا توجد ملفات تحكيم مسجلة حالياً.' : 'No peer review cases found.'}</p>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {editorialCases.map(c => (
+                <Card key={c.id} className="p-6 space-y-4 hover:border-emerald-500/50 transition-all">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <span className="text-xs font-mono text-[var(--ds-text-muted)]">{c.id}</span>
+                      <h3 className="text-base font-bold text-[var(--ds-text-primary)] mt-1">{c.title_ar}</h3>
                     </div>
-                    {/* Score circle */}
-                    <div className="h-10 w-10 rounded-full bg-purple-600/10 border border-purple-500/20 flex items-center justify-center text-xs font-black text-purple-600 shrink-0">
-                      {scores[criterion.id] || 0} / 10
-                    </div>
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-bold ${
+                      c.status === 'DECIDED' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' :
+                      c.status === 'REVISION_REQUESTED' ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20' :
+                      'bg-blue-500/10 text-blue-600 border border-blue-500/20'
+                    }`}>
+                      {c.status}
+                    </span>
                   </div>
 
-                  {/* Score slider */}
-                  <div className="space-y-1.5">
-                    <input
-                      type="range"
-                      min="1"
-                      max="10"
-                      value={scores[criterion.id] || 8}
-                      onChange={e => handleScoreChange(criterion.id, parseInt(e.target.value))}
-                      className="w-full h-1 bg-[var(--ds-surface-secondary)] rounded-lg appearance-none cursor-pointer accent-purple-600"
-                    />
-                    <div className="flex justify-between text-[9px] text-[var(--ds-text-muted)] font-bold">
-                      <span>{isAr ? 'ضعيف (1)' : 'Poor (1)'}</span>
-                      <span>{isAr ? 'مقبول (5)' : 'Fair (5)'}</span>
-                      <span>{isAr ? 'ممتاز (10)' : 'Outstanding (10)'}</span>
-                    </div>
+                  <div className="flex items-center justify-between text-xs text-[var(--ds-text-muted)] bg-[var(--ds-surface-sunken)] p-3 rounded-xl">
+                    <span>{isAr ? `الجولة الحالية: ${c.current_round_number}` : `Round: ${c.current_round_number}`}</span>
+                    <span>{isAr ? `المحكمون النشطون: ${c.active_assignments_count}` : `Active: ${c.active_assignments_count}`}</span>
+                    <span>{isAr ? `المراجعات المكتملة: ${c.completed_reviews_count}` : `Completed: ${c.completed_reviews_count}`}</span>
                   </div>
 
-                  {/* Comments text box */}
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-[var(--ds-text-muted)]">
-                      {isAr ? 'ملحوظة المحكّم والتقرير التفصيلي للمعيار:' : 'Referee qualitative notes:'}
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={comments[criterion.id] || ''}
-                      onChange={e => handleCommentChange(criterion.id, e.target.value)}
-                      placeholder={isAr ? 'اكتب نقاط القوة والضعف والتعديلات المطلوبة...' : 'Strengths, weaknesses, and required amendments...'}
-                      className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--ds-text-primary)] placeholder:text-[var(--ds-text-muted)] focus:outline-none focus:ring-1 focus:ring-purple-500/50"
-                    />
+                  <div className="flex gap-2 pt-2 border-t border-[var(--ds-border-subtle)]">
+                    <Button
+                      onClick={() => setDecisionCaseId(c.id)}
+                      variant="secondary"
+                      className="w-full text-xs flex items-center justify-center gap-1.5 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+                    >
+                      <Award className="w-3.5 h-3.5" />
+                      <span>{isAr ? 'تسجيل قرار هيئة التحرير' : 'Record Final Decision'}</span>
+                    </Button>
                   </div>
                 </Card>
               ))}
             </div>
           )}
+        </div>
+      )}
 
-          {/* Tab 2: Instruments/Questionnaire Refereeing */}
-          {activeTab === 'instrument' && (
-            <div className="space-y-6 animate-fade-in">
-              <div className="p-4 rounded-xl border border-purple-500/20 bg-purple-500/5 flex gap-2 text-[10px] text-purple-700 dark:text-purple-400 leading-relaxed font-bold">
-                <Sparkles size={16} className="shrink-0 text-purple-500 mt-0.5" />
-                <div>
-                  <p className="m-0 font-extrabold">{isAr ? 'دليل تحكيم أدوات الدراسة (Questionnaire Validation):' : 'Instruments Refereeing Guide:'}</p>
-                  <p className="m-0 mt-0.5 font-normal">
-                    {isAr
-                      ? 'يقوم النظام بسحب المقاييس الفترية (المستخلصة من المتغيرات التابعة/الوسيطة) وتوليد بنود الاستبانة إلكترونياً. يرجى تقييم كل بند من حيث الصلاحية والوضوح وتعديل الصياغة لتقنين الأداة.'
-                      : 'Rate each item on whether it aligns with its target variable dimension, is clearly stated, or requires modifications.'}
-                  </p>
-                </div>
-              </div>
-
-              {activeProject.variables.filter(v => v.scale === 'interval' || v.scale === 'ratio').length === 0 ? (
-                <div className="p-8 text-center border border-dashed border-[var(--ds-border-subtle)] rounded-2xl text-[var(--ds-text-muted)] text-xs font-medium">
-                  {isAr ? 'لا توجد أدوات استبانة أو مقاييس فترية حالياً بمشروعك لتحكيمها.' : 'No interval scales or questionnaires available in the active project.'}
-                </div>
-              ) : (
-                activeProject.variables
-                  .filter(v => v.scale === 'interval' || v.scale === 'ratio')
-                  .map(v => {
-                    const items = getMockItemsForVariable(v.id, v.nameAr, v.nameEn);
-                    return (
-                      <div key={v.id} className="space-y-4">
-                        <div className="flex items-center gap-2 border-b border-[var(--ds-border-subtle)] pb-1">
-                          <Settings2 className="text-purple-500" size={15} />
-                          <h4 className="text-xs font-black text-[var(--ds-text-primary)] m-0">
-                            {isAr ? `أداة قياس: ${v.nameAr}` : `Measurement Tool: ${v.nameEn}`}
-                          </h4>
-                          <span className="text-[9px] bg-purple-500/10 text-purple-700 dark:text-purple-400 px-2 py-0.5 rounded-md border border-purple-500/20 font-bold">
-                            {isAr ? 'مقياس فتري' : 'Interval Scale'}
-                          </span>
-                        </div>
-
-                        <div className="space-y-3">
-                          {items.map((item, idx) => {
-                            const key = `${v.id}-item-${idx}`;
-                            const rating = toolRatings[key] || { alignment: 'appropriate', clarity: 'clear', amendment: '' };
-
-                            return (
-                              <Card key={idx} className="p-4 space-y-4 border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)]">
-                                {/* Item Header */}
-                                <div className="flex items-start justify-between gap-4">
-                                  <div className="flex items-center gap-2">
-                                    <span className="bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px]">
-                                      {idx + 1}
-                                    </span>
-                                    <p className="text-xs font-bold text-[var(--ds-text-primary)] m-0">
-                                      {isAr ? item.ar : item.en}
-                                    </p>
-                                  </div>
-                                </div>
-
-                                {/* Evaluation Grid */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-[var(--ds-border-subtle)]">
-                                  
-                                  {/* Alignment Selector */}
-                                  <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-[var(--ds-text-secondary)] uppercase block">
-                                      {isAr ? 'ملاءمة البند للبعد المتغير:' : 'Alignment with Variable:'}
-                                    </label>
-                                    <div className="flex gap-2">
-                                      {(['appropriate', 'needs_modification', 'inappropriate'] as const).map(opt => {
-                                        const optLabels: Record<string, { ar: string; en: string }> = {
-                                          appropriate: { ar: 'ملائم', en: 'Appropriate' },
-                                          needs_modification: { ar: 'تعديل', en: 'Modify' },
-                                          inappropriate: { ar: 'غير ملائم', en: 'Inappropriate' }
-                                        };
-                                        return (
-                                          <button
-                                            key={opt}
-                                            type="button"
-                                            onClick={() => handleToolRatingChange(key, 'alignment', opt)}
-                                            className={`flex-1 px-2.5 py-1.5 rounded-lg text-[10px] font-black cursor-pointer border text-center transition-all ${
-                                              rating.alignment === opt
-                                                ? opt === 'appropriate' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' :
-                                                  opt === 'needs_modification' ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' :
-                                                  'bg-rose-500/10 text-rose-600 border-rose-500/20'
-                                                : 'bg-[var(--ds-surface-secondary)] text-[var(--ds-text-muted)] border-[var(--ds-border-subtle)] hover:bg-[var(--ds-surface-primary)]'
-                                            }`}
-                                          >
-                                            {isAr ? optLabels[opt].ar : optLabels[opt].en}
-                                          </button>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-
-                                  {/* Clarity Selector */}
-                                  <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-[var(--ds-text-secondary)] uppercase block">
-                                      {isAr ? 'وضوح الصياغة اللغوية:' : 'Language Clarity:'}
-                                    </label>
-                                    <div className="flex gap-2">
-                                      {(['clear', 'unclear'] as const).map(opt => {
-                                        const optLabels: Record<string, { ar: string; en: string }> = {
-                                          clear: { ar: 'واضحة', en: 'Clear' },
-                                          unclear: { ar: 'غير واضحة', en: 'Unclear' }
-                                        };
-                                        return (
-                                          <button
-                                            key={opt}
-                                            type="button"
-                                            onClick={() => handleToolRatingChange(key, 'clarity', opt)}
-                                            className={`flex-1 px-2.5 py-1.5 rounded-lg text-[10px] font-black cursor-pointer border text-center transition-all ${
-                                              rating.clarity === opt
-                                                ? opt === 'clear' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' :
-                                                  'bg-rose-500/10 text-rose-600 border-rose-500/20'
-                                                : 'bg-[var(--ds-surface-secondary)] text-[var(--ds-text-muted)] border-[var(--ds-border-subtle)] hover:bg-[var(--ds-surface-primary)]'
-                                            }`}
-                                          >
-                                            {isAr ? optLabels[opt].ar : optLabels[opt].en}
-                                          </button>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* Amendment Text Input */}
-                                <div className="space-y-1.5">
-                                  <label className="text-[9px] font-bold text-[var(--ds-text-muted)] uppercase block">
-                                    {isAr ? 'التعديل اللغوي أو المنهجي المقترح للبند (اختياري):' : 'Suggested wording amendment (optional):'}
-                                  </label>
-                                  <input
-                                    type="text"
-                                    value={rating.amendment}
-                                    onChange={e => handleToolRatingChange(key, 'amendment', e.target.value)}
-                                    placeholder={isAr ? 'اكتب الصياغة البديلة الموصى بها...' : 'Enter recommended alternative phrasing...'}
-                                    className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none focus:ring-1 focus:ring-purple-500/50"
-                                  />
-                                </div>
-                              </Card>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })
-              )}
-            </div>
-          )}
-
-          {/* Overall Decision Section */}
-          <Card className="p-5 space-y-4">
-            <h3 className="text-sm font-bold text-[var(--ds-text-primary)] pb-2 border-b border-[var(--ds-border-subtle)] m-0">
-              {isAr ? 'التوصية النهائية والقرار المشترك للمحكّم' : 'Final Recommendation & Overall Decision'}
+      {/* ── NEW CASE MODAL ────────────────────────────────────────────────────── */}
+      {showNewCaseModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Card className="max-w-lg w-full p-6 space-y-4 bg-[var(--ds-surface-card)]">
+            <h3 className="text-lg font-bold text-[var(--ds-text-primary)]">
+              {isAr ? 'إنشاء ملف تحكيم علمي جديد' : 'Create New Peer Review Case'}
             </h3>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {decisions.map(dec => (
-                <label
-                  key={dec.value}
-                  className={`p-3.5 border rounded-2xl flex items-center gap-3 cursor-pointer transition-all ${
-                    overallDecision === dec.value
-                      ? 'border-purple-600 bg-purple-500/5 font-extrabold'
-                      : 'border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] hover:bg-[var(--ds-surface-secondary)]'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="decision"
-                    value={dec.value}
-                    checked={overallDecision === dec.value}
-                    onChange={() => setOverallDecision(dec.value as any)}
-                    className="accent-purple-600"
-                  />
-                  <div className="text-xs">
-                    <p className={`font-bold m-0 ${dec.color}`}>{isAr ? dec.labelAr : dec.labelEn}</p>
-                  </div>
-                </label>
-              ))}
-            </div>
-
-            {/* Reviewer Signature */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3">
-              <div className="flex flex-col space-y-1">
-                <label className="text-[10px] font-bold text-[var(--ds-text-muted)]">
-                  {isAr ? 'اسم المحكّم المعتمد (التحكيم المعمى يُبقي الاسم مخفياً للباحث):' : 'Referee Name (double-blind remains anonymous):'}
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-[var(--ds-text-secondary)] mb-1">
+                  {isAr ? 'عنوان البحث / المخطوطة (بالعربية):' : 'Title (Arabic):'}
                 </label>
                 <input
                   type="text"
-                  required
-                  placeholder={isAr ? 'د. أحمد المحمادي...' : 'Dr. Jane Doe...'}
-                  value={reviewerName}
-                  onChange={e => setReviewerName(e.target.value)}
-                  className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none focus:ring-1 focus:ring-purple-500/50"
+                  value={newCaseTitleAr}
+                  onChange={e => setNewCaseTitleAr(e.target.value)}
+                  placeholder={isAr ? 'مثال: أثر الذكاء الاصطناعي على مهارات البحث...' : 'Title in Arabic...'}
+                  className="w-full p-3 rounded-xl bg-[var(--ds-surface-sunken)] border border-[var(--ds-border-subtle)] text-sm text-[var(--ds-text-primary)]"
                 />
               </div>
-              
-              <div className="p-3.5 bg-amber-500/5 border border-amber-500/15 rounded-2xl flex gap-2 text-[10px] text-amber-600 leading-relaxed font-bold">
-                <AlertTriangle size={16} className="shrink-0 text-amber-500" />
-                <div>
-                  <p className="m-0 font-extrabold">{isAr ? 'إخلاء مسؤولية النشر:' : 'Blind review policy:'}</p>
-                  <p className="m-0 mt-0.5 font-normal">
-                    {isAr
-                      ? 'للحفاظ على سرية التحكيم، لن يُعرض اسم المحكّم للباحث في صفحة جاهزية النشر ويتم الحساب تلقائياً.'
-                      : 'To ensure blind peer review, the referee\'s name will not be shown to the investigator.'}
-                  </p>
-                </div>
+              <div>
+                <label className="block text-xs font-semibold text-[var(--ds-text-secondary)] mb-1">
+                  {isAr ? 'نوع التعمية والخصوصية:' : 'Blind Review Mode:'}
+                </label>
+                <select
+                  value={newCaseBlindType}
+                  onChange={e => setNewCaseBlindType(e.target.value)}
+                  className="w-full p-3 rounded-xl bg-[var(--ds-surface-sunken)] border border-[var(--ds-border-subtle)] text-sm text-[var(--ds-text-primary)]"
+                >
+                  <option value="DOUBLE_BLIND">{isAr ? 'تحكيم مزدوج التعمية (Double-Blind) — موصى به' : 'Double-Blind'}</option>
+                  <option value="SINGLE_BLIND">{isAr ? 'تحكيم أحادي التعمية (Single-Blind)' : 'Single-Blind'}</option>
+                  <option value="OPEN">{isAr ? 'تحكيم مفتوح (Open Review)' : 'Open Review'}</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-[var(--ds-text-secondary)] mb-1">
+                  {isAr ? 'المستخلص الأكاديمي (اختياري):' : 'Abstract (Optional):'}
+                </label>
+                <textarea
+                  value={newCaseAbstractAr}
+                  onChange={e => setNewCaseAbstractAr(e.target.value)}
+                  placeholder={isAr ? 'المستخلص البحثي...' : 'Abstract...'}
+                  className="w-full p-3 rounded-xl bg-[var(--ds-surface-sunken)] border border-[var(--ds-border-subtle)] text-sm text-[var(--ds-text-primary)]"
+                  rows={3}
+                />
               </div>
             </div>
-
-            {/* Submission actions */}
-            <div className="flex justify-end pt-2">
-              <button
-                type="submit"
-                disabled={!reviewerName.trim()}
-                className="flex items-center gap-1.5 px-5 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-40 text-white text-xs font-bold cursor-pointer transition-colors shadow-md disabled:cursor-not-allowed"
-              >
-                <Send size={13} />
-                <span>{isAr ? 'اعتماد التقرير العلمي للتحكيم' : 'Certify Peer Review Report'}</span>
-              </button>
+            <div className="flex justify-end gap-3 pt-4 border-t border-[var(--ds-border-subtle)]">
+              <Button onClick={() => setShowNewCaseModal(false)} variant="secondary">
+                {isAr ? 'إلغاء' : 'Cancel'}
+              </Button>
+              <Button onClick={handleCreateNewCase} className="bg-emerald-600 hover:bg-emerald-500 text-white">
+                {isAr ? 'إنشاء وبدء الجولة 1' : 'Create Case'}
+              </Button>
             </div>
           </Card>
-        </form>
+        </div>
       )}
+
+      {/* ── EDITORIAL DECISION MODAL ─────────────────────────────────────────── */}
+      {decisionCaseId && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Card className="max-w-lg w-full p-6 space-y-4 bg-[var(--ds-surface-card)]">
+            <h3 className="text-lg font-bold text-[var(--ds-text-primary)] flex items-center gap-2">
+              <Award className="w-5 h-5 text-emerald-500" />
+              <span>{isAr ? 'تسجيل قرار هيئة التحرير / اللجنة الأكاديمية' : 'Record Editorial Decision'}</span>
+            </h3>
+            <p className="text-xs text-[var(--ds-text-muted)]">
+              {isAr ? 'وفقاً لمبدأ الحوكمة الأكاديمية (Human-in-the-Loop)، هذا القرار يصدر حصرياً من قبل عضو اللجنة البشري.' : 'Human-in-the-loop editorial decision.'}
+            </p>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-[var(--ds-text-secondary)] mb-1">
+                  {isAr ? 'القرار النهائي:' : 'Final Decision:'}
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'ACCEPTED', label: isAr ? 'قبول للنشر' : 'Accepted', color: 'border-emerald-500 text-emerald-600 bg-emerald-500/10' },
+                    { id: 'REVISION_REQUIRED', label: isAr ? 'طلب تعديل' : 'Revision Req.', color: 'border-amber-500 text-amber-600 bg-amber-500/10' },
+                    { id: 'REJECTED', label: isAr ? 'رفض' : 'Rejected', color: 'border-rose-500 text-rose-600 bg-rose-500/10' }
+                  ].map(d => (
+                    <button
+                      key={d.id}
+                      type="button"
+                      onClick={() => setEditorialDecision(d.id as any)}
+                      className={`p-3 rounded-xl border text-xs font-bold transition-all text-center ${
+                        editorialDecision === d.id ? `${d.color} ring-2 ring-emerald-500` : 'border-[var(--ds-border-subtle)] bg-[var(--ds-surface-sunken)] text-[var(--ds-text-muted)]'
+                      }`}
+                    >
+                      {d.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-[var(--ds-text-secondary)] mb-1">
+                  {isAr ? 'حيثيات ومبررات القرار الأكاديمي:' : 'Decision Rationale / Notes:'}
+                </label>
+                <textarea
+                  value={editorialNotes}
+                  onChange={e => setEditorialNotes(e.target.value)}
+                  placeholder={isAr ? 'بيان أسباب القرار وملاحظات اللجنة للباحث...' : 'Detailed rationale...'}
+                  className="w-full p-3 rounded-xl bg-[var(--ds-surface-sunken)] border border-[var(--ds-border-subtle)] text-sm text-[var(--ds-text-primary)]"
+                  rows={4}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-4 border-t border-[var(--ds-border-subtle)]">
+              <Button onClick={() => setDecisionCaseId(null)} variant="secondary">
+                {isAr ? 'إلغاء' : 'Cancel'}
+              </Button>
+              <Button onClick={handleRecordEditorialDecision} className="bg-emerald-600 hover:bg-emerald-500 text-white">
+                {isAr ? 'اعتماد وتسجيل القرار' : 'Confirm Decision'}
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
     </div>
   );
 };

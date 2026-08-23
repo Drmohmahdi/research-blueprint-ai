@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useProject } from '../context/ProjectContext';
 import { AlertTriangle, Award, CheckCircle2, Clock, FileLock2, History } from 'lucide-react';
 import { Button } from '../design-system/components/Button';
@@ -64,7 +64,7 @@ export const PreRegistration: React.FC = () => {
       });
 
     return () => { cancelled = true; };
-  }, [activeProject?.id, activeProject?.version, activeProject?.preRegistrationHash]);
+  }, [activeProject]);
 
   if (!activeProject) {
     return (
@@ -139,14 +139,14 @@ export const PreRegistration: React.FC = () => {
             
             <div className="text-xs space-y-1.5 text-[var(--ds-text-secondary)] font-medium">
               <div className="flex justify-between">
-                <span>{language === 'ar' ? 'البصمة الرقمية للملف (Hash):' : 'File Digital Signature (Hash):'}</span>
+                <span>{language === 'ar' ? 'بصمة التحقق التشفيرية للملف (SHA-256):' : 'File integrity checksum (SHA-256):'}</span>
                 <span className="font-mono bg-[var(--ds-surface-secondary)] px-1.5 py-0.5 rounded select-all">
                   {activeProject.preRegistrationHash}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span>{language === 'ar' ? 'تاريخ التثبيت:' : 'Date Locked:'}</span>
-                <span>{activeProject.preRegistrationLockedAt}</span>
+                <span>{lockedAtLabel || activeProject.preRegistrationLockedAt}</span>
               </div>
               <div className="flex justify-between">
                 <span>{language === 'ar' ? 'إصدار الخطة:' : 'Protocol Version:'}</span>

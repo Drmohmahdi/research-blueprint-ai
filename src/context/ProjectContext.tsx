@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { legacyResearchStorageEnabled, purgeLegacyResearchStorage, researchStorage } from '../utils/researchStorage';
 import type { ResearchProject, SimulationResult, SimulationParameters } from '../types/research';
 
 // ── Typed Interfaces replacing 'any' ─────────────────────────────────────────
@@ -25,6 +26,7 @@ import {
   apiDeleteProject,
   apiSimulateScores,
   apiLogin,
+  apiLogout,
   apiRegister,
   setApiAuthToken,
   apiUpdateProjectWorkflowProfile
@@ -172,7 +174,7 @@ const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
 export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSecureMode, setSecureModeState] = useState<boolean>(() => {
-    return localStorage.getItem('rb_secure_mode') === 'true';
+    return !legacyResearchStorageEnabled || localStorage.getItem('rb_secure_mode') === 'true';
   });
 
   const [user, setUser] = useState<{ id?: string; username: string; role: string } | null>(() => {
@@ -182,10 +184,10 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const [projects, setProjects] = useState<ResearchProject[]>(() => {
     // If secure mode is enabled, projects should load dynamically from the backend and NOT persist in localStorage
-    if (localStorage.getItem('rb_secure_mode') === 'true') {
+    if (!legacyResearchStorageEnabled || localStorage.getItem('rb_secure_mode') === 'true') {
       return [defaultProject];
     }
-    const saved = localStorage.getItem('rb_projects');
+    const saved = researchStorage.getItem('rb_projects');
     return saved ? JSON.parse(saved) : [defaultProject];
   });
   
@@ -205,10 +207,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Sync token on startup
   useEffect(() => {
-    const token = localStorage.getItem('rb_auth_token');
-    if (token) {
-      setApiAuthToken(token);
-    }
+    // Session credentials remain in the server-issued HttpOnly cookie.
   }, []);
 
   useEffect(() => {
@@ -218,11 +217,12 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [projects, activeProject]);
 
   useEffect(() => {
+    purgeLegacyResearchStorage();
     // SECURITY HARDENING: Never write projects data to local storage in Secure Research Mode!
-    if (!isSecureMode) {
-      localStorage.setItem('rb_projects', JSON.stringify(projects));
+    if (!isSecureMode && legacyResearchStorageEnabled) {
+      researchStorage.setItem('rb_projects', JSON.stringify(projects));
     } else {
-      localStorage.removeItem('rb_projects');
+      researchStorage.removeItem('rb_projects');
     }
   }, [projects, isSecureMode]);
 
@@ -260,9 +260,10 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, [isSecureMode, user]);
 
   const setSecureMode = (mode: boolean) => {
-    setSecureModeState(mode);
-    localStorage.setItem('rb_secure_mode', mode ? 'true' : 'false');
-    if (!mode) {
+    const effectiveMode = legacyResearchStorageEnabled ? mode : true;
+    setSecureModeState(effectiveMode);
+    localStorage.setItem('rb_secure_mode', effectiveMode ? 'true' : 'false');
+    if (!effectiveMode) {
       logout();
     }
   };
@@ -272,8 +273,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (data) {
       setUser({ id: data.userId || 'local-id', username: data.username, role: data.role });
       localStorage.setItem('rb_user', JSON.stringify({ id: data.userId || 'local-id', username: data.username, role: data.role }));
-      localStorage.setItem('rb_auth_token', data.token);
-      setApiAuthToken(data.token);
+      setApiAuthToken(null);
       
       const backendProjects = await apiListProjects();
       if (backendProjects && backendProjects.length > 0) {
@@ -292,10 +292,10 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return await apiRegister(username, password, email, role);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await apiLogout();
     setUser(null);
     localStorage.removeItem('rb_user');
-    localStorage.removeItem('rb_auth_token');
     setApiAuthToken(null);
     setProjects([defaultProject]);
     setActiveProjectState(defaultProject);

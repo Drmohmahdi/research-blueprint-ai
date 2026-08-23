@@ -1,10 +1,17 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useProject } from '../context/ProjectContext';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Cloud, Database, RefreshCw, Trash2, CheckCircle2, AlertCircle, RotateCcw } from 'lucide-react';
 import { Button, IconButton } from '../design-system/components/Button';
-import { Trash2 } from 'lucide-react';
+import {
+  apiGetLiteratureSynthesis,
+  apiAddLiteratureStudy,
+  apiDeleteLiteratureStudy,
+  apiSyncLiteratureStudies,
+  type LiteratureStudyItem
+} from '../utils/api';
+import { researchStorage } from '../utils/researchStorage';
 
-interface ExtractedStudy {
+export interface ExtractedStudy {
   id: string;
   author: string;
   year: number;
@@ -13,13 +20,15 @@ interface ExtractedStudy {
   ciLower: number;
   ciUpper: number;
   source: 'manual';
+  doi?: string;
+  notes?: string;
 }
 
 const getLiteratureStorageKey = (projectId: string) => `rb_literature_studies_${projectId}`;
 
-const loadStudies = (projectId: string): ExtractedStudy[] => {
+const loadLocalStudies = (projectId: string): ExtractedStudy[] => {
   try {
-    const stored = localStorage.getItem(getLiteratureStorageKey(projectId));
+    const stored = researchStorage.getItem(getLiteratureStorageKey(projectId));
     if (!stored) return [];
     const parsed: unknown = JSON.parse(stored);
     if (!Array.isArray(parsed)) return [];
@@ -49,20 +58,120 @@ const loadStudies = (projectId: string): ExtractedStudy[] => {
   }
 };
 
+const saveLocalStudies = (projectId: string, studies: ExtractedStudy[]) => {
+  try {
+    researchStorage.setItem(getLiteratureStorageKey(projectId), JSON.stringify(studies));
+  } catch (e) {
+    console.warn('Failed to save studies to localStorage', e);
+  }
+};
+
 export const LiteratureSynthesizer: React.FC = () => {
-  const { activeProject, language } = useProject();
+  const { activeProject, language, isSecureMode } = useProject();
   
   const [studies, setStudies] = useState<ExtractedStudy[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [studyDraft, setStudyDraft] = useState({ author: '', year: '', sampleSize: '', effectSize: '', ciLower: '', ciUpper: '' });
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  const projectId = activeProject?.id;
+  const activeProjectIdRef = useRef<string | undefined>(projectId);
+  const requestSequenceRef = useRef(0);
 
   useEffect(() => {
-    setStudies(activeProject ? loadStudies(activeProject.id) : []);
+    activeProjectIdRef.current = projectId;
+  }, [projectId]);
+
+  const fetchProjectStudies = useCallback(async (pId: string) => {
+    const currentSeq = ++requestSequenceRef.current;
+    if (isSecureMode) {
+      setIsSyncing(true);
+      setSyncStatus('idle');
+      try {
+        const remoteData = await apiGetLiteratureSynthesis(pId);
+        // Discard if project switched or a newer request started
+        if (activeProjectIdRef.current !== pId || requestSequenceRef.current !== currentSeq) {
+          return;
+        }
+
+        if (remoteData && remoteData.studies) {
+          const mappedStudies: ExtractedStudy[] = remoteData.studies.map(s => ({
+            id: s.id,
+            author: s.author,
+            year: s.year,
+            sampleSize: s.sampleSize,
+            effectSize: s.effectSize,
+            ciLower: s.ciLower,
+            ciUpper: s.ciUpper,
+            source: 'manual',
+            doi: s.doi,
+            notes: s.notes
+          }));
+
+          if (mappedStudies.length === 0) {
+            // Check if legacy local data exists and auto-migrate safely
+            const localStudies = loadLocalStudies(pId);
+            if (localStudies.length > 0) {
+              const syncResult = await apiSyncLiteratureStudies(pId, localStudies as LiteratureStudyItem[]);
+              if (activeProjectIdRef.current !== pId || requestSequenceRef.current !== currentSeq) return;
+              if (syncResult && syncResult.studies) {
+                setStudies(syncResult.studies.map(s => ({
+                  id: s.id,
+                  author: s.author,
+                  year: s.year,
+                  sampleSize: s.sampleSize,
+                  effectSize: s.effectSize,
+                  ciLower: s.ciLower,
+                  ciUpper: s.ciUpper,
+                  source: 'manual'
+                })));
+                saveLocalStudies(pId, localStudies);
+                setSyncStatus('success');
+                setIsSyncing(false);
+                return;
+              }
+            }
+          }
+
+          setStudies(mappedStudies);
+          saveLocalStudies(pId, mappedStudies);
+          setSyncStatus('success');
+        } else {
+          // Fallback to local
+          const local = loadLocalStudies(pId);
+          setStudies(local);
+          setSyncStatus('error');
+        }
+      } catch (err) {
+        console.error('Failed to load studies from server', err);
+        if (activeProjectIdRef.current === pId && requestSequenceRef.current === currentSeq) {
+          setStudies(loadLocalStudies(pId));
+          setSyncStatus('error');
+        }
+      } finally {
+        if (activeProjectIdRef.current === pId && requestSequenceRef.current === currentSeq) {
+          setIsSyncing(false);
+        }
+      }
+    } else {
+      // Demo Mode: Local Storage
+      setStudies(loadLocalStudies(pId));
+      setSyncStatus('idle');
+    }
+  }, [isSecureMode]);
+
+  useEffect(() => {
+    if (!projectId) {
+      setStudies([]);
+      return;
+    }
+    fetchProjectStudies(projectId);
     setStudyDraft({ author: '', year: '', sampleSize: '', effectSize: '', ciLower: '', ciUpper: '' });
     setSelectedFile(null);
     setFileError(null);
-  }, [activeProject?.id]);
+  }, [projectId, fetchProjectStudies]);
 
   if (!activeProject) {
     return (
@@ -118,14 +227,38 @@ export const LiteratureSynthesizer: React.FC = () => {
     setSelectedFile(file);
   };
 
-  const handleRemoveStudy = (studyId: string) => {
+  const handleRemoveStudy = async (studyId: string) => {
+    const pId = activeProject.id;
     const nextStudies = studies.filter(study => study.id !== studyId);
     setStudies(nextStudies);
-    localStorage.setItem(getLiteratureStorageKey(activeProject.id), JSON.stringify(nextStudies));
+    saveLocalStudies(pId, nextStudies);
+
+    if (isSecureMode) {
+      setIsSyncing(true);
+      try {
+        const ok = await apiDeleteLiteratureStudy(pId, studyId);
+        if (activeProjectIdRef.current !== pId) return;
+        if (ok) {
+          setSyncStatus('success');
+        } else {
+          setSyncStatus('error');
+        }
+      } catch (err) {
+        console.error('Failed to delete study on server', err);
+        if (activeProjectIdRef.current === pId) {
+          setSyncStatus('error');
+        }
+      } finally {
+        if (activeProjectIdRef.current === pId) {
+          setIsSyncing(false);
+        }
+      }
+    }
   };
 
-  const handleAddStudy = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleAddStudy = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const pId = activeProject.id;
     const year = Number(studyDraft.year);
     const sampleSize = Number(studyDraft.sampleSize);
     const effectSize = Number(studyDraft.effectSize);
@@ -135,15 +268,111 @@ export const LiteratureSynthesizer: React.FC = () => {
       setFileError(language === 'ar' ? 'أدخل مرجع الدراسة والسنة وحجم عينة صحيحين وحجم أثر داخل فاصل الثقة.' : 'Enter a reference, valid year and sample size, and an effect size inside its confidence interval.');
       return;
     }
-    const nextStudies = [...studies, { id: `study-${Date.now()}`, author: studyDraft.author.trim(), year, sampleSize, effectSize, ciLower, ciUpper, source: 'manual' as const }];
+
+    const newStudyId = `study-${Date.now()}`;
+    const newStudy: ExtractedStudy = {
+      id: newStudyId,
+      author: studyDraft.author.trim(),
+      year,
+      sampleSize,
+      effectSize,
+      ciLower,
+      ciUpper,
+      source: 'manual' as const
+    };
+
+    const nextStudies = [...studies, newStudy];
     setStudies(nextStudies);
-    localStorage.setItem(getLiteratureStorageKey(activeProject.id), JSON.stringify(nextStudies));
+    saveLocalStudies(pId, nextStudies);
     setStudyDraft({ author: '', year: '', sampleSize: '', effectSize: '', ciLower: '', ciUpper: '' });
     setFileError(null);
+
+    if (isSecureMode) {
+      setIsSyncing(true);
+      try {
+        const saved = await apiAddLiteratureStudy(pId, {
+          id: newStudyId,
+          author: newStudy.author,
+          year: newStudy.year,
+          sampleSize: newStudy.sampleSize,
+          effectSize: newStudy.effectSize,
+          ciLower: newStudy.ciLower,
+          ciUpper: newStudy.ciUpper,
+          source: 'manual'
+        });
+        if (activeProjectIdRef.current !== pId) return;
+        if (saved) {
+          setSyncStatus('success');
+        } else {
+          setSyncStatus('error');
+        }
+      } catch (err) {
+        console.error('Failed to save study on server', err);
+        if (activeProjectIdRef.current === pId) {
+          setSyncStatus('error');
+        }
+      } finally {
+        if (activeProjectIdRef.current === pId) {
+          setIsSyncing(false);
+        }
+      }
+    }
   };
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
+      {/* Persistence Status Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg px-4 py-2.5 text-xs">
+        <div className="flex items-center gap-2">
+          {isSecureMode ? (
+            <>
+              <Cloud size={16} className="text-[var(--ds-primary)]" />
+              <span className="font-semibold text-[var(--ds-text-primary)]">
+                {language === 'ar' ? 'نمط البحث المؤمّن (حفظ قاعدة البيانات السحابية)' : 'Secure Research Mode (Database Persistence)'}
+              </span>
+            </>
+          ) : (
+            <>
+              <Database size={16} className="text-[var(--ds-warning)]" />
+              <span className="font-semibold text-[var(--ds-text-secondary)]">
+                {language === 'ar' ? 'النمط التجريبي (تخزين محلي بالمتصفح)' : 'Demo Mode (Browser Local Storage)'}
+              </span>
+            </>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          {isSyncing && (
+            <span className="flex items-center gap-1.5 text-[var(--ds-primary)] font-medium">
+              <RefreshCw size={13} className="animate-spin" />
+              {language === 'ar' ? 'جارٍ المزامنة...' : 'Syncing...'}
+            </span>
+          )}
+          {syncStatus === 'success' && !isSyncing && (
+            <span className="flex items-center gap-1 text-[var(--ds-success)] font-medium">
+              <CheckCircle2 size={13} />
+              {language === 'ar' ? 'متزامن مع الخادم' : 'Server Synced'}
+            </span>
+          )}
+          {syncStatus === 'error' && !isSyncing && (
+            <span className="flex items-center gap-1 text-[var(--ds-danger)] font-medium">
+              <AlertCircle size={13} />
+              {language === 'ar' ? 'تعذر المزامنة مع الخادم (حفظ مؤقت)' : 'Server sync failed (scratch cache)'}
+            </span>
+          )}
+          {isSecureMode && (
+            <button
+              type="button"
+              onClick={() => projectId && fetchProjectStudies(projectId)}
+              className="flex items-center gap-1 text-[11px] text-[var(--ds-primary)] hover:underline ml-2 cursor-pointer"
+            >
+              <RotateCcw size={11} />
+              {language === 'ar' ? 'إعادة المحاولة' : 'Retry'}
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Upload Zone */}
       <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-6 shadow-sm text-center space-y-4">
         <BookOpen size={40} className="text-[var(--ds-primary)] mx-auto" />

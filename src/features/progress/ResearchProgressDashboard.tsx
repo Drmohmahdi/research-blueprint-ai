@@ -53,7 +53,7 @@ export const ResearchProgressDashboard: React.FC = () => {
         if (!cancelled) setProtocolStatus('unavailable');
       });
     return () => { cancelled = true; };
-  }, [activeProject?.id, activeProject?.version, activeProject?.preRegistrationHash]);
+  }, [activeProject]);
 
   if (!activeProject) {
     return (

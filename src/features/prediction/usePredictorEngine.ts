@@ -12,6 +12,7 @@ import {
   localDynamicForecast,
   localGenerateScenarios
 } from '../../utils/predictionFallback';
+import { researchStorage } from '../../utils/researchStorage';
 
 export interface LitStudy {
   effectSize: number;
@@ -102,7 +103,7 @@ export const usePredictorEngine = () => {
   const loadRunDetails = useCallback(async (runId: string) => {
     if (!activeProject) return;
     if (!isSecureMode) {
-      const saved = localStorage.getItem(`rb_local_runs_${activeProject.id}`);
+      const saved = researchStorage.getItem(`rb_local_runs_${activeProject.id}`);
       const localRuns = saved ? JSON.parse(saved) : [];
       const details = localRuns.find((r: any) => r.run.id === runId);
       if (details) {
@@ -121,7 +122,7 @@ export const usePredictorEngine = () => {
     setLoadingRuns(true);
     setSelectedRun(null);
     if (!isSecureMode) {
-      const saved = localStorage.getItem(`rb_local_runs_${activeProject.id}`);
+      const saved = researchStorage.getItem(`rb_local_runs_${activeProject.id}`);
       if (saved) {
         const parsed = JSON.parse(saved);
         setRuns(parsed.map((r: any) => r.run));
@@ -321,10 +322,10 @@ export const usePredictorEngine = () => {
         recommendations: mock_recommendations
       };
 
-      const saved = localStorage.getItem(`rb_local_runs_${activeProject.id}`);
+      const saved = researchStorage.getItem(`rb_local_runs_${activeProject.id}`);
       const localRuns = saved ? JSON.parse(saved) : [];
       const updatedRuns = [newRun, ...localRuns];
-      localStorage.setItem(`rb_local_runs_${activeProject.id}`, JSON.stringify(updatedRuns));
+      researchStorage.setItem(`rb_local_runs_${activeProject.id}`, JSON.stringify(updatedRuns));
 
       setRuns(updatedRuns.map(r => r.run));
       setSelectedRun(newRun);
@@ -416,7 +417,7 @@ export const usePredictorEngine = () => {
         }
       };
 
-      const saved = localStorage.getItem(`rb_local_runs_${activeProject.id}`);
+      const saved = researchStorage.getItem(`rb_local_runs_${activeProject.id}`);
       const localRuns = saved ? JSON.parse(saved) : [];
       const updatedRuns = localRuns.map((r: any) => {
         if (r.run.id === selectedRun.run.id) {
@@ -427,7 +428,7 @@ export const usePredictorEngine = () => {
         }
         return r;
       });
-      localStorage.setItem(`rb_local_runs_${activeProject.id}`, JSON.stringify(updatedRuns));
+      researchStorage.setItem(`rb_local_runs_${activeProject.id}`, JSON.stringify(updatedRuns));
       
       const nextDetails = updatedRuns.find((r: any) => r.run.id === selectedRun.run.id);
       if (nextDetails) {

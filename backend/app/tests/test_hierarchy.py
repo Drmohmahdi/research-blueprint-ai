@@ -21,6 +21,7 @@ def override_get_db():
 
 @pytest.fixture(scope="module")
 def setup_database():
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     db = TestingSessionLocal()
     now = datetime.datetime.now(datetime.UTC).isoformat()

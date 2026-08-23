@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { getTranslation } from '../utils/translations';
-import { useNotifications } from '../hooks/useNotifications';
 import { VIEW_TO_PATH, PATH_TO_VIEW } from '../router/routes';
 import { 
   LayoutDashboard, 
@@ -35,7 +34,6 @@ import {
   ChevronLeft,
   Award,
   FileText,
-  Bell,
   Briefcase,
   ClipboardList,
   Ruler,
@@ -44,6 +42,7 @@ import {
 } from 'lucide-react';
 import { GuidedFlowSidebar } from '../features/guided-flow/GuidedFlowSidebar';
 import { SupervisorPanel } from '../features/comments/SupervisorPanel';
+import { NotificationCenter } from '../features/notifications/NotificationCenter';
 
 interface LayoutV2Props {
   children: React.ReactNode;
@@ -73,14 +72,43 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
     user,
     logout
   } = useProject();
-  
-  const { unreadCount, markAllAsRead } = useNotifications(user?.id || null);
 
   // Sidebar state
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
   const [sidebarSearch, setSidebarSearch] = useState('');
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const menu = mobileMenuRef.current;
+    const trigger = mobileMenuButtonRef.current;
+    const firstButton = menu?.querySelector<HTMLElement>('button');
+    firstButton?.focus();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setMobileMenuOpen(false);
+        return;
+      }
+      if (event.key !== 'Tab' || !menu) return;
+      const focusable = Array.from(menu.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'));
+      if (event.shiftKey && document.activeElement === focusable[0]) {
+        event.preventDefault();
+        focusable.at(-1)?.focus();
+      } else if (!event.shiftKey && document.activeElement === focusable.at(-1)) {
+        event.preventDefault();
+        focusable[0]?.focus();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      trigger?.focus();
+    };
+  }, [mobileMenuOpen]);
 
   // Dynamic Contextual Sidebar groups based on current URL path
   const getSidebarGroups = () => {
@@ -398,6 +426,9 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--ds-background-canvas)] text-[var(--ds-text-primary)] transition-colors duration-180 antialiased">
+      <a className="ds-skip-link" href="#main-content">
+        {language === 'ar' ? 'تخطَّ إلى المحتوى الرئيسي' : 'Skip to main content'}
+      </a>
       {/* Top Banner Warning (Ethical warning required) */}
       <div className="bg-[var(--ds-warning-soft)] border-b border-[var(--ds-warning)]/20 px-4 py-2.5 flex items-center justify-center gap-2 text-xs md:text-sm text-[var(--ds-warning)] font-bold z-50">
         <AlertTriangle size={16} className="shrink-0 text-[var(--ds-warning)]" />
@@ -406,11 +437,12 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
 
       {/* Premium V2 Header */}
       <header className="sticky top-0 z-40 w-full h-16 border-b border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] shadow-sm backdrop-blur-md">
-        <div className="flex h-full items-center justify-between px-6">
+        <div className="flex h-full min-w-0 items-center justify-between gap-2 px-3 sm:px-6">
           
           {/* Logo & Platform Info */}
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <button 
+              ref={mobileMenuButtonRef}
               onClick={() => setMobileMenuOpen(true)}
               aria-label={language === 'ar' ? 'فتح قائمة التنقل' : 'Open navigation menu'}
               className="lg:hidden p-2 rounded-xl hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)]"
@@ -420,10 +452,10 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--ds-primary)] text-white font-extrabold text-lg shadow-sm">
               {language === 'ar' ? 'ب' : 'B'}
             </div>
-            <div>
-              <h1 className="text-base font-black tracking-tight text-[var(--ds-text-primary)] m-0 leading-none">
+            <div className="min-w-0">
+              <div className="truncate text-sm sm:text-base font-black tracking-tight text-[var(--ds-text-primary)] m-0 leading-none">
                 {getTranslation(language, 'title')}
-              </h1>
+              </div>
               <p className="text-[10px] text-[var(--ds-text-muted)] m-0 mt-1.5 hidden sm:block font-bold">
                 {getTranslation(language, 'subtitle')}
               </p>
@@ -432,7 +464,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
 
           {/* Project Selection Dropdown / Metadata */}
           {pathname !== '/app' && (
-            <div className="hidden md:flex items-center gap-3">
+            <div className="hidden xl:flex min-w-0 max-w-[34vw] items-center gap-3">
               <span className="text-[10px] font-bold text-[var(--ds-text-muted)] uppercase tracking-wider">
                 {language === 'ar' ? 'المشروع النشط:' : 'Active Project:'}
               </span>
@@ -442,7 +474,8 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
                   const found = projects.find(p => p.id === e.target.value);
                   if (found) setActiveProject(found);
                 }}
-                className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg px-3 py-1.5 text-xs font-bold text-[var(--ds-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
+                aria-label={language === 'ar' ? 'اختيار المشروع النشط' : 'Select active project'}
+                className="min-w-0 max-w-[28vw] truncate bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg px-3 py-1.5 text-xs font-bold text-[var(--ds-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
               >
                 {projects.map(p => (
                   <option key={p.id} value={p.id}>
@@ -454,7 +487,17 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
           )}
 
           {/* Action buttons (Theme, Language, Auth) */}
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-0.5 sm:gap-2 lg:gap-3">
+            {/* Global search button */}
+            <button
+              onClick={() => navigate('/app/search')}
+              aria-label={language === 'ar' ? 'فتح البحث الأكاديمي الموحد' : 'Open unified academic search'}
+              className="p-2 rounded-xl hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] transition-colors cursor-pointer"
+              title={language === 'ar' ? 'بحث أكاديمي موحد' : 'Unified Search'}
+            >
+              <Search size={18} />
+            </button>
+
             {/* Secure mode indicator */}
             {isSecureMode && (
               <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--ds-success-soft)] text-[var(--ds-success)] border border-[var(--ds-success)]/20 text-[10px] font-extrabold">
@@ -463,23 +506,16 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
               </div>
             )}
 
-            {/* Notifications Bell */}
-            <button
-              onClick={() => markAllAsRead()}
-              className="relative p-2 rounded-xl hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] transition-colors cursor-pointer"
-              title={language === 'ar' ? 'الإشعارات' : 'Notifications'}
-            >
-              <Bell size={18} />
-              {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 flex h-3 w-3 items-center justify-center rounded-full bg-[var(--ds-danger)] text-[8px] font-bold text-white ring-2 ring-[var(--ds-surface-primary)]">
-                  {unreadCount}
-                </span>
-              )}
-            </button>
+            {/* Notifications Center */}
+            <NotificationCenter
+              language={language}
+              onNavigate={(view) => setCurrentView(view)}
+            />
 
             {/* Language toggle */}
             <button
               onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
+              aria-label={language === 'ar' ? 'تغيير اللغة إلى الإنجليزية' : 'Change language to Arabic'}
               className="p-2 rounded-xl hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] transition-colors cursor-pointer"
               title={language === 'ar' ? 'English' : 'العربية'}
             >
@@ -489,7 +525,8 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-xl hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] transition-colors cursor-pointer"
+              aria-label={theme === 'dark' ? (language === 'ar' ? 'تفعيل الوضع الفاتح' : 'Use light theme') : (language === 'ar' ? 'تفعيل الوضع الداكن' : 'Use dark theme')}
+              className="hidden sm:inline-flex p-2 rounded-xl hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] transition-colors cursor-pointer"
               title={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
@@ -497,8 +534,8 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
 
             {/* User Profile */}
             {user && (
-              <div className="flex items-center gap-2 border-r border-[var(--ds-border-subtle)] pr-3 mr-1">
-                <div className="h-8 w-8 rounded-full bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] flex items-center justify-center font-bold text-xs">
+              <div className="flex items-center gap-1 sm:gap-2 sm:border-r border-[var(--ds-border-subtle)] sm:pr-3 sm:mr-1">
+                <div className="hidden sm:flex h-8 w-8 rounded-full bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] items-center justify-center font-bold text-xs">
                   <UserIcon size={14} />
                 </div>
                 <div className="hidden xl:block text-start">
@@ -507,6 +544,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
                 </div>
                 <button
                   onClick={logout}
+                  aria-label={language === 'ar' ? 'تسجيل الخروج' : 'Log out'}
                   className="p-2 rounded-xl hover:bg-[var(--ds-danger-soft)] text-[var(--ds-danger)] transition-colors cursor-pointer"
                   title={language === 'ar' ? 'تسجيل الخروج' : 'Logout'}
                 >
@@ -523,6 +561,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
         
         {/* Intelligent Sidebar V2 (Desktop Only) */}
         <aside 
+          aria-label={language === 'ar' ? 'التنقل الرئيسي' : 'Primary navigation'}
           className={`hidden lg:flex flex-col border-l border-r border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] transition-all duration-180 shrink-0 ${
             isCollapsed ? 'w-20' : 'w-[280px]'
           }`}
@@ -536,6 +575,8 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
             )}
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
+              aria-label={isCollapsed ? (language === 'ar' ? 'توسيع شريط التنقل' : 'Expand navigation') : (language === 'ar' ? 'طي شريط التنقل' : 'Collapse navigation')}
+              aria-expanded={!isCollapsed}
               className="p-1.5 rounded-xl hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] mx-auto cursor-pointer"
             >
               {language === 'ar' 
@@ -560,7 +601,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
           )}
 
           {/* Navigation links groups (Scrollable) */}
-          <nav className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+          <nav aria-label={language === 'ar' ? 'أقسام المنصة' : 'Platform sections'} className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
             {!isCollapsed && activeProject && pathname.startsWith('/app/research') && (
               <div className="rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] p-3 space-y-2">
                 <div className="flex items-center justify-between gap-2 text-[9px] font-black uppercase tracking-wider text-[var(--ds-text-muted)]">
@@ -570,7 +611,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
                 <p className="m-0 text-xs font-bold text-[var(--ds-text-primary)] line-clamp-2">
                   {language === 'ar' ? activeProject.titleAr : activeProject.titleEn}
                 </p>
-                <div className="h-1.5 overflow-hidden rounded-full bg-[var(--ds-surface-tertiary)]" aria-label={language === 'ar' ? 'اكتمال المشروع' : 'Project completion'}>
+                <div className="h-1.5 overflow-hidden rounded-full bg-[var(--ds-surface-tertiary)]" role="progressbar" aria-label={language === 'ar' ? 'اكتمال المشروع' : 'Project completion'} aria-valuemin={0} aria-valuemax={100} aria-valuenow={activeProjectCompletion}>
                   <div className="h-full bg-[var(--ds-primary)]" style={{ width: `${activeProjectCompletion}%` }} />
                 </div>
               </div>
@@ -602,6 +643,8 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
                           <button
                             key={item.id}
                             onClick={() => setCurrentView(item.id)}
+                            aria-label={language === 'ar' ? item.labelAr : item.labelEn}
+                            aria-current={isActive ? 'page' : undefined}
                             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative group cursor-pointer ${
                               isActive
                                 ? 'bg-[var(--ds-primary-soft)] text-[var(--ds-primary-active)] dark:text-[var(--ds-primary)] border border-[var(--ds-primary)]/30 shadow-sm'
@@ -632,8 +675,8 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
 
         {/* Mobile Navigation Drawer Overlay */}
         {mobileMenuOpen && (
-          <div className="fixed inset-0 z-50 flex lg:hidden bg-black/60 backdrop-blur-sm">
-            <div className="w-[280px] bg-[var(--ds-surface-primary)] h-full flex flex-col animate-slide-in relative border-l border-[var(--ds-border-subtle)]">
+          <div className="fixed inset-0 z-50 flex lg:hidden bg-black/60 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label={language === 'ar' ? 'قائمة التنقل' : 'Navigation menu'}>
+            <div ref={mobileMenuRef} className="w-[min(88vw,320px)] bg-[var(--ds-surface-primary)] h-full flex flex-col animate-slide-in relative border-l border-[var(--ds-border-subtle)]">
               <div className="p-4 border-b border-[var(--ds-border-subtle)] flex justify-between items-center">
                 <span className="text-xs font-black">{language === 'ar' ? 'التنقل البحثي' : 'Research Navigation'}</span>
                 <button 
@@ -663,7 +706,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
                     <p className="m-0 text-xs font-bold text-[var(--ds-text-primary)] line-clamp-2">
                       {language === 'ar' ? activeProject.titleAr : activeProject.titleEn}
                     </p>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-[var(--ds-surface-tertiary)]" aria-label={language === 'ar' ? 'اكتمال المشروع' : 'Project completion'}>
+                    <div className="h-1.5 overflow-hidden rounded-full bg-[var(--ds-surface-tertiary)]" role="progressbar" aria-label={language === 'ar' ? 'اكتمال المشروع' : 'Project completion'} aria-valuemin={0} aria-valuemax={100} aria-valuenow={activeProjectCompletion}>
                       <div className="h-full bg-[var(--ds-primary)]" style={{ width: `${activeProjectCompletion}%` }} />
                     </div>
                   </div>
@@ -703,7 +746,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
         )}
 
         {/* Main Content Workspace */}
-        <main className="flex-1 flex flex-col overflow-y-auto px-4 md:px-8 py-6 max-w-[1500px] mx-auto w-full">
+        <main id="main-content" tabIndex={-1} className="min-w-0 flex-1 flex flex-col overflow-y-auto px-4 md:px-8 py-6 max-w-[1500px] mx-auto w-full">
           
           {/* Breadcrumbs and Context Info */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -711,9 +754,9 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
               <div className="text-[10px] font-extrabold text-[var(--ds-text-muted)] uppercase tracking-widest">
                 {getBreadcrumbs()}
               </div>
-              <h2 className="text-xl md:text-2xl font-black text-[var(--ds-text-primary)] m-0">
+              <h1 className="text-xl md:text-2xl font-black text-[var(--ds-text-primary)] m-0">
                 {activeProject ? (language === 'ar' ? activeProject.titleAr : activeProject.titleEn) : 'بصيرة'}
-              </h2>
+              </h1>
             </div>
             
             {activeProject?.activePathId && pathname.startsWith('/app/research') && (
@@ -744,7 +787,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
                             ? 'bg-[var(--ds-success-soft)] text-[var(--ds-success)] border-[var(--ds-success)]/30' 
                             : isCurrent 
                               ? 'bg-[var(--ds-primary)] text-white border-[var(--ds-primary)] shadow-sm ring-4 ring-[var(--ds-primary-soft)] scale-105' 
-                              : 'bg-[var(--ds-surface-secondary)] text-[var(--ds-text-muted)] border-[var(--ds-border-subtle)]'
+                              : 'bg-zinc-800 text-white border-zinc-600'
                         }`}>
                           {idx + 1}
                         </div>

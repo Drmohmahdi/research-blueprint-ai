@@ -52,6 +52,13 @@ async def _broadcast_comment_notification(comment_data: dict):
         "data": comment_data
     })
 
+from ..services.notifications import (
+    OutboxService,
+    WorkflowEventType,
+    AggregateType,
+    EventPayload
+)
+
 @router.post("/")
 def create_comment(
     body: CommentCreate,
@@ -85,6 +92,27 @@ def create_comment(
         createdAt=datetime.now(timezone.utc).isoformat(),
     )
     db.add(comment)
+
+    # Record Outbox Event for project comment
+    OutboxService.record_event(
+        db=db,
+        organization_id=context.organization.id,
+        event_type=WorkflowEventType.PROJECT_COMMENT_ADDED,
+        aggregate_type=AggregateType.RESEARCH_PROJECT,
+        aggregate_id=proj.id,
+        actor_user_id=context.user.id,
+        payload=EventPayload(
+            title_ar="تعليق جديد على المشروع البحثي",
+            title_en="New Project Workspace Comment",
+            message_ar=f"أضاف {context.user.username} تعليقاً جديداً على مشروع ({proj.titleAr or proj.titleEn}).",
+            message_en=f"{context.user.username} added a new comment on project ({proj.titleEn or proj.titleAr}).",
+            target_type="RESEARCH_PROJECT",
+            target_id=proj.id,
+            meta={"comment_id": comment.id, "priority": comment.priority}
+        ),
+        scope_key=f"comment:{comment.id}"
+    )
+
     db.commit()
     db.refresh(comment)
     

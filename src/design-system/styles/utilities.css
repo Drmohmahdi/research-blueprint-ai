@@ -1,9 +1,26 @@
 /* Custom Design System utility overrides and helpers */
 
 .ds-focus-ring:focus-visible {
-  outline: 2px solid var(--ds-primary);
+  outline: 3px solid var(--ds-focus-ring);
   outline-offset: 2px;
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.4);
+}
+
+.ds-skip-link {
+  position: fixed;
+  inset-block-start: 0.75rem;
+  inset-inline-start: 0.75rem;
+  z-index: 100;
+  transform: translateY(-160%);
+  border-radius: 0.75rem;
+  background: var(--ds-primary-active);
+  color: white;
+  padding: 0.75rem 1rem;
+  font-weight: 800;
+}
+
+.ds-skip-link:focus {
+  transform: translateY(0);
 }
 
 /* Emphasized micro-animation transitions */

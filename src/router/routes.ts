@@ -34,6 +34,7 @@ export const ROUTES = {
   // Peer Review Module
   PEER_REVIEW:       '/app/peer-review',
   PEER_REVIEW_ASSIGNMENTS: '/app/peer-review/assignments',
+  EXTERNAL_REVIEW:   '/external-review/:token',
 
   // Promotion Module
   PROMOTION:         '/app/promotion',
@@ -52,6 +53,9 @@ export const ROUTES = {
   ASSETS:             '/app/assets',
   ASSET_DETAILS:      '/app/assets/:assetId',
 
+
+  // Phase 09 — Unified Search
+  SEARCH:             '/app/search',
 
   // System
   DESIGN_SYSTEM:     '/system/design',
@@ -115,6 +119,8 @@ export const VIEW_TO_PATH: Record<string, string> = {
   profileAffiliations: ROUTES.PROFILE_AFFILIATIONS,
   assets:             ROUTES.ASSETS,
   assetDetails:       ROUTES.ASSET_DETAILS,
+
+  search:             ROUTES.SEARCH,
 
   designSystem:       ROUTES.DESIGN_SYSTEM,
   smokeTest:          ROUTES.SMOKE_TEST,
