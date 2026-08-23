@@ -6,11 +6,34 @@
 import { createServer } from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import { join, extname, normalize } from "node:path";
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHash } from "node:crypto";
 
 const DIST_DIR = join(import.meta.dirname, "..", "dist");
+const GATE_HTML_PATH = join(import.meta.dirname, "gate.html");
 const PORT = Number(process.env.PORT || 3004);
 const API_ORIGIN = process.env.FRONTEND_API_ORIGIN || "'self'";
+
+// Temporary development-only access gate, mirroring backend/app/services/site_gate.py.
+// Both sides must hash the same way so a single successful login (which sets
+// the baseerah_gate cookie via the backend's /api/site-gate/verify) unlocks
+// both the compiled SPA bundle here and the API. Disabled when unset.
+const SITE_GATE_PASSWORD = process.env.SITE_GATE_PASSWORD || "";
+const GATE_COOKIE_NAME = "baseerah_gate";
+const GATE_TOKEN = SITE_GATE_PASSWORD
+  ? createHash("sha256").update(`baseerah-site-gate:${SITE_GATE_PASSWORD}`).digest("hex")
+  : null;
+let gateHtmlCache = null;
+
+function getCookie(req, name) {
+  const header = req.headers.cookie;
+  if (!header) return null;
+  for (const part of header.split(";")) {
+    const idx = part.indexOf("=");
+    if (idx === -1) continue;
+    if (part.slice(0, idx).trim() === name) return decodeURIComponent(part.slice(idx + 1).trim());
+  }
+  return null;
+}
 
 const MIME_TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -46,6 +69,23 @@ const server = createServer(async (req, res) => {
     securityHeaders["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains";
   }
   try {
+    if (GATE_TOKEN && getCookie(req, GATE_COOKIE_NAME) !== GATE_TOKEN) {
+      if (gateHtmlCache === null) {
+        gateHtmlCache = await readFile(GATE_HTML_PATH).catch(() => Buffer.from("Site locked."));
+      }
+      res.writeHead(200, {
+        ...securityHeaders,
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-store",
+        // This static, self-authored page has no user-generated content or
+        // XSS surface, so its inline <script>/<style> are allowed here only —
+        // the real SPA below keeps the strict script-src 'self' policy.
+        "Content-Security-Policy": `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' ${API_ORIGIN}; frame-ancestors 'none'; base-uri 'self'; form-action 'self'`,
+      });
+      res.end(gateHtmlCache);
+      return;
+    }
+
     const urlPath = decodeURIComponent(new URL(req.url, "http://localhost").pathname);
     const safePath = normalize(urlPath).replace(/^(\.\.[/\\])+/, "");
     let filePath = join(DIST_DIR, safePath);

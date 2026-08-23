@@ -26,6 +26,7 @@ class Settings:
     TRUSTED_HOSTS: list[str] = [host.strip() for host in os.getenv("TRUSTED_HOSTS", "localhost,127.0.0.1").split(",") if host.strip()]
     if os.getenv("TESTING") == "True" and "testserver" not in TRUSTED_HOSTS:
         TRUSTED_HOSTS.append("testserver")
+    SITE_GATE_PASSWORD: str = os.getenv("SITE_GATE_PASSWORD", "")
     CORS_ORIGINS: list[str] = [
         origin.strip()
         for origin in os.getenv(

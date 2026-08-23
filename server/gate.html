@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>بصيرة — المنصة قيد التطوير</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: #061416;
+    color: #f4f4f5;
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    position: relative;
+    overflow: hidden;
+  }
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+  }
+  .blob-1 { top: -30%; right: -20%; width: 70vw; height: 70vw; background: radial-gradient(circle, rgba(13,148,136,0.25), transparent 70%); }
+  .blob-2 { bottom: -20%; left: -20%; width: 60vw; height: 60vw; background: radial-gradient(circle, rgba(6,95,70,0.18), transparent 70%); }
+  .card {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 380px;
+    background: rgba(13, 32, 35, 0.85);
+    border: 1px solid rgba(19, 78, 74, 0.7);
+    border-radius: 28px;
+    padding: 32px 28px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 60px rgba(20, 184, 166, 0.12);
+    text-align: center;
+  }
+  .badge {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 18px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #14b8a6, #0891b2);
+    box-shadow: 0 8px 24px rgba(20, 184, 166, 0.35);
+  }
+  h1 {
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    font-weight: 900;
+    margin: 0 0 4px;
+    background: linear-gradient(90deg, #5eead4, #67e8f9);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  h2 {
+    font-size: 20px;
+    font-weight: 900;
+    margin: 0 0 8px;
+    color: #fff;
+  }
+  p.sub {
+    font-size: 12.5px;
+    color: #a1a1aa;
+    font-weight: 600;
+    line-height: 1.6;
+    margin: 0 0 24px;
+  }
+  .field { position: relative; margin-bottom: 14px; text-align: right; }
+  label { display: block; font-size: 11px; color: #a1a1aa; font-weight: 700; margin-bottom: 6px; }
+  input[type="password"], input[type="text"] {
+    width: 100%;
+    background: #09191b;
+    border: 1px solid #134e4a;
+    border-radius: 12px;
+    padding: 12px 44px 12px 14px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    outline: none;
+  }
+  input:focus { border-color: #2dd4bf; box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.15); }
+  .toggle-visibility {
+    position: absolute;
+    left: 12px;
+    top: 34px;
+    background: none;
+    border: none;
+    color: #71717a;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px;
+  }
+  .error {
+    display: none;
+    background: rgba(244, 63, 94, 0.08);
+    border: 1px solid rgba(244, 63, 94, 0.25);
+    color: #fb7185;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  button.submit {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #0d9488, #0e7490);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 900;
+    cursor: pointer;
+  }
+  button.submit:disabled { opacity: 0.6; cursor: not-allowed; }
+  footer {
+    margin-top: 20px;
+    font-size: 10px;
+    color: #52525b;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="card">
+    <div class="badge">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+    </div>
+    <h1>BASEERAH · بصيرة</h1>
+    <h2>المنصة قيد التطوير</h2>
+    <p class="sub">الوصول محدود مؤقتًا أثناء التطوير النشط. إن كنت تملك كلمة المرور، أدخلها للمتابعة.</p>
+
+    <div class="error" id="error-box"></div>
+
+    <form id="gate-form">
+      <div class="field">
+        <label for="gate-password">كلمة المرور</label>
+        <input type="password" id="gate-password" autocomplete="current-password" required />
+        <button type="button" class="toggle-visibility" id="toggle-visibility">إظهار</button>
+      </div>
+      <button type="submit" class="submit" id="submit-btn">دخول</button>
+    </form>
+
+    <footer>بصيرة للبحث العلمي &copy; 2026</footer>
+  </div>
+
+  <script>
+    var form = document.getElementById('gate-form');
+    var input = document.getElementById('gate-password');
+    var toggle = document.getElementById('toggle-visibility');
+    var errorBox = document.getElementById('error-box');
+    var submitBtn = document.getElementById('submit-btn');
+
+    toggle.addEventListener('click', function () {
+      var isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      toggle.textContent = isPassword ? 'إخفاء' : 'إظهار';
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      errorBox.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'جاري التحقق...';
+
+      fetch('/api/site-gate/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ password: input.value }),
+      })
+        .then(function (res) {
+          if (res.ok) {
+            window.location.reload();
+            return;
+          }
+          return res.json().catch(function () { return {}; }).then(function (data) {
+            throw new Error(data.detail || 'كلمة المرور غير صحيحة');
+          });
+        })
+        .catch(function (err) {
+          errorBox.textContent = err.message || 'حدث خطأ غير متوقع';
+          errorBox.style.display = 'block';
+        })
+        .finally(function () {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'دخول';
+        });
+    });
+  </script>
+</body>
+</html>

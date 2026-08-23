@@ -15,7 +15,8 @@ from sqlalchemy import text
 from .db import engine, Base
 from .config import settings
 from .observability import log_event, request_id_context
-from .routers import projects, analyzer, stats, auth, prediction, comments, organizations, storage, analytics, notifications, academic_visibility, academic_foundation, literature, promotions, peer_reviews, external_reviews, reports, billing, search, ai, admin
+from .services.site_gate import GATE_COOKIE_NAME, get_expected_site_gate_token
+from .routers import projects, analyzer, stats, auth, prediction, comments, organizations, storage, analytics, notifications, academic_visibility, academic_foundation, literature, promotions, peer_reviews, external_reviews, reports, billing, search, ai, admin, site_gate
 
 
 settings.validate_production()
@@ -48,6 +49,11 @@ app.add_middleware(
 )
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.TRUSTED_HOSTS)
 
+# Paths reachable without the temporary development site gate, regardless of
+# whether SITE_GATE_PASSWORD is set. Keep this minimal — anything else is
+# denied by default while the gate is enabled.
+SITE_GATE_EXEMPT_PATHS = {"/health", "/ready", "/readiness", "/api/site-gate/status", "/api/site-gate/verify"}
+
 
 @app.middleware("http")
 async def operational_middleware(request: Request, call_next):
@@ -60,21 +66,32 @@ async def operational_middleware(request: Request, call_next):
     request.state.request_id = request_id
     started = time.perf_counter()
     status_code = 500
-    try:
-        response = await call_next(request)
-        status_code = response.status_code
-    except Exception as exc:
-        log_event(
-            logging.ERROR,
-            "http.request.unhandled_error",
-            method=request.method,
-            route=request.url.path,
-            exception_type=type(exc).__name__,
-        )
-        response = JSONResponse(
-            status_code=500,
-            content={"detail": "Internal server error", "request_id": request_id},
-        )
+
+    gate_token = get_expected_site_gate_token()
+    if (
+        gate_token
+        and request.method != "OPTIONS"
+        and request.url.path not in SITE_GATE_EXEMPT_PATHS
+        and request.cookies.get(GATE_COOKIE_NAME) != gate_token
+    ):
+        response = JSONResponse(status_code=401, content={"detail": "SITE_GATED"})
+        status_code = 401
+    else:
+        try:
+            response = await call_next(request)
+            status_code = response.status_code
+        except Exception as exc:
+            log_event(
+                logging.ERROR,
+                "http.request.unhandled_error",
+                method=request.method,
+                route=request.url.path,
+                exception_type=type(exc).__name__,
+            )
+            response = JSONResponse(
+                status_code=500,
+                content={"detail": "Internal server error", "request_id": request_id},
+            )
     duration_ms = round((time.perf_counter() - started) * 1000, 2)
     level = logging.WARNING if status_code >= 500 or duration_ms >= settings.SLOW_REQUEST_MS else logging.INFO
     log_event(
@@ -119,6 +136,7 @@ app.include_router(billing.router)
 app.include_router(search.router, prefix="/api")
 app.include_router(ai.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
+app.include_router(site_gate.router, prefix="/api")
 
 
 
