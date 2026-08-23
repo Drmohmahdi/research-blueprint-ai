@@ -321,15 +321,23 @@ def test_search_promotion_privacy(db_session: Session):
     _seed_plans(db_session)
     t_a = create_test_tenant(db_session, "prompriv", "pln-enterprise")
     now = datetime.datetime.now(datetime.UTC).isoformat()
+    policy_id = f"plc-{t_a['org'].id}"
+    db_session.add(models.PromotionPolicy(
+        id=policy_id, organization_id=t_a["org"].id,
+        name_ar="سياسة ترقية اختبارية", name_en="Test promotion policy",
+        target_rank="PROFESSOR", version=1, status="ACTIVE",
+        created_by=t_a["researcher"].id, created_at=now, updated_at=now,
+    ))
+    db_session.flush()
     app_owner = models.PromotionApplication(
         id="papp-priv-owner", organization_id=t_a["org"].id,
-        user_id=t_a["researcher"].id, policy_id="plc-1", policy_version=1,
+        user_id=t_a["researcher"].id, policy_id=policy_id, policy_version=1,
         current_rank="ASSISTANT_PROFESSOR", target_rank="ASSOCIATE_PROFESSOR",
         status="DRAFT", readiness_percentage=10, created_at=now, updated_at=now
     )
     app_other = models.PromotionApplication(
         id="papp-priv-other", organization_id=t_a["org"].id,
-        user_id=t_a["colleague"].id, policy_id="plc-1", policy_version=1,
+        user_id=t_a["colleague"].id, policy_id=policy_id, policy_version=1,
         current_rank="ASSISTANT_PROFESSOR", target_rank="PROFESSOR",
         status="SUBMITTED", readiness_percentage=90, created_at=now, updated_at=now
     )
@@ -358,16 +366,25 @@ def test_search_peer_review_blindness(db_session: Session):
         current_round_number=1, created_at=now, updated_at=now
     )
     db_session.add(case)
+    db_session.flush()
+    db_session.add(models.PeerReviewRound(
+        id="round-priv-1", case_id=case.id, round_number=1,
+        manuscript_version=1, status="ACTIVE", created_at=now
+    ))
+    db_session.flush()
     db_session.add(models.ReviewerAssignment(
         id="asg-priv-1", round_id="round-priv-1", case_id=case.id,
         reviewer_type="EXTERNAL_REVIEWER", external_name="SECRET_REVIEWER_NAME",
         external_email="secret@example.com", status="IN_PROGRESS",
         conflict_status="UNCHECKED", invited_at=now, created_at=now
     ))
-    db_session.add(models.PeerReviewRound(
-        id="round-priv-1", case_id=case.id, round_number=1,
-        manuscript_version=1, status="ACTIVE", created_at=now
+    db_session.flush()
+    db_session.add(models.ReviewSubmission(
+        id="sub-priv-1", assignment_id="asg-priv-1", case_id=case.id,
+        round_id="round-priv-1", status="SUBMITTED",
+        recommendation="MINOR_REVISION", created_at=now, updated_at=now,
     ))
+    db_session.flush()
     db_session.add(models.ReviewComment(
         id="cmt-priv-1", submission_id="sub-priv-1", case_id=case.id, round_id="round-priv-1",
         comment_type="CONFIDENTIAL_TO_EDITOR", comment_text="CONFIDENTIAL_EDITOR_NOTE",
@@ -877,16 +894,24 @@ def test_runtime_scenario_committee_promotion_access(db_session: Session):
     _seed_plans(db_session)
     t_a = create_test_tenant(db_session, "rt_prom", "pln-enterprise")
     now = datetime.datetime.now(datetime.UTC).isoformat()
+    policy_id = f"plc-{t_a['org'].id}"
+    db_session.add(models.PromotionPolicy(
+        id=policy_id, organization_id=t_a["org"].id,
+        name_ar="سياسة ترقية اختبارية", name_en="Test promotion policy",
+        target_rank="PROFESSOR", version=1, status="ACTIVE",
+        created_by=t_a["researcher"].id, created_at=now, updated_at=now,
+    ))
+    db_session.flush()
     db_session.add_all([
         models.PromotionApplication(
             id="papp-rt-1", organization_id=t_a["org"].id,
-            user_id=t_a["researcher"].id, policy_id="plc-1", policy_version=1,
+            user_id=t_a["researcher"].id, policy_id=policy_id, policy_version=1,
             current_rank="ASSISTANT_PROFESSOR", target_rank="ASSOCIATE_PROFESSOR",
             status="SUBMITTED", readiness_percentage=70, created_at=now, updated_at=now
         ),
         models.PromotionApplication(
             id="papp-rt-2", organization_id=t_a["org"].id,
-            user_id=t_a["colleague"].id, policy_id="plc-1", policy_version=1,
+            user_id=t_a["colleague"].id, policy_id=policy_id, policy_version=1,
             current_rank="ASSISTANT_PROFESSOR", target_rank="PROFESSOR",
             status="UNDER_REVIEW", readiness_percentage=80, created_at=now, updated_at=now
         ),

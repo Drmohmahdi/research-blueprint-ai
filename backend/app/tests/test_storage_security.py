@@ -385,6 +385,7 @@ def test_historical_manuscript_immutability_and_delete_protection(db_session: Se
     )
     db_session.add(round1)
     db_session.flush()
+    db_session.flush()
 
     rev1 = models.ManuscriptRevision(
         id="rev-storage-immut-1",
@@ -449,6 +450,7 @@ def test_external_reviewer_scoped_manuscript_download(db_session: Session):
         created_at="2026-08-23T00:00:00Z"
     )
     db_session.add(round1)
+    db_session.flush()
 
     rev = models.ManuscriptRevision(
         id="rev-ext-file-1",
@@ -708,6 +710,7 @@ def test_external_reviewer_wrong_assignment_cannot_download(db_session: Session)
         created_at="2026-08-23T00:00:00Z"
     )
     db_session.add(round2)
+    db_session.flush()
 
     # Revision linked only to Round 1
     rev1 = models.ManuscriptRevision(
@@ -861,6 +864,7 @@ def test_external_reviewer_expired_token_cannot_download(db_session: Session):
         created_at="2026-08-01T00:00:00Z"
     )
     db_session.add(round1)
+    db_session.flush()
 
     rev = models.ManuscriptRevision(
         id="rev-ext-exp-1",
@@ -1189,6 +1193,7 @@ def test_external_reviewer_revoked_token_cannot_download(db_session: Session):
         manuscript_version=1, status="ACTIVE", created_at="2026-08-23T00:00:00Z"
     )
     db_session.add(round1)
+    db_session.flush()
     db_session.add(models.ManuscriptRevision(
         id="rev-ext-rev-tok-1", case_id=case.id, round_id=round1.id,
         version_number=1, title_ar="بحث ملغي الرابط", title_en="Revoked Token Paper",

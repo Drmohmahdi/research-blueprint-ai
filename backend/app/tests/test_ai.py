@@ -291,12 +291,20 @@ def _seed_peer_review(db_session, t):
         id=round_id, case_id=case.id, round_number=1,
         manuscript_version=1, status="ACTIVE", created_at=now
     ))
+    db_session.flush()
     db_session.add(models.ReviewerAssignment(
         id=asg_id, round_id=round_id, case_id=case.id,
         reviewer_type="EXTERNAL_REVIEWER", external_name="SECRET_REVIEWER_NAME",
         external_email="secret@example.com", status="IN_PROGRESS",
         conflict_status="UNCHECKED", invited_at=now, created_at=now
     ))
+    db_session.flush()
+    db_session.add(models.ReviewSubmission(
+        id=sub_id, assignment_id=asg_id, round_id=round_id, case_id=case.id,
+        status="SUBMITTED", recommendation="MINOR_REVISION",
+        created_at=now, updated_at=now,
+    ))
+    db_session.flush()
     db_session.add(models.ReviewComment(
         id=f"{sub_id}-1", submission_id=sub_id, case_id=case.id,
         round_id=round_id, section_key="METHODOLOGY",
@@ -312,6 +320,19 @@ def _seed_peer_review(db_session, t):
     ))
     db_session.commit()
     return case
+
+
+def _seed_promotion_policy(db_session, t):
+    now = datetime.datetime.now(datetime.UTC).isoformat()
+    policy_id = f"plc-{t['org'].id}"
+    db_session.add(models.PromotionPolicy(
+        id=policy_id, organization_id=t["org"].id,
+        name_ar="سياسة ترقية اختبارية", name_en="Test promotion policy",
+        target_rank="PROFESSOR", version=1, status="ACTIVE",
+        created_by=t["researcher"].id, created_at=now, updated_at=now,
+    ))
+    db_session.flush()
+    return policy_id
 
 
 def test_peer_review_ai_blind_privacy(db_session: Session):
@@ -349,10 +370,11 @@ def test_promotion_ai_no_autonomous_decision(db_session: Session):
     """AI never issues a final promotion decision; returns decision-support framing."""
     _seed_plans(db_session)
     t_a = create_test_tenant(db_session, "promsafe", "pln-enterprise")
+    policy_id = _seed_promotion_policy(db_session, t_a)
     now = datetime.datetime.now(datetime.UTC).isoformat()
     app_own = models.PromotionApplication(
         id="papp-ai-safe", organization_id=t_a["org"].id,
-        user_id=t_a["researcher"].id, policy_id="plc-1", policy_version=1,
+        user_id=t_a["researcher"].id, policy_id=policy_id, policy_version=1,
         current_rank="ASSISTANT_PROFESSOR", target_rank="ASSOCIATE_PROFESSOR",
         status="DRAFT", readiness_percentage=40, created_at=now, updated_at=now
     )
@@ -375,10 +397,11 @@ def test_promotion_ai_privacy(db_session: Session):
     """Applicant cannot summarize another applicant's promotion evidence."""
     _seed_plans(db_session)
     t_a = create_test_tenant(db_session, "prompriv", "pln-enterprise")
+    policy_id = _seed_promotion_policy(db_session, t_a)
     now = datetime.datetime.now(datetime.UTC).isoformat()
     other = models.PromotionApplication(
         id="papp-ai-other", organization_id=t_a["org"].id,
-        user_id=t_a["researcher"].id, policy_id="plc-1", policy_version=1,
+        user_id=t_a["researcher"].id, policy_id=policy_id, policy_version=1,
         current_rank="ASSISTANT_PROFESSOR", target_rank="PROFESSOR",
         status="SUBMITTED", readiness_percentage=90, created_at=now, updated_at=now
     )
@@ -747,10 +770,11 @@ def test_rt_promotion_evidence_summary(db_session: Session):
     """Applicant requests evidence summary → own evidence only, no autonomous decision."""
     _seed_plans(db_session)
     t = create_test_tenant(db_session, "rt5", "pln-enterprise")
+    policy_id = _seed_promotion_policy(db_session, t)
     now = datetime.datetime.now(datetime.UTC).isoformat()
     app = models.PromotionApplication(
         id="papp-rt5", organization_id=t["org"].id,
-        user_id=t["researcher"].id, policy_id="plc-1", policy_version=1,
+        user_id=t["researcher"].id, policy_id=policy_id, policy_version=1,
         current_rank="ASSISTANT_PROFESSOR", target_rank="ASSOCIATE_PROFESSOR",
         status="DRAFT", readiness_percentage=40, created_at=now, updated_at=now
     )
@@ -844,10 +868,11 @@ def test_rt_human_authority_promotion(db_session: Session):
     """AI asked for final employment decision → framing only, no autonomous decision."""
     _seed_plans(db_session)
     t = create_test_tenant(db_session, "rt12", "pln-enterprise")
+    policy_id = _seed_promotion_policy(db_session, t)
     now = datetime.datetime.now(datetime.UTC).isoformat()
     app = models.PromotionApplication(
         id="papp-rt12", organization_id=t["org"].id,
-        user_id=t["researcher"].id, policy_id="plc-1", policy_version=1,
+        user_id=t["researcher"].id, policy_id=policy_id, policy_version=1,
         current_rank="ASSISTANT_PROFESSOR", target_rank="PROFESSOR",
         status="SUBMITTED", readiness_percentage=80, created_at=now, updated_at=now
     )

@@ -482,6 +482,14 @@ def test_category_preferences_and_mandatory_override():
     assert notif_opt is None
 
     # 4. Mandatory Promotion Event -> MUST BE DELIVERED in-app despite in_app_enabled=False
+    db.add(models.PromotionPolicy(
+        id="pol-dummy", organization_id=org_id,
+        name_ar="سياسة ترقية اختبارية", name_en="Test promotion policy",
+        target_rank="PROFESSOR", version=1, status="ACTIVE",
+        created_by=admin_id, created_at="2026-08-23T00:00:00Z",
+        updated_at="2026-08-23T00:00:00Z",
+    ))
+    db.flush()
     app = models.PromotionApplication(
         id=f"app-prefs-{secrets.token_hex(4)}",
         organization_id=org_id,
