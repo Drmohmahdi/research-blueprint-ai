@@ -18,7 +18,7 @@ def setup_db():
     yield
 
 
-def create_test_tenant(db, username: str, org_id: str, role: str = "RESEARCHER"):
+def create_test_tenant(db, username: str, org_id: str, role: str = "RESEARCHER", user_role: str = "RESEARCHER"):
     user_email = f"{username}_{secrets.token_hex(4)}@test-univ.edu"
     user = db.query(models.User).filter(models.User.username == username).first()
     if not user:
@@ -27,7 +27,7 @@ def create_test_tenant(db, username: str, org_id: str, role: str = "RESEARCHER")
             username=username,
             email=user_email,
             hashed_password=hash_password("Password123!"),
-            role="RESEARCHER",
+            role=user_role,
             created_at="2026-08-22T00:00:00Z"
         )
         db.add(user)
@@ -66,13 +66,17 @@ def create_test_tenant(db, username: str, org_id: str, role: str = "RESEARCHER")
     if not plan:
         plan = models.Plan(
             id="pln-free",
+            code="FREE",
+            name="Free Plan",
             name_ar="الخطة المجانية",
             name_en="Free Plan",
-            tier="FREE",
-            monthly_price=0,
-            annual_price=0,
+            billing_interval="MONTHLY",
+            price=0,
+            price_minor_units=0,
+            currency="SAR",
             features_json={},
-            limits_json={"projects_limit": 100}
+            limits_json={"max_projects": 100},
+            created_at="2026-08-22T00:00:00Z"
         )
         db.add(plan)
 
@@ -168,6 +172,39 @@ def test_create_peer_review_case(test_tenants):
     assert round_1["status"] == "ACTIVE"
     assert round_1["decision"] == "PENDING"
     assert round_1["rubric_snapshot_json"] is not None
+
+
+def test_system_admin_without_org_role_can_issue_editorial_decision(test_tenants):
+    """A platform SystemAdmin (User.role) must pass verify_editorial_admin even with
+    only a RESEARCHER membership — regression for the ADMIN/ORGANIZATION_ADMIN
+    naming mismatch that made this global override unreachable (F13-005)."""
+    h_author = test_tenants["headers_author_a"]
+    org_a_id = test_tenants["org_a"].id
+    suffix = secrets.token_hex(4)
+
+    db = SessionLocal()
+    sysadmin_username = f"pr_sysadmin_{suffix}"
+    create_test_tenant(db, sysadmin_username, org_a_id, role="RESEARCHER", user_role="SystemAdmin")
+    db.close()
+    headers_sysadmin = get_auth_headers(sysadmin_username, org_a_id)
+
+    res_case = client.post(
+        "/api/peer-reviews/cases",
+        headers=h_author,
+        json={
+            "title_ar": "دراسة تجريبية لصلاحيات المسؤول العام",
+            "title_en": "Global admin authorization regression case"
+        }
+    )
+    assert res_case.status_code == 201
+    case_id = res_case.json()["id"]
+
+    res_decision = client.post(
+        f"/api/peer-reviews/cases/{case_id}/decision",
+        headers=headers_sysadmin,
+        json={"decision": "ACCEPTED", "decision_notes": "قرار صادر من مسؤول عام للمنصة"}
+    )
+    assert res_decision.status_code == 200
 
 
 def test_cross_tenant_case_isolation(test_tenants):

@@ -27,8 +27,7 @@ router = APIRouter(prefix="/promotions", tags=["Academic Promotion Engine"])
 def verify_policy_admin(context: TenantContext):
     """Ensures caller has institutional administrative privileges to manage policies."""
     role = (context.membership.role or "RESEARCHER").upper()
-    user_role = (context.user.role or "RESEARCHER").upper()
-    if role not in ["OWNER", "ORGANIZATION_ADMIN"] and user_role not in ["SUPER_ADMIN", "ADMIN"]:
+    if role not in ["OWNER", "ORGANIZATION_ADMIN"] and not context.is_global_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Institutional Admin or Owner privileges required to configure promotion policies"
@@ -38,8 +37,7 @@ def verify_policy_admin(context: TenantContext):
 def verify_committee_reviewer(context: TenantContext):
     """Ensures caller has committee reviewer privileges to review dossiers."""
     role = (context.membership.role or "RESEARCHER").upper()
-    user_role = (context.user.role or "RESEARCHER").upper()
-    if role not in ["OWNER", "ORGANIZATION_ADMIN", "SUPERVISOR"] and user_role not in ["SUPER_ADMIN", "ADMIN"]:
+    if role not in ["OWNER", "ORGANIZATION_ADMIN", "SUPERVISOR"] and not context.is_global_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Academic Committee privileges required to review promotion applications"

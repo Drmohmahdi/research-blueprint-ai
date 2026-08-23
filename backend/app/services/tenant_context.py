@@ -7,6 +7,13 @@ from sqlalchemy.orm import Session
 from ..db import get_db
 from ..models import User, Organization, OrganizationMembership, Subscription, Plan, UsageEvent
 
+# Canonical platform-wide administrative identifiers for the legacy free-text
+# User.role field (see models.User.role). Must stay aligned with auth.py's
+# registration blocklist and the frontend AdminGuard allowlist — those compare
+# the raw value, this compares upper-cased, so keep both sets in sync.
+GLOBAL_ADMIN_ROLES = {"SYSTEMADMIN", "ADMIN", "SUPERADMIN", "DEVELOPER"}
+
+
 def get_organization_family_ids(db: Session, root_org_id: str) -> list[str]:
     family = [root_org_id]
     queue = [root_org_id]
@@ -31,6 +38,11 @@ class TenantContext:
     @property
     def role(self) -> str:
         return self.membership.role
+
+    @property
+    def is_global_admin(self) -> bool:
+        """Platform-wide administrative override, independent of organization membership."""
+        return (self.user.role or "").upper() in GLOBAL_ADMIN_ROLES
 
     @property
     def limits(self) -> dict:

@@ -27,8 +27,7 @@ def hash_token(raw_token: str) -> str:
 def verify_editorial_admin(context: TenantContext):
     """Ensures caller has institutional administrative or editorial privileges."""
     role = (context.membership.role or "RESEARCHER").upper()
-    user_role = (context.user.role or "RESEARCHER").upper()
-    if role not in ["OWNER", "ORGANIZATION_ADMIN", "SUPERVISOR"] and user_role not in ["SUPER_ADMIN", "ADMIN"]:
+    if role not in ["OWNER", "ORGANIZATION_ADMIN", "SUPERVISOR"] and not context.is_global_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Editorial, Supervisor, or Administrative privileges required for this action"

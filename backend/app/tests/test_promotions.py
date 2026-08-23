@@ -25,7 +25,7 @@ def setup_db():
     yield
 
 
-def create_test_tenant(db, username: str, org_id: str, role: str = "RESEARCHER"):
+def create_test_tenant(db, username: str, org_id: str, role: str = "RESEARCHER", user_role: str = "RESEARCHER"):
     user_email = f"{username}@test-univ.edu"
     user = db.query(User).filter(User.username == username).first()
     if not user:
@@ -34,7 +34,7 @@ def create_test_tenant(db, username: str, org_id: str, role: str = "RESEARCHER")
             username=username,
             email=user_email,
             hashed_password=hash_password("Password123!"),
-            role="RESEARCHER",
+            role=user_role,
             created_at="2026-08-22T00:00:00Z"
         )
         db.add(user)
@@ -73,13 +73,17 @@ def create_test_tenant(db, username: str, org_id: str, role: str = "RESEARCHER")
     if not plan:
         plan = Plan(
             id="pln-free",
+            code="FREE",
+            name="Free Plan",
             name_ar="الخطة المجانية",
             name_en="Free Plan",
-            tier="FREE",
-            monthly_price=0,
-            annual_price=0,
+            billing_interval="MONTHLY",
+            price=0,
+            price_minor_units=0,
+            currency="SAR",
             features_json={},
-            limits_json={"projects_limit": 100}
+            limits_json={"max_projects": 100},
+            created_at="2026-08-22T00:00:00Z"
         )
         db.add(plan)
 
@@ -188,6 +192,32 @@ def test_promotion_policy_lifecycle_and_rbac():
     created_policy = create_res.json()
     assert created_policy["target_rank"] == "ASSOCIATE_PROFESSOR"
     assert len(created_policy["criteria"]) == 2
+
+
+def test_system_admin_without_org_role_can_manage_policies():
+    """A platform SystemAdmin (User.role) must pass verify_policy_admin even with
+    only a RESEARCHER membership — regression for the ADMIN/ORGANIZATION_ADMIN
+    naming mismatch that made this global override unreachable (F13-005)."""
+    db = SessionLocal()
+    suffix = uuid.uuid4().hex[:6]
+    sysadmin, org = create_test_tenant(
+        db, f"promo_sysadmin_{suffix}", f"org-promo-sysadmin-{suffix}",
+        role="RESEARCHER", user_role="SystemAdmin"
+    )
+    org_id = org.id
+    db.close()
+
+    headers = get_auth_headers(f"promo_sysadmin_{suffix}", org_id)
+    res = client.post(
+        "/api/promotions/policies",
+        json={
+            "name_ar": "لائحة إدارية",
+            "name_en": "Admin-created policy",
+            "target_rank": "ASSOCIATE_PROFESSOR"
+        },
+        headers=headers
+    )
+    assert res.status_code == 201
 
 
 def test_cross_tenant_isolation_promotions():
