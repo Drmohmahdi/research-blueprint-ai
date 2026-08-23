@@ -17,7 +17,7 @@
 ## معلومات النشر الحالية (بدون أسرار)
 
 - **GitHub**: `Drmohmahdi/research-blueprint-ai` (فرع `main`)
-- **النطاق**: `https://research.ehaastore.com` — عام، بلا حماية إضافية
+- **النطاق**: `https://research.ehaastore.com` — ⚠️ محمي مؤقتًا بكلمة مرور على مستوى Traefik (HTTP Basic Auth) لحين انتهاء التطوير الحالي — راجع قسم "حماية التطوير المؤقتة" أدناه قبل افتراض أن الموقع عام
 - **الخادم**: Hostinger VPS، المسار `/var/www/research-blueprint-ai`
 - **عمليتا PM2**:
   - `research-frontend` (منفذ `3004`) — خادم ملفات ثابتة مخصَّص بلا أي تبعيات (`server/static-server.mjs`)، وليس حزمة `serve` (استُبعِدت عمدًا لثغرة DoS في تبعياتها الفرعية `brace-expansion`)
@@ -29,6 +29,16 @@
 - **Node.js على الخادم**: 22.x (للواجهة فقط، الخلفية بايثون منفصلة تمامًا)
 - **نسخ احتياطي**: يومي تلقائي عبر `/root/backups/backup-databases.sh` على الخادم
 - **مراقبة**: مُضافة في Uptime Kuma (`status.ehaastore.com`)
+
+## حماية التطوير المؤقتة (Traefik Basic Auth)
+
+بتاريخ 2026-08-24 أُضيفت طبقة حماية مؤقتة بكلمة مرور على مستوى Traefik لإخفاء الموقع عن الجمهور أثناء التطوير النشط الحالي — **لا علاقة لها بتسجيل الدخول الفعلي للتطبيق**، وهي طبقة إضافية أمامه بالكامل.
+
+- **الآلية**: middleware باسم `research-dev-gate` (نوع `basicAuth`) في `/root/traefik-dynamic/research-blueprint-ai.yml` على الخادم، مُطبَّق على راوتري `research-frontend` و`research-backend`.
+- **استُثنيت عمدًا من الحماية**: `/health` و`/ready` فقط (عبر راوتر منفصل `research-health` بأولوية أعلى) — حتى تستمر مراقبة Uptime Kuma (`status.ehaastore.com`) بالعمل دون كسر.
+- **اسم المستخدم**: `baseerah-dev` — **كلمة المرور**: أُرسلت للمستخدم مباشرة في المحادثة وليست مخزَّنة في هذا الملف أو أي ملف متتبَّع بـ Git (تجنبًا لتسريبها عبر GitHub). إن فُقدت، أعد توليدها على الخادم بـ: `htpasswd -nbB baseerah-dev '<كلمة-مرور-جديدة>'` ثم استبدل السطر داخل `users:` في ملف الـ middleware، لا حاجة لإعادة تشغيل أي شيء (Traefik file provider يعيد التحميل تلقائيًا عند تعديل الملف).
+- **نسخة احتياطية من الإعداد الأصلي** (بلا حماية): `/root/traefik-dynamic/research-blueprint-ai.yml.bak-20260824012657` على الخادم.
+- **لإزالة الحماية عند انتهاء التطوير**: استرجع النسخة الاحتياطية أعلاه فوق الملف الحالي (أو احذف سطري `middlewares:` من الراوترين `research-frontend`/`research-backend` وأعد دمج راوتر `/health`+`/ready` مع `research-backend` كما كانا قبل هذا التعديل) — لا حاجة لإعادة نشر الكود أو إعادة تشغيل PM2، التعديل في ملف Traefik وحده كافٍ.
 
 ## فخاخ معروفة (لا تُعِد اكتشافها)
 

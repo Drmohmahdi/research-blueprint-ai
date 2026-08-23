@@ -215,7 +215,7 @@ export const PortalGateway: React.FC = () => {
       {/* Upper Navigation for profile and assets registry */}
       <div className="flex flex-wrap gap-4 items-center justify-between bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] p-5 rounded-xl shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-purple-600/10 border border-purple-500/20 flex items-center justify-center text-purple-500">
+          <div className="w-10 h-10 rounded-full bg-[var(--ds-primary-soft)] border border-[var(--ds-primary)]/20 flex items-center justify-center text-[var(--ds-primary)]">
             <User className="w-5 h-5" />
           </div>
           <div>
@@ -259,7 +259,7 @@ export const PortalGateway: React.FC = () => {
 
       {/* Title block */}
       <div className="text-center space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-xs font-black text-purple-600 dark:text-purple-400">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--ds-primary-soft)] border border-[var(--ds-primary)]/20 text-xs font-black text-[var(--ds-primary)]">
           <LayoutGrid size={13} />
           <span>{isAr ? 'منظومة الذكاء الأكاديمي' : 'Academic Intelligence Suite'}</span>
         </div>
@@ -354,7 +354,7 @@ export const PortalGateway: React.FC = () => {
 
       {/* Info card */}
       <div className="flex items-start gap-3 p-4 rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] max-w-2xl mx-auto">
-        <ShieldCheck size={16} className="text-purple-500 shrink-0 mt-0.5" />
+        <ShieldCheck size={16} className="text-[var(--ds-primary)] shrink-0 mt-0.5" />
         <p className="text-[10px] text-[var(--ds-text-secondary)] leading-relaxed m-0 font-medium">
           {isAr
             ? 'تعتمد منظومة بصيرة على معمارية الملف الأكاديمي الموحد. أي تعديل في متغيرات البحث العلمي أو الأبحاث المنشورة سينعكس تلقائياً في حسابات نقاط ترقيتك أو فحص جاهزية نشر مخطوطاتك.'

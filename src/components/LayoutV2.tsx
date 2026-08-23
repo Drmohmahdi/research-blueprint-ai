@@ -430,14 +430,14 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
         {language === 'ar' ? 'تخطَّ إلى المحتوى الرئيسي' : 'Skip to main content'}
       </a>
       {/* Top Banner Warning (Ethical warning required) */}
-      <div className="bg-[var(--ds-warning-soft)] border-b border-[var(--ds-warning)]/20 px-4 py-2.5 flex items-center justify-center gap-2 text-xs md:text-sm text-[var(--ds-warning)] font-bold z-50">
+      <div className="bg-[var(--ds-accent-gold-soft)] border-b border-[var(--ds-accent-gold)]/25 px-4 py-2 flex items-center justify-center gap-2 text-xs md:text-sm text-[var(--ds-warning)] font-bold z-50">
         <AlertTriangle size={16} className="shrink-0 text-[var(--ds-warning)]" />
         <span className="text-center">{getTranslation(language, 'ethicalAlert')}</span>
       </div>
 
       {/* Premium V2 Header */}
-      <header className="sticky top-0 z-40 w-full h-16 border-b border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] shadow-sm backdrop-blur-md">
-        <div className="flex h-full min-w-0 items-center justify-between gap-2 px-3 sm:px-6">
+      <header className="baseerah-glass sticky top-0 z-40 w-full h-[4.5rem] border-b border-[var(--ds-border-subtle)] shadow-[0_12px_35px_-30px_rgba(8,76,72,0.8)]">
+        <div className="mx-auto flex h-full w-full max-w-[1920px] min-w-0 items-center justify-between gap-1.5 px-2 min-[380px]:px-3 sm:gap-2 sm:px-6 2xl:px-10">
           
           {/* Logo & Platform Info */}
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
@@ -449,11 +449,11 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
             >
               <Menu size={20} />
             </button>
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--ds-primary)] text-white font-extrabold text-lg shadow-sm">
+            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[var(--ds-primary)] to-[#164E63] text-white font-extrabold shadow-lg shadow-teal-950/15 ring-1 ring-white/20 before:absolute before:inset-0 before:bg-gradient-to-tr before:from-transparent before:to-white/15 sm:h-11 sm:w-11 sm:rounded-2xl sm:text-lg">
               {language === 'ar' ? 'ب' : 'B'}
             </div>
             <div className="min-w-0">
-              <div className="truncate text-sm sm:text-base font-black tracking-tight text-[var(--ds-text-primary)] m-0 leading-none">
+              <div className="max-w-[92px] truncate text-xs font-black leading-none tracking-tight text-[var(--ds-text-primary)] min-[380px]:max-w-[130px] sm:max-w-none sm:text-base">
                 {getTranslation(language, 'title')}
               </div>
               <p className="text-[10px] text-[var(--ds-text-muted)] m-0 mt-1.5 hidden sm:block font-bold">
@@ -492,7 +492,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
             <button
               onClick={() => navigate('/app/search')}
               aria-label={language === 'ar' ? 'فتح البحث الأكاديمي الموحد' : 'Open unified academic search'}
-              className="p-2 rounded-xl hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] transition-colors cursor-pointer"
+              className="hidden min-[420px]:inline-flex p-2 rounded-xl hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] transition-colors cursor-pointer"
               title={language === 'ar' ? 'بحث أكاديمي موحد' : 'Unified Search'}
             >
               <Search size={18} />
@@ -562,7 +562,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
         {/* Intelligent Sidebar V2 (Desktop Only) */}
         <aside 
           aria-label={language === 'ar' ? 'التنقل الرئيسي' : 'Primary navigation'}
-          className={`hidden lg:flex flex-col border-l border-r border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] transition-all duration-180 shrink-0 ${
+          className={`hidden lg:flex flex-col border-l border-r border-[var(--ds-border-subtle)] bg-[color-mix(in_srgb,var(--ds-surface-primary)_94%,transparent)] shadow-[8px_0_30px_-28px_rgba(8,76,72,0.6)] transition-all duration-180 shrink-0 ${
             isCollapsed ? 'w-20' : 'w-[280px]'
           }`}
         >
@@ -746,15 +746,15 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
         )}
 
         {/* Main Content Workspace */}
-        <main id="main-content" tabIndex={-1} className="min-w-0 flex-1 flex flex-col overflow-y-auto px-4 md:px-8 py-6 max-w-[1500px] mx-auto w-full">
+        <main id="main-content" tabIndex={-1} className="min-w-0 flex-1 flex flex-col overflow-y-auto px-3 min-[380px]:px-4 md:px-8 2xl:px-10 py-4 sm:py-6 max-w-[1800px] mx-auto w-full">
           
           {/* Breadcrumbs and Context Info */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <div className="space-y-1">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 min-w-0">
+            <div className="min-w-0 space-y-1">
               <div className="text-[10px] font-extrabold text-[var(--ds-text-muted)] uppercase tracking-widest">
                 {getBreadcrumbs()}
               </div>
-              <h1 className="text-xl md:text-2xl font-black text-[var(--ds-text-primary)] m-0">
+              <h1 className="break-words text-lg min-[380px]:text-xl md:text-2xl font-black text-[var(--ds-text-primary)] m-0">
                 {activeProject ? (language === 'ar' ? activeProject.titleAr : activeProject.titleEn) : 'بصيرة'}
               </h1>
             </div>
@@ -810,7 +810,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
           )}
 
           {/* Children View Panel with optional side panels */}
-          <div className="flex-1 flex gap-6">
+          <div className="flex-1 flex min-w-0 gap-4 2xl:gap-6">
             {/* Main content */}
             <div className="flex-1 min-w-0">
               {children}
@@ -818,7 +818,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
 
             {/* Right side: GuidedFlow + Comments (Only show inside Research module) */}
             {activeProject?.activePathId && pathname.startsWith('/app/research') && (
-              <div className="hidden xl:flex flex-col gap-4 w-[260px] shrink-0">
+              <div className="hidden 2xl:flex flex-col gap-4 w-[280px] shrink-0">
                 <GuidedFlowSidebar />
                 <SupervisorPanel />
               </div>
@@ -827,6 +827,27 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
         </main>
 
       </div>
+
+      <footer className="border-t border-[var(--ds-border-subtle)] bg-[color-mix(in_srgb,var(--ds-surface-primary)_92%,transparent)] px-4 py-5 text-[var(--ds-text-secondary)] backdrop-blur-xl md:px-8">
+        <div className="mx-auto flex max-w-[1800px] flex-col items-center justify-between gap-3 text-center sm:flex-row sm:text-start">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--ds-primary)] to-[#164E63] text-sm font-black text-white shadow-sm">
+              {language === 'ar' ? 'ب' : 'B'}
+            </div>
+            <div>
+              <p className="m-0 text-xs font-black text-[var(--ds-text-primary)]">{getTranslation(language, 'title')}</p>
+              <p className="m-0 mt-0.5 text-[10px] text-[var(--ds-text-muted)]">{language === 'ar' ? 'بيئة أكاديمية موثوقة لصناعة بحث أفضل' : 'A trusted academic environment for better research'}</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[10px] font-bold text-[var(--ds-text-muted)]">
+            <span>{language === 'ar' ? 'الخصوصية أولًا' : 'Privacy first'}</span>
+            <span className="text-[var(--ds-border-strong)]">•</span>
+            <span>{language === 'ar' ? 'قرارات أكاديمية بمراجعة بشرية' : 'Human-reviewed academic decisions'}</span>
+            <span className="text-[var(--ds-border-strong)]">•</span>
+            <span>© {new Date().getFullYear()} Baseerah</span>
+          </div>
+        </div>
+      </footer>
 
     </div>
   );

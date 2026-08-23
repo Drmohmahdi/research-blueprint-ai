@@ -37,7 +37,7 @@ export const Input: React.FC<InputProps> = ({
     ? 'border-rose-500/50 focus-visible:ring-rose-500/30'
     : success
       ? 'border-emerald-500/50 focus-visible:ring-emerald-500/30'
-      : 'border-[var(--ds-border-default)] focus-visible:ring-purple-500/30';
+      : 'border-[var(--ds-border-default)] focus-visible:ring-[var(--ds-primary)]/30';
 
   return (
     <div className="flex flex-col gap-1.5 w-full text-xs">
@@ -69,7 +69,7 @@ export const Input: React.FC<InputProps> = ({
 
         {(suffixIcon || loading) && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-[var(--ds-text-muted)]">
-            {loading ? <Loader2 className="animate-spin text-purple-600" size={16} /> : suffixIcon}
+            {loading ? <Loader2 className="animate-spin text-[var(--ds-primary)]" size={16} /> : suffixIcon}
           </div>
         )}
       </div>
@@ -102,7 +102,7 @@ export const Textarea: React.FC<TextareaProps> = ({
     ? 'border-rose-500/50 focus-visible:ring-rose-500/30'
     : success
       ? 'border-emerald-500/50 focus-visible:ring-emerald-500/30'
-      : 'border-[var(--ds-border-default)] focus-visible:ring-purple-500/30';
+      : 'border-[var(--ds-border-default)] focus-visible:ring-[var(--ds-primary)]/30';
 
   return (
     <div className="flex flex-col gap-1.5 w-full text-xs">
@@ -154,7 +154,7 @@ export const Select: React.FC<SelectProps> = ({
     ? 'border-rose-500/50 focus-visible:ring-rose-500/30'
     : success
       ? 'border-emerald-500/50 focus-visible:ring-emerald-500/30'
-      : 'border-[var(--ds-border-default)] focus-visible:ring-purple-500/30';
+      : 'border-[var(--ds-border-default)] focus-visible:ring-[var(--ds-primary)]/30';
 
   return (
     <div className="flex flex-col gap-1.5 w-full text-xs">
@@ -205,7 +205,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
       <input
         type="checkbox"
         id={checkId}
-        className={`mt-0.5 h-4 w-4 rounded border-[var(--ds-border-default)] text-purple-600 focus:ring-purple-500 cursor-pointer ${className}`}
+        className={`mt-0.5 h-4 w-4 rounded border-[var(--ds-border-default)] text-[var(--ds-primary)] focus:ring-[var(--ds-primary)] cursor-pointer ${className}`}
         {...props}
       />
       <div className="flex flex-col gap-0.5">
@@ -238,7 +238,7 @@ export const Radio: React.FC<RadioProps> = ({
       <input
         type="radio"
         id={radioId}
-        className={`mt-0.5 h-4 w-4 border-[var(--ds-border-default)] text-purple-600 focus:ring-purple-500 cursor-pointer ${className}`}
+        className={`mt-0.5 h-4 w-4 border-[var(--ds-border-default)] text-[var(--ds-primary)] focus:ring-[var(--ds-primary)] cursor-pointer ${className}`}
         {...props}
       />
       <div className="flex flex-col gap-0.5">
@@ -277,7 +277,7 @@ export const Switch: React.FC<SwitchProps> = ({
           className="sr-only peer"
           {...props}
         />
-        <div className="w-9 h-5 bg-[var(--ds-background-subtle)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600 transition-colors" />
+        <div className="w-9 h-5 bg-[var(--ds-background-subtle)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--ds-primary)] transition-colors" />
       </div>
     </label>
   );

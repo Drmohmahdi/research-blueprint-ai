@@ -15,7 +15,7 @@ from sqlalchemy import text
 from .db import engine, Base
 from .config import settings
 from .observability import log_event, request_id_context
-from .routers import projects, analyzer, stats, auth, prediction, comments, organizations, storage, analytics, notifications, academic_visibility, academic_foundation, literature, promotions, peer_reviews, external_reviews, reports, billing, search, ai
+from .routers import projects, analyzer, stats, auth, prediction, comments, organizations, storage, analytics, notifications, academic_visibility, academic_foundation, literature, promotions, peer_reviews, external_reviews, reports, billing, search, ai, admin
 
 
 settings.validate_production()
@@ -31,7 +31,7 @@ limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"], en
 app = FastAPI(
     title="Research Blueprint AI API",
     description="Backend services for Research Blueprint AI (Baseerah Academic Suite)",
-    version="2.0.0"
+    version="3.0.0"
 )
 
 # Rate Limit Error Handler
@@ -118,18 +118,19 @@ app.include_router(academic_foundation.router)
 app.include_router(billing.router)
 app.include_router(search.router, prefix="/api")
 app.include_router(ai.router, prefix="/api")
+app.include_router(admin.router, prefix="/api")
 
 
 
 @app.get("/")
 @limiter.limit("30/minute")
 def read_root(request: Request):
-    return {"message": "Welcome to Research Blueprint AI API", "version": "2.0.0"}
+    return {"message": "Welcome to Research Blueprint AI API", "version": "3.0.0"}
 
 
 @app.get("/health")
 def health(request: Request):
-    return {"status": "ok", "liveness": "alive", "version": "2.0.0"}
+    return {"status": "ok", "liveness": "alive", "version": "3.0.0"}
 
 
 @app.get("/readiness")

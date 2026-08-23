@@ -18,8 +18,10 @@ client = TestClient(app)
 
 
 def test_suite_uses_isolated_database():
-    assert "test_suite.db" in str(engine.url)
-    assert "research_blueprint.db" not in str(engine.url)
+    database_url = str(engine.url)
+    assert "baseerah_test_" in database_url
+    assert database_url.endswith(".db")
+    assert "research_blueprint.db" not in database_url
 
 
 def test_health_is_lightweight_and_correlated():

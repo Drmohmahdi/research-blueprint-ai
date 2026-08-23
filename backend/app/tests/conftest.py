@@ -1,4 +1,8 @@
 import os
+import tempfile
+import uuid
+from pathlib import Path
+
 import pytest
 
 # The shared test fixtures must never point at the developer or production
@@ -6,8 +10,12 @@ import pytest
 # SQLAlchemy engine at import time.
 os.environ["TESTING"] = "True"
 POSTGRES_TESTING = os.getenv("POSTGRES_TESTING", "").lower() == "true"
+SQLITE_TEST_DB: Path | None = None
 if not POSTGRES_TESTING:
-    os.environ["DATABASE_URL"] = "sqlite:///./test_suite.db"
+    # Every pytest process gets its own database. This keeps local, CI and
+    # interrupted test runs from locking or contaminating each other.
+    SQLITE_TEST_DB = Path(tempfile.gettempdir()) / f"baseerah_test_{uuid.uuid4().hex}.db"
+    os.environ["DATABASE_URL"] = f"sqlite:///{SQLITE_TEST_DB.as_posix()}"
 elif not os.getenv("DATABASE_URL", "").startswith(("postgresql://", "postgresql+psycopg2://")):
     raise RuntimeError("POSTGRES_TESTING requires an explicit PostgreSQL DATABASE_URL")
 os.environ["AUTO_CREATE_TABLES"] = "false"
@@ -23,6 +31,9 @@ def setup_test_suite_db():
     # PostgreSQL test databases are migrated by Alembic before pytest starts;
     # never let create_all conceal migration drift in that gate.
     yield
+    if SQLITE_TEST_DB is not None:
+        engine.dispose()
+        SQLITE_TEST_DB.unlink(missing_ok=True)
 
 
 @pytest.fixture

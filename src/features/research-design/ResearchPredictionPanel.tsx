@@ -58,7 +58,7 @@ export const ResearchPredictionPanel: React.FC<ResearchPredictionPanelProps> = (
       </div>
 
       {/* Tier Selector Buttons */}
-      <div className="grid grid-cols-3 gap-1 bg-[var(--ds-surface-primary)] p-1 rounded-lg border border-[var(--ds-border-subtle)] text-[11px] font-semibold">
+      <div className="grid grid-cols-1 min-[380px]:grid-cols-3 gap-1 bg-[var(--ds-surface-primary)] p-1 rounded-lg border border-[var(--ds-border-subtle)] text-[11px] font-semibold">
         <button
           onClick={() => setTier('EXPLORATORY')}
           className={`py-1 rounded transition-all border-none cursor-pointer ${

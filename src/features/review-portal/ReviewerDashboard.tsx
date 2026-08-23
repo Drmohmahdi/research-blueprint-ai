@@ -785,7 +785,7 @@ export const ReviewerDashboard: React.FC = () => {
                 <label className="block text-xs font-semibold text-[var(--ds-text-secondary)] mb-1">
                   {isAr ? 'القرار النهائي:' : 'Final Decision:'}
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 min-[380px]:grid-cols-3 gap-2">
                   {[
                     { id: 'ACCEPTED', label: isAr ? 'قبول للنشر' : 'Accepted', color: 'border-emerald-500 text-emerald-600 bg-emerald-500/10' },
                     { id: 'REVISION_REQUIRED', label: isAr ? 'طلب تعديل' : 'Revision Req.', color: 'border-amber-500 text-amber-600 bg-amber-500/10' },

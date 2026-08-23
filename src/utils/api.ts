@@ -475,6 +475,65 @@ export async function apiListAuditLogs(): Promise<any[] | null> {
   return null;
 }
 
+// ── Phase Admin: Platform Settings & System Status ───────────────────────────
+
+export interface PlatformSettingsResponse {
+  settings: Record<string, unknown>;
+  settings_meta: Record<string, {
+    key: string;
+    value: unknown;
+    value_type: string;
+    description_ar?: string | null;
+    description_en?: string | null;
+    updated_at?: string | null;
+  }>;
+  feature_flags: Record<string, boolean>;
+}
+
+export interface SystemStatusResponse {
+  version: string;
+  database: string;
+  storage: string;
+  ai_provider: string;
+  payment_provider: string;
+  counts: Record<string, number>;
+  recent_audit_count: number;
+}
+
+export async function apiGetAdminSettings(): Promise<PlatformSettingsResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/settings`, { headers: getHeaders() });
+    if (res.ok) return await res.json();
+  } catch (e) {
+    console.error('Get admin settings failed', e);
+  }
+  return null;
+}
+
+export async function apiUpdateAdminSettings(settings: Record<string, unknown>): Promise<PlatformSettingsResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/settings`, {
+      method: 'PUT',
+      headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ settings }),
+    });
+    if (res.ok) return await res.json();
+  } catch (e) {
+    console.error('Update admin settings failed', e);
+  }
+  return null;
+}
+
+export async function apiGetSystemStatus(): Promise<SystemStatusResponse | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/status`, { headers: getHeaders() });
+    if (res.ok) return await res.json();
+  } catch (e) {
+    console.error('Get system status failed', e);
+  }
+  return null;
+}
+
 export async function apiListPlans(): Promise<any[] | null> {
   try {
     const res = await fetch(`${API_BASE_URL}/organizations/plans`, { headers: getHeaders() });

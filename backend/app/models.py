@@ -518,6 +518,23 @@ class StorageQuotaUsage(Base):
     updated_at = Column(String, nullable=True)
 
 
+class PlatformSetting(Base):
+    """
+    Persistent platform-wide settings and feature flags managed from the Admin
+    Center. Keyed by setting name; values are typed (string, int, bool, json).
+    Global admins only.
+    """
+    __tablename__ = "platform_settings"
+
+    key = Column(String, primary_key=True, index=True)
+    value_type = Column(String, nullable=False, default="string")  # string, int, bool, json
+    value_json = Column(JSON, nullable=True)
+    description_ar = Column(String, nullable=True)
+    description_en = Column(String, nullable=True)
+    updated_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    updated_at = Column(String, nullable=False, index=True)
+
+
 class AcademicIdentityProfile(Base):
     __tablename__ = "core_academic_identity_profiles"
 

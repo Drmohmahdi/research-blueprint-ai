@@ -336,7 +336,7 @@ export const PredictorResultsPanel: React.FC<PredictorResultsPanelProps> = ({ en
                     : (language === 'ar' ? 'خارج النطاق المتوقع' : 'Outside Prediction Interval')}
                 </span>
               </div>
-              <div className="grid grid-cols-3 gap-2 text-[10px] text-[var(--ds-text-secondary)] pt-1.5 border-t border-[var(--ds-border-subtle)]">
+              <div className="grid grid-cols-1 min-[380px]:grid-cols-3 gap-2 text-[10px] text-[var(--ds-text-secondary)] pt-1.5 border-t border-[var(--ds-border-subtle)]">
                 <div>
                   <span>{language === 'ar' ? 'المتوقع:' : 'Predicted:'}</span>{' '}
                   <span className="font-bold text-[var(--ds-text-primary)] font-mono">{c.metrics.predictedEffectSize.toFixed(2)}</span>

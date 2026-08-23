@@ -3,56 +3,56 @@
 export const colors = {
   light: {
     background: {
-      canvas: '#F6F7FB',
-      subtle: '#EEF1F7',
+      canvas: '#F3F7F7',
+      subtle: '#E8F0F0',
     },
     surface: {
       primary: '#FFFFFF',
-      secondary: '#F9FAFC',
-      tertiary: '#F1F3F8',
+      secondary: '#F8FBFA',
+      tertiary: '#EDF4F3',
       elevated: '#FFFFFF',
     },
     border: {
-      subtle: '#E1E5ED',
-      default: '#CED4DF',
-      strong: '#AEB7C7',
+      subtle: '#DCE8E6',
+      default: '#C2D4D1',
+      strong: '#92ACA8',
     },
     text: {
-      primary: '#111827',
-      secondary: '#475569',
-      muted: '#718096',
-      disabled: '#A0A8B5',
+      primary: '#102A2E',
+      secondary: '#3F5E61',
+      muted: '#688184',
+      disabled: '#93A6A8',
     }
   },
   dark: {
     background: {
-      canvas: '#090B10',
-      subtle: '#0D1017',
+      canvas: '#071416',
+      subtle: '#0A1A1D',
     },
     surface: {
-      primary: '#11151E',
-      secondary: '#171C27',
-      tertiary: '#1E2431',
-      elevated: '#242B3A',
+      primary: '#0D2023',
+      secondary: '#11282B',
+      tertiary: '#173235',
+      elevated: '#1C3B3E',
     },
     border: {
-      subtle: '#293142',
-      default: '#364055',
-      strong: '#4A5770',
+      subtle: '#1E3A3D',
+      default: '#2B4E51',
+      strong: '#427074',
     },
     text: {
-      primary: '#F7F9FC',
-      secondary: '#C5CCDA',
-      muted: '#9099AC',
-      disabled: '#626B7D',
+      primary: '#F2FBF9',
+      secondary: '#BED6D2',
+      muted: '#86A9A5',
+      disabled: '#587A77',
     }
   },
   brand: {
     primary: {
-      default: '#8B5CF6',
-      hover: '#7C3AED',
-      active: '#6D28D9',
-      soft: 'rgba(139, 92, 246, 0.14)',
+      default: '#0F766E',
+      hover: '#0B625C',
+      active: '#084C48',
+      soft: 'rgba(15, 118, 110, 0.14)',
       foreground: '#FFFFFF',
     },
     researchBlue: {

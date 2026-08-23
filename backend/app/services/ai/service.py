@@ -29,6 +29,7 @@ from ...services.tenant_context import TenantContext
 from ...services.billing import EntitlementService, FeatureKey
 from .provider import (
     AIProviderFactory,
+    GeminiProvider,
     AIProviderError,
     AITimeoutError,
     AIRateLimitedError,
@@ -101,9 +102,7 @@ class GovernedAIService:
     def status() -> Dict[str, Any]:
         return {
             "provider_status": AIProviderFactory.status(),
-            "live_provider_configured": __import__(
-                "app.services.ai.provider", fromlist=["GeminiProvider"]
-            ).GeminiProvider.is_configured(),
+            "live_provider_configured": GeminiProvider.is_configured(),
             "rag": "NOT USED",
             "vector_database": "NOT USED",
             "semantic_search": "NOT USED",

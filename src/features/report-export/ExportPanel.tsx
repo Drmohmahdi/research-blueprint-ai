@@ -147,7 +147,7 @@ export const ExportPanel: React.FC = () => {
               <label className="text-xs font-bold text-[var(--ds-text-secondary)]">
                 {isAr ? 'صيغة التصدير المستهدفة' : 'Output Format'}
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 min-[380px]:grid-cols-3 gap-2">
                 {[
                   { id: 'PDF', label: 'PDF (Vector/RTL)' },
                   { id: 'DOCX', label: 'DOCX (Word)' },
