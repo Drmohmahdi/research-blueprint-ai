@@ -41,7 +41,7 @@ export const ResearchDesignHeader: React.FC<ResearchDesignHeaderProps> = ({
             <h2 className="text-lg font-bold text-[var(--ds-text-primary)]">
               {isAr ? 'تصميم دراسة جديدة' : 'New Study Design'}
             </h2>
-            <span className="px-2 py-0.5 text-xs rounded-full font-semibold bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300">
+            <span className="px-2 py-0.5 text-xs rounded-full font-semibold bg-ai/10 text-ai">
               {activeStepTitle}
             </span>
           </div>
@@ -59,7 +59,7 @@ export const ResearchDesignHeader: React.FC<ResearchDesignHeaderProps> = ({
             onClick={() => setIsGuidedMode(true)}
             className={`px-3 py-1.5 rounded-md transition-all border-none cursor-pointer ${
               isGuidedMode
-                ? 'bg-purple-600 text-white shadow-sm'
+                ? 'bg-[var(--ds-primary-soft)] text-ink shadow-sm'
                 : 'text-[var(--ds-text-secondary)] bg-transparent hover:text-[var(--ds-text-primary)]'
             }`}
           >
@@ -69,7 +69,7 @@ export const ResearchDesignHeader: React.FC<ResearchDesignHeaderProps> = ({
             onClick={() => setIsGuidedMode(false)}
             className={`px-3 py-1.5 rounded-md transition-all border-none cursor-pointer ${
               !isGuidedMode
-                ? 'bg-purple-600 text-white shadow-sm'
+                ? 'bg-[var(--ds-primary-soft)] text-ink shadow-sm'
                 : 'text-[var(--ds-text-secondary)] bg-transparent hover:text-[var(--ds-text-primary)]'
             }`}
           >
@@ -86,7 +86,7 @@ export const ResearchDesignHeader: React.FC<ResearchDesignHeaderProps> = ({
           )}
           <button
             onClick={onSave}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white border-none cursor-pointer shadow-sm transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-action hover:bg-action-hover text-on-action border-none cursor-pointer shadow-sm ds-transition"
           >
             <Save size={14} />
             <span>{isAr ? 'حفظ' : 'Save'}</span>

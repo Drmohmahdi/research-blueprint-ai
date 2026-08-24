@@ -34,9 +34,9 @@ export const Input: React.FC<InputProps> = ({
   const helpId = `${inputId}-help`;
 
   const stateClass = error 
-    ? 'border-rose-500/50 focus-visible:ring-rose-500/30'
+    ? 'border-[var(--ds-danger)]/50 focus-visible:ring-[var(--ds-danger)]/30'
     : success
-      ? 'border-emerald-500/50 focus-visible:ring-emerald-500/30'
+      ? 'border-[var(--ds-success)]/50 focus-visible:ring-[var(--ds-success)]/30'
       : 'border-[var(--ds-border-default)] focus-visible:ring-[var(--ds-primary)]/30';
 
   return (
@@ -44,7 +44,7 @@ export const Input: React.FC<InputProps> = ({
       {label && (
         <label htmlFor={inputId} className="font-bold text-[var(--ds-text-secondary)] flex items-center gap-1 select-none">
           {label}
-          {requiredIndicator && <span className="text-rose-500">*</span>}
+          {requiredIndicator && <span className="text-[var(--ds-danger)]">*</span>}
         </label>
       )}
       
@@ -99,9 +99,9 @@ export const Textarea: React.FC<TextareaProps> = ({
   const helpId = `${inputId}-help`;
 
   const stateClass = error 
-    ? 'border-rose-500/50 focus-visible:ring-rose-500/30'
+    ? 'border-[var(--ds-danger)]/50 focus-visible:ring-[var(--ds-danger)]/30'
     : success
-      ? 'border-emerald-500/50 focus-visible:ring-emerald-500/30'
+      ? 'border-[var(--ds-success)]/50 focus-visible:ring-[var(--ds-success)]/30'
       : 'border-[var(--ds-border-default)] focus-visible:ring-[var(--ds-primary)]/30';
 
   return (
@@ -109,7 +109,7 @@ export const Textarea: React.FC<TextareaProps> = ({
       {label && (
         <label htmlFor={inputId} className="font-bold text-[var(--ds-text-secondary)] flex items-center gap-1 select-none">
           {label}
-          {requiredIndicator && <span className="text-rose-500">*</span>}
+          {requiredIndicator && <span className="text-[var(--ds-danger)]">*</span>}
         </label>
       )}
 
@@ -151,9 +151,9 @@ export const Select: React.FC<SelectProps> = ({
   const helpId = `${inputId}-help`;
 
   const stateClass = error 
-    ? 'border-rose-500/50 focus-visible:ring-rose-500/30'
+    ? 'border-[var(--ds-danger)]/50 focus-visible:ring-[var(--ds-danger)]/30'
     : success
-      ? 'border-emerald-500/50 focus-visible:ring-emerald-500/30'
+      ? 'border-[var(--ds-success)]/50 focus-visible:ring-[var(--ds-success)]/30'
       : 'border-[var(--ds-border-default)] focus-visible:ring-[var(--ds-primary)]/30';
 
   return (
@@ -161,7 +161,7 @@ export const Select: React.FC<SelectProps> = ({
       {label && (
         <label htmlFor={inputId} className="font-bold text-[var(--ds-text-secondary)] flex items-center gap-1 select-none">
           {label}
-          {requiredIndicator && <span className="text-rose-500">*</span>}
+          {requiredIndicator && <span className="text-[var(--ds-danger)]">*</span>}
         </label>
       )}
 
@@ -277,7 +277,7 @@ export const Switch: React.FC<SwitchProps> = ({
           className="sr-only peer"
           {...props}
         />
-        <div className="w-9 h-5 bg-[var(--ds-background-subtle)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--ds-primary)] transition-colors" />
+        <div className="w-9 h-5 bg-[var(--ds-background-subtle)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[var(--ds-border-default)] after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--ds-primary)] ds-transition" />
       </div>
     </label>
   );

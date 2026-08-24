@@ -5,6 +5,7 @@ import { apiGetMyProfile, apiUpsertProfile, apiGetDownloadUrl } from '../utils/a
 import { ROUTES } from '../router/routes';
 import { ACADEMIC_CHANNELS } from '../config/academicChannels';
 import { Card } from '../design-system/components/Card';
+import { PathPanel } from '../design-system/components/Navigation';
 import {
   Sparkles,
   ExternalLink,
@@ -178,7 +179,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
   if (loadError || !profile) {
     return (
       <div className="max-w-md mx-auto text-center py-24 space-y-2">
-        <ShieldAlert className="mx-auto text-rose-500" size={28} />
+        <ShieldAlert className="mx-auto text-danger" size={28} />
         <p className="text-sm font-bold text-[var(--ds-text-secondary)]">
           {isAr ? 'تعذّر تحميل الملف الأكاديمي. تأكد من تسجيل الدخول وحاول مجددًا.' : 'Could not load your academic profile. Make sure you are signed in and try again.'}
         </p>
@@ -267,8 +268,8 @@ export const AcademicVisibilityDashboard: React.FC = () => {
         <div className={`fixed top-4 inset-x-0 z-50 flex justify-center px-4 pointer-events-none`}>
           <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl shadow-lg text-xs font-bold pointer-events-auto ${
             msg.kind === 'success'
-              ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-500'
-              : 'bg-rose-500/15 border border-rose-500/30 text-rose-500'
+              ? 'bg-action/15 border border-success/30 text-success'
+              : 'bg-danger/15 border border-danger/30 text-danger'
           }`}>
             {msg.kind === 'success' ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
             <span>{msg.text}</span>
@@ -276,8 +277,8 @@ export const AcademicVisibilityDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Top Welcome Banner */}
-      <div className="bg-gradient-to-r from-indigo-950/40 via-purple-900/10 to-transparent border border-indigo-500/20 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-md">
+      <PathPanel accent="var(--ds-path-identity)">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-full overflow-hidden bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] flex items-center justify-center shrink-0">
             {profile.profile_photo_file_id ? (
@@ -288,8 +289,8 @@ export const AcademicVisibilityDashboard: React.FC = () => {
           </div>
           <div className="space-y-2">
           <div className="flex items-center gap-2 mb-1">
-            <Globe size={20} className="text-indigo-400" />
-            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+            <Globe size={20} className="text-path-identity" />
+            <span className="text-[10px] font-black text-path-identity uppercase tracking-widest">
               {isAr ? 'الهوية الرقمية والانتشار الأكاديمي للباحثين' : 'Academic Identity & Visibility Suite'}
             </span>
           </div>
@@ -306,7 +307,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
             profile.visibility_status === 'PUBLIC' ? (
               <button
                 onClick={() => copyToClipboard(`${window.location.origin}/researcher/${user.username}`, 'public-link')}
-                className="inline-flex items-center gap-1.5 text-[11px] font-black text-indigo-500 hover:underline cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-[11px] font-black text-path-identity hover:underline cursor-pointer"
               >
                 <ExternalLink size={12} />
                 <span>{copiedKey === 'public-link' ? (isAr ? 'تم نسخ الرابط!' : 'Link copied!') : (isAr ? 'نسخ رابط ملفك العام' : 'Copy your public profile link')}</span>
@@ -314,7 +315,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
             ) : (
               <button
                 onClick={() => navigate(ROUTES.PROFILE)}
-                className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-500 hover:underline cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-[11px] font-bold text-warning hover:underline cursor-pointer"
               >
                 <ShieldAlert size={12} />
                 <span>{isAr ? 'ملفك غير عام حاليًا — فعّل الظهور العام من الملف الكامل' : 'Your profile is private — enable public visibility in the full profile'}</span>
@@ -328,12 +329,13 @@ export const AcademicVisibilityDashboard: React.FC = () => {
         <div className="p-4 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl flex items-center gap-3 shrink-0">
           <div className="text-right">
             <span className="text-[9px] text-[var(--ds-text-muted)] font-black block uppercase">{isAr ? 'مؤشر اكتمال الملف' : 'Profile Completeness'}</span>
-            <span className="text-2xl font-black text-indigo-500 block">{visibilityScore}%</span>
+            <span className="text-2xl font-black text-path-identity block">{visibilityScore}%</span>
           </div>
           <div className="h-10 w-[1px] bg-[var(--ds-border-subtle)]" />
-          <Activity size={24} className="text-indigo-500" />
+          <Activity size={24} className="text-path-identity" />
         </div>
       </div>
+      </PathPanel>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -345,13 +347,13 @@ export const AcademicVisibilityDashboard: React.FC = () => {
           <Card className="p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-2">
               <h3 className="text-xs font-black text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
-                <User className="text-indigo-500" size={16} />
+                <User className="text-path-identity" size={16} />
                 <span>{isAr ? 'تدقيق الاتساق والاسم الأكاديمي' : 'Academic Name Consistency Audit'}</span>
               </h3>
               {!editingName && (
                 <button
                   onClick={() => setEditingName(true)}
-                  className="text-[10px] font-black text-indigo-500 hover:underline cursor-pointer"
+                  className="text-[10px] font-black text-path-identity hover:underline cursor-pointer"
                 >
                   {isAr ? 'تعديل' : 'Edit'}
                 </button>
@@ -395,7 +397,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                   <button
                     onClick={saveName}
                     disabled={saving}
-                    className="flex items-center gap-1.5 text-[10px] font-black text-white bg-indigo-500 hover:bg-indigo-600 disabled:opacity-60 px-3 py-1.5 rounded-lg cursor-pointer"
+                    className="flex items-center gap-1.5 text-[10px] font-black text-on-action bg-action hover:bg-action-hover disabled:opacity-60 px-3 py-1.5 rounded-lg cursor-pointer"
                   >
                     {saving ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
                     <span>{isAr ? 'حفظ' : 'Save'}</span>
@@ -430,7 +432,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">{isAr ? 'الصيغ البديلة المكتشفة' : 'Identified Name Variants'}</span>
                     {profile.name_variants_json.length > 0 && (
-                      <div className="flex items-center gap-1 text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded-xl shrink-0">
+                      <div className="flex items-center gap-1 text-[9px] font-bold text-warning bg-warning/10 border border-warning/20 px-2 py-1 rounded-xl shrink-0">
                         <ShieldAlert size={11} className="shrink-0" />
                         <span>{isAr ? 'خطر تشتت الاستشهاد' : 'Citation Split Risk'}</span>
                       </div>
@@ -448,12 +450,12 @@ export const AcademicVisibilityDashboard: React.FC = () => {
           <Card className="p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-2">
               <h3 className="text-xs font-black text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
-                <School className="text-indigo-500" size={16} />
+                <School className="text-path-identity" size={16} />
                 <span>{isAr ? 'المؤسسة والانتماء الأكاديمي' : 'Institution & Affiliation'}</span>
               </h3>
               <button
                 onClick={() => navigate(ROUTES.PROFILE_AFFILIATIONS)}
-                className="text-[10px] font-black text-indigo-500 hover:underline cursor-pointer"
+                className="text-[10px] font-black text-path-identity hover:underline cursor-pointer"
               >
                 {isAr ? 'إدارة الانتماءات' : 'Manage affiliations'}
               </button>
@@ -469,7 +471,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {(profile.academic_title || profile.current_rank) && (
                       <div className="flex items-center gap-2">
-                        <Award size={13} className="text-indigo-400 shrink-0" />
+                        <Award size={13} className="text-path-identity shrink-0" />
                         <span className="text-xs font-bold text-[var(--ds-text-primary)]">
                           {[profile.academic_title, profile.current_rank].filter(Boolean).join(' — ') || '—'}
                         </span>
@@ -477,7 +479,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                     )}
                     {(profile.university || profile.college || profile.department) && (
                       <div className="flex items-center gap-2">
-                        <School size={13} className="text-indigo-400 shrink-0" />
+                        <School size={13} className="text-path-identity shrink-0" />
                         <span className="text-xs font-bold text-[var(--ds-text-primary)]">
                           {[profile.university, profile.college, profile.department].filter(Boolean).join(' · ')}
                         </span>
@@ -494,7 +496,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                           {aff.organization_name}{aff.position_title ? ` — ${aff.position_title}` : ''}
                         </span>
                         {aff.is_current && (
-                          <span className="text-[8px] font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded shrink-0">
+                          <span className="text-[8px] font-bold text-success bg-action/10 border border-success/20 px-1.5 py-0.5 rounded shrink-0">
                             {isAr ? 'حالي' : 'Current'}
                           </span>
                         )}
@@ -515,12 +517,12 @@ export const AcademicVisibilityDashboard: React.FC = () => {
           <Card className="p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-2">
               <h3 className="text-xs font-black text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
-                <Sparkles className="text-indigo-500" size={16} />
+                <Sparkles className="text-path-identity" size={16} />
                 <span>{isAr ? 'السيرة والكلمات المفتاحية للنشر' : 'Publishing Bio & Keywords'}</span>
               </h3>
               <button
                 onClick={() => navigate(ROUTES.PROFILE)}
-                className="text-[10px] font-black text-indigo-500 hover:underline cursor-pointer"
+                className="text-[10px] font-black text-path-identity hover:underline cursor-pointer"
               >
                 {isAr ? 'تعديل في الملف الكامل' : 'Edit in full profile'}
               </button>
@@ -598,7 +600,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
           {/* Channel list, backed by real AcademicIdentifier rows */}
           <Card className="p-5 space-y-4">
             <h3 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center gap-2">
-              <Globe className="text-indigo-500" size={16} />
+              <Globe className="text-path-identity" size={16} />
               <span>{isAr ? 'قنوات وملفات الهوية العلمية' : 'Academic Identity Channels'}</span>
             </h3>
 
@@ -612,13 +614,13 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-black text-[var(--ds-text-primary)]">{chan.label}</span>
                       {chan.linked ? (
-                        <span className="text-[8px] font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
+                        <span className="text-[8px] font-bold text-success bg-action/10 border border-success/20 px-1.5 py-0.5 rounded">
                           {isAr ? 'مرتبط' : 'Linked'}
                         </span>
                       ) : (
                         <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded border ${
                           chan.priority === 'critical'
-                            ? 'text-rose-500 bg-rose-500/10 border-rose-500/20'
+                            ? 'text-danger bg-danger/10 border-danger/20'
                             : 'text-[var(--ds-text-muted)] bg-[var(--ds-surface-tertiary)] border-[var(--ds-border-subtle)]'
                         }`}>
                           {isAr ? 'مفقود' : 'Missing'}
@@ -632,7 +634,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                             href={chan.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-[9px] font-black text-indigo-500 hover:underline flex items-center gap-0.5"
+                            className="text-[9px] font-black text-path-identity hover:underline flex items-center gap-0.5"
                           >
                             <span>{isAr ? 'زيارة' : 'Visit'}</span>
                             <ExternalLink size={10} />
@@ -640,7 +642,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                         )}
                         <button
                           onClick={() => startEditChannel(chan.type, chan.value, chan.url)}
-                          className="text-[9px] font-black text-[var(--ds-text-muted)] hover:text-indigo-500 cursor-pointer"
+                          className="text-[9px] font-black text-[var(--ds-text-muted)] hover:text-path-identity cursor-pointer"
                         >
                           {isAr ? 'تعديل' : 'Edit'}
                         </button>
@@ -648,7 +650,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                     ) : (
                       <button
                         onClick={() => startEditChannel(chan.type)}
-                        className="text-[9px] font-black text-indigo-500 hover:underline flex items-center gap-0.5 cursor-pointer"
+                        className="text-[9px] font-black text-path-identity hover:underline flex items-center gap-0.5 cursor-pointer"
                       >
                         <Plus size={11} />
                         <span>{isAr ? 'إضافة' : 'Add'}</span>
@@ -676,7 +678,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                         <button
                           onClick={() => saveChannel(chan.type)}
                           disabled={saving || !channelDraft.value.trim()}
-                          className="flex items-center gap-1 text-[9px] font-black text-white bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 px-2.5 py-1 rounded-lg cursor-pointer"
+                          className="flex items-center gap-1 text-[9px] font-black text-on-action bg-action hover:bg-action-hover disabled:opacity-50 px-2.5 py-1 rounded-lg cursor-pointer"
                         >
                           {saving ? <Loader2 size={11} className="animate-spin" /> : <Check size={11} />}
                           <span>{isAr ? 'حفظ' : 'Save'}</span>
@@ -706,20 +708,20 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-black text-[var(--ds-text-primary)]">{chan.identifier_type}</span>
-                      <span className="text-[8px] font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
+                      <span className="text-[8px] font-bold text-success bg-action/10 border border-success/20 px-1.5 py-0.5 rounded">
                         {isAr ? 'مرتبط' : 'Linked'}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       {chan.profile_url && (
-                        <a href={chan.profile_url} target="_blank" rel="noreferrer" className="text-[9px] font-black text-indigo-500 hover:underline flex items-center gap-0.5">
+                        <a href={chan.profile_url} target="_blank" rel="noreferrer" className="text-[9px] font-black text-path-identity hover:underline flex items-center gap-0.5">
                           <span>{isAr ? 'زيارة' : 'Visit'}</span>
                           <ExternalLink size={10} />
                         </a>
                       )}
                       <button
                         onClick={() => removeCustomChannel(chan.identifier_type)}
-                        className="text-[var(--ds-text-muted)] hover:text-rose-500 cursor-pointer"
+                        className="text-[var(--ds-text-muted)] hover:text-danger cursor-pointer"
                         title={isAr ? 'حذف' : 'Remove'}
                       >
                         <Trash2 size={12} />
@@ -758,7 +760,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                   <button
                     onClick={saveCustomChannel}
                     disabled={saving || !customChannelDraft.type.trim() || !customChannelDraft.value.trim()}
-                    className="flex items-center gap-1 text-[9px] font-black text-white bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 px-2.5 py-1 rounded-lg cursor-pointer"
+                    className="flex items-center gap-1 text-[9px] font-black text-on-action bg-action hover:bg-action-hover disabled:opacity-50 px-2.5 py-1 rounded-lg cursor-pointer"
                   >
                     {saving ? <Loader2 size={11} className="animate-spin" /> : <Check size={11} />}
                     <span>{isAr ? 'حفظ' : 'Save'}</span>
@@ -775,7 +777,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
             ) : (
               <button
                 onClick={() => setAddingCustomChannel(true)}
-                className="w-full flex items-center justify-center gap-1.5 text-[10px] font-black text-indigo-500 border border-dashed border-indigo-500/30 hover:bg-indigo-500/5 py-2 rounded-xl cursor-pointer"
+                className="w-full flex items-center justify-center gap-1.5 text-[10px] font-black text-path-identity border border-dashed border-[var(--ds-path-identity)]/30 hover:bg-info/10 py-2 rounded-xl cursor-pointer"
               >
                 <Plus size={12} />
                 <span>{isAr ? 'إضافة قناة أخرى (مثل Academia.edu أو موقعك الشخصي)' : 'Add another channel (e.g. Academia.edu or personal site)'}</span>
@@ -786,13 +788,13 @@ export const AcademicVisibilityDashboard: React.FC = () => {
           {/* Reputation plan, computed live from real profile completeness */}
           <Card className="p-5 space-y-4">
             <h3 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center gap-2">
-              <CheckSquare className="text-indigo-500" size={16} />
+              <CheckSquare className="text-path-identity" size={16} />
               <span>{isAr ? 'خطة بناء السمعة الأكاديمية' : 'Academic Reputation Plan'}</span>
             </h3>
 
             <div className="space-y-3">
               {tasks.filter(t => !t.done).length === 0 ? (
-                <p className="text-xs font-bold text-emerald-500 m-0 text-center py-3">
+                <p className="text-xs font-bold text-success m-0 text-center py-3">
                   {isAr ? 'ملفك مكتمل — لا مهام متبقية حاليًا.' : 'Your profile is complete — no tasks remaining.'}
                 </p>
               ) : (
@@ -802,8 +804,8 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                     onClick={() => !task.done && task.action()}
                     className={`p-3 border rounded-xl flex items-start gap-2.5 transition-all ${
                       task.done
-                        ? 'bg-emerald-500/5 border-emerald-500/20 text-[var(--ds-text-muted)] line-through cursor-default'
-                        : 'bg-[var(--ds-surface-secondary)] border-[var(--ds-border-subtle)] text-[var(--ds-text-secondary)] hover:border-indigo-500/40 cursor-pointer'
+                        ? 'bg-action/5 border-success/20 text-[var(--ds-text-muted)] line-through cursor-default'
+                        : 'bg-[var(--ds-surface-secondary)] border-[var(--ds-border-subtle)] text-[var(--ds-text-secondary)] hover:border-[var(--ds-path-identity)]/40 cursor-pointer'
                     }`}
                   >
                     <input
@@ -818,10 +820,10 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                       </p>
                       <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded border inline-block ${
                         task.impact === 'High'
-                          ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
+                          ? 'bg-danger/10 text-danger border-danger/20'
                           : task.impact === 'Medium'
-                            ? 'bg-amber-500/10 text-amber-500 border-amber-500/20'
-                            : 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20'
+                            ? 'bg-warning/10 text-warning border-warning/20'
+                            : 'bg-muted/10 text-muted border-muted/20'
                       }`}>
                         {task.impact} Impact
                       </span>

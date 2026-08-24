@@ -1,9 +1,7 @@
-/* Custom Design System utility overrides and helpers */
-
 .ds-focus-ring:focus-visible {
   outline: 3px solid var(--ds-focus-ring);
   outline-offset: 2px;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.4);
+  box-shadow: var(--ds-shadow-glow);
 }
 
 .ds-skip-link {
@@ -16,23 +14,180 @@
   background: var(--ds-primary-active);
   color: white;
   padding: 0.75rem 1rem;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .ds-skip-link:focus {
   transform: translateY(0);
 }
 
-/* Emphasized micro-animation transitions */
 .ds-transition {
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 180ms;
+  transition-timing-function: var(--ds-ease);
+  transition-duration: var(--ds-duration);
 }
 
-/* Respect user preferences for reduced motion */
+.baseerah-aurora {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.baseerah-aurora::before,
+.baseerah-aurora::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.85;
+}
+
+.baseerah-aurora::before {
+  width: 42rem;
+  height: 42rem;
+  top: -12rem;
+  inset-inline-end: -8rem;
+  background: radial-gradient(circle, var(--ds-aurora-emerald), transparent 68%);
+}
+
+.baseerah-aurora::after {
+  width: 34rem;
+  height: 34rem;
+  bottom: -10rem;
+  inset-inline-start: -8rem;
+  background: radial-gradient(circle, var(--ds-aurora-gold), transparent 70%);
+}
+
+.baseerah-surface {
+  position: relative;
+  background:
+    linear-gradient(165deg, color-mix(in srgb, var(--ds-surface-elevated) 72%, transparent), var(--ds-surface-primary) 48%, var(--ds-surface-secondary));
+  border: 1px solid var(--ds-border-subtle);
+  box-shadow: var(--ds-shadow-layered);
+}
+
+.baseerah-surface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 38%);
+  opacity: 0.55;
+}
+
+.dark .baseerah-surface::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 40%);
+  opacity: 1;
+}
+
+.baseerah-glow {
+  box-shadow: var(--ds-shadow-glow);
+}
+
+.baseerah-glow-gold {
+  box-shadow: 0 10px 28px -14px var(--ds-accent-gold-glow);
+}
+
+.baseerah-gradient-text {
+  background: linear-gradient(120deg, var(--ds-primary-bright), var(--ds-accent-gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.baseerah-glass {
+  background: color-mix(in srgb, var(--ds-surface-primary) 94%, transparent);
+  backdrop-filter: blur(8px) saturate(112%);
+}
+
+.baseerah-marketing {
+  --ds-background-canvas: #0B1F33;
+  --ds-background-subtle: #161A22;
+  --ds-surface-primary: #121A28;
+  --ds-surface-secondary: #1A2333;
+  --ds-surface-tertiary: #232C3E;
+  --ds-border-subtle: rgba(248, 247, 243, 0.08);
+  --ds-border-default: rgba(248, 247, 243, 0.14);
+  --ds-text-primary: #F8F7F3;
+  --ds-text-secondary: #C5CBD6;
+  --ds-text-muted: #8B95A5;
+  --ds-text-disabled: #6A7383;
+  --ds-primary: #6BB894;
+  --ds-primary-hover: #8FCBAD;
+  --ds-primary-active: #A5D6BB;
+  --ds-primary-bright: #8FCBAD;
+  --ds-primary-soft: rgba(107, 184, 148, 0.16);
+  --ds-primary-glow: rgba(107, 184, 148, 0.28);
+  --ds-action-fill: #0B5D3B;
+  --ds-action-fill-hover: #094C30;
+  --ds-on-action: #FFFFFF;
+  --ds-navy: #0B1F33;
+  --ds-navy-elevated: #1A3F5C;
+  --ds-accent-gold: #D4B46A;
+  --ds-accent-gold-bright: #E4C98A;
+  --ds-accent-gold-soft: rgba(212, 180, 106, 0.14);
+  --ds-aurora-emerald: rgba(107, 184, 148, 0.16);
+  --ds-aurora-gold: rgba(212, 180, 106, 0.1);
+  --ds-aurora-navy: rgba(26, 63, 92, 0.4);
+  --ds-shadow-glow: 0 12px 32px -12px rgba(107, 184, 148, 0.38);
+  --ds-shadow-layered: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 24px 48px -28px rgba(0, 0, 0, 0.55);
+  color: var(--ds-text-primary);
+  background-color: var(--ds-navy);
+  background-image:
+    radial-gradient(ellipse 50% 40% at 82% -4%, var(--ds-aurora-emerald), transparent 70%),
+    radial-gradient(ellipse 40% 32% at 8% 18%, var(--ds-aurora-gold), transparent 68%),
+    radial-gradient(ellipse 46% 36% at 50% 100%, var(--ds-aurora-navy), transparent 72%);
+}
+
+.baseerah-knowledge {
+  background-image:
+    radial-gradient(circle at 18% 22%, color-mix(in srgb, var(--ds-primary) 16%, transparent) 0 1.5px, transparent 1.6px),
+    radial-gradient(circle at 72% 38%, color-mix(in srgb, var(--ds-data-teal) 18%, transparent) 0 1.5px, transparent 1.6px),
+    linear-gradient(115deg, transparent 48%, color-mix(in srgb, var(--ds-primary) 12%, transparent) 49%, transparent 51%),
+    linear-gradient(155deg, transparent 62%, color-mix(in srgb, var(--ds-navy-elevated) 10%, transparent) 63%, transparent 65%);
+  background-size: 100% 100%;
+}
+
+.ds-numeric {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+.font-arabic-plex {
+  font-family: "IBM Plex Sans Arabic", system-ui, sans-serif;
+}
+
+.font-arabic-noto {
+  font-family: "Noto Sans Arabic", system-ui, sans-serif;
+}
+
+.font-latin-inter {
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.ds-ai-surface {
+  background: linear-gradient(135deg, var(--ds-primary-soft), var(--ds-data-teal-soft) 55%, var(--ds-navy-soft));
+  border: 1px solid color-mix(in srgb, var(--ds-data-teal) 28%, var(--ds-border-subtle));
+}
+
+.ds-shimmer {
+  background: linear-gradient(90deg, var(--ds-surface-tertiary) 0%, var(--ds-surface-secondary) 45%, var(--ds-surface-tertiary) 100%);
+  background-size: 200% 100%;
+  animation: ds-shimmer 1.8s var(--ds-ease) infinite;
+}
+
+@keyframes ds-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  *, ::before, ::after {
+  *,
+  ::before,
+  ::after {
     animation-delay: -1ms !important;
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
@@ -40,5 +195,9 @@
     scroll-behavior: auto !important;
     transition-duration: 0s !important;
     transition-delay: 0s !important;
+  }
+
+  .ds-shimmer {
+    animation: none !important;
   }
 }

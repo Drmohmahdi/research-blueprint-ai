@@ -132,7 +132,7 @@ export const PreRegistration: React.FC = () => {
         {/* Display Active registration state */}
         {activeProject.preRegistrationHash ? (
           <div className="p-4 bg-[var(--ds-success-soft)] border border-[var(--ds-success)]/20 rounded-lg space-y-3">
-            <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-bold text-sm">
+            <div className="flex items-center gap-2 text-success dark:text-success font-bold text-sm">
               <Award size={18} />
               <span>{language === 'ar' ? 'بروتوكول البحث مسجل ومثبت رقمياً' : 'Protocol Digitally Locked & Registered'}</span>
             </div>
@@ -154,7 +154,7 @@ export const PreRegistration: React.FC = () => {
               </div>
               <div className="flex justify-between items-center">
                 <span>{language === 'ar' ? 'سلامة المحتوى بعد التثبيت:' : 'Post-lock content integrity:'}</span>
-                <span className={integrity === 'verified' ? 'text-emerald-700 dark:text-emerald-400' : integrity === 'mismatch' ? 'text-red-700 dark:text-red-400' : 'text-[var(--ds-text-secondary)]'}>
+                <span className={integrity === 'verified' ? 'text-success dark:text-success' : integrity === 'mismatch' ? 'text-danger dark:text-danger' : 'text-[var(--ds-text-secondary)]'}>
                   {integrity === 'verified'
                     ? (language === 'ar' ? 'سليم ومطابق للبصمة' : 'Verified against fingerprint')
                     : integrity === 'mismatch'
@@ -194,7 +194,7 @@ export const PreRegistration: React.FC = () => {
               {language === 'ar' ? 'تسجيل وتجميد الخطة البحثية الآن' : 'Lock & Preregister Protocol Now'}
             </Button>
             {missingRequirements.length > 0 && (
-              <div role="alert" className="text-start text-xs font-semibold text-amber-800 bg-amber-50 border border-amber-200 rounded-md p-3 space-y-2">
+              <div role="alert" className="text-start text-xs font-semibold text-warning bg-warning/10 border border-warning rounded-md p-3 space-y-2">
                 <div className="flex items-center gap-2">
                   <AlertTriangle size={15} />
                   <span>{language === 'ar' ? 'أكمل المتطلبات التالية قبل التثبيت:' : 'Complete these requirements before locking:'}</span>
@@ -205,7 +205,7 @@ export const PreRegistration: React.FC = () => {
               </div>
             )}
             {missingRequirements.length === 0 && (
-              <div className="flex items-center justify-center gap-2 text-xs text-emerald-700 dark:text-emerald-400 font-semibold">
+              <div className="flex items-center justify-center gap-2 text-xs text-success dark:text-success font-semibold">
                 <CheckCircle2 size={15} />
                 <span>{language === 'ar' ? 'المتطلبات الأساسية مكتملة للتسجيل' : 'Core preregistration requirements are complete'}</span>
               </div>
@@ -214,8 +214,8 @@ export const PreRegistration: React.FC = () => {
               <div
                 role="alert"
                 className={status.type === 'success'
-                  ? 'text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md p-3'
-                  : 'text-xs font-semibold text-red-700 bg-red-50 border border-red-200 rounded-md p-3'}
+                  ? 'text-xs font-semibold text-success bg-success/10 border border-success rounded-md p-3'
+                  : 'text-xs font-semibold text-danger bg-danger/10 border border-danger rounded-md p-3'}
               >
                 {status.message}
               </div>

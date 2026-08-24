@@ -46,7 +46,7 @@ export const GuidedFlowSidebar: React.FC = () => {
     <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl p-4 shadow-sm space-y-4">
       {/* Path title */}
       <div className="pb-3 border-b border-[var(--ds-border-subtle)]">
-        <h4 className="text-xs font-black text-purple-500 m-0 uppercase tracking-wider">
+        <h4 className="text-xs font-black text-ai m-0 uppercase tracking-wider">
           {language === 'ar' ? 'المسار البحثي' : 'Research Path'}
         </h4>
         <p className="text-sm font-bold text-[var(--ds-text-primary)] m-0 mt-1">
@@ -67,19 +67,19 @@ export const GuidedFlowSidebar: React.FC = () => {
               onClick={() => navigate(VIEW_TO_PATH[stepId] ?? '/')}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                 isCurrent
-                  ? 'bg-purple-600/10 text-purple-600 border border-purple-500/20'
+                  ? 'bg-action/10 text-ai border border-ai/20'
                   : isCompleted
-                  ? 'text-emerald-600 hover:bg-emerald-500/5'
+                  ? 'text-success hover:bg-action/5'
                   : 'text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-secondary)]'
               }`}
             >
               {/* Step indicator */}
               <div className="shrink-0">
                 {isCompleted ? (
-                  <CheckCircle2 size={14} className="text-emerald-500" />
+                  <CheckCircle2 size={14} className="text-success" />
                 ) : (
                   <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${
-                    isCurrent ? 'border-purple-500 bg-purple-500' : 'border-zinc-400'
+                    isCurrent ? 'border-ai bg-ai' : 'border-muted'
                   }`}>
                     {isCurrent && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
                   </div>
@@ -117,7 +117,7 @@ export const GuidedFlowSidebar: React.FC = () => {
             }
           }}
           disabled={currentStepIdx >= activePath.orderedSteps.length - 1}
-          className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold disabled:opacity-30 cursor-pointer transition-colors disabled:cursor-not-allowed"
+          className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl bg-action hover:bg-action-hover text-on-action text-xs font-bold disabled:opacity-30 cursor-pointer ds-transition disabled:cursor-not-allowed"
         >
           <span>{language === 'ar' ? 'التالي' : 'Next'}</span>
           {language === 'ar' ? <ArrowLeft size={12} /> : <ArrowRight size={12} />}
@@ -132,7 +132,7 @@ export const GuidedFlowSidebar: React.FC = () => {
         </div>
         <div className="h-1.5 rounded-full bg-[var(--ds-surface-secondary)] overflow-hidden">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-purple-600 to-emerald-500 transition-all duration-500"
+            className="h-full rounded-full bg-[var(--ds-primary)] ds-transition"
             style={{ width: `${(completedSteps.filter(s => activePath.orderedSteps.includes(s)).length / activePath.orderedSteps.length) * 100}%` }}
           />
         </div>

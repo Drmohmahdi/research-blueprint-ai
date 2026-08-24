@@ -145,31 +145,35 @@ export const DesignSystemShowcase: React.FC = () => {
         <div className="space-y-12">
           {/* A. colors & Tokens */}
           <section className="space-y-4">
-            <SectionHeader title={language === 'ar' ? '1. لوحة الألوان والتوكينات (Semantic Colors)' : '1. Semantic Colors & Tokens'} />
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+            <SectionHeader title={language === 'ar' ? '1. لوحة الألوان — Saudi Academic Premium' : '1. Saudi Academic Premium Palette'} />
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3">
               <div className="p-3 rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-background-canvas)] text-center space-y-1">
                 <div className="h-8 w-full rounded bg-[var(--ds-background-canvas)] border border-[var(--ds-border-subtle)]" />
-                <span className="text-[10px] font-bold block">Background Canvas</span>
+                <span className="text-[10px] font-bold block">Pearl / Navy</span>
               </div>
-              <div className="p-3 rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-center space-y-1">
-                <div className="h-8 w-full rounded bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)]" />
-                <span className="text-[10px] font-bold block">Surface Primary</span>
-              </div>
-              <div className="p-3 rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] text-center space-y-1">
-                <div className="h-8 w-full rounded bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)]" />
-                <span className="text-[10px] font-bold block">Surface Secondary</span>
-              </div>
-              <div className="p-3 rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-tertiary)] text-center space-y-1">
-                <div className="h-8 w-full rounded bg-[var(--ds-surface-tertiary)] border border-[var(--ds-border-subtle)]" />
-                <span className="text-[10px] font-bold block">Surface Tertiary</span>
+              <div className="p-3 rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-background-subtle)] text-center space-y-1">
+                <div className="h-8 w-full rounded bg-[var(--ds-background-subtle)] border border-[var(--ds-border-subtle)]" />
+                <span className="text-[10px] font-bold block">Warm Sand / Graphite</span>
               </div>
               <div className="p-3 rounded-xl border border-[var(--ds-border-subtle)] text-center bg-[var(--ds-surface-primary)] space-y-1">
                 <div className="h-8 w-full rounded bg-[var(--ds-primary)]" />
-                <span className="text-[10px] font-bold block text-[var(--ds-primary)]">Primary Accent</span>
+                <span className="text-[10px] font-bold block text-[var(--ds-primary)]">Saudi Deep Emerald</span>
               </div>
               <div className="p-3 rounded-xl border border-[var(--ds-border-subtle)] text-center bg-[var(--ds-surface-primary)] space-y-1">
-                <div className="h-8 w-full rounded bg-[var(--ds-research-blue)]" />
-                <span className="text-[10px] font-bold block text-[var(--ds-research-blue)]">Research Blue</span>
+                <div className="h-8 w-full rounded bg-[var(--ds-navy)]" />
+                <span className="text-[10px] font-bold block">Academic Midnight Navy</span>
+              </div>
+              <div className="p-3 rounded-xl border border-[var(--ds-border-subtle)] text-center bg-[var(--ds-surface-primary)] space-y-1">
+                <div className="h-8 w-full rounded bg-[var(--ds-accent-gold)]" />
+                <span className="text-[10px] font-bold block text-[var(--ds-accent-gold)]">Muted Warm Gold</span>
+              </div>
+              <div className="p-3 rounded-xl border border-[var(--ds-border-subtle)] text-center bg-[var(--ds-surface-primary)] space-y-1">
+                <div className="h-8 w-full rounded bg-[var(--ds-data-teal)]" />
+                <span className="text-[10px] font-bold block text-[var(--ds-data-teal)]">Data Teal</span>
+              </div>
+              <div className="p-3 rounded-xl border border-[var(--ds-border-subtle)] text-center bg-[var(--ds-surface-primary)] space-y-1">
+                <div className="h-8 w-full rounded bg-[var(--ds-surface-tertiary)] border border-[var(--ds-border-subtle)]" />
+                <span className="text-[10px] font-bold block">Layered Surface</span>
               </div>
             </div>
           </section>
@@ -179,18 +183,24 @@ export const DesignSystemShowcase: React.FC = () => {
             <SectionHeader title={language === 'ar' ? '2. مقاييس الطباعة والخطوط (Typography)' : '2. Typography Scale'} />
             <div className="space-y-3 p-6 border border-[var(--ds-border-subtle)] rounded-2xl bg-[var(--ds-surface-primary)]">
               <div>
-                <span className="text-[9px] text-[var(--ds-text-muted)] uppercase block font-bold">display-xl (800)</span>
-                <h2 className="text-3xl md:text-4xl font-extrabold m-0 text-[var(--ds-text-primary)]">بصيرة للبحث العلمي</h2>
+                <span className="text-[9px] text-[var(--ds-text-muted)] uppercase block font-bold">IBM Plex Sans Arabic — المعتمد للواجهات</span>
+                <h2 className="font-arabic-plex text-3xl md:text-4xl font-bold m-0 text-[var(--ds-text-primary)]">بصيرة للبحث العلمي</h2>
+                <p className="font-arabic-plex text-sm text-[var(--ds-text-secondary)] mt-2 m-0 leading-relaxed">منهجية أوضح، أرقام أدق، وحروف عربية تناسب المختبر الأكاديمي دون اتساع Noto الوثائقي.</p>
               </div>
               <div className="pt-2 border-t border-[var(--ds-border-subtle)]">
-                <span className="text-[9px] text-[var(--ds-text-muted)] uppercase block font-bold">section-title (600)</span>
-                <h3 className="text-lg md:text-xl font-bold m-0 text-[var(--ds-text-primary)]">مختبر تصميم ومحاكاة البحوث العلمية</h3>
+                <span className="text-[9px] text-[var(--ds-text-muted)] uppercase block font-bold">Noto Sans Arabic — احتياطي للرموز النادرة</span>
+                <h3 className="font-arabic-noto text-lg md:text-xl font-bold m-0 text-[var(--ds-text-primary)]">مختبر تصميم ومحاكاة البحوث العلمية</h3>
+                <p className="font-arabic-noto text-xs text-[var(--ds-text-secondary)] leading-relaxed m-0 mt-1">أوسع قليلًا وأكثر وثائقية؛ يبقى احتياطيًا بعد المقارنة.</p>
               </div>
-              <div className="pt-2 border-t border-[var(--ds-border-subtle)]">
-                <span className="text-[9px] text-[var(--ds-text-muted)] uppercase block font-bold">body (400)</span>
-                <p className="text-xs text-[var(--ds-text-secondary)] leading-relaxed m-0">
-                  يهدف هذا النظام البصري إلى حماية سلامة المنصة الأكاديمية وتقديم واجهات مستخدم متميزة ذات دقة تفاعلية ممتازة، تدعم التصفح باللغتين العربية والإنجليزية.
-                </p>
+              <div className="pt-2 border-t border-[var(--ds-border-subtle)] grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <span className="text-[9px] text-[var(--ds-text-muted)] uppercase block font-bold">Inter — English UI</span>
+                  <p className="font-latin-inter text-sm text-[var(--ds-text-primary)] m-0">Precise academic interface 0123456789</p>
+                </div>
+                <div>
+                  <span className="text-[9px] text-[var(--ds-text-muted)] uppercase block font-bold">IBM Plex Sans — fallback</span>
+                  <p className="font-latin-plex text-sm text-[var(--ds-text-primary)] m-0">Institutional companion 0123456789</p>
+                </div>
               </div>
             </div>
           </section>
@@ -389,14 +399,14 @@ export const DesignSystemShowcase: React.FC = () => {
                 <tr className="hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-primary)]">
                   <td className="p-3 font-semibold">TR-01</td>
                   <td className="p-3"><Badge variant="completed">Experimental</Badge></td>
-                  <td className="p-3 font-bold text-indigo-600">35.0</td>
-                  <td className="p-3 font-bold text-emerald-600">45.0</td>
+                  <td className="p-3 font-bold text-path-identity">35.0</td>
+                  <td className="p-3 font-bold text-success">45.0</td>
                 </tr>
                 <tr className="hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-primary)]">
                   <td className="p-3 font-semibold">CON-01</td>
                   <td className="p-3"><Badge variant="draft">Control</Badge></td>
-                  <td className="p-3 font-bold text-indigo-600">34.0</td>
-                  <td className="p-3 font-bold text-emerald-600">36.0</td>
+                  <td className="p-3 font-bold text-path-identity">34.0</td>
+                  <td className="p-3 font-bold text-success">36.0</td>
                 </tr>
               </Table>
             </div>
@@ -456,11 +466,11 @@ export const DesignSystemShowcase: React.FC = () => {
             <SectionHeader title={language === 'ar' ? '9. الرسوم واللوحات التوضيحية (Academic Illustrations)' : '9. Illustrations & Empty States'} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="p-6 border border-[var(--ds-border-subtle)] rounded-2xl bg-[var(--ds-surface-primary)] flex flex-wrap justify-center gap-6">
-                <StudyDesignIllustration size={90} className="text-purple-600" />
-                <SimulationIllustration size={90} className="text-emerald-500" />
-                <PredictionIllustration size={90} className="text-indigo-600" />
-                <DataAnalysisIllustration size={90} className="text-cyan-500" />
-                <ScientificPublishingIllustration size={90} className="text-rose-500" />
+                <StudyDesignIllustration size={90} className="text-ai" />
+                <SimulationIllustration size={90} className="text-success" />
+                <PredictionIllustration size={90} className="text-path-identity" />
+                <DataAnalysisIllustration size={90} className="text-ai" />
+                <ScientificPublishingIllustration size={90} className="text-danger" />
               </div>
 
               <EmptyState
@@ -489,14 +499,14 @@ export const DesignSystemShowcase: React.FC = () => {
                 </span>
                 <div className="flex gap-4 items-center">
                   <Tooltip content={language === 'ar' ? 'تلميح أمني للوضع البحثي' : 'Secure protocol tooltip'}>
-                    <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-600 flex items-center gap-1.5 cursor-help">
+                    <div className="p-2.5 rounded-xl bg-ai/10 text-ai flex items-center gap-1.5 cursor-help">
                       <ResearchIcon name="ShieldAlert" size={16} />
                       <span className="text-[10px] font-bold">{language === 'ar' ? 'مؤمن' : 'Secure'}</span>
                     </div>
                   </Tooltip>
 
                   <Tooltip content={language === 'ar' ? 'مؤشر اتجاه RTL معكوس' : 'RTL inverted arrow indicator'}>
-                    <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 flex items-center gap-1.5 cursor-help">
+                    <div className="p-2.5 rounded-xl bg-info/10 text-path-publication flex items-center gap-1.5 cursor-help">
                       <ResearchIcon name="ArrowRight" size={16} flipInRtl={true} />
                       <span className="text-[10px] font-bold">{language === 'ar' ? 'سهم ديناميكي' : 'Dynamic Arrow'}</span>
                     </div>

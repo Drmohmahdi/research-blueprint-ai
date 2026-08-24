@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useProject } from '../context/ProjectContext';
 import { Card } from '../design-system/components/Card';
 import { Button } from '../design-system/components/Button';
+import { PathPanel } from '../design-system/components/Navigation';
 import { 
   Briefcase, 
   CheckCircle2, 
@@ -224,10 +225,10 @@ export const PromotionDashboard: React.FC = () => {
           )}
           {application?.status && (
             <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-              application.status === 'SUBMITTED' ? 'bg-blue-500/10 text-blue-600 border border-blue-500/20' :
-              application.status === 'UNDER_REVIEW' ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20' :
-              application.status === 'COMPLETED' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' :
-              'bg-slate-500/10 text-slate-600 border border-slate-500/20'
+              application.status === 'SUBMITTED' ? 'bg-info/10 text-path-publication border border-info/20' :
+              application.status === 'UNDER_REVIEW' ? 'bg-warning/10 text-warning border border-warning/20' :
+              application.status === 'COMPLETED' ? 'bg-action/10 text-success border border-success/20' :
+              'bg-muted/10 text-secondary border border-muted/20'
             }`}>
               {application.status}
             </span>
@@ -237,9 +238,9 @@ export const PromotionDashboard: React.FC = () => {
 
       {statusMessage && (
         <div className={`p-3 rounded-xl text-xs flex items-center gap-2 font-semibold ${
-          statusMessage.type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' :
-          statusMessage.type === 'error' ? 'bg-rose-50 text-rose-800 border border-rose-200' :
-          'bg-blue-50 text-blue-800 border border-blue-200'
+          statusMessage.type === 'success' ? 'bg-success/10 text-success border border-success' :
+          statusMessage.type === 'error' ? 'bg-danger/10 text-danger border border-danger' :
+          'bg-info/10 text-info border border-info'
         }`}>
           {statusMessage.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
           <span>{statusMessage.text}</span>
@@ -247,11 +248,12 @@ export const PromotionDashboard: React.FC = () => {
       )}
 
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-amber-900/30 via-yellow-900/10 to-transparent border border-amber-500/20 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-md">
+      <PathPanel accent="var(--ds-path-promotion)">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2 mb-1">
-            <Briefcase size={20} className="text-amber-400" />
-            <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest">
+            <Briefcase size={20} className="text-warning" />
+            <span className="text-[10px] font-black text-warning uppercase tracking-widest">
               {isAr ? 'الترقيات الأكاديمية لأعضاء هيئة التدريس' : 'Academic Faculty Promotion Hub'}
             </span>
           </div>
@@ -270,9 +272,9 @@ export const PromotionDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => handleRankSwitch('ASSOCIATE_PROFESSOR')}
-            className={`px-4 py-2 rounded-lg text-xs font-black cursor-pointer transition-all ${
+            className={`px-4 py-2 rounded-lg text-xs font-black cursor-pointer ds-transition ${
               targetRank === 'ASSOCIATE_PROFESSOR'
-                ? 'bg-amber-600 text-white shadow-sm'
+                ? 'bg-[var(--ds-primary-soft)] text-ink shadow-sm'
                 : 'text-[var(--ds-text-muted)] hover:text-[var(--ds-text-secondary)]'
             }`}
           >
@@ -281,9 +283,9 @@ export const PromotionDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => handleRankSwitch('FULL_PROFESSOR')}
-            className={`px-4 py-2 rounded-lg text-xs font-black cursor-pointer transition-all ${
+            className={`px-4 py-2 rounded-lg text-xs font-black cursor-pointer ds-transition ${
               targetRank === 'FULL_PROFESSOR'
-                ? 'bg-amber-600 text-white shadow-sm'
+                ? 'bg-[var(--ds-primary-soft)] text-ink shadow-sm'
                 : 'text-[var(--ds-text-muted)] hover:text-[var(--ds-text-secondary)]'
             }`}
           >
@@ -291,10 +293,11 @@ export const PromotionDashboard: React.FC = () => {
           </button>
         </div>
       </div>
+      </PathPanel>
 
       {!application && (
         <Card className="p-8 text-center space-y-4 border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)]">
-          <div className="w-12 h-12 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto">
+          <div className="w-12 h-12 rounded-full bg-warning/10 text-warning flex items-center justify-center mx-auto">
             <Briefcase size={24} />
           </div>
           <div className="space-y-1">
@@ -310,7 +313,7 @@ export const PromotionDashboard: React.FC = () => {
           <Button
             onClick={() => handleRankSwitch(targetRank)}
             variant="primary"
-            className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs"
+            className="bg-warning hover:bg-[var(--ds-accent-gold-hover)] text-white font-bold text-xs"
           >
             {isAr ? 'بدء إعداد ملف الترقية الآن' : 'Initialize Promotion Portfolio'}
           </Button>
@@ -335,13 +338,13 @@ export const PromotionDashboard: React.FC = () => {
                   <circle cx="18" cy="18" r="15.9" fill="none"
                     stroke="var(--ds-border-subtle)" strokeWidth="3" />
                   <circle cx="18" cy="18" r="15.9" fill="none"
-                    stroke={readinessScore >= 100 ? '#10b981' : '#eab308'}
+                    stroke={readinessScore >= 100 ? 'var(--ds-success)' : 'var(--ds-warning)'}
                     strokeWidth="3"
                     strokeDasharray={`${readinessScore} ${100 - readinessScore}`}
                     strokeLinecap="round" />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-2xl font-black text-amber-500">
+                  <span className="text-2xl font-black text-warning">
                     {readinessScore}%
                   </span>
                   <span className="text-[9px] text-[var(--ds-text-muted)] font-bold">
@@ -358,7 +361,7 @@ export const PromotionDashboard: React.FC = () => {
               </span>
               
               <div className="space-y-1">
-                <span className="text-3xl font-black text-amber-500 block">
+                <span className="text-3xl font-black text-warning block">
                   {pointsEarned.toFixed(1)}
                 </span>
                 <span className="text-xs text-[var(--ds-text-secondary)] font-bold block">
@@ -367,7 +370,7 @@ export const PromotionDashboard: React.FC = () => {
               </div>
               
               <div className="w-full bg-[var(--ds-surface-secondary)] rounded-full h-2 overflow-hidden">
-                <div className="bg-amber-500 h-full rounded-full transition-all duration-500" style={{ width: `${pointsPercentage}%` }} />
+                <div className="bg-warning h-full rounded-full transition-all duration-500" style={{ width: `${pointsPercentage}%` }} />
               </div>
             </Card>
           </div>
@@ -376,7 +379,7 @@ export const PromotionDashboard: React.FC = () => {
           <Card className="p-5 space-y-4">
             <div className="flex justify-between items-center border-b border-[var(--ds-border-subtle)] pb-2">
               <h3 className="text-xs font-black text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
-                <FileCheck className="text-amber-500" size={16} />
+                <FileCheck className="text-warning" size={16} />
                 <span>{isAr ? 'بنود ومعايير اللائحة المؤسسية' : 'Institutional Promotion Criteria'}</span>
               </h3>
               <button
@@ -402,18 +405,18 @@ export const PromotionDashboard: React.FC = () => {
                         {isAr ? item.title_ar : item.title_en}
                       </span>
                       {item.status === 'SATISFIED' ? (
-                        <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-lg">
-                          <CheckCircle2 size={13} className="text-emerald-500 shrink-0" />
+                        <div className="flex items-center gap-1 text-[10px] font-bold text-success bg-action/10 border border-success/20 px-2 py-0.5 rounded-lg">
+                          <CheckCircle2 size={13} className="text-success shrink-0" />
                           <span>{isAr ? 'مستوفى' : 'Satisfied'}</span>
                         </div>
                       ) : item.status === 'PARTIALLY_SATISFIED' ? (
-                        <div className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-lg">
-                          <AlertTriangle size={13} className="shrink-0 text-amber-500" />
+                        <div className="flex items-center gap-1 text-[10px] font-bold text-warning bg-warning/10 border border-warning/20 px-2 py-0.5 rounded-lg">
+                          <AlertTriangle size={13} className="shrink-0 text-warning" />
                           <span>{isAr ? 'مستوفى جزئياً' : 'Partial'}</span>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-1 text-[10px] font-bold text-rose-600 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-lg">
-                          <AlertTriangle size={13} className="shrink-0 text-rose-500" />
+                        <div className="flex items-center gap-1 text-[10px] font-bold text-danger bg-danger/10 border border-danger/20 px-2 py-0.5 rounded-lg">
+                          <AlertTriangle size={13} className="shrink-0 text-danger" />
                           <span>{isAr ? 'مستند أو شرط ناقص' : 'Missing Requirement'}</span>
                         </div>
                       )}
@@ -435,8 +438,8 @@ export const PromotionDashboard: React.FC = () => {
 
             {/* Recommendations & Gaps */}
             {evaluation?.recommendations_ar && evaluation.recommendations_ar.length > 0 && (
-              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl space-y-1 text-xs">
-                <div className="font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+              <div className="p-3 bg-warning/10 border border-warning/20 rounded-xl space-y-1 text-xs">
+                <div className="font-bold text-warning dark:text-warning flex items-center gap-1.5">
                   <Info size={14} />
                   <span>{isAr ? 'توصيات استيفاء النواقص بالملف:' : 'Portfolio Gaps & Recommendations:'}</span>
                 </div>
@@ -462,7 +465,7 @@ export const PromotionDashboard: React.FC = () => {
                   disabled={isSubmitting || (application?.evidence_selections.length || 0) === 0}
                   variant="primary"
                   size="sm"
-                  className="bg-amber-600 hover:bg-amber-700 text-white shrink-0"
+                  className="bg-warning hover:bg-[var(--ds-accent-gold-hover)] text-white shrink-0"
                   iconBefore={<Send size={13} />}
                 >
                   <span>{isAr ? 'تقديم الملف للجنة الترقية' : 'Submit to Committee'}</span>
@@ -479,7 +482,7 @@ export const PromotionDashboard: React.FC = () => {
           <Card className="p-5 space-y-4">
             <h3 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <BookOpen className="text-amber-500" size={16} />
+                <BookOpen className="text-warning" size={16} />
                 <span>{isAr ? 'الأبحاث المدرجة بملف الترقية' : 'Dossier Evidence Publications'}</span>
               </div>
               <span className="text-[10px] font-bold text-[var(--ds-text-muted)]">
@@ -510,14 +513,14 @@ export const PromotionDashboard: React.FC = () => {
                           {title}
                         </span>
                         <div className="flex items-center gap-1.5 shrink-0">
-                          <span className="bg-amber-500/10 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-md border border-amber-500/20 text-[9px] font-bold">
+                          <span className="bg-warning/10 text-warning dark:text-warning px-2 py-0.5 rounded-md border border-warning/20 text-[9px] font-bold">
                             +{ev.calculated_points.toFixed(1)} {isAr ? 'نقطة' : 'pts'}
                           </span>
                           {application.status === 'DRAFT' && (
                             <button
                               type="button"
                               onClick={() => handleRemoveEvidence(ev.scholarly_asset_id)}
-                              className="text-rose-500 hover:text-rose-700 p-1 cursor-pointer"
+                              className="text-danger hover:text-danger p-1 cursor-pointer"
                               title={isAr ? 'حذف من الملف' : 'Remove from dossier'}
                             >
                               <Trash2 size={13} />
@@ -573,7 +576,7 @@ export const PromotionDashboard: React.FC = () => {
                   type="submit"
                   disabled={!selectedAssetId || isLoading}
                   variant="primary"
-                  className="w-full flex items-center justify-center gap-1.5 font-bold text-xs rounded-xl mt-2 bg-amber-600 hover:bg-amber-700"
+                  className="w-full flex items-center justify-center gap-1.5 font-bold text-xs rounded-xl mt-2 bg-warning hover:bg-[var(--ds-accent-gold-hover)]"
                 >
                   <Plus size={14} />
                   <span>{isAr ? 'إدراج الورقة واحتساب النقاط' : 'Add Paper & Score Points'}</span>

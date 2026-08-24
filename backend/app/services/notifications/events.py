@@ -23,11 +23,20 @@ class WorkflowEventType(str, enum.Enum):
     PROJECT_COMMENT_ADDED = "PROJECT_COMMENT_ADDED"
     PROJECT_STATUS_CHANGED = "PROJECT_STATUS_CHANGED"
 
+    # Cross-domain research lifecycle events. Payloads contain references and
+    # safe summaries only; never raw data or confidential review content.
+    ACADEMIC_HANDOFF_CREATED = "ACADEMIC_HANDOFF_CREATED"
+    ACADEMIC_HANDOFF_ACCEPTED = "ACADEMIC_HANDOFF_ACCEPTED"
+    DATASET_VERSION_CHANGED = "DATASET_VERSION_CHANGED"
+    DOWNSTREAM_REVIEW_REQUIRED = "DOWNSTREAM_REVIEW_REQUIRED"
+
 
 class AggregateType(str, enum.Enum):
     PROMOTION_APPLICATION = "PROMOTION_APPLICATION"
     PEER_REVIEW_CASE = "PEER_REVIEW_CASE"
     RESEARCH_PROJECT = "RESEARCH_PROJECT"
+    ACADEMIC_HANDOFF = "ACADEMIC_HANDOFF"
+    RESEARCH_DATASET = "RESEARCH_DATASET"
 
 
 class NotificationCategory(str, enum.Enum):

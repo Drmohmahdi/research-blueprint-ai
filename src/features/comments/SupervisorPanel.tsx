@@ -73,9 +73,9 @@ export const SupervisorPanel: React.FC = () => {
   if (!activeProject) return null;
 
   const priorityColors: Record<string, string> = {
-    CRITICAL: 'bg-rose-500/10 text-rose-500 border-rose-500/20',
-    HIGH: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-    NORMAL: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+    CRITICAL: 'bg-danger/10 text-danger border-danger/20',
+    HIGH: 'bg-warning/10 text-warning border-warning/20',
+    NORMAL: 'bg-info/10 text-path-publication border-info/20',
     LOW: 'bg-[var(--ds-surface-secondary)] text-[var(--ds-text-muted)] border-[var(--ds-border-subtle)]',
   };
 
@@ -87,12 +87,12 @@ export const SupervisorPanel: React.FC = () => {
         className="w-full flex items-center justify-between p-4 cursor-pointer hover:bg-[var(--ds-surface-secondary)] transition-colors"
       >
         <div className="flex items-center gap-2">
-          <MessageSquare size={16} className="text-purple-500" />
+          <MessageSquare size={16} className="text-ai" />
           <span className="text-sm font-bold text-[var(--ds-text-primary)]">
             {language === 'ar' ? 'ملاحظات المشرف' : 'Supervisor Comments'}
           </span>
           {unresolvedCount > 0 && (
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-500/10 text-rose-500">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-danger/10 text-danger">
               {unresolvedCount}
             </span>
           )}
@@ -110,7 +110,7 @@ export const SupervisorPanel: React.FC = () => {
               onChange={e => setNewComment(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleAdd()}
               placeholder={language === 'ar' ? 'أضف ملاحظة...' : 'Add a comment...'}
-              className="flex-1 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--ds-text-primary)] placeholder:text-[var(--ds-text-muted)] focus:outline-none focus:ring-1 focus:ring-purple-500/50"
+              className="flex-1 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--ds-text-primary)] placeholder:text-[var(--ds-text-muted)] focus:outline-none focus:ring-1 focus:ring-ai/50"
             />
             <select
               value={newPriority}
@@ -125,7 +125,7 @@ export const SupervisorPanel: React.FC = () => {
             <button
               onClick={handleAdd}
               disabled={!newComment.trim()}
-              className="p-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-40 cursor-pointer transition-colors"
+              className="p-2 rounded-xl bg-action hover:bg-action-hover text-on-action disabled:opacity-40 cursor-pointer ds-transition"
             >
               <Send size={14} />
             </button>
@@ -162,10 +162,10 @@ export const SupervisorPanel: React.FC = () => {
                       </p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                      <button onClick={() => handleResolve(c.id)} className="p-1 rounded hover:bg-emerald-500/10 cursor-pointer transition-colors" title={c.resolved ? 'Unresolve' : 'Resolve'}>
-                        <Check size={12} className={c.resolved ? 'text-emerald-500' : 'text-[var(--ds-text-muted)]'} />
+                      <button onClick={() => handleResolve(c.id)} className="p-1 rounded hover:bg-action/10 cursor-pointer transition-colors" title={c.resolved ? 'Unresolve' : 'Resolve'}>
+                        <Check size={12} className={c.resolved ? 'text-success' : 'text-[var(--ds-text-muted)]'} />
                       </button>
-                      <button onClick={() => handleDelete(c.id)} className="p-1 rounded hover:bg-rose-500/10 cursor-pointer transition-colors">
+                      <button onClick={() => handleDelete(c.id)} className="p-1 rounded hover:bg-danger/10 cursor-pointer transition-colors">
                         <Trash2 size={12} className="text-[var(--ds-text-muted)]" />
                       </button>
                     </div>

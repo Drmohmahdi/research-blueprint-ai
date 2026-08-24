@@ -183,7 +183,7 @@ export const DataInspector: React.FC = () => {
           </p>
         )}
         {error && (
-          <div role="alert" className="text-xs font-semibold text-red-700 bg-red-50 border border-red-200 rounded-md p-3 text-start">
+          <div role="alert" className="text-xs font-semibold text-danger bg-danger/10 border border-danger rounded-md p-3 text-start">
             {error}
           </div>
         )}
@@ -232,7 +232,7 @@ export const DataInspector: React.FC = () => {
                   {/(confirmed|success|successful|confirmed|تأكيد|نجاح|سليم)/i.test(iss) ? (
                     <CheckCircle2 size={16} className="text-[var(--ds-success)] shrink-0 mt-0.5" />
                   ) : (
-                    <AlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />
+                    <AlertTriangle size={16} className="text-warning shrink-0 mt-0.5" />
                   )}
                   <p className="text-[var(--ds-text-secondary)] m-0 leading-relaxed font-semibold">
                     {iss}

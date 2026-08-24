@@ -11,6 +11,7 @@ import {
   Download
 } from 'lucide-react';
 import { Button } from '../../design-system/components/Button';
+import { PathPanel } from '../../design-system/components/Navigation';
 import { ROUTES } from '../../router/routes';
 import { calculateProtocolHash } from '../../utils/protocolIntegrity';
 
@@ -111,39 +112,37 @@ export const ResearchProgressDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-12">
-      {/* Header & Overall Summary */}
-      <div className="bg-gradient-to-r from-purple-900/30 via-violet-900/15 to-transparent border border-purple-500/15 rounded-3xl p-8 shadow-md relative overflow-hidden">
-        <div className="flex justify-between items-start relative z-10">
+      <PathPanel accent="var(--ds-path-research)">
+        <div className="flex justify-between items-start">
           <div>
-            <h2 className="text-2xl md:text-3xl font-black text-[var(--ds-text-primary)] m-0 mb-2">
+            <h2 className="text-2xl md:text-3xl font-black text-ink m-0 mb-2">
               {language === 'ar' ? 'لوحة تحليلات البحث' : 'Research Analytics'}
             </h2>
-            <p className="text-sm font-semibold text-purple-300 m-0">
+            <p className="text-sm font-semibold text-secondary m-0">
               {language === 'ar'
                 ? `${activeProject.titleAr || activeProject.titleEn || 'مشروع بدون عنوان'}`
                 : `${activeProject.titleEn || activeProject.titleAr || 'Untitled project'}`}
             </p>
           </div>
-          <Button onClick={handleExportPdf} variant="secondary" className="flex items-center gap-2 cursor-pointer bg-[var(--ds-surface-primary)]">
+          <Button onClick={handleExportPdf} variant="secondary" className="flex items-center gap-2 cursor-pointer">
             <Download size={16} />
             <span>{language === 'ar' ? 'تصدير التقرير' : 'Export Report'}</span>
           </Button>
         </div>
 
-        {/* Overall progress bar */}
-        <div className="mt-8 space-y-2 relative z-10 max-w-xl">
+        <div className="mt-8 space-y-2 max-w-xl">
           <div className="flex justify-between text-sm font-black">
-            <span className="text-[var(--ds-text-secondary)]">{language === 'ar' ? 'الإنجاز الكلي للمسار المنهجي' : 'Overall Path Progress'}</span>
-            <span className="text-purple-400">{overallPercent}%</span>
+            <span className="text-secondary">{language === 'ar' ? 'الإنجاز الكلي للمسار المنهجي' : 'Overall Path Progress'}</span>
+            <span className="text-[var(--ds-primary)]">{overallPercent}%</span>
           </div>
-          <div className="h-4 rounded-full bg-black/40 overflow-hidden border border-purple-500/20 shadow-inner">
+          <div className="h-4 rounded-full bg-[var(--ds-surface-tertiary)] overflow-hidden border border-[var(--ds-border-subtle)]">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-purple-600 via-violet-500 to-emerald-500 transition-all duration-1000 ease-out"
+              className="h-full rounded-full bg-[var(--ds-primary)] ds-transition"
               style={{ width: `${overallPercent}%` }}
             />
           </div>
         </div>
-      </div>
+      </PathPanel>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
@@ -152,9 +151,9 @@ export const ResearchProgressDashboard: React.FC = () => {
           {/* Quick stats grid */}
           <div className="grid grid-cols-2 gap-3">
             {[
-              { labelAr: 'البيانات', labelEn: 'Data', value: `${dataCompletion}%`, color: dataCompletion >= 80 ? 'text-emerald-500' : 'text-amber-500' },
-              { labelAr: 'الخطوات', labelEn: 'Steps', value: `${completedInPath}/${totalSteps}`, color: 'text-purple-500' },
-              { labelAr: 'التسجيل', labelEn: 'Pre-reg', value: preRegValue, color: protocolStatus === 'checking' ? 'text-amber-500' : hasPreReg ? 'text-emerald-500' : 'text-rose-500' },
+              { labelAr: 'البيانات', labelEn: 'Data', value: `${dataCompletion}%`, color: dataCompletion >= 80 ? 'text-success' : 'text-warning' },
+              { labelAr: 'الخطوات', labelEn: 'Steps', value: `${completedInPath}/${totalSteps}`, color: 'text-ai' },
+              { labelAr: 'التسجيل', labelEn: 'Pre-reg', value: preRegValue, color: protocolStatus === 'checking' ? 'text-warning' : hasPreReg ? 'text-success' : 'text-danger' },
               { labelAr: 'المسار', labelEn: 'Path', value: activePath ? (language === 'ar' ? activePath.titleAr.substring(0, 10) : activePath.titleEn.substring(0, 10)) : '—', color: 'text-[var(--ds-text-primary)]' },
             ].map((stat, i) => (
               <div key={i} className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl p-4 text-center shadow-sm">
@@ -182,8 +181,8 @@ export const ResearchProgressDashboard: React.FC = () => {
 
                 return (
                   <div key={phase.id} className="flex items-center gap-3">
-                    <div className={`p-2 rounded-xl ${pct === 100 ? 'bg-emerald-500/10' : 'bg-[var(--ds-surface-secondary)]'}`}>
-                      <Icon size={14} className={pct === 100 ? 'text-emerald-500' : 'text-[var(--ds-text-muted)]'} />
+                    <div className={`p-2 rounded-xl ${pct === 100 ? 'bg-action/10' : 'bg-[var(--ds-surface-secondary)]'}`}>
+                      <Icon size={14} className={pct === 100 ? 'text-success' : 'text-[var(--ds-text-muted)]'} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
@@ -195,7 +194,7 @@ export const ResearchProgressDashboard: React.FC = () => {
                       <div className="h-1.5 rounded-full bg-[var(--ds-surface-secondary)] overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all duration-500 ${
-                            pct === 100 ? 'bg-emerald-500' : pct > 0 ? 'bg-purple-500' : 'bg-transparent'
+                            pct === 100 ? 'bg-action' : pct > 0 ? 'bg-ai' : 'bg-transparent'
                           }`}
                           style={{ width: `${pct}%` }}
                         />
@@ -221,12 +220,12 @@ export const ResearchProgressDashboard: React.FC = () => {
                   <div className="flex items-center justify-between gap-4 text-xs font-bold mb-2">
                     <span className="text-[var(--ds-text-primary)]">{language === 'ar' ? section.labelAr : section.labelEn}</span>
                     <div className="flex items-center gap-3">
-                      <span className={percent === 100 ? 'text-emerald-500' : 'text-[var(--ds-text-muted)]'}>{section.completed}/{section.total}</span>
+                      <span className={percent === 100 ? 'text-success' : 'text-[var(--ds-text-muted)]'}>{section.completed}/{section.total}</span>
                       {percent < 100 && <Button type="button" variant="ghost" size="sm" onClick={() => navigate(section.route)}>{language === 'ar' ? 'استكمال' : 'Complete'}</Button>}
                     </div>
                   </div>
                   <div className="h-2 rounded-full bg-[var(--ds-surface-secondary)] overflow-hidden">
-                    <div className={percent === 100 ? 'h-full bg-emerald-500 transition-all duration-500' : 'h-full bg-sky-500 transition-all duration-500'} style={{ width: `${percent}%` }} />
+                    <div className={percent === 100 ? 'h-full bg-action ds-transition' : 'h-full bg-info ds-transition'} style={{ width: `${percent}%` }} />
                   </div>
                 </div>;
               })}
@@ -237,7 +236,7 @@ export const ResearchProgressDashboard: React.FC = () => {
             <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 mb-6">
               {language === 'ar' ? 'سلامة البروتوكول' : 'Protocol Integrity'}
             </h3>
-            <p className={`m-0 text-sm font-semibold ${protocolStatus === 'verified' ? 'text-emerald-500' : protocolStatus === 'checking' ? 'text-amber-500' : 'text-rose-500'}`}>
+            <p className={`m-0 text-sm font-semibold ${protocolStatus === 'verified' ? 'text-success' : protocolStatus === 'checking' ? 'text-warning' : 'text-danger'}`}>
               {protocolStatus === 'verified'
                 ? (language === 'ar' ? 'البروتوكول المسجل يطابق الخطة الحالية.' : 'The registered protocol matches the current plan.')
                 : protocolStatus === 'checking'

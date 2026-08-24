@@ -3,8 +3,8 @@ import { useProject } from '../context/ProjectContext';
 import { apiAnalyzeTitle } from '../utils/api';
 import type { ParsedTitle } from '../utils/ruleEngine';
 import { getTranslation } from '../utils/translations';
-import { Card } from '../design-system/components/Card';
 import { Button } from '../design-system/components/Button';
+import { PathPanel } from '../design-system/components/Navigation';
 import { 
   Sparkles, 
   HelpCircle, 
@@ -145,16 +145,17 @@ export const TitleAnalyzer: React.FC = () => {
     <div className="space-y-6 max-w-4xl mx-auto pb-16">
       {/* Success Notification Banner */}
       {successMessage && (
-        <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-400 rounded-lg p-4 flex items-center gap-3 animate-pulse">
-          <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
+        <div className="bg-action/10 border border-success/20 text-success dark:text-success rounded-lg p-4 flex items-center gap-3 animate-pulse">
+          <CheckCircle2 size={18} className="text-success shrink-0" />
           <span className="text-xs font-bold">{successMessage}</span>
         </div>
       )}
 
       {/* Title Input Card */}
-      <Card className="p-6 border border-[var(--ds-border-subtle)] space-y-5 bg-gradient-to-r from-[var(--ds-surface-primary)] to-[var(--ds-surface-secondary)]">
+      <PathPanel accent="var(--ds-path-research)">
+      <div className="space-y-5">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 text-xs font-bold mb-1">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-ai/10 text-ai text-xs font-bold mb-1">
             <Sparkles size={12} />
             <span>{language === 'ar' ? 'أداة الاستكشاف المنهجي' : 'Methodological Analyzer'}</span>
           </div>
@@ -175,7 +176,7 @@ export const TitleAnalyzer: React.FC = () => {
               value={titleInput}
               onChange={(e) => setTitleInput(e.target.value)}
               placeholder={language === 'ar' ? 'مثال: أثر استخدام الواقع المعزز في التحصيل الدراسي لدى طلاب المرحلة الابتدائية' : 'e.g. The effect of augmented reality on achievement...'}
-              className="flex-1 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg px-4 py-3 text-xs shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 text-zinc-950 dark:text-zinc-100 font-bold"
+              className="flex-1 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg px-4 py-3 text-xs shadow-sm focus:outline-none focus:ring-2 focus:ring-ai/50 text-ink font-bold"
             />
             <Button
               onClick={handleAnalyze}
@@ -198,7 +199,7 @@ export const TitleAnalyzer: React.FC = () => {
                 <button
                   key={idx}
                   onClick={() => handlePresetClick(language === 'ar' ? preset.ar : preset.en)}
-                  className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] border border-[var(--ds-border-subtle)] hover:bg-purple-500/5 hover:border-purple-500/30 transition-all cursor-pointer text-right max-w-full truncate"
+                  className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] border border-[var(--ds-border-subtle)] hover:bg-ai/5 hover:border-ai/30 transition-all cursor-pointer text-right max-w-full truncate"
                 >
                   {language === 'ar' ? preset.ar : preset.en}
                 </button>
@@ -206,7 +207,8 @@ export const TitleAnalyzer: React.FC = () => {
             </div>
           </div>
         </div>
-      </Card>
+      </div>
+      </PathPanel>
 
       {/* Analysis Results */}
       {result && (
@@ -217,13 +219,13 @@ export const TitleAnalyzer: React.FC = () => {
               <h4 className="text-sm font-black text-[var(--ds-text-primary)] m-0">
                 {getTranslation(language, 'analysisResult')}
               </h4>
-              <span className="text-xs text-purple-600 dark:text-purple-400 font-black">
+              <span className="text-xs text-ai font-black">
                 {getTranslation(language, 'confidenceScore')}: {(result.confidence * 100).toFixed(0)}%
               </span>
             </div>
 
             {result.isFallback && (
-              <div className="p-3 bg-amber-500/5 border border-amber-500/10 rounded-lg flex items-center gap-2 text-amber-600 dark:text-amber-400 text-xs font-bold">
+              <div className="p-3 bg-warning/5 border border-warning/10 rounded-lg flex items-center gap-2 text-warning text-xs font-bold">
                 <AlertTriangle size={14} className="shrink-0" />
                 <span>
                   {language === 'ar' 
@@ -235,8 +237,8 @@ export const TitleAnalyzer: React.FC = () => {
 
             <div className="space-y-4">
               {/* Methodology */}
-              <div className="p-3.5 bg-purple-500/5 border border-purple-500/10 rounded-lg space-y-1.5">
-                <span className="text-[10px] font-black text-purple-600 dark:text-purple-400 uppercase tracking-wider block">
+              <div className="p-3.5 bg-ai/5 border border-ai/10 rounded-lg space-y-1.5">
+                <span className="text-[10px] font-black text-ai uppercase tracking-wider block">
                   {getTranslation(language, 'suggestedMethodology')}
                 </span>
                 <span className="text-xs font-black text-[var(--ds-text-primary)]">
@@ -254,7 +256,7 @@ export const TitleAnalyzer: React.FC = () => {
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {result.independentVariables.map((v, i) => (
-                      <span key={i} className="text-[10px] font-bold bg-[var(--ds-surface-primary)] text-purple-600 dark:text-purple-400 border border-purple-500/20 px-2 py-1 rounded-md">
+                      <span key={i} className="text-[10px] font-bold bg-[var(--ds-surface-primary)] text-ai border border-ai/20 px-2 py-1 rounded-md">
                         {v}
                       </span>
                     ))}
@@ -267,7 +269,7 @@ export const TitleAnalyzer: React.FC = () => {
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {result.dependentVariables.map((v, i) => (
-                      <span key={i} className="text-[10px] font-bold bg-[var(--ds-surface-primary)] text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded-md">
+                      <span key={i} className="text-[10px] font-bold bg-[var(--ds-surface-primary)] text-success border border-success/20 px-2 py-1 rounded-md">
                         {v}
                       </span>
                     ))}
@@ -317,7 +319,7 @@ export const TitleAnalyzer: React.FC = () => {
             {/* Ambiguities */}
             {result.ambiguities.length > 0 && (
               <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-3">
-                <h4 className="text-xs font-black text-amber-600 dark:text-amber-400 flex items-center gap-1.5 m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
+                <h4 className="text-xs font-black text-warning flex items-center gap-1.5 m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
                   <AlertTriangle size={14} />
                   <span>{getTranslation(language, 'ambiguityAlert')}</span>
                 </h4>
@@ -325,7 +327,7 @@ export const TitleAnalyzer: React.FC = () => {
                 <div className="space-y-2">
                   {result.ambiguities.map((amb, i) => (
                     <div key={i} className="flex items-start gap-2 text-xs">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 mt-1.5"></span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-warning shrink-0 mt-1.5"></span>
                       <p className="text-[11px] text-[var(--ds-text-secondary)] m-0 leading-relaxed font-medium">{amb}</p>
                     </div>
                   ))}
@@ -336,7 +338,7 @@ export const TitleAnalyzer: React.FC = () => {
             {/* Follow-up Questions */}
             {result.followUpQuestions.length > 0 && (
               <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-3">
-                <h4 className="text-xs font-black text-purple-600 dark:text-purple-400 flex items-center gap-1.5 m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
+                <h4 className="text-xs font-black text-ai flex items-center gap-1.5 m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
                   <HelpCircle size={14} />
                   <span>{getTranslation(language, 'followupQ')}</span>
                 </h4>

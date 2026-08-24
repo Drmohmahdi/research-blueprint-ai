@@ -190,10 +190,10 @@ export const MethodologyChat: React.FC = () => {
   return (
     <div className="space-y-4 max-w-3xl mx-auto">
       {/* Header */}
-      <div className="bg-gradient-to-r from-violet-900/30 via-purple-900/15 to-transparent border border-purple-500/15 rounded-2xl p-6 shadow-md">
+      <div className="ds-ai-surface rounded-2xl p-6">
         <div className="flex items-center gap-3 mb-2">
-          <div className="p-2.5 rounded-2xl bg-purple-600/10">
-            <Brain size={22} className="text-purple-500" />
+          <div className="p-2.5 rounded-2xl bg-action/10">
+            <Brain size={22} className="text-ai" />
           </div>
           <div>
             <h2 className="text-lg font-extrabold text-[var(--ds-text-primary)] m-0">
@@ -212,7 +212,7 @@ export const MethodologyChat: React.FC = () => {
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
-              <Sparkles size={32} className="text-purple-500/40" />
+              <Sparkles size={32} className="text-ai/40" />
               <p className="text-sm text-[var(--ds-text-muted)] max-w-xs">
                 {isAr ? 'ابدأ بطرح سؤال منهجي وسأساعدك بناءً على بيانات مشروعك' : 'Start by asking a methodology question — I\'ll use your project data for context'}
               </p>
@@ -222,7 +222,7 @@ export const MethodologyChat: React.FC = () => {
                   <button
                     key={i}
                     onClick={() => { setInput(s); }}
-                    className="px-3 py-1.5 rounded-xl bg-purple-500/5 border border-purple-500/15 text-[10px] font-bold text-[var(--ds-text-primary)] hover:bg-purple-500/10 transition-colors cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-ai/5 border border-ai/15 text-[10px] font-bold text-[var(--ds-text-primary)] hover:bg-ai/10 transition-colors cursor-pointer"
                   >
                     {s}
                   </button>
@@ -234,16 +234,16 @@ export const MethodologyChat: React.FC = () => {
           {messages.map(msg => (
             <div key={msg.id} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
               <div className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${
-                msg.role === 'user' ? 'bg-purple-600' : 'bg-emerald-600/10'
+                msg.role === 'user' ? 'bg-action' : 'bg-action/10'
               }`}>
-                {msg.role === 'user' ? <User size={13} className="text-white" /> : <Bot size={13} className="text-emerald-500" />}
+                {msg.role === 'user' ? <User size={13} className="text-on-action" /> : <Bot size={13} className="text-success" />}
               </div>
               <div className={`max-w-[80%] space-y-2 ${
                 msg.role === 'user' ? '' : ''
               }`}>
                 <div className={`px-4 py-3 rounded-2xl text-xs leading-relaxed whitespace-pre-wrap ${
                   msg.role === 'user'
-                    ? 'bg-purple-600 text-white rounded-tr-sm'
+                    ? 'bg-action text-on-action rounded-tr-sm'
                     : 'bg-[var(--ds-surface-secondary)] text-[var(--ds-text-primary)] border border-[var(--ds-border-subtle)] rounded-tl-sm'
                 }`}>
                   {msg.content}
@@ -266,7 +266,7 @@ export const MethodologyChat: React.FC = () => {
 
                 {/* Integrity notice */}
                 {msg.role === 'assistant' && msg.aiGenerated && (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/5 border border-amber-500/15 text-[9px] font-bold text-amber-600">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-warning/5 border border-warning/15 text-[9px] font-bold text-warning">
                     <AlertTriangle size={10} />
                     <span>{isAr
                       ? 'محتوى منشأ بالذكاء الاصطناعي — يتطلب مراجعة أكاديمية والتحقق من المصادر.'
@@ -277,7 +277,7 @@ export const MethodologyChat: React.FC = () => {
 
                 {/* Provider status */}
                 {msg.role === 'assistant' && !msg.aiGenerated && (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/5 border border-purple-500/15 text-[9px] font-bold text-[var(--ds-text-primary)]">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-ai/5 border border-ai/15 text-[9px] font-bold text-[var(--ds-text-primary)]">
                     <CheckCircle2 size={10} />
                     <span>{isAr ? 'محرك القواعد المحلي' : 'Local rule engine'}</span>
                   </div>
@@ -285,7 +285,7 @@ export const MethodologyChat: React.FC = () => {
 
                 {/* Source error */}
                 {msg.role === 'assistant' && msg.sourceError && (
-                  <div className="text-[9px] text-amber-600 font-semibold">
+                  <div className="text-[9px] text-warning font-semibold">
                     {msg.sourceError}
                   </div>
                 )}
@@ -295,11 +295,11 @@ export const MethodologyChat: React.FC = () => {
 
           {isTyping && (
             <div className="flex gap-3" role="status" aria-live="polite" aria-label={isAr ? 'المساعد ينشئ ردًا' : 'Assistant is generating a response'}>
-              <div className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center bg-emerald-600/10">
-                <Bot size={13} className="text-emerald-500" />
+              <div className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center bg-action/10">
+                <Bot size={13} className="text-success" />
               </div>
               <div className="px-4 py-3 rounded-2xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-tl-sm">
-                <Loader2 size={14} className="text-purple-500 animate-spin" />
+                <Loader2 size={14} className="text-ai animate-spin" />
               </div>
             </div>
           )}
@@ -307,7 +307,7 @@ export const MethodologyChat: React.FC = () => {
 
         {/* Input bar */}
         <div className="p-3 border-t border-[var(--ds-border-subtle)] flex gap-2">
-          <button onClick={clearChat} className="p-2 rounded-xl hover:bg-rose-500/10 text-[var(--ds-text-muted)] cursor-pointer transition-colors" title={isAr ? 'مسح المحادثة' : 'Clear chat'}>
+          <button onClick={clearChat} className="p-2 rounded-xl hover:bg-danger/10 text-[var(--ds-text-muted)] cursor-pointer transition-colors" title={isAr ? 'مسح المحادثة' : 'Clear chat'}>
             <Trash2 size={14} />
           </button>
           <input
@@ -317,13 +317,13 @@ export const MethodologyChat: React.FC = () => {
             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
             placeholder={isAr ? 'اكتب سؤالك المنهجي هنا...' : 'Type your methodology question...'}
             aria-label={isAr ? 'سؤال منهجي للمساعد' : 'Methodology question for the assistant'}
-            className="flex-1 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2.5 text-xs text-[var(--ds-text-primary)] placeholder:text-[var(--ds-text-muted)] focus:outline-none focus:ring-1 focus:ring-purple-500/50"
+            className="flex-1 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2.5 text-xs text-[var(--ds-text-primary)] placeholder:text-[var(--ds-text-muted)] focus:outline-none focus:ring-1 focus:ring-ai/50"
           />
           <button
             onClick={handleSend}
             aria-label={isAr ? 'إرسال السؤال المنهجي' : 'Send methodology question'}
             disabled={!input.trim() || isTyping}
-            className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-40 cursor-pointer transition-colors flex items-center gap-1.5"
+            className="px-4 py-2 rounded-xl bg-action hover:bg-action-hover text-on-action disabled:opacity-40 cursor-pointer ds-transition flex items-center gap-1.5"
           >
             <Send size={13} />
           </button>

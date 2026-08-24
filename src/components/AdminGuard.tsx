@@ -46,7 +46,7 @@ export const AdminGuard: React.FC<AdminGuardProps> = ({ children }) => {
           height="64"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="var(--ds-color-danger, #ef4444)"
+          stroke="var(--ds-danger)"
           strokeWidth="1.5"
         >
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />

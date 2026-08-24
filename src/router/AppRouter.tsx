@@ -21,6 +21,8 @@ const SampleSizeCalc            = lazy(() => import('../components/SampleSizeCal
 const SimulationLab             = lazy(() => import('../components/SimulationLab').then(m => ({ default: m.SimulationLab })));
 const ResearchOutcomePredictor  = lazy(() => import('../components/ResearchOutcomePredictor').then(m => ({ default: m.ResearchOutcomePredictor })));
 const DataInspector             = lazy(() => import('../components/DataInspector').then(m => ({ default: m.DataInspector })));
+const ResearchDataStudio        = lazy(() => import('../features/research-data/ResearchDataStudio').then(m => ({ default: m.ResearchDataStudio })));
+const ResearchLifecycleCommandCenter = lazy(() => import('../features/research-lifecycle/ResearchLifecycleCommandCenter').then(m => ({ default: m.ResearchLifecycleCommandCenter })));
 const PreRegistration           = lazy(() => import('../components/PreRegistration').then(m => ({ default: m.PreRegistration })));
 const FieldMonitoring           = lazy(() => import('../components/FieldMonitoring').then(m => ({ default: m.FieldMonitoring })));
 const LiteratureSynthesizer     = lazy(() => import('../components/LiteratureSynthesizer').then(m => ({ default: m.LiteratureSynthesizer })));
@@ -50,7 +52,7 @@ const NotFound: React.FC = () => {
       <p className="m-0 text-sm text-[var(--ds-text-secondary)]">
         {language === 'ar' ? 'قد يكون الرابط قد تغير أو لا يتوفر ضمن مساحة عملك.' : 'The link may have changed or may not be available in your workspace.'}
       </p>
-      <a href={ROUTES.PORTAL} className="rounded-lg bg-[var(--ds-primary)] px-4 py-2.5 font-bold text-white">
+      <a href={ROUTES.PORTAL} className="rounded-lg bg-action px-4 py-2.5 font-bold text-on-action">
         {language === 'ar' ? 'العودة إلى البوابة' : 'Return to portal'}
       </a>
     </section>
@@ -112,6 +114,7 @@ export const AppRouter: React.FC = () => {
       
       {/* Research Module Routes */}
       <Route path={ROUTES.DASHBOARD}        element={<SafeRoute><Dashboard /></SafeRoute>} />
+      <Route path={ROUTES.LIFECYCLE}        element={<SafeRoute><ResearchLifecycleCommandCenter /></SafeRoute>} />
       <Route path={ROUTES.PATHS}            element={<SafeRoute><ResearchPathSelector /></SafeRoute>} />
       <Route path={ROUTES.DECISION_CENTER}  element={<SafeRoute><ResearchDecisionCenter /></SafeRoute>} />
       <Route path={ROUTES.PLANNING}         element={<SafeRoute><ResearchPlanning /></SafeRoute>} />
@@ -125,6 +128,7 @@ export const AppRouter: React.FC = () => {
       <Route path={ROUTES.SIMULATION}       element={<SafeRoute><SimulationLab /></SafeRoute>} />
       <Route path={ROUTES.PREDICTOR}        element={<SafeRoute><ResearchOutcomePredictor /></SafeRoute>} />
       <Route path={ROUTES.DATA_QUALITY}     element={<SafeRoute><DataInspector /></SafeRoute>} />
+      <Route path={ROUTES.RESEARCH_DATA}    element={<SafeRoute><ResearchDataStudio /></SafeRoute>} />
       <Route path={ROUTES.PRE_REGISTRATION} element={<SafeRoute><PreRegistration /></SafeRoute>} />
       <Route path={ROUTES.FIELD_MONITORING} element={<SafeRoute><FieldMonitoring /></SafeRoute>} />
       <Route path={ROUTES.LIT_SYNTHESIZER}  element={<SafeRoute><LiteratureSynthesizer /></SafeRoute>} />

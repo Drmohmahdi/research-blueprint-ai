@@ -33,13 +33,13 @@ export const WorkspaceStepper: React.FC<WorkspaceStepperProps> = ({ engine }) =>
               onClick={() => handleStepNavigation(step.id)}
               className={`w-full text-right flex items-center justify-between px-3 py-2.5 rounded-xl transition-all cursor-pointer border ${
                 isActive 
-                  ? 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20' 
+                  ? 'bg-ai/10 text-ai dark:text-ai border-ai/20'
                   : 'text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-secondary)] border-transparent'
               }`}
             >
               <div className="flex items-center gap-2 truncate">
                 {isStepDone ? (
-                  <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
+                  <CheckCircle2 size={14} className="text-success shrink-0" />
                 ) : (
                   <HelpCircle size={14} className="text-[var(--ds-text-muted)] shrink-0" />
                 )}

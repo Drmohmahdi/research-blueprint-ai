@@ -8,7 +8,6 @@ import {
 
 const CONTACT_EMAIL = 'info@ehaastore.com';
 const CONTACT_PHONE = '0566007625';
-const PLATFORM_VERSION = '3.0';
 
 interface LandingPageProps {
   language: 'ar' | 'en';
@@ -154,40 +153,40 @@ export const LandingPage: React.FC<LandingPageProps> = ({ language, onNavigateTo
   };
 
   return (
-    <div dir={isAr ? 'rtl' : 'ltr'} className="min-h-screen bg-[#05090f] text-zinc-100 font-sans">
+    <div dir={isAr ? 'rtl' : 'ltr'} className="baseerah-marketing min-h-screen font-sans">
       {/* ── Top Navigation ── */}
-      <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-200 ${scrolled ? 'bg-[#05090f]/90 backdrop-blur-md border-b border-white/5 py-2' : 'py-4'}`}>
+      <header className={`fixed top-0 inset-x-0 z-50 ds-transition ${scrolled ? 'baseerah-glass border-b border-[var(--ds-border-subtle)] py-2' : 'py-4'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 text-white shadow-lg shadow-teal-500/20">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-[var(--ds-primary)] to-[var(--ds-navy-elevated)] text-white shadow-[var(--ds-shadow-glow)]">
               <Brain size={20} />
             </div>
             <div>
-              <span className="text-sm font-black tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-teal-300 to-cyan-300">
+              <span className="text-sm font-black tracking-wide baseerah-gradient-text">
                 {isAr ? 'بصيرة' : 'BASEERAH'}
               </span>
-              <span className="text-[9px] font-bold text-zinc-500 block">V{PLATFORM_VERSION}</span>
+              <span className="text-[9px] font-bold text-[var(--ds-text-muted)] block">{isAr ? 'الجودة الأكاديمية السعودية' : 'Saudi Academic Premium'}</span>
             </div>
           </div>
 
-          <nav className="hidden md:flex items-center gap-6 text-xs font-bold text-zinc-400">
-            <button onClick={() => scrollTo('features')} className="hover:text-teal-300 transition-colors cursor-pointer">{isAr ? 'المميزات' : 'Features'}</button>
-            <button onClick={() => scrollTo('how')} className="hover:text-teal-300 transition-colors cursor-pointer">{isAr ? 'كيف تعمل' : 'How it works'}</button>
-            <button onClick={() => scrollTo('pricing')} className="hover:text-teal-300 transition-colors cursor-pointer">{isAr ? 'الباقات' : 'Pricing'}</button>
-            <button onClick={() => scrollTo('faq')} className="hover:text-teal-300 transition-colors cursor-pointer">{isAr ? 'الأسئلة الشائعة' : 'FAQ'}</button>
-            <button onClick={() => scrollTo('contact')} className="hover:text-teal-300 transition-colors cursor-pointer">{isAr ? 'تواصل معنا' : 'Contact'}</button>
+          <nav className="hidden md:flex items-center gap-6 text-xs font-bold text-[var(--ds-text-muted)]">
+            <button onClick={() => scrollTo('features')} className="hover:text-[var(--ds-primary-bright)] ds-transition cursor-pointer">{isAr ? 'المميزات' : 'Features'}</button>
+            <button onClick={() => scrollTo('how')} className="hover:text-[var(--ds-primary-bright)] ds-transition cursor-pointer">{isAr ? 'كيف تعمل' : 'How it works'}</button>
+            <button onClick={() => scrollTo('pricing')} className="hover:text-[var(--ds-primary-bright)] ds-transition cursor-pointer">{isAr ? 'الباقات' : 'Pricing'}</button>
+            <button onClick={() => scrollTo('faq')} className="hover:text-[var(--ds-primary-bright)] ds-transition cursor-pointer">{isAr ? 'الأسئلة الشائعة' : 'FAQ'}</button>
+            <button onClick={() => scrollTo('contact')} className="hover:text-[var(--ds-primary-bright)] ds-transition cursor-pointer">{isAr ? 'تواصل معنا' : 'Contact'}</button>
           </nav>
 
           <div className="flex items-center gap-2">
             <button
               onClick={onNavigateToLogin}
-              className="px-4 py-2 rounded-xl text-xs font-black border border-white/10 bg-white/5 hover:bg-white/10 text-zinc-200 transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-xl text-xs font-black border border-[var(--ds-border-default)] bg-white/4 hover:bg-white/8 text-[var(--ds-text-primary)] ds-transition cursor-pointer"
             >
               {isAr ? 'تسجيل الدخول' : 'Sign in'}
             </button>
             <button
               onClick={() => scrollTo('pricing')}
-              className="px-4 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-400 hover:to-cyan-500 text-white shadow-lg shadow-teal-500/20 transition-all cursor-pointer"
+              className="px-4 py-2 rounded-xl text-xs font-black bg-action hover:bg-action-hover text-on-action shadow-[var(--ds-shadow-glow)] ds-transition cursor-pointer"
             >
               {isAr ? 'ابدأ مجانًا' : 'Start free'}
             </button>
@@ -198,21 +197,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({ language, onNavigateTo
       {/* ── Hero Section ── */}
       <section className="relative pt-36 pb-20 px-4 sm:px-6 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-[25%] right-[10%] w-[60vw] h-[60vw] rounded-full bg-teal-600/10 blur-[120px]" />
-          <div className="absolute top-[30%] -left-[15%] w-[40vw] h-[40vw] rounded-full bg-cyan-700/10 blur-[120px]" />
-          <div className="absolute bottom-0 left-[40%] w-[30vw] h-[30vw] rounded-full bg-emerald-700/5 blur-[100px]" />
+          <div className="absolute -top-[25%] right-[10%] w-[60vw] h-[60vw] rounded-full bg-[var(--ds-aurora-emerald)] blur-[120px]" />
+          <div className="absolute top-[30%] -left-[15%] w-[40vw] h-[40vw] rounded-full bg-[var(--ds-aurora-gold)] blur-[120px]" />
+          <div className="absolute bottom-0 left-[40%] w-[30vw] h-[30vw] rounded-full bg-[var(--ds-aurora-navy)] blur-[100px]" />
         </div>
 
         <div className="relative max-w-5xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-teal-400/25 bg-teal-500/10 text-teal-300 text-[10px] font-black mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--ds-accent-gold)]/25 bg-[var(--ds-accent-gold-soft)] text-[var(--ds-accent-gold)] text-[10px] font-black mb-6">
             <Sparkles size={12} />
-            <span>{isAr ? `الإصدار ${PLATFORM_VERSION} — منصة البصيرة للبحث العلمي` : `Version ${PLATFORM_VERSION} — Baseerah Academic Suite`}</span>
+            <span>{isAr ? 'الجودة الأكاديمية السعودية — منصة البصيرة للبحث العلمي' : 'Saudi Academic Premium — Baseerah Academic Suite'}</span>
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-black leading-tight tracking-tight m-0">
             {isAr ? (
               <>
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-teal-300 via-cyan-300 to-emerald-300">
+                <span className="baseerah-gradient-text">
                   المختبر الأكاديمي الذكي
                 </span>
                 <br />
@@ -222,14 +221,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ language, onNavigateTo
               <>
                 The Intelligent Academic
                 <br />
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-teal-300 via-cyan-300 to-emerald-300">
+                <span className="baseerah-gradient-text">
                   Research Laboratory
                 </span>
               </>
             )}
           </h1>
 
-          <p className="max-w-2xl mx-auto mt-6 text-sm sm:text-base text-zinc-400 leading-relaxed font-medium">
+          <p className="max-w-2xl mx-auto mt-6 text-sm sm:text-base text-[var(--ds-text-secondary)] leading-relaxed font-medium">
             {isAr
               ? 'منصة سحابية متكاملة (SaaS) لتصميم الدراسات، التحليل الإحصائي، محاكاة السيناريوهات، التحكيم العلمي مزدوج التعمية، محرك الترقيات، والتقارير المصدقة — مع عزل سيادي كامل للبيانات وذكاء اصطناعي حوكمي.'
               : 'An all-in-one SaaS platform for study design, statistical analysis, scenario simulation, double-blind peer review, promotion engine, and certified reporting — with full sovereign data isolation and governed AI.'}
@@ -238,14 +237,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ language, onNavigateTo
           <div className="flex flex-wrap items-center justify-center gap-3 mt-8">
             <button
               onClick={onNavigateToLogin}
-              className="flex items-center gap-2 px-7 py-3 rounded-2xl text-sm font-black bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-400 hover:to-cyan-500 text-white shadow-xl shadow-teal-500/25 transition-all cursor-pointer"
+              className="flex items-center gap-2 px-7 py-3 rounded-2xl text-sm font-black bg-action hover:bg-action-hover text-on-action shadow-[var(--ds-shadow-glow)] ds-transition cursor-pointer"
             >
               <span>{isAr ? 'ابدأ رحلتك البحثية مجانًا' : 'Start your research journey free'}</span>
               {isAr ? <ArrowLeft size={16} /> : <ArrowRight size={16} />}
             </button>
             <button
               onClick={() => scrollTo('pricing')}
-              className="px-7 py-3 rounded-2xl text-sm font-black border border-white/10 bg-white/5 hover:bg-white/10 text-zinc-200 transition-colors cursor-pointer"
+              className="px-7 py-3 rounded-2xl text-sm font-black border border-[var(--ds-border-default)] bg-white/4 hover:bg-white/8 text-[var(--ds-text-primary)] ds-transition cursor-pointer"
             >
               {isAr ? 'استعرض الباقات' : 'View pricing'}
             </button>
@@ -257,11 +256,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ language, onNavigateTo
               { value: '6', labelAr: 'وحدات بحثية متكاملة', labelEn: 'Integrated modules' },
               { value: '4', labelAr: 'باقات مرنة', labelEn: 'Flexible plans' },
               { value: '100%', labelAr: 'عزل سيادي للبيانات', labelEn: 'Sovereign isolation' },
-              { value: PLATFORM_VERSION, labelAr: 'الإصدار الحالي', labelEn: 'Current version' },
+              { value: 'AR+EN', labelAr: 'عربي وإنجليزي', labelEn: 'Arabic and English' },
             ].map((s, i) => (
-              <div key={i} className="rounded-2xl border border-white/5 bg-white/[0.02] p-4">
-                <div className="text-xl font-black text-teal-300">{s.value}</div>
-                <div className="text-[10px] font-bold text-zinc-500 mt-1">{isAr ? s.labelAr : s.labelEn}</div>
+              <div key={i} className="rounded-2xl border border-[var(--ds-border-subtle)] bg-white/[0.03] p-4 shadow-[var(--ds-shadow-layered)]">
+                <div className="text-xl font-black text-[var(--ds-accent-gold)]">{s.value}</div>
+                <div className="text-[10px] font-bold text-[var(--ds-text-muted)] mt-1">{isAr ? s.labelAr : s.labelEn}</div>
               </div>
             ))}
           </div>
@@ -269,26 +268,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({ language, onNavigateTo
       </section>
 
       {/* ── Features Section ── */}
-      <section id="features" className="py-20 px-4 sm:px-6 border-t border-white/5">
+      <section id="features" className="py-20 px-4 sm:px-6 border-t border-[var(--ds-border-subtle)]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <span className="text-[10px] font-black uppercase tracking-widest text-teal-400">{isAr ? 'المميزات' : 'Features'}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold)]">{isAr ? 'المميزات' : 'Features'}</span>
             <h2 className="text-2xl sm:text-4xl font-black mt-2 m-0">
               {isAr ? 'كل ما يحتاجه الباحث في منصة واحدة' : 'Everything a researcher needs, in one platform'}
             </h2>
-            <p className="text-xs text-zinc-500 font-semibold mt-3 max-w-xl mx-auto">
+            <p className="text-xs text-[var(--ds-text-muted)] font-semibold mt-3 max-w-xl mx-auto">
               {isAr ? 'ست وحدات متكاملة تغطي دورة البحث كاملة من التصميم إلى النشر والاعتماد.' : 'Six integrated modules covering the full research lifecycle from design to publication.'}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {FEATURES.map((f, i) => (
-              <div key={i} className="group rounded-3xl border border-white/5 bg-white/[0.02] p-6 hover:border-teal-400/25 hover:bg-teal-500/[0.03] transition-all duration-200">
-                <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-teal-500/20 to-cyan-500/10 text-teal-300 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <div key={i} className="group rounded-3xl border border-[var(--ds-border-subtle)] bg-white/[0.03] p-6 hover:border-[var(--ds-primary)]/30 hover:bg-[var(--ds-primary-soft)] ds-transition">
+                <div className="h-11 w-11 rounded-2xl bg-[var(--ds-primary-soft)] text-[var(--ds-primary-bright)] flex items-center justify-center mb-4 ds-transition">
                   {f.icon}
                 </div>
                 <h3 className="text-sm font-black m-0">{isAr ? f.titleAr : f.titleEn}</h3>
-                <p className="text-xs text-zinc-500 leading-relaxed font-medium mt-2">{isAr ? f.descAr : f.descEn}</p>
+                <p className="text-xs text-[var(--ds-text-muted)] leading-relaxed font-medium mt-2">{isAr ? f.descAr : f.descEn}</p>
               </div>
             ))}
           </div>
@@ -296,10 +295,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ language, onNavigateTo
       </section>
 
       {/* ── How it works ── */}
-      <section id="how" className="py-20 px-4 sm:px-6 border-t border-white/5 bg-white/[0.01]">
+      <section id="how" className="py-20 px-4 sm:px-6 border-t border-[var(--ds-border-subtle)] bg-white/[0.015]">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <span className="text-[10px] font-black uppercase tracking-widest text-teal-400">{isAr ? 'كيف تعمل' : 'How it works'}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold)]">{isAr ? 'كيف تعمل' : 'How it works'}</span>
             <h2 className="text-2xl sm:text-4xl font-black mt-2 m-0">{isAr ? 'رحلة البحث في أربع خطوات' : 'Your research journey in four steps'}</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -309,11 +308,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ language, onNavigateTo
               { icon: <FileCheck2 size={20} />, step: '03', titleAr: 'راجع وانشر', titleEn: 'Review & publish', descAr: 'أرسل للتحكيم مزدوج التعمية وجهّز تقاريرك المصدقة.', descEn: 'Submit for double-blind review and generate certified reports.' },
               { icon: <Crown size={20} />, step: '04', titleAr: 'ترقَّ واظهر', titleEn: 'Advance & get visible', descAr: 'جهّز ملف الترقية الأكاديمية وعزّز حضورك الأكاديمي ومعرّفاتك.', descEn: 'Prepare your promotion dossier and boost your academic visibility.' },
             ].map((s, i) => (
-              <div key={i} className="relative rounded-3xl border border-white/5 bg-white/[0.02] p-6">
+              <div key={i} className="relative rounded-3xl border border-[var(--ds-border-subtle)] bg-white/[0.03] p-6 shadow-[var(--ds-shadow-layered)]">
                 <div className="absolute top-4 end-4 text-3xl font-black text-white/5">{s.step}</div>
-                <div className="h-10 w-10 rounded-xl bg-cyan-500/10 text-cyan-300 flex items-center justify-center mb-4">{s.icon}</div>
+                <div className="h-10 w-10 rounded-xl bg-[var(--ds-accent-gold-soft)] text-[var(--ds-accent-gold)] flex items-center justify-center mb-4">{s.icon}</div>
                 <h3 className="text-sm font-black m-0">{isAr ? s.titleAr : s.titleEn}</h3>
-                <p className="text-xs text-zinc-500 font-medium leading-relaxed mt-2">{isAr ? s.descAr : s.descEn}</p>
+                <p className="text-xs text-[var(--ds-text-muted)] font-medium leading-relaxed mt-2">{isAr ? s.descAr : s.descEn}</p>
               </div>
             ))}
           </div>
@@ -321,12 +320,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ language, onNavigateTo
       </section>
 
       {/* ── Pricing Section ── */}
-      <section id="pricing" className="py-20 px-4 sm:px-6 border-t border-white/5">
+      <section id="pricing" className="py-20 px-4 sm:px-6 border-t border-[var(--ds-border-subtle)]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <span className="text-[10px] font-black uppercase tracking-widest text-teal-400">{isAr ? 'الباقات' : 'Pricing'}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold)]">{isAr ? 'الباقات' : 'Pricing'}</span>
             <h2 className="text-2xl sm:text-4xl font-black mt-2 m-0">{isAr ? 'خطط تناسب كل مرحلة بحثية' : 'Plans for every research stage'}</h2>
-            <p className="text-xs text-zinc-500 font-semibold mt-3 max-w-xl mx-auto">
+            <p className="text-xs text-[var(--ds-text-muted)] font-semibold mt-3 max-w-xl mx-auto">
               {isAr
                 ? 'ابدأ مجانًا وارتقِ عندما تنمو احتياجاتك. جميع الباقات تشمل التحديثات والدعم الفني.'
                 : 'Start free and scale as your needs grow. All plans include updates and technical support.'}
@@ -339,34 +338,34 @@ export const LandingPage: React.FC<LandingPageProps> = ({ language, onNavigateTo
                 key={p.code}
                 className={`relative rounded-3xl border p-6 flex flex-col ${
                   p.highlight
-                    ? 'border-teal-400/40 bg-gradient-to-b from-teal-500/10 to-transparent shadow-xl shadow-teal-500/10'
-                    : 'border-white/8 bg-white/[0.02]'
+                    ? 'border-[var(--ds-accent-gold)]/40 bg-gradient-to-b from-[var(--ds-accent-gold-soft)] to-transparent shadow-[var(--ds-shadow-glow)]'
+                    : 'border-[var(--ds-border-subtle)] bg-white/[0.03]'
                 }`}
               >
                 {p.highlight && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-teal-500 to-cyan-600 text-white text-[9px] font-black">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[var(--ds-accent-gold)] text-[var(--ds-navy)] text-[9px] font-black">
                     {isAr ? 'الأكثر شيوعًا' : 'Most popular'}
                   </div>
                 )}
                 <h3 className="text-sm font-black m-0">{isAr ? p.nameAr : p.nameEn}</h3>
                 <div className="flex items-baseline gap-1.5 mt-3">
                   <span className="text-3xl font-black text-white">{isAr ? p.priceAr : p.priceEn}</span>
-                  <span className="text-[10px] font-bold text-zinc-500">{isAr ? p.periodAr : p.periodEn}</span>
+                  <span className="text-[10px] font-bold text-[var(--ds-text-muted)]">{isAr ? p.periodAr : p.periodEn}</span>
                 </div>
-                <ul className="flex-1 space-y-2 mt-5 text-xs font-semibold text-zinc-400">
+                <ul className="flex-1 space-y-2 mt-5 text-xs font-semibold text-[var(--ds-text-secondary)]">
                   {(isAr ? p.featuresAr : p.featuresEn).map((f, j) => (
                     <li key={j} className="flex items-start gap-2">
-                      <Check size={13} className="text-teal-400 shrink-0 mt-0.5" />
+                      <Check size={13} className="text-[var(--ds-primary-bright)] shrink-0 mt-0.5" />
                       <span>{f}</span>
                     </li>
                   ))}
                 </ul>
                 <button
                   onClick={onNavigateToLogin}
-                  className={`mt-6 w-full py-2.5 rounded-2xl text-xs font-black transition-all cursor-pointer ${
+                  className={`mt-6 w-full py-2.5 rounded-2xl text-xs font-black ds-transition cursor-pointer ${
                     p.highlight
-                      ? 'bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-400 hover:to-cyan-500 text-white'
-                      : 'border border-white/10 bg-white/5 hover:bg-white/10 text-zinc-200'
+                      ? 'bg-action hover:bg-action-hover text-on-action shadow-[var(--ds-shadow-glow)]'
+                      : 'border border-[var(--ds-border-default)] bg-white/4 hover:bg-white/8 text-[var(--ds-text-primary)]'
                   }`}
                 >
                   {isAr ? 'اختر الباقة' : 'Choose plan'}
@@ -378,25 +377,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({ language, onNavigateTo
       </section>
 
       {/* ── FAQ ── */}
-      <section id="faq" className="py-20 px-4 sm:px-6 border-t border-white/5 bg-white/[0.01]">
+      <section id="faq" className="py-20 px-4 sm:px-6 border-t border-[var(--ds-border-subtle)] bg-white/[0.015]">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-10">
-            <span className="text-[10px] font-black uppercase tracking-widest text-teal-400">{isAr ? 'الأسئلة الشائعة' : 'FAQ'}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold)]">{isAr ? 'الأسئلة الشائعة' : 'FAQ'}</span>
             <h2 className="text-2xl sm:text-3xl font-black mt-2 m-0">{isAr ? 'أسئلة تتكرر كثيرًا' : 'Frequently asked questions'}</h2>
           </div>
           <div className="space-y-3">
             {FAQ.map((f, i) => (
-              <div key={i} className="rounded-2xl border border-white/5 bg-white/[0.02] overflow-hidden">
+              <div key={i} className="rounded-2xl border border-[var(--ds-border-subtle)] bg-white/[0.03] overflow-hidden">
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between px-5 py-4 text-xs font-black text-zinc-200 hover:bg-white/[0.02] transition-colors cursor-pointer"
+                  className="w-full flex items-center justify-between px-5 py-4 text-xs font-black text-[var(--ds-text-primary)] hover:bg-white/[0.03] ds-transition cursor-pointer"
                   aria-expanded={openFaq === i}
                 >
                   <span>{isAr ? f.qAr : f.qEn}</span>
-                  <ChevronDown size={14} className={`text-teal-400 transition-transform ${openFaq === i ? 'rotate-180' : ''}`} />
+                  <ChevronDown size={14} className={`text-[var(--ds-accent-gold)] ds-transition ${openFaq === i ? 'rotate-180' : ''}`} />
                 </button>
                 {openFaq === i && (
-                  <div className="px-5 pb-4 text-xs text-zinc-500 font-medium leading-relaxed">
+                  <div className="px-5 pb-4 text-xs text-[var(--ds-text-muted)] font-medium leading-relaxed">
                     {isAr ? f.aAr : f.aEn}
                   </div>
                 )}
@@ -407,11 +406,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ language, onNavigateTo
       </section>
 
       {/* ── Contact Section ── */}
-      <section id="contact" className="py-20 px-4 sm:px-6 border-t border-white/5">
+      <section id="contact" className="py-20 px-4 sm:px-6 border-t border-[var(--ds-border-subtle)]">
         <div className="max-w-3xl mx-auto text-center">
-          <span className="text-[10px] font-black uppercase tracking-widest text-teal-400">{isAr ? 'تواصل معنا' : 'Contact us'}</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold)]">{isAr ? 'تواصل معنا' : 'Contact us'}</span>
           <h2 className="text-2xl sm:text-3xl font-black mt-2 m-0">{isAr ? 'نحن هنا لمساعدتك' : 'We are here to help'}</h2>
-          <p className="text-xs text-zinc-500 font-semibold mt-3">
+          <p className="text-xs text-[var(--ds-text-muted)] font-semibold mt-3">
             {isAr
               ? 'للاستفسارات حول الباقات والاشتراكات أو الدعم الفني، تواصل معنا مباشرة.'
               : 'For questions about plans, subscriptions, or technical support, reach out to us directly.'}
@@ -420,57 +419,57 @@ export const LandingPage: React.FC<LandingPageProps> = ({ language, onNavigateTo
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-10">
             <a
               href={`mailto:${CONTACT_EMAIL}`}
-              className="group rounded-3xl border border-white/8 bg-white/[0.02] p-6 hover:border-teal-400/30 hover:bg-teal-500/[0.03] transition-all"
+              className="group rounded-3xl border border-[var(--ds-border-subtle)] bg-white/[0.03] p-6 hover:border-[var(--ds-primary)]/30 hover:bg-[var(--ds-primary-soft)] ds-transition"
             >
-              <div className="h-10 w-10 rounded-xl bg-teal-500/10 text-teal-300 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+              <div className="h-10 w-10 rounded-xl bg-[var(--ds-primary-soft)] text-[var(--ds-primary-bright)] flex items-center justify-center mx-auto mb-3 ds-transition">
                 <Mail size={18} />
               </div>
-              <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{isAr ? 'البريد الإلكتروني' : 'Email'}</div>
-              <div className="text-sm font-black text-zinc-200 mt-1 break-all" dir="ltr">{CONTACT_EMAIL}</div>
+              <div className="text-[10px] font-bold text-[var(--ds-text-muted)] uppercase tracking-wider">{isAr ? 'البريد الإلكتروني' : 'Email'}</div>
+              <div className="text-sm font-black text-[var(--ds-text-primary)] mt-1 break-all" dir="ltr">{CONTACT_EMAIL}</div>
             </a>
             <a
               href={`tel:${CONTACT_PHONE}`}
-              className="group rounded-3xl border border-white/8 bg-white/[0.02] p-6 hover:border-teal-400/30 hover:bg-teal-500/[0.03] transition-all"
+              className="group rounded-3xl border border-[var(--ds-border-subtle)] bg-white/[0.03] p-6 hover:border-[var(--ds-accent-gold)]/30 hover:bg-[var(--ds-accent-gold-soft)] ds-transition"
             >
-              <div className="h-10 w-10 rounded-xl bg-cyan-500/10 text-cyan-300 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+              <div className="h-10 w-10 rounded-xl bg-[var(--ds-accent-gold-soft)] text-[var(--ds-accent-gold)] flex items-center justify-center mx-auto mb-3 ds-transition">
                 <Phone size={18} />
               </div>
-              <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{isAr ? 'رقم الجوال' : 'Phone'}</div>
-              <div className="text-sm font-black text-zinc-200 mt-1" dir="ltr">{CONTACT_PHONE}</div>
+              <div className="text-[10px] font-bold text-[var(--ds-text-muted)] uppercase tracking-wider">{isAr ? 'رقم الجوال' : 'Phone'}</div>
+              <div className="text-sm font-black text-[var(--ds-text-primary)] mt-1" dir="ltr">{CONTACT_PHONE}</div>
             </a>
           </div>
         </div>
       </section>
 
       {/* ── Footer ── */}
-      <footer className="py-10 px-4 sm:px-6 border-t border-white/5 bg-white/[0.01]">
+      <footer className="py-10 px-4 sm:px-6 border-t border-[var(--ds-border-subtle)] bg-white/[0.015]">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 text-white">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-[var(--ds-primary)] to-[var(--ds-navy-elevated)] text-white">
               <Brain size={16} />
             </div>
             <div>
-              <span className="text-xs font-black tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-teal-300 to-cyan-300">
+              <span className="text-xs font-black tracking-wide baseerah-gradient-text">
                 {isAr ? 'بصيرة للبحث العلمي' : 'Baseerah Academic Suite'}
               </span>
-              <span className="text-[9px] font-bold text-zinc-500 block">V{PLATFORM_VERSION}</span>
+              <span className="text-[9px] font-bold text-[var(--ds-text-muted)] block">{isAr ? 'الجودة الأكاديمية السعودية' : 'Saudi Academic Premium'}</span>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[10px] font-bold text-zinc-500">
-            <button onClick={() => scrollTo('features')} className="hover:text-teal-300 cursor-pointer">{isAr ? 'المميزات' : 'Features'}</button>
-            <button onClick={() => scrollTo('pricing')} className="hover:text-teal-300 cursor-pointer">{isAr ? 'الباقات' : 'Pricing'}</button>
-            <button onClick={() => scrollTo('faq')} className="hover:text-teal-300 cursor-pointer">{isAr ? 'الأسئلة' : 'FAQ'}</button>
-            <button onClick={() => scrollTo('contact')} className="hover:text-teal-300 cursor-pointer">{isAr ? 'التواصل' : 'Contact'}</button>
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[10px] font-bold text-[var(--ds-text-muted)]">
+            <button onClick={() => scrollTo('features')} className="hover:text-[var(--ds-primary-bright)] cursor-pointer">{isAr ? 'المميزات' : 'Features'}</button>
+            <button onClick={() => scrollTo('pricing')} className="hover:text-[var(--ds-primary-bright)] cursor-pointer">{isAr ? 'الباقات' : 'Pricing'}</button>
+            <button onClick={() => scrollTo('faq')} className="hover:text-[var(--ds-primary-bright)] cursor-pointer">{isAr ? 'الأسئلة' : 'FAQ'}</button>
+            <button onClick={() => scrollTo('contact')} className="hover:text-[var(--ds-primary-bright)] cursor-pointer">{isAr ? 'التواصل' : 'Contact'}</button>
           </div>
 
-          <div className="flex items-center gap-4 text-[10px] font-bold text-zinc-500">
-            <a href={`mailto:${CONTACT_EMAIL}`} className="flex items-center gap-1.5 hover:text-teal-300"><Mail size={12} /> <span dir="ltr">{CONTACT_EMAIL}</span></a>
-            <a href={`tel:${CONTACT_PHONE}`} className="flex items-center gap-1.5 hover:text-teal-300"><Phone size={12} /> <span dir="ltr">{CONTACT_PHONE}</span></a>
+          <div className="flex items-center gap-4 text-[10px] font-bold text-[var(--ds-text-muted)]">
+            <a href={`mailto:${CONTACT_EMAIL}`} className="flex items-center gap-1.5 hover:text-[var(--ds-primary-bright)]"><Mail size={12} /> <span dir="ltr">{CONTACT_EMAIL}</span></a>
+            <a href={`tel:${CONTACT_PHONE}`} className="flex items-center gap-1.5 hover:text-[var(--ds-primary-bright)]"><Phone size={12} /> <span dir="ltr">{CONTACT_PHONE}</span></a>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto mt-6 pt-6 border-t border-white/5 text-center text-[10px] text-zinc-600 font-semibold">
-          © {new Date().getFullYear()} {isAr ? 'بصيرة للبحث العلمي — جميع الحقوق محفوظة.' : 'Baseerah Academic Suite — All rights reserved.'} {isAr ? `الإصدار ${PLATFORM_VERSION}` : `Version ${PLATFORM_VERSION}`}
+        <div className="max-w-7xl mx-auto mt-6 pt-6 border-t border-[var(--ds-border-subtle)] text-center text-[10px] text-[var(--ds-text-muted)] font-semibold">
+          © {new Date().getFullYear()} {isAr ? 'بصيرة للبحث العلمي — جميع الحقوق محفوظة.' : 'Baseerah Academic Suite — All rights reserved.'}
         </div>
       </footer>
     </div>

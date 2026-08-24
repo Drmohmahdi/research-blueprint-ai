@@ -5,6 +5,7 @@ import { RESEARCH_PATHS_CONFIG } from '../config/researchPathsConfig';
 import type { ResearchPath } from '../config/researchPathsConfig';
 import { Card } from '../design-system/components/Card';
 import { Button } from '../design-system/components/Button';
+import { PathPanel } from '../design-system/components/Navigation';
 import { EmptyState, Progress } from '../design-system/components/Feedback';
 import { 
   Sparkles, 
@@ -135,7 +136,9 @@ export const ResearchPathSelector: React.FC = () => {
 
     const orgId = activeProject.organizationId || 'personal';
     
-    if (path.id === 'NEW_STUDY_DESIGN') {
+    if (path.id === 'COMPLETED_STUDY_ANALYSIS') {
+      navigate(VIEW_TO_PATH.researchData);
+    } else if (path.id === 'NEW_STUDY_DESIGN') {
       navigate(`/organizations/${orgId}/projects/${activeProject.id}/paths/new-study-design`);
     } else if (path.id === 'SEMINAR_PROPOSAL_REVIEW') {
       navigate(`/organizations/${orgId}/projects/${activeProject.id}/paths/seminar-proposal`);
@@ -151,7 +154,7 @@ export const ResearchPathSelector: React.FC = () => {
   const tabClass = (tab: keyof typeof CATEGORY_LABELS) =>
     `px-4 py-2 rounded-lg text-xs font-black transition-all cursor-pointer border ${
       activeTab === tab
-        ? 'bg-[var(--ds-primary)] text-white border-[var(--ds-primary)] shadow-sm'
+        ? 'bg-[var(--ds-primary-soft)] text-ink border-[var(--ds-primary)] shadow-sm'
         : 'bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] border-[var(--ds-border-subtle)] hover:bg-[var(--ds-surface-tertiary)]'
     }`;
 
@@ -166,25 +169,25 @@ export const ResearchPathSelector: React.FC = () => {
         );
       case 'SimulationIllustration':
         return (
-          <svg className="w-12 h-12 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="w-12 h-12 text-path-identity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 10.44l-5.577 5.578 5.577 5.578m5-11.156l5.578 5.578-5.578 5.578m2.137-9.59L10.518 21.6" />
           </svg>
         );
       case 'FieldStudyIllustration':
         return (
-          <svg className="w-12 h-12 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="w-12 h-12 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307L21.75 7.875M21.75 7.875V12M21.75 7.875H17.25" />
           </svg>
         );
       case 'DataAnalysisIllustration':
         return (
-          <svg className="w-12 h-12 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="w-12 h-12 text-ai" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
           </svg>
         );
       case 'ReadingPaperIllustration':
         return (
-          <svg className="w-12 h-12 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="w-12 h-12 text-path-data" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
           </svg>
         );
@@ -199,12 +202,8 @@ export const ResearchPathSelector: React.FC = () => {
 
   return (
     <div className="space-y-8 max-w-[1400px] mx-auto pb-16">
-      {/* Dynamic Jumbotron */}
-      <div className="relative rounded-lg overflow-hidden bg-[var(--ds-surface-primary)] p-6 md:p-8 border border-[var(--ds-border-subtle)] shadow-sm">
-        <div className="absolute top-0 right-0 p-4 opacity-[0.04] pointer-events-none text-[var(--ds-primary)]">
-          <Sparkles size={260} />
-        </div>
-        <div className="relative z-10 space-y-4 max-w-3xl">
+      <PathPanel accent="var(--ds-path-research)">
+        <div className="space-y-4 max-w-3xl">
           <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--ds-primary-soft)] border border-[var(--ds-primary)]/20 text-xs font-bold text-[var(--ds-primary)]">
             <Sparkles size={14} />
             <span>{language === 'ar' ? '\u0645\u0633\u0627\u0631\u0627\u062a \u0627\u0644\u0628\u062d\u062b \u0627\u0644\u0645\u0646\u0647\u062c\u064a\u0629' : 'Methodological Paths'}</span>
@@ -218,7 +217,7 @@ export const ResearchPathSelector: React.FC = () => {
               : 'Select a research path to orchestrate study design validation, predictive modeling, and publishing audits.'}
           </p>
         </div>
-      </div>
+      </PathPanel>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] p-4 shadow-sm">
@@ -289,7 +288,7 @@ export const ResearchPathSelector: React.FC = () => {
                       </div>
                       <div className="flex gap-1.5">
                         {path.beta && (
-                          <span className="px-2 py-0.5 rounded-md text-[8px] font-extrabold bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                          <span className="px-2 py-0.5 rounded-md text-[8px] font-extrabold bg-warning/10 text-warning border border-warning/20">
                             BETA
                           </span>
                         )}
@@ -406,7 +405,7 @@ export const ResearchPathSelector: React.FC = () => {
                     return (
                       <div key={idx} className="relative flex items-start gap-3 text-xs">
                         {/* Timeline dot */}
-                        <span className={`absolute right-[-14px] top-1 w-2.5 h-2.5 rounded-full border-2 ${isCompleted ? 'bg-emerald-500 border-emerald-500' : isNextStep ? 'bg-[var(--ds-primary)] border-[var(--ds-primary)]' : 'bg-[var(--ds-surface-secondary)] border-[var(--ds-border-subtle)]'}`}></span>
+                        <span className={`absolute right-[-14px] top-1 w-2.5 h-2.5 rounded-full border-2 ${isCompleted ? 'bg-action border-success' : isNextStep ? 'bg-[var(--ds-primary)] border-[var(--ds-primary)]' : 'bg-[var(--ds-surface-secondary)] border-[var(--ds-border-subtle)]'}`}></span>
                         {isNextStep && (
                           <span className="absolute right-[-14px] top-1 w-2.5 h-2.5 rounded-full bg-[var(--ds-primary)] border-2 border-[var(--ds-primary)]"></span>
                         )}
@@ -419,7 +418,7 @@ export const ResearchPathSelector: React.FC = () => {
                             disabled={!stepPath}
                             className={`text-start w-full font-bold text-[11px] transition-colors ${
                               isCompleted
-                                ? 'text-emerald-600 line-through'
+                                ? 'text-success line-through'
                                 : isNextStep
                                   ? 'text-[var(--ds-primary)] font-black'
                                   : 'text-[var(--ds-text-secondary)]'

@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="robots" content="noindex, nofollow" />
 <title>بصيرة — المنصة قيد التطوير</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet" />
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
@@ -15,9 +18,9 @@
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background: #061416;
-    color: #f4f4f5;
-    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    background: #0B1F33;
+    color: #F8F7F3;
+    font-family: "IBM Plex Sans Arabic", "Noto Sans Arabic", Inter, "Segoe UI", Tahoma, Arial, sans-serif;
     position: relative;
     overflow: hidden;
   }
@@ -27,19 +30,18 @@
     filter: blur(120px);
     pointer-events: none;
   }
-  .blob-1 { top: -30%; right: -20%; width: 70vw; height: 70vw; background: radial-gradient(circle, rgba(13,148,136,0.25), transparent 70%); }
-  .blob-2 { bottom: -20%; left: -20%; width: 60vw; height: 60vw; background: radial-gradient(circle, rgba(6,95,70,0.18), transparent 70%); }
+  .blob-1 { top: -30%; right: -20%; width: 70vw; height: 70vw; background: radial-gradient(circle, rgba(61,155,134,0.18), transparent 70%); }
+  .blob-2 { bottom: -20%; left: -20%; width: 60vw; height: 60vw; background: radial-gradient(circle, rgba(198,165,106,0.12), transparent 70%); }
   .card {
     position: relative;
     z-index: 1;
     width: 100%;
     max-width: 380px;
-    background: rgba(13, 32, 35, 0.85);
-    border: 1px solid rgba(19, 78, 74, 0.7);
+    background: linear-gradient(165deg, #1A2333, #121A28);
+    border: 1px solid rgba(247, 244, 239, 0.1);
     border-radius: 28px;
     padding: 32px 28px;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 0 60px rgba(20, 184, 166, 0.12);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset, 0 24px 48px -28px rgba(0,0,0,0.55);
     text-align: center;
   }
   .badge {
@@ -50,53 +52,53 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #14b8a6, #0891b2);
-    box-shadow: 0 8px 24px rgba(20, 184, 166, 0.35);
+    background: linear-gradient(135deg, #0B5D3B, #1A3F5C);
+    box-shadow: 0 10px 28px -12px rgba(11, 93, 59, 0.45);
   }
   h1 {
     font-size: 13px;
     letter-spacing: 0.15em;
-    font-weight: 900;
+    font-weight: 700;
     margin: 0 0 4px;
-    background: linear-gradient(90deg, #5eead4, #67e8f9);
+    background: linear-gradient(90deg, #5FB39E, #D4B87A);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
   h2 {
     font-size: 20px;
-    font-weight: 900;
+    font-weight: 700;
     margin: 0 0 8px;
-    color: #fff;
+    color: #F7F4EF;
   }
   p.sub {
     font-size: 12.5px;
-    color: #a1a1aa;
+    color: #8B95A5;
     font-weight: 600;
-    line-height: 1.6;
+    line-height: 1.7;
     margin: 0 0 24px;
   }
   .field { position: relative; margin-bottom: 14px; text-align: right; }
-  label { display: block; font-size: 11px; color: #a1a1aa; font-weight: 700; margin-bottom: 6px; }
+  label { display: block; font-size: 11px; color: #8B95A5; font-weight: 700; margin-bottom: 6px; }
   input[type="password"], input[type="text"] {
     width: 100%;
-    background: #09191b;
-    border: 1px solid #134e4a;
+    background: #0B1A2C;
+    border: 1px solid #33415A;
     border-radius: 12px;
     padding: 12px 44px 12px 14px;
-    color: #fff;
+    color: #F7F4EF;
     font-size: 13px;
     font-weight: 600;
     outline: none;
   }
-  input:focus { border-color: #2dd4bf; box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.15); }
+  input:focus { border-color: #3D9B86; box-shadow: 0 0 0 3px rgba(61, 155, 134, 0.18); }
   .toggle-visibility {
     position: absolute;
     left: 12px;
     top: 34px;
     background: none;
     border: none;
-    color: #71717a;
+    color: #8B95A5;
     cursor: pointer;
     font-size: 11px;
     font-weight: 700;
@@ -104,9 +106,9 @@
   }
   .error {
     display: none;
-    background: rgba(244, 63, 94, 0.08);
-    border: 1px solid rgba(244, 63, 94, 0.25);
-    color: #fb7185;
+    background: rgba(194, 65, 58, 0.08);
+    border: 1px solid rgba(194, 65, 58, 0.25);
+    color: #F87171;
     border-radius: 10px;
     padding: 10px;
     font-size: 12px;
@@ -118,17 +120,18 @@
     padding: 12px;
     border: none;
     border-radius: 12px;
-    background: linear-gradient(90deg, #0d9488, #0e7490);
+    background: #0B5D3B;
     color: #fff;
     font-size: 13px;
-    font-weight: 900;
+    font-weight: 700;
     cursor: pointer;
+    box-shadow: 0 10px 28px -12px rgba(11, 83, 71, 0.45);
   }
   button.submit:disabled { opacity: 0.6; cursor: not-allowed; }
   footer {
     margin-top: 20px;
     font-size: 10px;
-    color: #52525b;
+    color: #6A7383;
     font-weight: 700;
   }
 </style>

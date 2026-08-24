@@ -254,10 +254,10 @@ export const ScholarlyAssetsList: React.FC = () => {
 
   const getLifecycleStatusColor = (status: string) => {
     switch (status) {
-      case 'PUBLISHED': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
-      case 'ACCEPTED': return 'bg-sky-500/10 text-sky-500 border-sky-500/20';
-      case 'UNDER_REVIEW': return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
-      case 'ARCHIVED': return 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20';
+      case 'PUBLISHED': return 'bg-action/10 text-success border-success/20';
+      case 'ACCEPTED': return 'bg-info/10 text-info border-info/20';
+      case 'UNDER_REVIEW': return 'bg-warning/10 text-warning border-warning/20';
+      case 'ARCHIVED': return 'bg-muted/10 text-muted border-muted/20';
       default: return 'bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-muted)] border-[var(--ds-border-subtle)]';
     }
   };
@@ -327,7 +327,7 @@ export const ScholarlyAssetsList: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] p-6 rounded-2xl shadow-sm">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Layers className="w-7 h-7 text-purple-500" />
+            <Layers className="w-7 h-7 text-ai" />
             <span>{t.title}</span>
           </h2>
           <p className="text-xs text-[var(--ds-text-secondary)] mt-1">{t.desc}</p>
@@ -335,7 +335,7 @@ export const ScholarlyAssetsList: React.FC = () => {
         
         <button
           onClick={openAddModal}
-          className="w-full md:w-auto px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-bold shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
+          className="w-full md:w-auto px-5 py-2.5 bg-action hover:bg-action-hover text-on-action rounded-lg text-sm font-bold shadow-sm flex items-center justify-center gap-2 ds-transition cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>{t.addAsset}</span>
@@ -352,7 +352,7 @@ export const ScholarlyAssetsList: React.FC = () => {
               onClick={() => setSelectedTypeFilter(filter)}
               className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
                 selectedTypeFilter === filter
-                  ? 'bg-purple-600 text-white'
+                  ? 'bg-[var(--ds-primary-soft)] text-ink'
                   : 'text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-secondary)]'
               }`}
             >
@@ -384,7 +384,7 @@ export const ScholarlyAssetsList: React.FC = () => {
             placeholder={t.searchPlaceholder}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:ring-1 focus:ring-purple-500 focus:outline-none"
+            className="w-full pl-9 pr-4 py-2 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:ring-1 focus:ring-ai focus:outline-none"
           />
         </div>
       </div>
@@ -392,18 +392,18 @@ export const ScholarlyAssetsList: React.FC = () => {
       {/* Assets Grid List */}
       {loading ? (
         <div className="flex flex-col items-center justify-center min-h-[40vh] gap-4">
-          <div className="w-12 h-12 rounded-full border-4 border-purple-600 border-t-transparent animate-spin"></div>
+          <div className="w-12 h-12 rounded-full border-4 border-ai border-t-transparent animate-spin"></div>
           <p className="text-[var(--ds-text-secondary)] text-sm font-semibold">
             {language === 'ar' ? 'جاري تحميل الأصول العلمية...' : 'Loading Scholarly Assets...'}
           </p>
         </div>
       ) : filteredAssets.length === 0 ? (
         <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] p-12 text-center rounded-2xl shadow-sm text-sm text-[var(--ds-text-secondary)]">
-          <BookOpen className="w-12 h-12 text-purple-400/40 mx-auto mb-4" />
+          <BookOpen className="w-12 h-12 text-ai/40 mx-auto mb-4" />
           <p className="font-semibold">{t.noAssets}</p>
           <button
             onClick={openAddModal}
-            className="mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-bold transition-all inline-flex items-center gap-1.5 cursor-pointer"
+            className="mt-4 px-4 py-2 bg-action hover:bg-action-hover text-on-action rounded-lg text-xs font-bold ds-transition inline-flex items-center gap-1.5 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>{t.addAsset}</span>
@@ -414,12 +414,12 @@ export const ScholarlyAssetsList: React.FC = () => {
           {filteredAssets.map((asset) => (
             <div 
               key={asset.id} 
-              className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] p-5 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between gap-4 hover:border-purple-500/40 transition-all"
+              className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] p-5 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between gap-4 hover:border-ai/40 transition-all"
             >
               <div className="space-y-2 flex-1">
                 {/* Header indicators */}
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-ai/10 text-ai border border-ai/20">
                     {getAssetTypeBadgeLabel(asset.asset_type)}
                   </span>
 
@@ -436,7 +436,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                   )}
 
                   {asset.doi && (
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center gap-1">
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-info/10 text-info border border-info/20 flex items-center gap-1">
                       <Link className="w-3 h-3" />
                       <span>DOI</span>
                     </span>
@@ -458,7 +458,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                 {/* Secondary Meta details */}
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-[var(--ds-text-secondary)] pt-1">
                   {asset.journal_name && (
-                    <span className="flex items-center gap-1 font-semibold text-purple-400/90">
+                    <span className="flex items-center gap-1 font-semibold text-ai/90">
                       <BookOpen className="w-3.5 h-3.5" />
                       <span>{asset.journal_name}</span>
                     </span>
@@ -498,7 +498,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                     href={`https://doi.org/${asset.doi}`} 
                     target="_blank" 
                     rel="noreferrer"
-                    className="p-2 text-sky-400 hover:bg-sky-500/10 rounded-xl transition-all cursor-pointer"
+                    className="p-2 text-info hover:bg-info/10 rounded-xl transition-all cursor-pointer"
                     title="View DOI Link"
                   >
                     <ExternalLink className="w-4 h-4" />
@@ -510,14 +510,14 @@ export const ScholarlyAssetsList: React.FC = () => {
                   <>
                     <button
                       onClick={() => openEditModal(asset)}
-                      className="p-2 text-purple-400 hover:bg-purple-500/10 rounded-xl transition-all cursor-pointer"
+                      className="p-2 text-ai hover:bg-ai/10 rounded-xl transition-all cursor-pointer"
                       title={t.edit}
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDeleteAsset(asset.id)}
-                      className="p-2 text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer"
+                      className="p-2 text-danger hover:bg-danger/10 rounded-xl transition-all cursor-pointer"
                       title="Delete Asset"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -532,12 +532,12 @@ export const ScholarlyAssetsList: React.FC = () => {
 
       {/* Register Asset Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl p-6 space-y-6 dir-auto" style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}>
+        <div className="fixed inset-0 z-50 bg-[var(--ds-surface-overlay)] flex items-center justify-center p-4">
+          <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-[var(--ds-shadow-overlay)] p-6 space-y-6 dir-auto" style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}>
             
             <div className="flex justify-between items-center border-b border-[var(--ds-border-subtle)] pb-3">
               <h3 className="text-base font-black flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-purple-500" />
+                <Sparkles className="w-5 h-5 text-ai" />
                 <span>{editingAssetId ? t.modalTitleEdit : t.modalTitleAdd}</span>
               </h3>
               <button
@@ -707,17 +707,17 @@ export const ScholarlyAssetsList: React.FC = () => {
 
               {/* CRediT contributors form section */}
               <div className="space-y-3 pt-3 border-t border-[var(--ds-border-subtle)]">
-                <h4 className="text-xs font-bold text-purple-400">{t.contributors}</h4>
+                <h4 className="text-xs font-bold text-ai">{t.contributors}</h4>
                 
                 {/* List of currently added contributors */}
                 <div className="flex flex-wrap gap-2">
                   {newAsset.contributors.map((c: any, idx: number) => (
-                    <span key={idx} className="bg-purple-500/10 border border-purple-500/20 text-purple-400 px-2.5 py-1 rounded-xl text-[10px] font-bold flex items-center gap-1.5">
+                    <span key={idx} className="bg-ai/10 border border-ai/20 text-ai px-2.5 py-1 rounded-xl text-[10px] font-bold flex items-center gap-1.5">
                       <span>{c.external_name} ({c.contribution_percentage}%)</span>
                       <button 
                         type="button" 
                         onClick={() => handleRemoveContributor(idx)} 
-                        className="hover:text-rose-400 cursor-pointer"
+                        className="hover:text-danger cursor-pointer"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -767,7 +767,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                                 }
                                 setContributorForm({ ...contributorForm, contribution_roles_json: updated });
                               }}
-                              className="rounded border-[var(--ds-border-subtle)] text-purple-600 focus:ring-purple-500 w-3.5 h-3.5 cursor-pointer"
+                              className="rounded border-[var(--ds-border-subtle)] text-ai focus:ring-ai w-3.5 h-3.5 cursor-pointer"
                             />
                             <label htmlFor={`role-${role.value}`} className="text-[10px] text-[var(--ds-text-secondary)] cursor-pointer select-none">
                               {language === 'ar' ? role.labelAr : role.labelEn}
@@ -796,7 +796,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                           id="is-corresponding"
                           checked={contributorForm.is_corresponding_author}
                           onChange={(e) => setContributorForm({ ...contributorForm, is_corresponding_author: e.target.checked })}
-                          className="rounded border-[var(--ds-border-subtle)] text-purple-600 focus:ring-purple-500 w-4 h-4 cursor-pointer"
+                          className="rounded border-[var(--ds-border-subtle)] text-ai focus:ring-ai w-4 h-4 cursor-pointer"
                         />
                         <label htmlFor="is-corresponding" className="text-[10px] font-bold text-[var(--ds-text-secondary)] cursor-pointer select-none">
                           {t.corresponding}
@@ -806,7 +806,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                       <button
                         type="button"
                         onClick={handleAddContributor}
-                        className="w-full py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 cursor-pointer"
+                        className="w-full py-1.5 bg-action hover:bg-action-hover text-on-action rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 cursor-pointer"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>{language === 'ar' ? 'أضف المساهم للقائمة' : 'Add Contributor to List'}</span>
@@ -827,7 +827,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow-sm transition-all cursor-pointer"
+                  className="px-4 py-2 bg-action hover:bg-action-hover text-on-action rounded-xl text-xs font-bold shadow-sm ds-transition cursor-pointer"
                 >
                   {editingAssetId ? t.saveEdit : t.saveNew}
                 </button>

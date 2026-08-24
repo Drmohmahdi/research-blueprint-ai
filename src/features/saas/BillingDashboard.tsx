@@ -67,12 +67,12 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
     <div className="space-y-8">
       {/* Messages */}
       {message && (
-        <div className="p-3.5 border border-emerald-500/20 bg-emerald-500/5 text-emerald-500 rounded-2xl text-xs font-bold">
+        <div className="p-3.5 border border-success/20 bg-action/5 text-success rounded-2xl text-xs font-bold">
           {message}
         </div>
       )}
       {error && (
-        <div className="p-3.5 border border-rose-500/20 bg-rose-500/5 text-rose-500 rounded-2xl text-xs font-bold">
+        <div className="p-3.5 border border-danger/20 bg-danger/5 text-danger rounded-2xl text-xs font-bold">
           {error}
         </div>
       )}
@@ -87,13 +87,13 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Active subscription card */}
-        <Card className="lg:col-span-1 p-6 border-[var(--ds-border-subtle)] rounded-3xl bg-gradient-to-br from-purple-500/10 via-indigo-500/5 to-transparent relative">
+        <Card className="lg:col-span-1 p-6 border-[var(--ds-border-subtle)] rounded-3xl bg-[var(--ds-surface-primary)] relative">
           <div className="space-y-4">
             <span className="text-[10px] font-black text-[var(--ds-text-muted)] uppercase tracking-widest block">
               {language === 'ar' ? 'الاشتراك الحالي' : 'Current Subscription'}
             </span>
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-purple-500/15 text-purple-600 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-ai/15 text-ai flex items-center justify-center">
                 <CreditCard size={20} />
               </div>
               <div>
@@ -117,7 +117,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
               </div>
               <div className="flex justify-between font-bold">
                 <span className="text-[var(--ds-text-muted)]">{language === 'ar' ? 'القيمة:' : 'Price:'}</span>
-                <span className="text-purple-600">{activePlan?.price} {activePlan?.currency}</span>
+                <span className="text-ai">{activePlan?.price} {activePlan?.currency}</span>
               </div>
             </div>
           </div>
@@ -133,14 +133,14 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
             <div className="space-y-2">
               <div className="flex justify-between text-xs font-bold">
                 <span className="flex items-center gap-1.5 text-[var(--ds-text-secondary)]">
-                  <Activity size={14} className="text-purple-600" />
+                  <Activity size={14} className="text-ai" />
                   <span>{language === 'ar' ? 'عدد المشاريع البحثية' : 'Research Projects'}</span>
                 </span>
                 <span>{usage.projects_count} / {limits.max_projects}</span>
               </div>
               <div className="h-2.5 w-full bg-[var(--ds-surface-secondary)] rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-500" 
+                  className="h-full bg-[var(--ds-primary)] rounded-full ds-transition"
                   style={{ width: `${projectPct}%` }}
                 />
               </div>
@@ -150,14 +150,14 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
             <div className="space-y-2">
               <div className="flex justify-between text-xs font-bold">
                 <span className="flex items-center gap-1.5 text-[var(--ds-text-secondary)]">
-                  <HardDrive size={14} className="text-purple-600" />
+                  <HardDrive size={14} className="text-ai" />
                   <span>{language === 'ar' ? 'مساحة ملفات المستندات' : 'Document File Storage'}</span>
                 </span>
                 <span>{usage.storage_mb.toFixed(2)} MB / {limits.max_storage_mb} MB</span>
               </div>
               <div className="h-2.5 w-full bg-[var(--ds-surface-secondary)] rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-500" 
+                  className="h-full bg-[var(--ds-primary)] rounded-full ds-transition"
                   style={{ width: `${storagePct}%` }}
                 />
               </div>
@@ -183,12 +183,12 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
                 key={plan.id} 
                 className={`p-6 border-[var(--ds-border-subtle)] rounded-3xl flex flex-col justify-between relative overflow-hidden transition-all duration-180 hover:shadow-lg ${
                   isCurrent 
-                    ? 'ring-2 ring-purple-600 bg-purple-500/[0.02] border-purple-500/30' 
+                    ? 'ring-2 ring-action bg-ai/[0.02] border-ai/30'
                     : 'bg-[var(--ds-surface-primary)]'
                 }`}
               >
                 {isCurrent && (
-                  <div className="absolute top-0 right-0 left-0 h-1.5 bg-gradient-to-r from-purple-600 to-indigo-600" />
+                  <div className="absolute top-0 right-0 left-0 h-1.5 bg-[var(--ds-primary)]" />
                 )}
 
                 <div className="space-y-5">
@@ -207,15 +207,15 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
                   {/* Limit specifics */}
                   <div className="space-y-2.5 border-t border-[var(--ds-border-subtle)] pt-4 text-xs font-bold">
                     <div className="flex items-center gap-2">
-                      <Check size={14} className="text-emerald-500 shrink-0" />
+                      <Check size={14} className="text-success shrink-0" />
                       <span>{pLimits.max_projects} {language === 'ar' ? 'مشاريع كحد أقصى' : 'Projects Max'}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Check size={14} className="text-emerald-500 shrink-0" />
+                      <Check size={14} className="text-success shrink-0" />
                       <span>{pLimits.max_storage_mb} MB {language === 'ar' ? 'مساحة ملفات' : 'File Storage'}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Check size={14} className="text-emerald-500 shrink-0" />
+                      <Check size={14} className="text-success shrink-0" />
                       <span>{pFeatures.can_export ? (language === 'ar' ? 'دعم تصدير التقارير كاملة' : 'Full Blueprint Export') : (language === 'ar' ? 'لا يوجد تصدير ملفات' : 'No Blueprint Export')}</span>
                     </div>
                   </div>
@@ -266,9 +266,9 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
                     <tr key={inv.id} className="hover:bg-[var(--ds-surface-secondary)] transition-colors">
                       <td className="px-6 py-4 font-black">{inv.id}</td>
                       <td className="px-6 py-4">{new Date(inv.created_at).toLocaleDateString()}</td>
-                      <td className="px-6 py-4 text-purple-600">{inv.amount} {inv.currency}</td>
+                      <td className="px-6 py-4 text-ai">{inv.amount} {inv.currency}</td>
                       <td className="px-6 py-4">
-                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] font-extrabold">
+                        <span className="px-2.5 py-0.5 rounded-full bg-action/10 text-success border border-success/20 text-[10px] font-extrabold">
                           {inv.status}
                         </span>
                       </td>
@@ -277,7 +277,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
                           href={apiGetDownloadUrl(inv.id)} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-purple-600 hover:text-purple-700 hover:underline cursor-pointer"
+                          className="inline-flex items-center gap-1 text-ai hover:text-ai hover:underline cursor-pointer"
                         >
                           <Download size={14} />
                           <span>PDF</span>

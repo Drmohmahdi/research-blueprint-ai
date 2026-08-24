@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { BarChart, Bar, LineChart, Line, RadarChart, Radar, PolarGrid, PolarAngleAxis, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from 'recharts';
+import React, { useMemo, useState } from 'react';
+import { BarChart, Bar, LineChart, Line, RadarChart, Radar, PolarGrid, PolarAngleAxis, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend, LabelList } from 'recharts';
 import { TrendingUp, BarChart2, Target, Zap, ArrowUpRight, ArrowDownRight, Minus, Activity } from 'lucide-react';
 
 interface GroupComparisonChartProps {
@@ -16,13 +16,17 @@ export const GroupComparisonChart: React.FC<GroupComparisonChartProps> = ({
   onRunSimulation
 }) => {
   const [activeTab, setActiveTab] = useState<'bar' | 'line' | 'radar'>('bar');
+  const reduceMotion = useMemo(
+    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    [],
+  );
 
   const isArabic = language === 'ar';
   const chartColors = {
-    pre: 'var(--ds-primary)',
-    post: 'var(--ds-success)',
-    control: 'var(--ds-text-muted)',
-    treatment: 'var(--ds-warning)',
+    pre: 'var(--ds-chart-1)',
+    post: 'var(--ds-chart-2)',
+    control: 'var(--ds-chart-3)',
+    treatment: 'var(--ds-chart-5)',
     grid: 'var(--ds-border-subtle)'
   };
 
@@ -110,23 +114,23 @@ export const GroupComparisonChart: React.FC<GroupComparisonChartProps> = ({
   }
 
   const interpretEffect = (d: number) => {
-    if (d >= 0.8) return { label: isArabic ? 'كبير' : 'Large', color: 'text-emerald-500 bg-emerald-500/10' };
-    if (d >= 0.5) return { label: isArabic ? 'متوسط' : 'Medium', color: 'text-amber-500 bg-amber-500/10' };
-    return { label: isArabic ? 'صغير' : 'Small', color: 'text-rose-500 bg-rose-500/10' };
+    if (d >= 0.8) return { label: isArabic ? 'كبير' : 'Large', color: 'text-success bg-action/10' };
+    if (d >= 0.5) return { label: isArabic ? 'متوسط' : 'Medium', color: 'text-warning bg-warning/10' };
+    return { label: isArabic ? 'صغير' : 'Small', color: 'text-danger bg-danger/10' };
   };
 
   const effectSize = interpretEffect(stats.cohensD);
 
   const getTabClass = (tab: string) => {
     return activeTab === tab
-      ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-600 text-white flex items-center gap-2 transition-all"
+      ? "px-3 py-1.5 rounded-lg text-xs font-bold bg-[var(--ds-primary-soft)] text-ink flex items-center gap-2 ds-transition"
       : "px-3 py-1.5 rounded-lg text-xs font-bold bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] border border-[var(--ds-border-subtle)] hover:bg-[var(--ds-surface-tertiary)] cursor-pointer flex items-center gap-2 transition-all";
   };
 
   const formatDelta = (val: number) => {
-    if (val > 0) return { text: `+${val.toFixed(1)}`, color: 'text-emerald-500', icon: <ArrowUpRight className="w-4 h-4" /> };
-    if (val < 0) return { text: `${val.toFixed(1)}`, color: 'text-rose-500', icon: <ArrowDownRight className="w-4 h-4" /> };
-    return { text: '0', color: 'text-slate-500', icon: <Minus className="w-4 h-4" /> };
+    if (val > 0) return { text: `+${val.toFixed(1)}`, color: 'text-success', icon: <ArrowUpRight className="w-4 h-4" /> };
+    if (val < 0) return { text: `${val.toFixed(1)}`, color: 'text-danger', icon: <ArrowDownRight className="w-4 h-4" /> };
+    return { text: '0', color: 'text-muted', icon: <Minus className="w-4 h-4" /> };
   };
 
   const conGainFmt = formatDelta(stats.conGain);
@@ -137,7 +141,7 @@ export const GroupComparisonChart: React.FC<GroupComparisonChartProps> = ({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h3 className="text-lg font-bold text-[var(--ds-text-primary)] flex items-center gap-2">
-            <Activity className="w-5 h-5 text-purple-500" />
+            <Activity className="w-5 h-5 text-ai" />
             {simulationData ? t.simData : t.noSimData}
           </h3>
           <p className="text-sm text-[var(--ds-text-secondary)] mt-1">
@@ -161,25 +165,48 @@ export const GroupComparisonChart: React.FC<GroupComparisonChartProps> = ({
         </div>
       </div>
 
-      <div className="flex items-center justify-center gap-4 text-xs font-semibold pb-2">
-        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-[var(--ds-primary)]"/><span>{t.pre}</span></div>
-        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded bg-[var(--ds-success)]"/><span>{t.post}</span></div>
+      <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold pb-2">
+        <div className="flex items-center gap-1.5">
+          <span className="inline-block h-3 w-3 rounded-sm bg-[var(--ds-chart-1)]" style={{ backgroundImage: 'repeating-linear-gradient(135deg, transparent, transparent 2px, var(--ds-surface-primary) 2px, var(--ds-surface-primary) 3px)' }} />
+          <span>{t.pre}</span>
+          <span className="text-muted font-normal">— {isArabic ? 'صلب مائل' : 'hatched'}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="inline-block h-3 w-3 rounded-sm bg-[var(--ds-chart-2)]" style={{ backgroundImage: 'radial-gradient(circle at 30% 30%, var(--ds-surface-primary) 1.2px, transparent 1.4px)' }} />
+          <span>{t.post}</span>
+          <span className="text-muted font-normal">— {isArabic ? 'منقّط' : 'dotted'}</span>
+        </div>
       </div>
 
-      <div className="h-[300px] w-full" dir="ltr">
+      <div className="h-[300px] w-full min-w-0" dir="ltr">
         <ResponsiveContainer width="100%" height="100%">
           {activeTab === 'bar' ? (
-            <BarChart data={barData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <BarChart data={barData} margin={{ top: 18, right: 10, left: -20, bottom: 0 }}>
+              <defs>
+                <pattern id="ds-bar-pre" patternUnits="userSpaceOnUse" width="8" height="8">
+                  <rect width="8" height="8" fill="var(--ds-chart-1)" />
+                  <path d="M-1,1 l2,-2 M0,8 l8,-8 M7,9 l2,-2" stroke="var(--ds-surface-primary)" strokeWidth="1.25" />
+                </pattern>
+                <pattern id="ds-bar-post" patternUnits="userSpaceOnUse" width="8" height="8">
+                  <rect width="8" height="8" fill="var(--ds-chart-2)" />
+                  <circle cx="2" cy="2" r="1.1" fill="var(--ds-surface-primary)" />
+                  <circle cx="6" cy="6" r="1.1" fill="var(--ds-surface-primary)" />
+                </pattern>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--ds-text-secondary)', fontSize: 12 }} />
               <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--ds-text-secondary)', fontSize: 12 }} />
               <RechartsTooltip 
-                contentStyle={{ backgroundColor: 'var(--ds-surface-primary)', borderColor: 'var(--ds-border-subtle)', borderRadius: '0.5rem', color: 'var(--ds-text-primary)' }}
+                contentStyle={{ backgroundColor: 'var(--ds-surface-elevated)', borderColor: 'var(--ds-border-default)', borderRadius: '0.5rem', color: 'var(--ds-text-primary)' }}
                 itemStyle={{ color: 'var(--ds-text-primary)' }}
                 cursor={{ fill: 'var(--ds-surface-secondary)', opacity: 0.4 }}
               />
-              <Bar dataKey="pre" name={t.pre} fill={chartColors.pre} radius={[4, 4, 0, 0]} isAnimationActive={true} />
-              <Bar dataKey="post" name={t.post} fill={chartColors.post} radius={[4, 4, 0, 0]} isAnimationActive={true} />
+              <Bar dataKey="pre" name={t.pre} fill="url(#ds-bar-pre)" radius={[4, 4, 0, 0]} isAnimationActive={!reduceMotion}>
+                <LabelList dataKey="pre" position="top" fill="var(--ds-text-secondary)" fontSize={10} />
+              </Bar>
+              <Bar dataKey="post" name={t.post} fill="url(#ds-bar-post)" radius={[4, 4, 0, 0]} isAnimationActive={!reduceMotion}>
+                <LabelList dataKey="post" position="top" fill="var(--ds-text-secondary)" fontSize={10} />
+              </Bar>
             </BarChart>
           ) : activeTab === 'line' ? (
             <LineChart data={barData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -187,20 +214,21 @@ export const GroupComparisonChart: React.FC<GroupComparisonChartProps> = ({
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--ds-text-secondary)', fontSize: 12 }} />
               <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--ds-text-secondary)', fontSize: 12 }} />
               <RechartsTooltip 
-                contentStyle={{ backgroundColor: 'var(--ds-surface-primary)', borderColor: 'var(--ds-border-subtle)', borderRadius: '0.5rem', color: 'var(--ds-text-primary)' }}
+                contentStyle={{ backgroundColor: 'var(--ds-surface-elevated)', borderColor: 'var(--ds-border-default)', borderRadius: '0.5rem', color: 'var(--ds-text-primary)' }}
               />
-              <Line type="monotone" dataKey="pre" name={t.pre} stroke={chartColors.pre} strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} isAnimationActive={true} />
-              <Line type="monotone" dataKey="post" name={t.post} stroke={chartColors.post} strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} isAnimationActive={true} />
+              <Line type="monotone" dataKey="pre" name={`${t.pre} (solid)`} stroke={chartColors.pre} strokeWidth={3} strokeDasharray="0" dot={{ r: 5, strokeWidth: 2, fill: chartColors.pre }} isAnimationActive={!reduceMotion} />
+              <Line type="monotone" dataKey="post" name={`${t.post} (dashed)`} stroke={chartColors.post} strokeWidth={3} strokeDasharray="7 4" dot={{ r: 4, strokeWidth: 2, fill: 'var(--ds-surface-primary)', stroke: chartColors.post }} isAnimationActive={!reduceMotion} />
+              <Legend wrapperStyle={{ fontSize: '12px', color: 'var(--ds-text-secondary)' }} />
             </LineChart>
           ) : (
             <RadarChart outerRadius="80%" data={radarData}>
               <PolarGrid stroke={chartColors.grid} />
               <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--ds-text-secondary)', fontSize: 12 }} />
-              <Radar name={t.control} dataKey={t.control} stroke={chartColors.control} fill={chartColors.control} fillOpacity={0.24} isAnimationActive={true} />
-              <Radar name={t.treatment} dataKey={t.treatment} stroke={chartColors.treatment} fill={chartColors.treatment} fillOpacity={0.24} isAnimationActive={true} />
+              <Radar name={`${t.control} (solid)`} dataKey={t.control} stroke={chartColors.control} fill={chartColors.control} fillOpacity={0.18} strokeWidth={2} isAnimationActive={!reduceMotion} />
+              <Radar name={`${t.treatment} (dashed)`} dataKey={t.treatment} stroke={chartColors.treatment} fill={chartColors.treatment} fillOpacity={0.12} strokeDasharray="6 4" strokeWidth={2} isAnimationActive={!reduceMotion} />
               <Legend wrapperStyle={{ fontSize: '12px', color: 'var(--ds-text-secondary)' }} />
               <RechartsTooltip 
-                contentStyle={{ backgroundColor: 'var(--ds-surface-primary)', borderColor: 'var(--ds-border-subtle)', borderRadius: '0.5rem', color: 'var(--ds-text-primary)' }}
+                contentStyle={{ backgroundColor: 'var(--ds-surface-elevated)', borderColor: 'var(--ds-border-default)', borderRadius: '0.5rem', color: 'var(--ds-text-primary)' }}
               />
             </RadarChart>
           )}
@@ -218,19 +246,20 @@ export const GroupComparisonChart: React.FC<GroupComparisonChartProps> = ({
         <div className="bg-[var(--ds-surface-secondary)] p-3 rounded-lg border border-[var(--ds-border-subtle)]">
           <p className="text-xs text-[var(--ds-text-secondary)] mb-1">{t.powerTitle}</p>
           <div className="flex items-end gap-2">
-            <span className="text-xl font-bold text-[var(--ds-text-primary)]">{(stats.power * 100).toFixed(0)}%</span>
-            <div className={`w-2 h-2 rounded-full mb-2 ${stats.power >= 0.8 ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+            <span className="text-xl font-bold text-ink ds-numeric">{(stats.power * 100).toFixed(0)}%</span>
+            <span className="text-[10px] font-bold text-secondary mb-1">{stats.power >= 0.8 ? (isArabic ? 'كافٍ' : 'adequate') : (isArabic ? 'منخفض' : 'low')}</span>
           </div>
         </div>
         <div className="bg-[var(--ds-surface-secondary)] p-3 rounded-lg border border-[var(--ds-border-subtle)]">
           <p className="text-xs text-[var(--ds-text-secondary)] mb-1">{t.pTitle}</p>
-          <span className={`text-xl font-bold ${stats.pValue < 0.05 ? 'text-emerald-500' : 'text-rose-500'}`}>
-            {stats.pValue < 0.001 ? '<0.001' : stats.pValue.toFixed(3)}
+          <span className="text-xl font-bold text-ink ds-numeric" dir="ltr">
+            {stats.pValue < 0.001 ? 'p < 0.001' : `p = ${stats.pValue.toFixed(3)}`}
           </span>
+          <span className="ms-1 text-[10px] font-bold text-secondary">{stats.pValue < 0.05 ? (isArabic ? 'دال' : 'sig.') : (isArabic ? 'غير دال' : 'n.s.')}</span>
         </div>
         <div className="bg-[var(--ds-surface-secondary)] p-3 rounded-lg border border-[var(--ds-border-subtle)]">
           <p className="text-xs text-[var(--ds-text-secondary)] mb-1">{t.gainTitle}</p>
-          <span className={`text-xl font-bold ${stats.trGain > stats.conGain ? 'text-emerald-500' : 'text-amber-500'}`}>
+          <span className="text-xl font-bold text-ink ds-numeric" dir="ltr">
             +{Math.max(stats.trGain, stats.conGain).toFixed(1)}
           </span>
         </div>
@@ -269,7 +298,7 @@ export const GroupComparisonChart: React.FC<GroupComparisonChartProps> = ({
       {!simulationData && (
         <button 
           onClick={onRunSimulation}
-          className="mt-2 w-full py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold transition-colors flex items-center justify-center gap-2"
+          className="mt-2 w-full py-3 bg-action hover:bg-action-hover text-on-action rounded-lg font-bold ds-transition flex items-center justify-center gap-2"
         >
           <Zap className="w-5 h-5" />
           {isArabic ? 'قم بتشغيل المحاكاة الفعلية' : 'Run Actual Simulation'}

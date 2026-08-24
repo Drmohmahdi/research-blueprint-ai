@@ -81,11 +81,11 @@ export const Modal: React.FC<ModalProps> = ({
       <div className="flex min-h-screen items-center justify-center p-4 text-center">
         {/* Overlay backdrop */}
         <div 
-          className="fixed inset-0 bg-zinc-950/40 dark:bg-zinc-950/70 backdrop-blur-sm transition-opacity" 
+          className="fixed inset-0 bg-[var(--ds-surface-overlay)] transition-opacity"
           onClick={onClose}
         />
 
-        <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={titleId} className={`relative w-full transform rounded-2xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] p-6 text-start align-middle shadow-xl transition-all ${sizeClasses[size]}`}>
+        <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={titleId} className={`relative w-full transform rounded-2xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] p-6 text-start align-middle shadow-[var(--ds-shadow-overlay)] ds-transition ${sizeClasses[size]}`}>
           {/* Header */}
           <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-4 mb-4">
             <h3 id={titleId} className="text-sm font-extrabold text-[var(--ds-text-primary)] m-0">
@@ -189,12 +189,12 @@ export const Drawer: React.FC<DrawerProps> = ({
       <div className="absolute inset-0 overflow-hidden">
         {/* Backdrop overlay */}
         <div 
-          className="absolute inset-0 bg-zinc-950/40 dark:bg-zinc-950/70 backdrop-blur-sm transition-opacity" 
+          className="absolute inset-0 bg-[var(--ds-surface-overlay)] transition-opacity"
           onClick={onClose}
         />
 
         <div className={`absolute inset-y-0 ${placementClass} flex max-w-full`}>
-          <div ref={drawerRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={titleId} className={`w-screen max-w-md transform bg-[var(--ds-surface-primary)] border-l border-[var(--ds-border-subtle)] p-6 shadow-xl flex flex-col justify-between ${animClass}`}>
+          <div ref={drawerRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={titleId} className={`w-screen max-w-md transform bg-[var(--ds-surface-primary)] ${placement === 'left' ? 'border-r' : 'border-l'} border-[var(--ds-border-subtle)] p-6 shadow-[var(--ds-shadow-overlay)] flex flex-col justify-between ${animClass}`}>
             
             <div className="space-y-6 flex-1 flex flex-col overflow-y-auto no-scrollbar">
               {/* Header */}

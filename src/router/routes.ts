@@ -3,6 +3,7 @@ export const ROUTES = {
   // Portal Gateway
   PORTAL:            '/app',
   DASHBOARD:         '/app/research', // maps to the core research dashboard for backward compatibility
+  LIFECYCLE:         '/app/research/lifecycle',
 
   // Research Module
   PATHS:             '/app/research/paths',
@@ -18,6 +19,7 @@ export const ROUTES = {
   SIMULATION:        '/app/research/simulation/lab',
   PREDICTOR:         '/app/research/simulation/predictor',
   DATA_QUALITY:      '/app/research/field/data-quality',
+  RESEARCH_DATA:     '/app/research/data-analysis',
   PRE_REGISTRATION:  '/app/research/field/pre-registration',
   FIELD_MONITORING:  '/app/research/field/monitoring',
   LIT_SYNTHESIZER:   '/app/research/literature/synthesizer',
@@ -86,6 +88,7 @@ export type RoutePath = (typeof ROUTES)[RouteKey];
 export const VIEW_TO_PATH: Record<string, string> = {
   portal:             ROUTES.PORTAL,
   dashboard:          ROUTES.DASHBOARD,
+  lifecycle:          ROUTES.LIFECYCLE,
   pathSelector:       ROUTES.PATHS,
   decisionCenter:     ROUTES.DECISION_CENTER,
   planning:           ROUTES.PLANNING,
@@ -99,6 +102,7 @@ export const VIEW_TO_PATH: Record<string, string> = {
   simulation:         ROUTES.SIMULATION,
   outcomePredictor:   ROUTES.PREDICTOR,
   dataQuality:        ROUTES.DATA_QUALITY,
+  researchData:       ROUTES.RESEARCH_DATA,
   preReg:             ROUTES.PRE_REGISTRATION,
   fidelity:           ROUTES.FIELD_MONITORING,
   litSynthesizer:     ROUTES.LIT_SYNTHESIZER,

@@ -1,22 +1,171 @@
 @import "tailwindcss";
 @import "./design-system/styles/design-system.css";
 
+@theme inline {
+  --font-sans: "IBM Plex Sans Arabic", Inter, system-ui, sans-serif;
+  --color-brand-emerald: var(--ds-primary);
+  --color-brand-navy: var(--ds-navy);
+  --color-brand-gold: var(--ds-accent-gold);
+  --color-brand-teal: var(--ds-data-teal);
+  --ease-brand: var(--ds-ease);
+
+  /* Semantic intent tokens — use these in source instead of zinc/emerald/purple utilities */
+  --color-canvas: var(--ds-background-canvas);
+  --color-surface: var(--ds-surface-primary);
+  --color-surface-subtle: var(--ds-surface-secondary);
+  --color-surface-elevated: var(--ds-surface-elevated);
+  --color-ink: var(--ds-text-primary);
+  --color-muted: var(--ds-text-muted);
+  --color-disabled: var(--ds-text-disabled);
+  --color-subtle: var(--ds-border-subtle);
+  --color-strong: var(--ds-border-strong);
+  --color-success: var(--ds-success);
+  --color-warning: var(--ds-warning);
+  --color-danger: var(--ds-danger);
+  --color-info: var(--ds-information);
+  --color-action: var(--ds-primary);
+  --color-action-hover: var(--ds-primary-hover);
+  --color-ai: var(--ds-data-teal);
+  --color-path-research: var(--ds-path-research);
+  --color-path-data: var(--ds-path-data);
+  --color-path-publication: var(--ds-path-publication);
+  --color-path-review: var(--ds-path-review);
+  --color-path-promotion: var(--ds-path-promotion);
+  --color-path-identity: var(--ds-path-identity);
+
+  --color-zinc-50: #F8F7F3;
+  --color-zinc-100: #F3EEE6;
+  --color-zinc-200: #EBE4D6;
+  --color-zinc-300: #DDD3C2;
+  --color-zinc-400: #9AA3B0;
+  --color-zinc-500: #6B7585;
+  --color-zinc-600: #4A5564;
+  --color-zinc-700: #3D4A5C;
+  --color-zinc-800: #1A2333;
+  --color-zinc-900: #121A28;
+  --color-zinc-950: #0B1F33;
+
+  --color-slate-50: #F8F7F3;
+  --color-slate-100: #F3EEE6;
+  --color-slate-200: #EBE4D6;
+  --color-slate-300: #DDD3C2;
+  --color-slate-400: #9AA3B0;
+  --color-slate-500: #6B7585;
+  --color-slate-600: #4A5564;
+  --color-slate-700: #3D4A5C;
+  --color-slate-800: #1A2333;
+  --color-slate-900: #121A28;
+  --color-slate-950: #0B1F33;
+
+  --color-gray-50: #F8F7F3;
+  --color-gray-100: #F3EEE6;
+  --color-gray-200: #EBE4D6;
+  --color-gray-800: #1A2333;
+  --color-gray-900: #121A28;
+  --color-gray-950: #0B1F33;
+
+  --color-emerald-50: #EAF6EF;
+  --color-emerald-100: #D0EBDB;
+  --color-emerald-400: #2E8A5C;
+  --color-emerald-500: #0B5D3B;
+  --color-emerald-600: #094C30;
+  --color-emerald-700: #073B26;
+  --color-green-500: #0B5D3B;
+  --color-green-600: #094C30;
+  --color-green-700: #073B26;
+
+  --color-teal-400: #2C9193;
+  --color-teal-500: #167D7F;
+  --color-teal-600: #126668;
+  --color-teal-700: #0E5052;
+  --color-cyan-400: #2C9193;
+  --color-cyan-500: #167D7F;
+  --color-cyan-600: #126668;
+  --color-cyan-700: #0E5052;
+
+  --color-amber-400: #C6A15B;
+  --color-amber-500: #C6A15B;
+  --color-amber-600: #A88646;
+  --color-amber-700: #866A36;
+  --color-amber-800: #655028;
+  --color-amber-50: #F8F1E2;
+  --color-amber-950: #2A2110;
+
+  --color-rose-500: #B42318;
+  --color-rose-600: #912012;
+  --color-rose-400: #E07A72;
+
+  --color-blue-500: #2E5A80;
+  --color-blue-600: #1A3F5C;
+  --color-blue-700: #123048;
+  --color-indigo-500: #3D6B8A;
+  --color-indigo-600: #2E5A80;
+  --color-purple-500: #5C5A8A;
+  --color-purple-600: #4A4870;
+  --color-purple-700: #3A3860;
+  --color-purple-400: #A8A6C9;
+  --color-violet-500: #5C5A8A;
+  --color-violet-600: #4A4870;
+  --color-sky-500: #167D7F;
+  --color-sky-400: #2C9193;
+}
+
+@utility text-secondary {
+  color: var(--ds-text-secondary);
+}
+
+@utility bg-action {
+  background-color: var(--ds-action-fill);
+}
+
+@utility bg-action-hover {
+  background-color: var(--ds-action-fill-hover);
+}
+
+@utility text-on-action {
+  color: var(--ds-on-action);
+}
+
+@utility text-action {
+  color: var(--ds-primary);
+}
+
+@utility border-default {
+  border-color: var(--ds-border-default);
+}
+
+@utility ring-action {
+  --tw-ring-color: var(--ds-primary);
+}
+
 @layer base {
+  html {
+    font-family: var(--ds-font-arabic);
+  }
+
+  html:lang(en) {
+    font-family: var(--ds-font-latin);
+  }
+
   body {
-    @apply bg-[var(--ds-background-canvas)] text-[var(--ds-text-primary)] transition-colors duration-180 antialiased;
-    font-family: "Noto Sans Arabic", "Segoe UI", Tahoma, Arial, system-ui, sans-serif;
-    line-height: 1.65;
+    @apply bg-[var(--ds-background-canvas)] text-[var(--ds-text-primary)] antialiased;
+    font-family: inherit;
+    line-height: 1.7;
     min-width: 320px;
     overflow-x: hidden;
+    letter-spacing: -0.01em;
+    transition: background-color var(--ds-duration) var(--ds-ease), color var(--ds-duration) var(--ds-ease);
     background-image:
-      radial-gradient(circle at 8% 4%, rgba(15, 118, 110, 0.08), transparent 28rem),
-      radial-gradient(circle at 92% 22%, rgba(198, 144, 47, 0.06), transparent 24rem);
+      radial-gradient(ellipse 52% 38% at 12% 0%, var(--ds-aurora-emerald), transparent 70%),
+      radial-gradient(ellipse 42% 32% at 92% 8%, var(--ds-aurora-gold), transparent 68%),
+      radial-gradient(ellipse 48% 40% at 78% 100%, var(--ds-aurora-navy), transparent 72%);
     background-attachment: fixed;
   }
 
-  :lang(en) body {
-    font-family: Inter, "Segoe UI", Arial, system-ui, sans-serif;
-    line-height: 1.5;
+  html:lang(en) body {
+    line-height: 1.55;
+    letter-spacing: -0.014em;
+    font-feature-settings: "cv11", "ss01", "tnum";
   }
 
   :focus-visible {
@@ -53,12 +202,13 @@
   }
 
   h1, h2, h3, h4 {
-    letter-spacing: -0.018em;
+    letter-spacing: -0.022em;
     text-wrap: balance;
+    font-weight: 700;
   }
 
   input, select, textarea {
-    transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+    transition: border-color var(--ds-duration) var(--ds-ease), box-shadow var(--ds-duration) var(--ds-ease), background-color var(--ds-duration) var(--ds-ease);
   }
 
   input:hover, select:hover, textarea:hover {
@@ -66,7 +216,6 @@
   }
 }
 
-/* Shared responsive safety net for every workspace rendered in the app shell. */
 #main-content,
 #main-content > *,
 #main-content section,
@@ -101,44 +250,45 @@
   }
 }
 
-@media (min-width: 1920px) {
-  body {
-    background-image:
-      radial-gradient(circle at 12% 3%, rgba(15, 118, 110, 0.1), transparent 38rem),
-      radial-gradient(circle at 88% 18%, rgba(198, 144, 47, 0.07), transparent 34rem);
-  }
-}
-
 @layer components {
-  .baseerah-glass {
-    background: color-mix(in srgb, var(--ds-surface-primary) 88%, transparent);
-    backdrop-filter: blur(18px) saturate(140%);
-  }
-
   .baseerah-panel {
     border: 1px solid var(--ds-border-subtle);
     border-radius: 1rem;
-    background: linear-gradient(145deg, var(--ds-surface-primary), var(--ds-surface-secondary));
-    box-shadow: 0 14px 35px -28px rgba(8, 76, 72, 0.45);
+    background: linear-gradient(155deg, var(--ds-surface-primary), var(--ds-surface-secondary));
+    box-shadow: var(--ds-shadow-layered);
   }
 }
 
-/* Custom styles for our Conceptual Model Builder Canvas */
 .svg-canvas {
-  background-image: radial-gradient(circle, rgba(161, 161, 170, 0.15) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(11, 26, 44, 0.08) 1px, transparent 1px);
   background-size: 20px 20px;
 }
 
 .dark .svg-canvas {
-  background-image: radial-gradient(circle, rgba(63, 63, 70, 0.3) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(247, 244, 239, 0.08) 1px, transparent 1px);
   background-size: 20px 20px;
 }
 
-/* Hide scrollbars for a clean look but maintain scrolling */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+.ds-numeric {
+  font-variant-numeric: tabular-nums;
+}
+
+html:not(:lang(en)) :is(.font-black, .font-extrabold) {
+  font-weight: 700;
+}
+
+@media print {
+  body {
+    background: #FFFFFF !important;
+    color: #0B1F33 !important;
+    background-image: none !important;
+  }
 }

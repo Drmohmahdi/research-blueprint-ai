@@ -187,6 +187,40 @@ class RecipientResolver:
                             role="PROJECT_OWNER"
                         ))
 
+        # -------------------------------------------------------------
+        # 4. CROSS-DOMAIN LIFECYCLE EVENTS
+        # -------------------------------------------------------------
+        elif aggregate_type in {AggregateType.ACADEMIC_HANDOFF.value, AggregateType.RESEARCH_DATASET.value}:
+            project = None
+            if aggregate_type == AggregateType.ACADEMIC_HANDOFF.value:
+                handoff = db.query(models.AcademicHandoff).filter(
+                    models.AcademicHandoff.id == aggregate_id,
+                    models.AcademicHandoff.organization_id == organization_id,
+                ).first()
+                if handoff:
+                    project = db.query(models.ResearchProject).filter(
+                        models.ResearchProject.id == handoff.project_id,
+                        models.ResearchProject.organizationId == organization_id,
+                    ).first()
+            else:
+                dataset = db.query(models.ResearchDataset).filter(
+                    models.ResearchDataset.id == aggregate_id,
+                    models.ResearchDataset.organization_id == organization_id,
+                ).first()
+                if dataset:
+                    project = db.query(models.ResearchProject).filter(
+                        models.ResearchProject.id == dataset.project_id,
+                        models.ResearchProject.organizationId == organization_id,
+                    ).first()
+            if project and project.userId and project.userId != actor_user_id:
+                owner_user = db.query(models.User).filter(models.User.id == project.userId).first()
+                if owner_user:
+                    recipients.append(ResolvedRecipient(
+                        user_id=owner_user.id,
+                        email=owner_user.email,
+                        role="PROJECT_OWNER",
+                    ))
+
         # Deduplicate recipients by user_id
         seen_user_ids = set()
         unique_recipients: List[ResolvedRecipient] = []

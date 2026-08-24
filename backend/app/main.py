@@ -16,7 +16,7 @@ from .db import engine, Base
 from .config import settings
 from .observability import log_event, request_id_context
 from .services.site_gate import GATE_COOKIE_NAME, get_expected_site_gate_token
-from .routers import projects, analyzer, stats, auth, prediction, comments, organizations, storage, analytics, notifications, academic_visibility, academic_foundation, literature, promotions, peer_reviews, external_reviews, reports, billing, search, ai, admin, site_gate
+from .routers import projects, analyzer, stats, auth, prediction, comments, organizations, storage, analytics, notifications, academic_visibility, academic_foundation, literature, promotions, peer_reviews, external_reviews, reports, billing, search, ai, admin, site_gate, research_data, research_lifecycle
 
 
 settings.validate_production()
@@ -137,6 +137,8 @@ app.include_router(search.router, prefix="/api")
 app.include_router(ai.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 app.include_router(site_gate.router, prefix="/api")
+app.include_router(research_data.router, prefix="/api")
+app.include_router(research_lifecycle.router, prefix="/api")
 
 
 

@@ -5,6 +5,7 @@ import { apiGetMyProfile, apiListScholarlyAssets } from '../utils/api';
 import { ROUTES } from '../router/routes';
 import { ACADEMIC_CHANNELS, getChannelLabel } from '../config/academicChannels';
 import { Card } from '../design-system/components/Card';
+import { PathPanel } from '../design-system/components/Navigation';
 import {
   FileBarChart,
   Printer,
@@ -70,7 +71,7 @@ export const AcademicVisibilityReports: React.FC = () => {
   if (!profile) {
     return (
       <div className="max-w-md mx-auto text-center py-24 space-y-2">
-        <ShieldAlert className="mx-auto text-rose-500" size={28} />
+        <ShieldAlert className="mx-auto text-danger" size={28} />
         <p className="text-sm font-bold text-[var(--ds-text-secondary)]">
           {isAr ? 'تعذّر تحميل بيانات التقرير. تأكد من تسجيل الدخول وحاول مجددًا.' : 'Could not load report data. Make sure you are signed in and try again.'}
         </p>
@@ -152,11 +153,12 @@ export const AcademicVisibilityReports: React.FC = () => {
     <div className="space-y-6 max-w-5xl mx-auto pb-16">
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] p-6 rounded-2xl shadow-sm print:shadow-none">
+      <PathPanel accent="var(--ds-path-identity)">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <FileBarChart size={20} className="text-indigo-400" />
-            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+            <FileBarChart size={20} className="text-path-identity" />
+            <span className="text-[10px] font-black text-path-identity uppercase tracking-widest">
               {isAr ? 'تقرير الانتشار الأكاديمي' : 'Academic Visibility Report'}
             </span>
           </div>
@@ -173,36 +175,37 @@ export const AcademicVisibilityReports: React.FC = () => {
           </button>
           <button
             onClick={() => window.print()}
-            className="flex items-center gap-1.5 text-xs font-bold text-white bg-indigo-500 hover:bg-indigo-600 px-3 py-2 rounded-xl cursor-pointer"
+            className="flex items-center gap-1.5 text-xs font-bold text-on-action bg-action hover:bg-action-hover px-3 py-2 rounded-xl cursor-pointer"
           >
             <Printer size={13} />
             <span>{isAr ? 'طباعة / تصدير PDF' : 'Print / Export PDF'}</span>
           </button>
         </div>
       </div>
+      </PathPanel>
 
       {/* Summary stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="p-4 text-center">
-          <span className="text-2xl font-black text-indigo-500 block">{completenessScore}%</span>
+          <span className="text-2xl font-black text-path-identity block">{completenessScore}%</span>
           <span className="text-[10px] text-[var(--ds-text-muted)] font-bold uppercase">{isAr ? 'اكتمال الملف' : 'Profile Completeness'}</span>
         </Card>
         <Card className="p-4 text-center">
-          <span className="text-2xl font-black text-indigo-500 block">{linkedChannels.length}/{CHANNEL_TYPES.length}</span>
+          <span className="text-2xl font-black text-path-identity block">{linkedChannels.length}/{CHANNEL_TYPES.length}</span>
           <span className="text-[10px] text-[var(--ds-text-muted)] font-bold uppercase">{isAr ? 'قنوات مرتبطة' : 'Linked Channels'}</span>
         </Card>
         <Card className="p-4 text-center">
-          <span className="text-2xl font-black text-indigo-500 block">{assets.length}</span>
+          <span className="text-2xl font-black text-path-identity block">{assets.length}</span>
           <span className="text-[10px] text-[var(--ds-text-muted)] font-bold uppercase">{isAr ? 'أصول علمية' : 'Scholarly Assets'}</span>
         </Card>
         <Card className="p-4 text-center">
-          <span className="text-2xl font-black text-indigo-500 block">{withDoi}</span>
+          <span className="text-2xl font-black text-path-identity block">{withDoi}</span>
           <span className="text-[10px] text-[var(--ds-text-muted)] font-bold uppercase">{isAr ? 'تحمل DOI' : 'With DOI'}</span>
         </Card>
       </div>
 
       {/* Note about citation data */}
-      <div className="flex items-start gap-2.5 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[11px] text-amber-600 dark:text-amber-400">
+      <div className="flex items-start gap-2.5 p-3 bg-warning/10 border border-warning/20 rounded-xl text-[11px] text-warning">
         <ShieldAlert size={14} className="shrink-0 mt-0.5" />
         <span>
           {isAr
@@ -217,7 +220,7 @@ export const AcademicVisibilityReports: React.FC = () => {
         <div className="lg:col-span-5 space-y-6">
           <Card className="p-5 space-y-3">
             <h3 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center gap-2">
-              <Globe className="text-indigo-500" size={16} />
+              <Globe className="text-path-identity" size={16} />
               <span>{isAr ? 'حالة قنوات الهوية' : 'Identity Channel Status'}</span>
             </h3>
             <div className="space-y-1.5">
@@ -228,8 +231,8 @@ export const AcademicVisibilityReports: React.FC = () => {
                     <span className="font-bold text-[var(--ds-text-secondary)]">{getChannelLabel(type, isAr)}</span>
                     <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${
                       linked
-                        ? 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20'
-                        : 'text-rose-500 bg-rose-500/10 border-rose-500/20'
+                        ? 'text-success bg-action/10 border-success/20'
+                        : 'text-danger bg-danger/10 border-danger/20'
                     }`}>
                       {linked ? (isAr ? 'مرتبط' : 'Linked') : (isAr ? 'مفقود' : 'Missing')}
                     </span>
@@ -239,7 +242,7 @@ export const AcademicVisibilityReports: React.FC = () => {
             </div>
             <button
               onClick={() => navigate(ROUTES.VISIBILITY)}
-              className="text-[10px] font-black text-indigo-500 hover:underline cursor-pointer print:hidden"
+              className="text-[10px] font-black text-path-identity hover:underline cursor-pointer print:hidden"
             >
               {isAr ? 'إدارة القنوات في لوحة الانتشار ←' : '← Manage channels in the dashboard'}
             </button>
@@ -265,7 +268,7 @@ export const AcademicVisibilityReports: React.FC = () => {
             )}
             <button
               onClick={() => navigate(ROUTES.ASSETS)}
-              className="text-[10px] font-black text-indigo-500 hover:underline cursor-pointer print:hidden"
+              className="text-[10px] font-black text-path-identity hover:underline cursor-pointer print:hidden"
             >
               {isAr ? 'إدارة الأصول العلمية ←' : '← Manage scholarly assets'}
             </button>
@@ -293,7 +296,7 @@ export const AcademicVisibilityReports: React.FC = () => {
 
           <Card className="p-5 space-y-3">
             <h3 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center gap-2">
-              <School className="text-indigo-500" size={16} />
+              <School className="text-path-identity" size={16} />
               <span>{isAr ? 'الانتماءات الأكاديمية' : 'Academic Affiliations'}</span>
             </h3>
             {affiliations.length === 0 ? (
@@ -306,7 +309,7 @@ export const AcademicVisibilityReports: React.FC = () => {
                       {aff.organization_name}{aff.position_title ? ` — ${aff.position_title}` : ''}
                     </span>
                     {aff.is_current && (
-                      <span className="text-[8px] font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded shrink-0">
+                      <span className="text-[8px] font-bold text-success bg-action/10 border border-success/20 px-1.5 py-0.5 rounded shrink-0">
                         {isAr ? 'حالي' : 'Current'}
                       </span>
                     )}
@@ -316,7 +319,7 @@ export const AcademicVisibilityReports: React.FC = () => {
             )}
             <button
               onClick={() => navigate(ROUTES.PROFILE_AFFILIATIONS)}
-              className="text-[10px] font-black text-indigo-500 hover:underline cursor-pointer print:hidden"
+              className="text-[10px] font-black text-path-identity hover:underline cursor-pointer print:hidden"
             >
               {isAr ? 'إدارة الانتماءات ←' : '← Manage affiliations'}
             </button>
@@ -327,7 +330,7 @@ export const AcademicVisibilityReports: React.FC = () => {
         <div className="lg:col-span-7">
           <Card className="p-5 space-y-3">
             <h3 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center gap-2">
-              <Calendar className="text-indigo-500" size={16} />
+              <Calendar className="text-path-identity" size={16} />
               <span>{isAr ? 'الجدول الزمني للمنشورات' : 'Publication Timeline'}</span>
             </h3>
             {timeline.length === 0 ? (
@@ -352,7 +355,7 @@ export const AcademicVisibilityReports: React.FC = () => {
                         href={`https://doi.org/${a.doi}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="shrink-0 text-sky-500 hover:text-sky-600"
+                        className="shrink-0 text-info hover:text-info"
                         title="DOI"
                       >
                         <LinkIcon size={13} />

@@ -347,12 +347,12 @@ export const SmokeTestDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-4">
+      <div className="flex items-center justify-between border-b border-subtle pb-4">
         <div>
-          <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-50 m-0">
+          <h2 className="text-xl font-bold text-ink m-0">
             {language === 'ar' ? 'لوحة فحوصات الدخان والجاهزية (Smoke Tests)' : 'Baseline Diagnostics & Smoke Tests'}
           </h2>
-          <p className="text-xs text-zinc-500 m-0 mt-1">
+          <p className="text-xs text-muted m-0 mt-1">
             {language === 'ar' 
               ? 'أداة الفحص الذاتي لتأكيد عمل الوظائف المنهجية وتكامل الواجهات مع قاعدة البيانات والمحاكيات المحلية.' 
               : 'Diagnostic engine confirming frontend framework routes, rule engines, local storage, and statistic fallbacks.'}
@@ -362,7 +362,7 @@ export const SmokeTestDashboard: React.FC = () => {
         <button
           onClick={runAllTests}
           disabled={isRunning}
-          className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
+          className="px-4 py-2 bg-action hover:bg-action-hover text-on-action rounded-lg text-xs font-bold ds-transition flex items-center gap-1.5 cursor-pointer shadow-md"
         >
           <Play size={14} className={isRunning ? 'animate-spin' : ''} />
           <span>{isRunning ? (language === 'ar' ? 'جاري الفحص...' : 'Running Diagnostics...') : (language === 'ar' ? 'تشغيل اختبارات الدخان' : 'Run Diagnostics')}</span>
@@ -375,32 +375,32 @@ export const SmokeTestDashboard: React.FC = () => {
           {testCases.map((tc) => (
             <div 
               key={tc.id}
-              className="p-4 bg-white dark:bg-[#0c0c0f] border border-zinc-200 dark:border-zinc-800 rounded-xl flex items-start gap-4 shadow-sm"
+              className="p-4 bg-surface-elevated border border-subtle rounded-xl flex items-start gap-4"
             >
               <div className="mt-0.5 shrink-0">
-                {tc.status === 'PENDING' && <Settings size={20} className="text-zinc-400" />}
-                {tc.status === 'RUNNING' && <RefreshCw size={20} className="text-purple-600 animate-spin" />}
-                {tc.status === 'PASSED' && <CheckCircle size={20} className="text-emerald-500" />}
-                {tc.status === 'FAILED' && <XCircle size={20} className="text-rose-500" />}
+                {tc.status === 'PENDING' && <Settings size={20} className="text-muted" />}
+                {tc.status === 'RUNNING' && <RefreshCw size={20} className="text-ai animate-spin" />}
+                {tc.status === 'PASSED' && <CheckCircle size={20} className="text-success" />}
+                {tc.status === 'FAILED' && <XCircle size={20} className="text-danger" />}
               </div>
               <div className="space-y-1 flex-1">
                 <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-bold text-zinc-800 dark:text-zinc-100 m-0">
+                  <h4 className="text-xs font-bold text-ink m-0">
                     {language === 'ar' ? tc.nameAr : tc.nameEn}
                   </h4>
                   <span className={`text-[10px] font-bold ${
-                    tc.status === 'PENDING' ? 'text-zinc-400' :
-                    tc.status === 'RUNNING' ? 'text-purple-500' :
-                    tc.status === 'PASSED' ? 'text-emerald-500' : 'text-rose-500'
+                    tc.status === 'PENDING' ? 'text-muted' :
+                    tc.status === 'RUNNING' ? 'text-ai' :
+                    tc.status === 'PASSED' ? 'text-success' : 'text-danger'
                   }`}>
                     {tc.status}
                   </span>
                 </div>
-                <p className="text-[11px] text-zinc-500 m-0">
+                <p className="text-[11px] text-muted m-0">
                   {language === 'ar' ? tc.descriptionAr : tc.descriptionEn}
                 </p>
                 {tc.error && (
-                  <div className="mt-2 p-2 border border-rose-500/20 bg-rose-500/10 rounded text-[10px] text-rose-600 dark:text-rose-400 font-semibold font-mono">
+                  <div className="mt-2 p-2 border border-danger/20 bg-danger/10 rounded text-[10px] text-danger font-semibold font-mono">
                     Error: {tc.error}
                   </div>
                 )}
@@ -410,8 +410,8 @@ export const SmokeTestDashboard: React.FC = () => {
         </div>
 
         {/* Log Viewer */}
-        <div className="lg:col-span-1 bg-zinc-950 text-zinc-300 p-4 rounded-xl border border-zinc-800 flex flex-col h-[520px]">
-          <h3 className="text-xs font-bold text-zinc-400 m-0 pb-3 border-b border-zinc-800 flex items-center gap-1.5">
+        <div className="lg:col-span-1 bg-canvas text-secondary p-4 rounded-xl border border-subtle flex flex-col h-[520px]">
+          <h3 className="text-xs font-bold text-muted m-0 pb-3 border-b border-subtle flex items-center gap-1.5">
             <Database size={14} />
             {language === 'ar' ? 'سجل تشغيل الفحوصات' : 'Diagnostic Log Terminal'}
           </h3>
@@ -422,7 +422,7 @@ export const SmokeTestDashboard: React.FC = () => {
               </div>
             ))}
             {logs.length === 0 && (
-              <div className="text-zinc-500 italic text-center pt-20">
+              <div className="text-muted italic text-center pt-20">
                 {language === 'ar' ? 'بانتظار بدء تشغيل الفحص...' : 'Waiting to initiate checks...'}
               </div>
             )}

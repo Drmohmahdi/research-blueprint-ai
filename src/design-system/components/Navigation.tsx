@@ -87,13 +87,13 @@ export const Stepper: React.FC<StepperProps> = ({
 
         let badgeColor = 'bg-[var(--ds-surface-tertiary)] border-[var(--ds-border-default)] text-[var(--ds-text-secondary)]';
         if (isCurrent) {
-          badgeColor = 'bg-[var(--ds-primary)] border-[var(--ds-primary)] text-white shadow-sm';
+          badgeColor = 'bg-action border-[var(--ds-action-fill)] text-on-action shadow-sm';
         } else if (isCompleted) {
-          badgeColor = 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500';
+          badgeColor = 'bg-[var(--ds-success-soft)] border-[var(--ds-success)]/30 text-[var(--ds-success)]';
         } else if (hasError) {
-          badgeColor = 'bg-rose-500/10 border-rose-500/30 text-rose-500';
+          badgeColor = 'bg-[var(--ds-danger-soft)] border-[var(--ds-danger)]/30 text-[var(--ds-danger)]';
         } else if (needsReview) {
-          badgeColor = 'bg-amber-500/10 border-amber-500/30 text-amber-500';
+          badgeColor = 'bg-[var(--ds-warning-soft)] border-[var(--ds-warning)]/30 text-[var(--ds-warning)]';
         }
 
         const ArrowIcon = isRtl ? ChevronLeft : ChevronRight;
@@ -172,6 +172,8 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
 export interface PageHeaderProps {
   title: string;
   description?: string;
+  eyebrow?: string;
+  status?: React.ReactNode;
   actions?: React.ReactNode;
   breadcrumbs?: BreadcrumbItem[];
   className?: string;
@@ -180,6 +182,8 @@ export interface PageHeaderProps {
 export const PageHeader: React.FC<PageHeaderProps> = ({
   title,
   description,
+  eyebrow,
+  status,
   actions,
   breadcrumbs,
   className = ''
@@ -189,9 +193,15 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       {breadcrumbs && <Breadcrumbs items={breadcrumbs} />}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="space-y-1">
-          <h2 className="text-xl md:text-2xl font-black text-[var(--ds-text-primary)] m-0 leading-tight">
-            {title}
-          </h2>
+          {eyebrow && (
+            <p className="m-0 text-[10px] font-bold uppercase tracking-widest text-[var(--ds-text-muted)]">{eyebrow}</p>
+          )}
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-xl md:text-2xl font-black text-[var(--ds-text-primary)] m-0 leading-tight">
+              {title}
+            </h2>
+            {status}
+          </div>
           {description && (
             <p className="text-xs text-[var(--ds-text-muted)] leading-relaxed m-0">
               {description}
@@ -207,6 +217,17 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
     </div>
   );
 };
+
+export const PathPanel: React.FC<{
+  accent?: string;
+  children: React.ReactNode;
+  className?: string;
+}> = ({ accent = 'var(--ds-path-research)', children, className = '' }) => (
+  <section className={`relative overflow-hidden rounded-2xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-[var(--ds-text-primary)] shadow-[var(--ds-shadow-layered)] ${className}`}>
+    <span aria-hidden className="absolute inset-y-0 start-0 w-1" style={{ background: accent }} />
+    <div className="relative p-6 ps-7">{children}</div>
+  </section>
+);
 
 export interface SectionHeaderProps {
   title: string;
@@ -266,7 +287,7 @@ export const Table: React.FC<TableProps> = ({
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-[var(--ds-border-subtle)]">
+        <tbody className="divide-y divide-[var(--ds-border-subtle)] [&_tr]:ds-transition [&_tr:hover]:bg-[var(--ds-surface-secondary)]">
           {children}
         </tbody>
       </table>

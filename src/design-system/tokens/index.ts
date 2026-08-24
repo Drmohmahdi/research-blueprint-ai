@@ -5,6 +5,8 @@ import { radius } from './radius';
 import { shadows } from './shadows';
 import { motion } from './motion';
 import { breakpoints } from './breakpoints';
+import { brand, palette } from './brand';
+import { primitive, chartPalette, pathAccents, semanticStatus } from './primitives';
 
 export {
   colors,
@@ -13,5 +15,11 @@ export {
   radius,
   shadows,
   motion,
-  breakpoints
+  breakpoints,
+  brand,
+  palette,
+  primitive,
+  chartPalette,
+  pathAccents,
+  semanticStatus,
 };

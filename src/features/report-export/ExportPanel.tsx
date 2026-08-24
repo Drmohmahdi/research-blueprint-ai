@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useProject } from '../../context/ProjectContext';
 import { Card } from '../../design-system/components/Card';
+import { PathPanel } from '../../design-system/components/Navigation';
 import { FileText, Download, ShieldCheck, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { apiExportAcademicReport, apiVerifyReport, type ReportVerificationResult } from '../../utils/api';
 
@@ -93,31 +94,30 @@ export const ExportPanel: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12">
-      {/* Header Banner */}
-      <div className="bg-gradient-to-r from-purple-900/30 via-indigo-900/20 to-transparent border border-purple-500/20 rounded-2xl p-6 shadow-md">
+      <PathPanel accent="var(--ds-path-publication)">
         <div className="flex items-center gap-3 mb-2">
-          <div className="p-3 rounded-2xl bg-purple-600/20 text-purple-400">
+          <div className="p-3 rounded-2xl bg-[var(--ds-path-publication)]/10 text-path-publication">
             <FileText size={24} />
           </div>
           <div>
-            <h2 className="text-xl font-black text-[var(--ds-text-primary)] m-0">
+            <h2 className="text-xl font-black text-ink m-0">
               {isAr ? 'محرك التقارير والتصدير الأكاديمي المؤسسي' : 'Institutional Academic Export & Reporting Engine'}
             </h2>
-            <p className="text-xs text-[var(--ds-text-secondary)] m-0 mt-1">
+            <p className="text-xs text-secondary m-0 mt-1">
               {isAr
                 ? 'تصدير وثائق وتقارير أكاديمية محكمة بصيغ (PDF, DOCX, JSON) مع الحفاظ على النزاهة الرقمية والخصوصية وعزل المؤسسات'
                 : 'Generate verified academic reports in PDF, DOCX, and JSON with digital integrity, role-based redaction, and multi-tenant isolation'}
             </p>
           </div>
         </div>
-      </div>
+      </PathPanel>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Form: Export Configuration */}
         <Card className="p-6 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-3xl space-y-5 lg:col-span-2">
           <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)] flex items-center justify-between">
             <span>{isAr ? 'إعدادات وثيقة التقرير' : 'Report Document Configuration'}</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 font-mono">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-info/10 text-path-identity font-mono">
               Phase 05 Engine
             </span>
           </h3>
@@ -131,7 +131,7 @@ export const ExportPanel: React.FC = () => {
               <select
                 value={reportType}
                 onChange={e => setReportType(e.target.value as any)}
-                className="w-full text-xs font-medium p-2.5 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] focus:outline-none focus:border-purple-500"
+                className="w-full text-xs font-medium p-2.5 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] focus:outline-none focus:border-ai"
               >
                 <option value="RESEARCH_PROJECT">{isAr ? 'مخطط البحث العلمي (Research Blueprint)' : 'Research Blueprint'}</option>
                 <option value="LITERATURE_SYNTHESIS">{isAr ? 'توليف الأدبيات والتحليل البعدي (Meta-Analysis)' : 'Literature Synthesis & Meta-Analysis'}</option>
@@ -159,7 +159,7 @@ export const ExportPanel: React.FC = () => {
                     onClick={() => setFormat(fmt.id as any)}
                     className={`py-2 px-1 text-center text-xs font-bold rounded-xl border transition-all cursor-pointer ${
                       format === fmt.id
-                        ? 'bg-purple-600/20 border-purple-500 text-purple-400 shadow-sm'
+                        ? 'bg-action/20 border-ai text-ai shadow-sm'
                         : 'bg-[var(--ds-surface-secondary)] border-[var(--ds-border-subtle)] text-[var(--ds-text-muted)] hover:border-[var(--ds-border-default)]'
                     }`}
                   >
@@ -177,7 +177,7 @@ export const ExportPanel: React.FC = () => {
               <select
                 value={reportLang}
                 onChange={e => setReportLang(e.target.value as any)}
-                className="w-full text-xs font-medium p-2.5 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] focus:outline-none focus:border-purple-500"
+                className="w-full text-xs font-medium p-2.5 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] focus:outline-none focus:border-ai"
               >
                 <option value="ar">{isAr ? 'العربية (RTL كامل)' : 'Arabic (Full RTL)'}</option>
                 <option value="en">{isAr ? 'الإنجليزية (LTR)' : 'English (LTR)'}</option>
@@ -193,7 +193,7 @@ export const ExportPanel: React.FC = () => {
               <select
                 value={audience}
                 onChange={e => setAudience(e.target.value as any)}
-                className="w-full text-xs font-medium p-2.5 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] focus:outline-none focus:border-purple-500"
+                className="w-full text-xs font-medium p-2.5 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] focus:outline-none focus:border-ai"
               >
                 <option value="RESEARCHER">{isAr ? 'الباحث الرئيسي (Researcher Standard)' : 'Principal Researcher'}</option>
                 <option value="AUTHOR">{isAr ? 'المؤلف (مع حجب هوية المحكمين والملاحظات السرية)' : 'Author (Double-Blind Redacted)'}</option>
@@ -223,7 +223,7 @@ export const ExportPanel: React.FC = () => {
             <button
               onClick={handleExport}
               disabled={isGenerating}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-600/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-action hover:bg-action-hover text-on-action font-bold text-xs flex items-center justify-center gap-2 shadow-[var(--ds-shadow-glow)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ds-transition"
             >
               {isGenerating ? (
                 <>
@@ -239,7 +239,7 @@ export const ExportPanel: React.FC = () => {
             </button>
 
             {lastGenerated && (
-              <div className="flex items-center gap-2 text-emerald-400 text-xs font-semibold">
+              <div className="flex items-center gap-2 text-success text-xs font-semibold">
                 <CheckCircle2 size={16} />
                 <span>{isAr ? 'تم تنزيل المستند بنجاح' : 'Document exported successfully'}</span>
               </div>
@@ -247,15 +247,15 @@ export const ExportPanel: React.FC = () => {
           </div>
 
           {errorMsg && (
-            <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2">
+            <div className="p-3.5 rounded-xl bg-danger/10 border border-danger/20 text-danger text-xs flex items-center gap-2">
               <AlertCircle size={16} className="shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {lastGenerated?.integrityHash && (
-            <div className="p-3 rounded-xl bg-indigo-950/40 border border-indigo-500/20 text-[10px] text-indigo-300 font-mono flex items-center gap-2 break-all">
-              <ShieldCheck size={14} className="shrink-0 text-indigo-400" />
+            <div className="p-3 rounded-xl bg-[var(--ds-path-identity)]/10 border border-[var(--ds-path-identity)]/20 text-[10px] text-path-identity font-mono flex items-center gap-2 break-all">
+              <ShieldCheck size={14} className="shrink-0 text-path-identity" />
               <span>SHA-256 Integrity: {lastGenerated.integrityHash}</span>
             </div>
           )}
@@ -264,7 +264,7 @@ export const ExportPanel: React.FC = () => {
         {/* Right Panel: Academic Verification & Document Integrity */}
         <Card className="p-6 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-3xl space-y-4">
           <div className="flex items-center gap-2 pb-3 border-b border-[var(--ds-border-subtle)]">
-            <ShieldCheck size={18} className="text-purple-400" />
+            <ShieldCheck size={18} className="text-ai" />
             <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0">
               {isAr ? 'التحقق من نزاهة الوثائق' : 'Document Verification'}
             </h3>
@@ -286,14 +286,14 @@ export const ExportPanel: React.FC = () => {
                 placeholder="e.g. BSR-A1B2-C3D4"
                 value={verifCode}
                 onChange={e => setVerifCode(e.target.value)}
-                className="w-full text-xs font-mono p-2.5 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] focus:outline-none focus:border-purple-500 uppercase"
+                className="w-full text-xs font-mono p-2.5 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] focus:outline-none focus:border-ai uppercase"
               />
             </div>
 
             <button
               type="submit"
               disabled={isVerifying || !verifCode.trim()}
-              className="w-full py-2.5 rounded-xl bg-purple-600/10 hover:bg-purple-600/20 text-purple-400 border border-purple-500/20 text-xs font-bold transition-all cursor-pointer disabled:opacity-40"
+              className="w-full py-2.5 rounded-xl bg-action/10 hover:bg-action/20 text-ai border border-ai/20 text-xs font-bold transition-all cursor-pointer disabled:opacity-40"
             >
               {isVerifying ? (
                 <span className="flex items-center justify-center gap-1.5">
@@ -309,15 +309,15 @@ export const ExportPanel: React.FC = () => {
           {verifResult && (
             <div className={`p-3.5 rounded-xl border text-xs space-y-2 ${
               verifResult.valid
-                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
-                : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                ? 'bg-action/10 border-success/20 text-success'
+                : 'bg-danger/10 border-danger/20 text-danger'
             }`}>
               <div className="font-bold flex items-center gap-1.5">
                 {verifResult.valid ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
                 <span>{verifResult.message}</span>
               </div>
               {verifResult.valid && (
-                <div className="space-y-1 text-[11px] opacity-90 pt-1 border-t border-emerald-500/20">
+                <div className="space-y-1 text-[11px] opacity-90 pt-1 border-t border-success/20">
                   <div><strong>{isAr ? 'الجهة:' : 'Issuer:'}</strong> {verifResult.organization_name}</div>
                   <div><strong>{isAr ? 'نوع التقرير:' : 'Type:'}</strong> {verifResult.report_type}</div>
                   <div><strong>{isAr ? 'تاريخ الإصدار:' : 'Issued:'}</strong> {verifResult.generated_at?.slice(0, 10)}</div>

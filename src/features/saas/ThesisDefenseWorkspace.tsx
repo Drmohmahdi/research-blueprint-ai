@@ -6,7 +6,6 @@ import { WorkspaceCommentsPanel } from './components/WorkspaceCommentsPanel';
 import { ThesisDefenseStepContent } from './components/ThesisDefenseStepContent';
 import { THESIS_DEFENSE_STEPS } from '../../config/thesisDefenseSteps';
 import { 
-  Sparkles,
   Unlock,
   ChevronRight,
   ChevronLeft,
@@ -14,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Card } from '../../design-system/components/Card';
 import { Button } from '../../design-system/components/Button';
+import { PathPanel } from '../../design-system/components/Navigation';
 
 export const ThesisDefenseWorkspace: React.FC = () => {
   const { stepId } = useParams<{ stepId?: string }>();
@@ -58,40 +58,35 @@ export const ThesisDefenseWorkspace: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-[1550px] mx-auto pb-24">
-      {/* ── Path Header ── */}
-      <Card className="p-6 bg-gradient-to-r from-emerald-900 via-teal-950 to-zinc-950 border-[var(--ds-border-subtle)] text-white rounded-3xl shadow-xl overflow-hidden relative">
-        <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-          <Sparkles size={160} />
-        </div>
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+      <PathPanel accent="var(--ds-path-research)">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-md text-[9px] font-black bg-emerald-500/25 border border-emerald-400/30 text-emerald-300 tracking-wider">
+              <span className="px-2.5 py-0.5 rounded-md text-[9px] font-black bg-[var(--ds-success-soft)] border border-[var(--ds-success)]/30 text-[var(--ds-success)] tracking-wider">
                 {language === 'ar' ? 'مساحة الاستعداد للمناقشة' : 'THESIS DEFENSE WORKSPACE'}
               </span>
               {isSecureMode && (
-                <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px] font-bold">
+                <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--ds-success-soft)] text-[var(--ds-success)] border border-[var(--ds-success)]/30 text-[9px] font-bold">
                   <Unlock size={10} />
                   <span>{language === 'ar' ? 'وضع آمن' : 'SECURE'}</span>
                 </div>
               )}
             </div>
-            <h3 className="text-xl md:text-3xl font-black m-0 leading-tight">
+            <h3 className="text-xl md:text-3xl font-black m-0 leading-tight text-ink">
               {language === 'ar' ? activeProject.titleAr : activeProject.titleEn}
             </h3>
           </div>
 
           <div className="flex flex-wrap items-center gap-4 shrink-0">
-            {/* Progress bar */}
-            <div className="text-center lg:text-right space-y-1">
-              <div className="text-xs font-black text-emerald-300">{progressPct}% {language === 'ar' ? 'مكتمل' : 'Completed'}</div>
-              <div className="h-2 w-32 bg-zinc-800 rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-500 transition-all duration-300" style={{ width: `${progressPct}%` }} />
+            <div className="text-center lg:text-end space-y-1">
+              <div className="text-xs font-black text-[var(--ds-primary)]">{progressPct}% {language === 'ar' ? 'مكتمل' : 'Completed'}</div>
+              <div className="h-2 w-32 bg-[var(--ds-surface-tertiary)] rounded-full overflow-hidden">
+                <div className="h-full bg-[var(--ds-primary)] ds-transition" style={{ width: `${progressPct}%` }} />
               </div>
             </div>
           </div>
         </div>
-      </Card>
+      </PathPanel>
 
       {/* Main Workspace Layout */}
       <div className="flex flex-col lg:flex-row gap-6 items-start">
@@ -106,17 +101,17 @@ export const ThesisDefenseWorkspace: React.FC = () => {
               <Card 
                 key={step.id} 
                 onClick={() => setActiveStep(step.id)}
-                className={`p-3 cursor-pointer transition-all border-l-4 rounded-xl shadow-sm hover:-translate-y-0.5 ${
+                className={`p-3 cursor-pointer ds-transition border-s-4 rounded-xl shadow-sm ${
                   isActive 
-                    ? 'border-l-emerald-600 bg-[var(--ds-surface-secondary)]' 
+                    ? 'border-s-[var(--ds-success)] bg-[var(--ds-surface-secondary)]'
                     : isCompleted
-                      ? 'border-l-teal-500 bg-[var(--ds-surface-primary)] opacity-80'
-                      : 'border-l-transparent bg-[var(--ds-surface-primary)] opacity-70 hover:opacity-100'
+                      ? 'border-s-[var(--ds-success)] bg-[var(--ds-surface-primary)] opacity-80'
+                      : 'border-s-transparent bg-[var(--ds-surface-primary)] opacity-70 hover:opacity-100'
                 }`}
               >
                 <div className="flex items-center gap-2">
                   <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
-                    isActive ? 'bg-emerald-600 text-white' : isCompleted ? 'bg-teal-500 text-white' : 'bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] border border-[var(--ds-border-subtle)]'
+                    isActive ? 'bg-action text-on-action' : isCompleted ? 'bg-success text-white' : 'bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] border border-[var(--ds-border-subtle)]'
                   }`}>
                     {isCompleted ? <Check size={10} /> : idx + 1}
                   </div>

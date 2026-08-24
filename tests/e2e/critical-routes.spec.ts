@@ -5,11 +5,16 @@ import { login } from './helpers';
 const criticalRoutes = [
   '/app',
   '/app/research',
+  '/app/research/lifecycle',
+  '/app/research/data-analysis',
   '/app/research/literature/synthesizer',
   '/app/search',
   '/app/promotion',
   '/app/peer-review',
   '/app/research/study-design/assistant',
+  '/app/publishing',
+  '/app/profile',
+  '/app/visibility',
   '/saas/billing',
 ];
 
@@ -34,13 +39,31 @@ test('@critical keyboard navigation and notification drawer', async ({ page }) =
   await notifications.focus();
   await page.keyboard.press('Enter');
   await expect(page.getByRole('dialog', { name: /مركز الإشعارات|notification center/ })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog', { name: /مركز الإشعارات|notification center/ })).toHaveCount(0);
+});
+
+test('@critical keyboard reaches Data Studio primary action', async ({ page }) => {
+  await page.goto('/app/research/data-analysis');
+  await expect(page.getByRole('heading', { name: /بصيرة للبيانات|Research Data/ })).toBeVisible();
+  const upload = page.getByRole('button', { name: 'مجموعة بيانات', exact: true }).or(page.getByRole('button', { name: 'Dataset', exact: true }));
+  await upload.focus();
+  await expect(upload).toBeFocused();
+});
+
+test('@critical lifecycle command center preserves project context and keyboard access', async ({ page }) => {
+  await page.goto('/app/research/lifecycle');
+  await expect(page.getByRole('heading', { name: /مركز قيادة المشروع البحثي|Research Project Command Center/ })).toBeVisible();
+  const rail = page.getByRole('region', { name: /مراحل دورة حياة المشروع|Project lifecycle stages/ });
+  await rail.focus();
+  await expect(rail).toBeFocused();
+  await expect(page.getByText(/الإجراء الأكاديمي التالي|Next academic action/)).toBeVisible();
 });
 
 test('@a11y critical authenticated routes have no serious axe violations', async ({ page }) => {
-  for (const route of ['/app', '/app/search', '/app/research/study-design/assistant', '/saas/billing', '/app/peer-review']) {
-    await page.goto(route);
-    // Audit the settled UI, not the 180 ms theme transition's blended colors.
-    await page.waitForTimeout(250);
+  for (const route of ['/app', '/app/search', '/app/research/lifecycle', '/app/research/data-analysis', '/app/research/study-design/assistant', '/app/publishing', '/app/peer-review', '/app/profile', '/saas/billing']) {
+    await page.goto(route, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(400);
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
     const serious = results.violations.filter((violation) => violation.impact === 'critical' || violation.impact === 'serious');
     expect(serious, `${route}: ${serious.map((v) => `${v.id}: ${v.help}`).join('; ')}`).toEqual([]);

@@ -46,7 +46,7 @@ export const ThesisDefenseStepContent: React.FC<ThesisDefenseStepContentProps> =
 
         <div className="flex items-center gap-2 shrink-0">
           {isCompleted ? (
-            <Button variant="secondary" onClick={handleMarkStepIncomplete} className="px-3.5 py-1.5 text-[10px] font-black rounded-xl text-emerald-600 cursor-pointer">
+            <Button variant="secondary" onClick={handleMarkStepIncomplete} className="px-3.5 py-1.5 text-[10px] font-black rounded-xl text-success cursor-pointer">
               <Check size={12} />
               <span>{language === 'ar' ? 'مكتملة ✓' : 'Completed ✓'}</span>
             </Button>

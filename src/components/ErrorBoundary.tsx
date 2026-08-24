@@ -41,11 +41,11 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
     return (
       <div
-        className="flex flex-col items-center justify-center min-h-[300px] p-8 rounded-2xl border border-rose-500/20 bg-rose-500/5 text-center gap-5"
+        className="flex flex-col items-center justify-center min-h-[300px] p-8 rounded-2xl border border-danger/20 bg-danger/5 text-center gap-5"
         role="alert"
       >
-        <div className="p-4 rounded-2xl bg-rose-500/10">
-          <AlertTriangle size={36} className="text-rose-500" />
+        <div className="p-4 rounded-2xl bg-danger/10">
+          <AlertTriangle size={36} className="text-danger" />
         </div>
 
         <div className="space-y-2">
@@ -60,7 +60,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
           {/* Show error details in development */}
           {import.meta.env.DEV && error && (
-            <pre className="mt-3 p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl text-[10px] text-rose-500 font-mono text-right overflow-x-auto max-w-xl mx-auto">
+            <pre className="mt-3 p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl text-[10px] text-danger font-mono text-right overflow-x-auto max-w-xl mx-auto">
               {error.message}
             </pre>
           )}
@@ -69,7 +69,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
         <div className="flex items-center gap-3">
           <button
             onClick={this.handleReset}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold cursor-pointer transition-colors shadow-md"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-action hover:bg-action-hover text-on-action text-sm font-bold cursor-pointer ds-transition shadow-md"
           >
             <RefreshCw size={14} />
             <span>{isAr ? 'إعادة المحاولة' : 'Try Again'}</span>

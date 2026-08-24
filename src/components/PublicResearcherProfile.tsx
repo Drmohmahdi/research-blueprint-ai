@@ -59,7 +59,7 @@ export const PublicResearcherProfile: React.FC = () => {
   if (notFound || !profile) {
     return wrap(
       <div className="text-center py-24 space-y-3">
-        <ShieldAlert className="mx-auto text-rose-500" size={32} />
+        <ShieldAlert className="mx-auto text-danger" size={32} />
         <h1 className="text-lg font-bold">{isAr ? 'هذا الملف غير متاح' : 'This profile is not available'}</h1>
         <p className="text-sm text-[var(--ds-text-secondary)]">
           {isAr
@@ -91,7 +91,7 @@ export const PublicResearcherProfile: React.FC = () => {
       <div className="flex justify-end">
         <button
           onClick={() => setIsAr(v => !v)}
-          className="text-[11px] font-bold text-indigo-500 hover:underline cursor-pointer"
+          className="text-[11px] font-bold text-path-identity hover:underline cursor-pointer"
         >
           {isAr ? 'English' : 'عربي'}
         </button>
@@ -108,8 +108,8 @@ export const PublicResearcherProfile: React.FC = () => {
         )}
         <div className="space-y-2 min-w-0">
           <div className="flex items-center gap-2">
-            <Globe size={16} className="text-indigo-400" />
-            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+            <Globe size={16} className="text-path-identity" />
+            <span className="text-[10px] font-black text-path-identity uppercase tracking-widest">
               {isAr ? 'الملف الأكاديمي العام' : 'Public Academic Profile'}
             </span>
           </div>
@@ -149,7 +149,7 @@ export const PublicResearcherProfile: React.FC = () => {
               href={ident.profile_url || '#'}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] hover:border-indigo-500/40 text-[var(--ds-text-secondary)]"
+              className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] hover:border-[var(--ds-path-identity)]/40 text-[var(--ds-text-secondary)]"
             >
               <span>{getChannelLabel(ident.identifier_type, isAr)}</span>
               {ident.profile_url && <ExternalLink size={11} />}
@@ -169,7 +169,7 @@ export const PublicResearcherProfile: React.FC = () => {
               <div key={idx} className="flex items-center justify-between text-sm p-2.5 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg">
                 <span className="font-bold">{aff.organization_name}{aff.position_title ? ` — ${aff.position_title}` : ''}</span>
                 {aff.is_current && (
-                  <span className="text-[9px] font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded shrink-0">
+                  <span className="text-[9px] font-bold text-success bg-action/10 border border-success/20 px-1.5 py-0.5 rounded shrink-0">
                     {isAr ? 'حالي' : 'Current'}
                   </span>
                 )}
@@ -190,7 +190,7 @@ export const PublicResearcherProfile: React.FC = () => {
               <div key={a.id} className="p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <span className="inline-block mb-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                    <span className="inline-block mb-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-ai/10 text-ai border border-ai/20">
                       {ASSET_TYPE_LABELS[a.asset_type] ? (isAr ? ASSET_TYPE_LABELS[a.asset_type].ar : ASSET_TYPE_LABELS[a.asset_type].en) : a.asset_type}
                     </span>
                     <p className="text-sm font-bold m-0">{isAr ? (a.title_ar || a.title_en) : (a.title_en || a.title_ar)}</p>
@@ -202,7 +202,7 @@ export const PublicResearcherProfile: React.FC = () => {
                     </p>
                   </div>
                   {a.doi && (
-                    <a href={`https://doi.org/${a.doi}`} target="_blank" rel="noreferrer" className="shrink-0 text-sky-500 hover:text-sky-600">
+                    <a href={`https://doi.org/${a.doi}`} target="_blank" rel="noreferrer" className="shrink-0 text-info hover:text-info">
                       <LinkIcon size={13} />
                     </a>
                   )}

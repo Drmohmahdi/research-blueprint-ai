@@ -193,7 +193,7 @@ export const SearchPage: React.FC = () => {
           }}
           className={`px-3 py-1.5 rounded-full text-[11px] font-extrabold border transition-colors cursor-pointer ${
             activeDomains.length === 0
-              ? 'bg-[var(--ds-primary)] text-white border-[var(--ds-primary)]'
+              ? 'bg-[var(--ds-primary-soft)] text-ink border-[var(--ds-primary)]'
               : 'bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] border-[var(--ds-border-subtle)]'
           }`}
         >
@@ -205,7 +205,7 @@ export const SearchPage: React.FC = () => {
             onClick={() => toggleDomain(d)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-extrabold border transition-colors cursor-pointer ${
               activeDomains.includes(d)
-                ? 'bg-[var(--ds-primary)] text-white border-[var(--ds-primary)]'
+                ? 'bg-[var(--ds-primary-soft)] text-ink border-[var(--ds-primary)]'
                 : 'bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] border-[var(--ds-border-subtle)]'
             }`}
           >

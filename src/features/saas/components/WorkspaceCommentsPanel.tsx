@@ -25,7 +25,7 @@ export const WorkspaceCommentsPanel: React.FC<WorkspaceCommentsPanelProps> = ({ 
   return (
     <Card className="p-5 border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] rounded-3xl space-y-4 shadow-sm text-xs font-bold">
       <h5 className="text-xs font-black text-[var(--ds-text-muted)] uppercase tracking-widest flex items-center gap-1.5 border-b border-[var(--ds-border-subtle)] pb-2 m-0">
-        <MessageSquare size={15} className="text-purple-600" />
+        <MessageSquare size={15} className="text-ai" />
         <span>{language === 'ar' ? 'ملاحظات المشرف للخطوة' : 'Step Supervisor Notes'}</span>
       </h5>
       
@@ -66,12 +66,12 @@ export const WorkspaceCommentsPanel: React.FC<WorkspaceCommentsPanelProps> = ({ 
             <p className="m-0 mt-1 text-[10px] text-[var(--ds-text-secondary)] leading-relaxed font-semibold">{comm.contentAr}</p>
             <div className="flex justify-between items-center mt-2">
               <span className={`px-1.5 py-0.5 rounded text-[7px] font-black uppercase ${
-                comm.priority === 'CRITICAL' ? 'bg-rose-500/10 text-rose-500' : 'bg-amber-500/10 text-amber-500'
+                comm.priority === 'CRITICAL' ? 'bg-danger/10 text-danger' : 'bg-warning/10 text-warning'
               }`}>{comm.priority}</span>
               {!comm.resolved && (
                 <button 
                   onClick={() => handleResolveComment(comm.id)}
-                  className="text-[8px] text-emerald-600 hover:underline cursor-pointer bg-transparent border-none font-bold"
+                  className="text-[8px] text-success hover:underline cursor-pointer bg-transparent border-none font-bold"
                 >
                   {language === 'ar' ? 'حل الملاحظة ✓' : 'Resolve'}
                 </button>

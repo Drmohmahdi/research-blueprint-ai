@@ -88,7 +88,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
             </div>
             <button
               onClick={saveConceptualStep}
-              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold border-none cursor-pointer"
+              className="px-4 py-2 bg-action hover:bg-action-hover text-on-action rounded-lg font-bold border-none cursor-pointer"
             >
               {isAr ? 'حفظ البيانات' : 'Save Details'}
             </button>
@@ -127,7 +127,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
             </div>
             <button
               onClick={saveConceptualStep}
-              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold border-none cursor-pointer"
+              className="px-4 py-2 bg-action hover:bg-action-hover text-on-action rounded-lg font-bold border-none cursor-pointer"
             >
               {isAr ? 'حفظ البيانات' : 'Save Details'}
             </button>
@@ -175,7 +175,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
           </h3>
           <div className="bg-[var(--ds-surface-secondary)] p-4 rounded-xl border border-[var(--ds-border-subtle)] space-y-4 text-xs">
             <div>
-              <h4 className="font-bold text-purple-600 dark:text-purple-400 mb-2">{isAr ? 'أسئلة الدراسة المفتوحة:' : 'Research Questions:'}</h4>
+              <h4 className="font-bold text-ai mb-2">{isAr ? 'أسئلة الدراسة المفتوحة:' : 'Research Questions:'}</h4>
               <ul className="list-decimal list-inside space-y-1 text-[var(--ds-text-secondary)]">
                 {project.questions?.map((q) => (
                   <li key={q.id}>{isAr ? q.textAr : q.textEn}</li>
@@ -183,7 +183,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
               </ul>
             </div>
             <div className="border-t border-[var(--ds-border-subtle)] pt-3">
-              <h4 className="font-bold text-emerald-600 dark:text-emerald-400 mb-2">{isAr ? 'الفرضيات الإحصائية المقابلة:' : 'Corresponding Hypotheses:'}</h4>
+              <h4 className="font-bold text-success mb-2">{isAr ? 'الفرضيات الإحصائية المقابلة:' : 'Corresponding Hypotheses:'}</h4>
               <ul className="list-disc list-inside space-y-1 text-[var(--ds-text-secondary)]">
                 {project.hypotheses?.map((h) => (
                   <li key={h.id}>{isAr ? h.textAr : h.textEn}</li>
@@ -269,7 +269,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
             </p>
             {project.variables?.filter(v => v.type === 'dependent').map((v) => (
               <div key={v.id} className="p-2.5 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg">
-                <span className="font-bold block mb-1 text-purple-600 dark:text-purple-400">{v.nameAr}</span>
+                <span className="font-bold block mb-1 text-ai">{v.nameAr}</span>
                 <div className="grid grid-cols-2 gap-2 text-[10px] text-[var(--ds-text-secondary)]">
                   <span>{isAr ? 'نوع الأداة: اختبار تحصيلي' : 'Instrument: Test'}</span>
                   <span>{isAr ? 'طريقة الصدق: صدق المحتوى والتحكيم' : 'Validity: Content & Panel review'}</span>
@@ -293,7 +293,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
             {project.hypotheses?.map((h, idx) => (
               <div key={h.id} className="p-2.5 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg flex justify-between items-center">
                 <span>{h.textAr}</span>
-                <span className="px-2 py-0.5 bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 rounded font-bold text-[10px]">
+                <span className="px-2 py-0.5 bg-ai/10 text-ai dark:bg-ai/10 dark:text-ai rounded font-bold text-[10px]">
                   {idx === 0 ? 'ANCOVA' : 'Independent t-test'}
                 </span>
               </div>

@@ -303,7 +303,7 @@ export const ReviewerDashboard: React.FC = () => {
             <h2 className="text-2xl font-bold text-[var(--ds-text-primary)]">
               {isAr ? 'منظومة التحكيم العلمي ومراجعة الأقران' : 'Academic Peer Review System'}
             </h2>
-            <span className="text-xs px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/20">
+            <span className="text-xs px-3 py-1 rounded-full bg-action/10 text-success font-semibold border border-success/20">
               {isAr ? 'إصدار مؤسسي معتمد' : 'Enterprise Verified'}
             </span>
           </div>
@@ -320,7 +320,7 @@ export const ReviewerDashboard: React.FC = () => {
             onClick={() => setActiveTab('my_reviews')}
             className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
               activeTab === 'my_reviews'
-                ? 'bg-[var(--ds-surface-card)] text-emerald-600 dark:text-emerald-400 shadow-sm'
+                ? 'bg-[var(--ds-surface-card)] text-success shadow-sm'
                 : 'text-[var(--ds-text-muted)] hover:text-[var(--ds-text-primary)]'
             }`}
           >
@@ -330,7 +330,7 @@ export const ReviewerDashboard: React.FC = () => {
             onClick={() => setActiveTab('editorial_cases')}
             className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
               activeTab === 'editorial_cases'
-                ? 'bg-[var(--ds-surface-card)] text-emerald-600 dark:text-emerald-400 shadow-sm'
+                ? 'bg-[var(--ds-surface-card)] text-success shadow-sm'
                 : 'text-[var(--ds-text-muted)] hover:text-[var(--ds-text-primary)]'
             }`}
           >
@@ -342,8 +342,8 @@ export const ReviewerDashboard: React.FC = () => {
       {actionMessage && (
         <div className={`p-4 rounded-xl text-sm flex items-center gap-3 border ${
           actionMessage.type === 'success'
-            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-            : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
+            ? 'bg-action/10 text-success border-success/20'
+            : 'bg-danger/10 text-danger border-danger/20'
         }`}>
           {actionMessage.type === 'success' ? <CheckCircle2 className="w-5 h-5 flex-shrink-0" /> : <AlertTriangle className="w-5 h-5 flex-shrink-0" />}
           <span>{actionMessage.text}</span>
@@ -358,12 +358,12 @@ export const ReviewerDashboard: React.FC = () => {
           <div className="lg:col-span-4 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-bold text-[var(--ds-text-primary)] flex items-center gap-2">
-                <ListChecks className="w-4 h-4 text-emerald-500" />
+                <ListChecks className="w-4 h-4 text-success" />
                 <span>{isAr ? 'قائمة المهام المسندة' : 'Assigned Manuscripts'}</span>
               </h2>
               <button 
                 onClick={loadMyAssignments}
-                className="text-xs text-[var(--ds-text-muted)] hover:text-emerald-500 flex items-center gap-1"
+                className="text-xs text-[var(--ds-text-muted)] hover:text-success flex items-center gap-1"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 <span>{isAr ? 'تحديث' : 'Refresh'}</span>
@@ -376,7 +376,7 @@ export const ReviewerDashboard: React.FC = () => {
               </div>
             ) : assignments.length === 0 ? (
               <Card className="p-6 text-center text-[var(--ds-text-muted)] text-sm">
-                <FileText className="w-10 h-10 mx-auto mb-2 text-slate-400 opacity-50" />
+                <FileText className="w-10 h-10 mx-auto mb-2 text-muted opacity-50" />
                 <p>{isAr ? 'لا توجد مهام تحكيم مسندة إليك حالياً.' : 'No review assignments found.'}</p>
               </Card>
             ) : (
@@ -389,16 +389,16 @@ export const ReviewerDashboard: React.FC = () => {
                       onClick={() => selectAssignment(asg)}
                       className={`p-4 rounded-xl border cursor-pointer transition-all ${
                         isSelected
-                          ? 'bg-[var(--ds-surface-card)] border-emerald-500 ring-1 ring-emerald-500'
-                          : 'bg-[var(--ds-surface-sunken)] border-[var(--ds-border-subtle)] hover:border-slate-400'
+                          ? 'bg-[var(--ds-surface-card)] border-success ring-1 ring-action'
+                          : 'bg-[var(--ds-surface-sunken)] border-[var(--ds-border-subtle)] hover:border-strong'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <span className={`text-xs px-2.5 py-0.5 rounded-full font-semibold ${
-                          asg.status === 'SUBMITTED' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' :
-                          asg.status === 'ACCEPTED' ? 'bg-blue-500/10 text-blue-600 border border-blue-500/20' :
-                          asg.status === 'DECLINED' ? 'bg-rose-500/10 text-rose-600 border border-rose-500/20' :
-                          'bg-amber-500/10 text-amber-600 border border-amber-500/20'
+                          asg.status === 'SUBMITTED' ? 'bg-action/10 text-success border border-success/20' :
+                          asg.status === 'ACCEPTED' ? 'bg-info/10 text-path-publication border border-info/20' :
+                          asg.status === 'DECLINED' ? 'bg-danger/10 text-danger border border-danger/20' :
+                          'bg-warning/10 text-warning border border-warning/20'
                         }`}>
                           {asg.status}
                         </span>
@@ -437,7 +437,7 @@ export const ReviewerDashboard: React.FC = () => {
                 <Card className="p-6 space-y-4">
                   <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-3">
                     <h3 className="text-base font-bold text-[var(--ds-text-primary)] flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-emerald-500" />
+                      <FileText className="w-5 h-5 text-success" />
                       <span>{activeCaseDetails.title_ar}</span>
                     </h3>
                     <span className="text-xs px-2.5 py-1 rounded bg-[var(--ds-surface-sunken)] text-[var(--ds-text-muted)] border border-[var(--ds-border-subtle)]">
@@ -453,8 +453,8 @@ export const ReviewerDashboard: React.FC = () => {
 
                 {/* Invitation Action if INVITED */}
                 {selectedAssignment.status === 'INVITED' && (
-                  <Card className="p-6 bg-amber-500/5 border-amber-500/20 space-y-4">
-                    <h3 className="text-base font-bold text-amber-700 dark:text-amber-300 flex items-center gap-2">
+                  <Card className="p-6 bg-warning/5 border-warning/20 space-y-4">
+                    <h3 className="text-base font-bold text-warning flex items-center gap-2">
                       <AlertTriangle className="w-5 h-5" />
                       <span>{isAr ? 'دعوة تحكيم جديدة — يرجى تأكيد القبول أو الاعتذار' : 'New Review Invitation'}</span>
                     </h3>
@@ -462,11 +462,11 @@ export const ReviewerDashboard: React.FC = () => {
                       {isAr ? 'يرجى مراجعة ملخص البحث أعلاه وتأكيد خلو التحكيم من أي تضارب للمصالح قبل البدء.' : 'Please confirm acceptance and absence of conflict of interest.'}
                     </p>
                     <div className="flex gap-3 pt-2">
-                      <Button onClick={handleAcceptAssignment} className="bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-2">
+                      <Button onClick={handleAcceptAssignment} className="flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4" />
                         <span>{isAr ? 'قبول التحكيم والبدء' : 'Accept Assignment'}</span>
                       </Button>
-                      <Button onClick={handleDeclineAssignment} variant="secondary" className="border-rose-300 text-rose-600 hover:bg-rose-50">
+                      <Button onClick={handleDeclineAssignment} variant="secondary" className="border-danger text-danger hover:bg-danger/10">
                         <span>{isAr ? 'الاعتذار' : 'Decline'}</span>
                       </Button>
                     </div>
@@ -478,11 +478,11 @@ export const ReviewerDashboard: React.FC = () => {
                   <Card className="p-6 space-y-6">
                     <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-3">
                       <h3 className="text-base font-bold text-[var(--ds-text-primary)] flex items-center gap-2">
-                        <ListChecks className="w-5 h-5 text-emerald-500" />
+                        <ListChecks className="w-5 h-5 text-success" />
                         <span>{rubric.name_ar}</span>
                       </h3>
                       {isSubmitted && (
-                        <span className="text-xs px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+                        <span className="text-xs px-3 py-1 rounded-full bg-action/10 text-success border border-success/20 flex items-center gap-1.5">
                           <Lock className="w-3.5 h-3.5" />
                           <span>{isAr ? 'تم تسليم التقرير بنجاح' : 'Submitted'}</span>
                         </span>
@@ -495,7 +495,7 @@ export const ReviewerDashboard: React.FC = () => {
                           <div className="flex items-center justify-between">
                             <div className="font-semibold text-sm text-[var(--ds-text-primary)]">
                               {idx + 1}. {criterion.title_ar}
-                              {criterion.is_mandatory && <span className="text-rose-500 text-xs mr-2">*</span>}
+                              {criterion.is_mandatory && <span className="text-danger text-xs mr-2">*</span>}
                             </div>
                             <span className="text-xs text-[var(--ds-text-muted)] bg-[var(--ds-surface-card)] px-2 py-0.5 rounded border border-[var(--ds-border-subtle)]">
                               {criterion.weight * 100}%
@@ -518,8 +518,8 @@ export const ReviewerDashboard: React.FC = () => {
                                     onClick={() => setScores(prev => ({ ...prev, [criterion.id]: val }))}
                                     className={`w-7 h-7 rounded-lg text-xs font-bold transition-all ${
                                       isSelected
-                                        ? 'bg-emerald-600 text-white ring-2 ring-emerald-400'
-                                        : 'bg-[var(--ds-surface-card)] text-[var(--ds-text-secondary)] hover:bg-slate-200 dark:hover:bg-slate-700 border border-[var(--ds-border-subtle)]'
+                                        ? 'bg-action text-on-action ring-2 ring-[var(--ds-action-fill)]'
+                                        : 'bg-[var(--ds-surface-card)] text-[var(--ds-text-secondary)] hover:bg-surface-subtle border border-[var(--ds-border-subtle)]'
                                     } ${isSubmitted ? 'opacity-70 cursor-not-allowed' : ''}`}
                                   >
                                     {val}
@@ -535,7 +535,7 @@ export const ReviewerDashboard: React.FC = () => {
                               value={criterionComments[criterion.id] || ''}
                               onChange={e => setCriterionComments(prev => ({ ...prev, [criterion.id]: e.target.value }))}
                               placeholder={isAr ? 'ملاحظات المحكم التفصيلية حول هذا المعيار...' : 'Criterion specific comments...'}
-                              className="w-full p-2.5 rounded-lg bg-[var(--ds-surface-card)] border border-[var(--ds-border-subtle)] text-xs text-[var(--ds-text-primary)] focus:ring-1 focus:ring-emerald-500"
+                              className="w-full p-2.5 rounded-lg bg-[var(--ds-surface-card)] border border-[var(--ds-border-subtle)] text-xs text-[var(--ds-text-primary)] focus:ring-1 focus:ring-action"
                               rows={2}
                             />
                           </div>
@@ -547,7 +547,7 @@ export const ReviewerDashboard: React.FC = () => {
                     <div className="space-y-4 pt-4 border-t border-[var(--ds-border-subtle)]">
                       <div>
                         <label className="block text-xs font-bold text-[var(--ds-text-primary)] mb-1.5 flex items-center gap-2">
-                          <MessageSquare className="w-4 h-4 text-emerald-500" />
+                          <MessageSquare className="w-4 h-4 text-success" />
                           <span>{isAr ? 'ملاحظات عامة موجهة للمؤلف (مرئية للباحث):' : 'Comments to Author:'}</span>
                         </label>
                         <textarea
@@ -555,13 +555,13 @@ export const ReviewerDashboard: React.FC = () => {
                           value={generalComment}
                           onChange={e => setGeneralComment(e.target.value)}
                           placeholder={isAr ? 'اكتب الملاحظات والتعديلات المطلوبة من الباحث بالتفصيل...' : 'Write detailed feedback for the author...'}
-                          className="w-full p-3 rounded-xl bg-[var(--ds-surface-sunken)] border border-[var(--ds-border-subtle)] text-xs text-[var(--ds-text-primary)] focus:ring-1 focus:ring-emerald-500 leading-relaxed"
+                          className="w-full p-3 rounded-xl bg-[var(--ds-surface-sunken)] border border-[var(--ds-border-subtle)] text-xs text-[var(--ds-text-primary)] focus:ring-1 focus:ring-action leading-relaxed"
                           rows={4}
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-amber-600 dark:text-amber-400 mb-1.5 flex items-center gap-2">
+                        <label className="block text-xs font-bold text-warning mb-1.5 flex items-center gap-2">
                           <Lock className="w-4 h-4" />
                           <span>{isAr ? 'ملاحظات سرية لهيئة التحرير (محجوبة تماماً عن المؤلف):' : 'Confidential Comments to Editor:'}</span>
                         </label>
@@ -570,7 +570,7 @@ export const ReviewerDashboard: React.FC = () => {
                           value={confidentialComment}
                           onChange={e => setConfidentialComment(e.target.value)}
                           placeholder={isAr ? 'ملاحظات خاصة بهيئة التحرير ولجنة التحكيم...' : 'Confidential editorial notes...'}
-                          className="w-full p-3 rounded-xl bg-[var(--ds-surface-sunken)] border border-amber-500/20 text-xs text-[var(--ds-text-primary)] focus:ring-1 focus:ring-amber-500 leading-relaxed"
+                          className="w-full p-3 rounded-xl bg-[var(--ds-surface-sunken)] border border-warning/20 text-xs text-[var(--ds-text-primary)] focus:ring-1 focus:ring-warning leading-relaxed"
                           rows={2}
                         />
                       </div>
@@ -583,10 +583,10 @@ export const ReviewerDashboard: React.FC = () => {
                       </label>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         {[
-                          { id: 'ACCEPT', label: isAr ? 'قبول النشر' : 'Accept', color: 'border-emerald-500 text-emerald-600 bg-emerald-500/10' },
-                          { id: 'MINOR_REVISION', label: isAr ? 'تعديلات طفيفة' : 'Minor Revision', color: 'border-blue-500 text-blue-600 bg-blue-500/10' },
-                          { id: 'MAJOR_REVISION', label: isAr ? 'تعديلات جوهرية' : 'Major Revision', color: 'border-amber-500 text-amber-600 bg-amber-500/10' },
-                          { id: 'REJECT', label: isAr ? 'رفض المخطوطة' : 'Reject', color: 'border-rose-500 text-rose-600 bg-rose-500/10' },
+                          { id: 'ACCEPT', label: isAr ? 'قبول النشر' : 'Accept', color: 'border-success text-success bg-action/10' },
+                          { id: 'MINOR_REVISION', label: isAr ? 'تعديلات طفيفة' : 'Minor Revision', color: 'border-info text-path-publication bg-info/10' },
+                          { id: 'MAJOR_REVISION', label: isAr ? 'تعديلات جوهرية' : 'Major Revision', color: 'border-warning text-warning bg-warning/10' },
+                          { id: 'REJECT', label: isAr ? 'رفض المخطوطة' : 'Reject', color: 'border-danger text-danger bg-danger/10' },
                         ].map(opt => {
                           const isSelected = recommendation === opt.id;
                           return (
@@ -596,7 +596,7 @@ export const ReviewerDashboard: React.FC = () => {
                               disabled={isSubmitted}
                               onClick={() => setRecommendation(opt.id as any)}
                               className={`p-3 rounded-xl border text-xs font-bold transition-all text-center ${
-                                isSelected ? `${opt.color} ring-2 ring-emerald-500` : 'border-[var(--ds-border-subtle)] bg-[var(--ds-surface-sunken)] text-[var(--ds-text-muted)] hover:bg-[var(--ds-surface-card)]'
+                                isSelected ? `${opt.color} ring-2 ring-action` : 'border-[var(--ds-border-subtle)] bg-[var(--ds-surface-sunken)] text-[var(--ds-text-muted)] hover:bg-[var(--ds-surface-card)]'
                               } ${isSubmitted ? 'opacity-70 cursor-not-allowed' : ''}`}
                             >
                               {opt.label}
@@ -622,7 +622,7 @@ export const ReviewerDashboard: React.FC = () => {
                         <Button
                           onClick={handleSubmitReview}
                           disabled={submittingReview || savingDraft}
-                          className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 flex items-center justify-center gap-2"
+                          className="w-full sm:w-auto font-bold px-8 flex items-center justify-center gap-2"
                         >
                           <Send className="w-4 h-4" />
                           <span>{submittingReview ? (isAr ? 'جارٍ التسليم...' : 'Submitting...') : (isAr ? 'تسليم التقرير النهائي' : 'Submit Review')}</span>
@@ -644,7 +644,7 @@ export const ReviewerDashboard: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-bold text-[var(--ds-text-primary)] flex items-center gap-2">
-                <Layers className="w-5 h-5 text-emerald-500" />
+                <Layers className="w-5 h-5 text-success" />
                 <span>{isAr ? 'ملفات التحكيم العلمي والمخطوطات قيد المراجعة' : 'Editorial Peer Review Cases'}</span>
               </h2>
               <p className="text-xs text-[var(--ds-text-muted)] mt-0.5">
@@ -653,7 +653,7 @@ export const ReviewerDashboard: React.FC = () => {
             </div>
             <Button
               onClick={() => setShowNewCaseModal(true)}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-2 text-xs"
+              className="flex items-center gap-2 text-xs"
             >
               <Plus className="w-4 h-4" />
               <span>{isAr ? 'فتح ملف تحكيم جديد' : 'New Review Case'}</span>
@@ -672,16 +672,16 @@ export const ReviewerDashboard: React.FC = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {editorialCases.map(c => (
-                <Card key={c.id} className="p-6 space-y-4 hover:border-emerald-500/50 transition-all">
+                <Card key={c.id} className="p-6 space-y-4 hover:border-success/50 transition-all">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <span className="text-xs font-mono text-[var(--ds-text-muted)]">{c.id}</span>
                       <h3 className="text-base font-bold text-[var(--ds-text-primary)] mt-1">{c.title_ar}</h3>
                     </div>
                     <span className={`text-xs px-2.5 py-1 rounded-full font-bold ${
-                      c.status === 'DECIDED' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' :
-                      c.status === 'REVISION_REQUESTED' ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20' :
-                      'bg-blue-500/10 text-blue-600 border border-blue-500/20'
+                      c.status === 'DECIDED' ? 'bg-action/10 text-success border border-success/20' :
+                      c.status === 'REVISION_REQUESTED' ? 'bg-warning/10 text-warning border border-warning/20' :
+                      'bg-info/10 text-path-publication border border-info/20'
                     }`}>
                       {c.status}
                     </span>
@@ -697,7 +697,7 @@ export const ReviewerDashboard: React.FC = () => {
                     <Button
                       onClick={() => setDecisionCaseId(c.id)}
                       variant="secondary"
-                      className="w-full text-xs flex items-center justify-center gap-1.5 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+                      className="w-full text-xs flex items-center justify-center gap-1.5 border-success/30 text-success hover:bg-action/10"
                     >
                       <Award className="w-3.5 h-3.5" />
                       <span>{isAr ? 'تسجيل قرار هيئة التحرير' : 'Record Final Decision'}</span>
@@ -712,7 +712,7 @@ export const ReviewerDashboard: React.FC = () => {
 
       {/* ── NEW CASE MODAL ────────────────────────────────────────────────────── */}
       {showNewCaseModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-[var(--ds-surface-overlay)] z-50 flex items-center justify-center p-4">
           <Card className="max-w-lg w-full p-6 space-y-4 bg-[var(--ds-surface-card)]">
             <h3 className="text-lg font-bold text-[var(--ds-text-primary)]">
               {isAr ? 'إنشاء ملف تحكيم علمي جديد' : 'Create New Peer Review Case'}
@@ -761,7 +761,7 @@ export const ReviewerDashboard: React.FC = () => {
               <Button onClick={() => setShowNewCaseModal(false)} variant="secondary">
                 {isAr ? 'إلغاء' : 'Cancel'}
               </Button>
-              <Button onClick={handleCreateNewCase} className="bg-emerald-600 hover:bg-emerald-500 text-white">
+              <Button onClick={handleCreateNewCase}>
                 {isAr ? 'إنشاء وبدء الجولة 1' : 'Create Case'}
               </Button>
             </div>
@@ -771,10 +771,10 @@ export const ReviewerDashboard: React.FC = () => {
 
       {/* ── EDITORIAL DECISION MODAL ─────────────────────────────────────────── */}
       {decisionCaseId && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-[var(--ds-surface-overlay)] z-50 flex items-center justify-center p-4">
           <Card className="max-w-lg w-full p-6 space-y-4 bg-[var(--ds-surface-card)]">
             <h3 className="text-lg font-bold text-[var(--ds-text-primary)] flex items-center gap-2">
-              <Award className="w-5 h-5 text-emerald-500" />
+              <Award className="w-5 h-5 text-success" />
               <span>{isAr ? 'تسجيل قرار هيئة التحرير / اللجنة الأكاديمية' : 'Record Editorial Decision'}</span>
             </h3>
             <p className="text-xs text-[var(--ds-text-muted)]">
@@ -787,16 +787,16 @@ export const ReviewerDashboard: React.FC = () => {
                 </label>
                 <div className="grid grid-cols-1 min-[380px]:grid-cols-3 gap-2">
                   {[
-                    { id: 'ACCEPTED', label: isAr ? 'قبول للنشر' : 'Accepted', color: 'border-emerald-500 text-emerald-600 bg-emerald-500/10' },
-                    { id: 'REVISION_REQUIRED', label: isAr ? 'طلب تعديل' : 'Revision Req.', color: 'border-amber-500 text-amber-600 bg-amber-500/10' },
-                    { id: 'REJECTED', label: isAr ? 'رفض' : 'Rejected', color: 'border-rose-500 text-rose-600 bg-rose-500/10' }
+                    { id: 'ACCEPTED', label: isAr ? 'قبول للنشر' : 'Accepted', color: 'border-success text-success bg-action/10' },
+                    { id: 'REVISION_REQUIRED', label: isAr ? 'طلب تعديل' : 'Revision Req.', color: 'border-warning text-warning bg-warning/10' },
+                    { id: 'REJECTED', label: isAr ? 'رفض' : 'Rejected', color: 'border-danger text-danger bg-danger/10' }
                   ].map(d => (
                     <button
                       key={d.id}
                       type="button"
                       onClick={() => setEditorialDecision(d.id as any)}
                       className={`p-3 rounded-xl border text-xs font-bold transition-all text-center ${
-                        editorialDecision === d.id ? `${d.color} ring-2 ring-emerald-500` : 'border-[var(--ds-border-subtle)] bg-[var(--ds-surface-sunken)] text-[var(--ds-text-muted)]'
+                        editorialDecision === d.id ? `${d.color} ring-2 ring-action` : 'border-[var(--ds-border-subtle)] bg-[var(--ds-surface-sunken)] text-[var(--ds-text-muted)]'
                       }`}
                     >
                       {d.label}
@@ -821,7 +821,7 @@ export const ReviewerDashboard: React.FC = () => {
               <Button onClick={() => setDecisionCaseId(null)} variant="secondary">
                 {isAr ? 'إلغاء' : 'Cancel'}
               </Button>
-              <Button onClick={handleRecordEditorialDecision} className="bg-emerald-600 hover:bg-emerald-500 text-white">
+              <Button onClick={handleRecordEditorialDecision}>
                 {isAr ? 'اعتماد وتسجيل القرار' : 'Confirm Decision'}
               </Button>
             </div>

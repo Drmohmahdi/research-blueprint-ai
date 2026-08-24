@@ -238,7 +238,7 @@ export const FieldMonitoring: React.FC = () => {
                 {language === 'ar' ? 'حفظ' : 'Save'}
               </Button>
             </form>
-            {enrollmentError && <p role="alert" className="text-[10px] font-semibold text-red-700 m-0">{enrollmentError}</p>}
+            {enrollmentError && <p role="alert" className="text-[10px] font-semibold text-danger m-0">{enrollmentError}</p>}
           </div>
         </div>
 
@@ -356,7 +356,7 @@ export const FieldMonitoring: React.FC = () => {
           <Button type="submit" variant="secondary" size="sm" iconBefore={<Plus size={14} />}>
             {language === 'ar' ? 'إضافة إلى سجل التنفيذ' : 'Add to monitoring log'}
           </Button>
-          {formError && <p role="alert" className="text-xs font-semibold text-red-700 bg-red-50 border border-red-200 rounded-md p-2 m-0">{formError}</p>}
+          {formError && <p role="alert" className="text-xs font-semibold text-danger bg-danger/10 border border-danger rounded-md p-2 m-0">{formError}</p>}
         </form>
       </div>
     </div>

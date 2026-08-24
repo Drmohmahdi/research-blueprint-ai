@@ -88,6 +88,206 @@ class ResearchProject(Base):
     prisma_flow = relationship("PrismaFlow", back_populates="project", uselist=False, cascade="all, delete-orphan")
 
 
+class ResearchDataset(Base):
+    __tablename__ = "research_datasets"
+    __table_args__ = (Index("ix_dataset_org_project", "organization_id", "project_id"),)
+
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    project_id = Column(String, ForeignKey("research_projects.id", ondelete="CASCADE"), nullable=False)
+    owner_id = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    name = Column(String, nullable=False)
+    source_type = Column(String, nullable=False, default="OTHER")
+    sensitivity = Column(String, nullable=False, default="INTERNAL")
+    status = Column(String, nullable=False, default="RAW")
+    current_version_id = Column(String, nullable=True)
+    created_at = Column(String, nullable=False)
+    updated_at = Column(String, nullable=False)
+
+
+class DatasetVersion(Base):
+    __tablename__ = "dataset_versions"
+    __table_args__ = (
+        UniqueConstraint("dataset_id", "version_number", name="uq_dataset_version_number"),
+        Index("ix_dataset_version_org", "organization_id", "dataset_id"),
+    )
+
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    dataset_id = Column(String, ForeignKey("research_datasets.id", ondelete="CASCADE"), nullable=False)
+    source_version_id = Column(String, ForeignKey("dataset_versions.id", ondelete="SET NULL"), nullable=True)
+    uploaded_file_id = Column(String, ForeignKey("uploaded_files.id", ondelete="SET NULL"), nullable=True)
+    version_number = Column(String, nullable=False)
+    kind = Column(String, nullable=False, default="RAW")
+    fingerprint = Column(String, nullable=False)
+    row_count = Column(Integer, nullable=False, default=0)
+    column_count = Column(Integer, nullable=False, default=0)
+    data_json = Column(JSON, nullable=False)
+    change_summary = Column(String, nullable=True)
+    created_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+
+
+class DatasetVariable(Base):
+    __tablename__ = "dataset_variables"
+    __table_args__ = (UniqueConstraint("dataset_id", "name", name="uq_dataset_variable_name"),)
+
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    dataset_id = Column(String, ForeignKey("research_datasets.id", ondelete="CASCADE"), nullable=False)
+    name = Column(String, nullable=False)
+    label_ar = Column(String, nullable=True)
+    label_en = Column(String, nullable=True)
+    description = Column(String, nullable=True)
+    data_type = Column(String, nullable=False)
+    measurement_level = Column(String, nullable=False, default="NOMINAL")
+    role = Column(String, nullable=False, default="OTHER")
+    allowed_values = Column(JSON, nullable=True)
+    missing_codes = Column(JSON, nullable=True)
+    sensitive = Column(Boolean, nullable=False, default=False)
+    identifier = Column(Boolean, nullable=False, default=False)
+
+
+class DatasetQualityIssue(Base):
+    __tablename__ = "dataset_quality_issues"
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    dataset_id = Column(String, ForeignKey("research_datasets.id", ondelete="CASCADE"), nullable=False)
+    version_id = Column(String, ForeignKey("dataset_versions.id", ondelete="CASCADE"), nullable=False)
+    variable_name = Column(String, nullable=True)
+    row_reference = Column(String, nullable=True)
+    issue_type = Column(String, nullable=False)
+    severity = Column(String, nullable=False)
+    status = Column(String, nullable=False, default="OPEN")
+    details = Column(JSON, nullable=True)
+    resolution = Column(String, nullable=True)
+    created_at = Column(String, nullable=False)
+
+
+class ResearchAnalysis(Base):
+    __tablename__ = "research_analyses"
+    __table_args__ = (Index("ix_analysis_org_project", "organization_id", "project_id"),)
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    project_id = Column(String, ForeignKey("research_projects.id", ondelete="CASCADE"), nullable=False)
+    dataset_id = Column(String, ForeignKey("research_datasets.id", ondelete="CASCADE"), nullable=False)
+    dataset_version_id = Column(String, ForeignKey("dataset_versions.id", ondelete="RESTRICT"), nullable=False)
+    research_question_id = Column(String, ForeignKey("research_questions.id", ondelete="SET NULL"), nullable=True)
+    hypothesis_id = Column(String, ForeignKey("hypotheses.id", ondelete="SET NULL"), nullable=True)
+    analysis_type = Column(String, nullable=False)
+    configuration = Column(JSON, nullable=False)
+    result = Column(JSON, nullable=False)
+    engine_version = Column(String, nullable=False)
+    status = Column(String, nullable=False, default="COMPLETED")
+    approved_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    approved_at = Column(String, nullable=True)
+    created_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+
+
+class ResearchLifecycle(Base):
+    """Project-level orchestration state. Domain completion remains derived."""
+    __tablename__ = "research_lifecycles"
+    __table_args__ = (
+        UniqueConstraint("project_id", name="uq_research_lifecycle_project"),
+        Index("ix_lifecycle_org_project", "organization_id", "project_id"),
+    )
+
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    project_id = Column(String, ForeignKey("research_projects.id", ondelete="CASCADE"), nullable=False)
+    template_key = Column(String, nullable=False)
+    template_version = Column(Integer, nullable=False, default=1)
+    created_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+    updated_at = Column(String, nullable=False)
+
+
+class ResearchVariableMapping(Base):
+    __tablename__ = "research_variable_mappings"
+    __table_args__ = (
+        UniqueConstraint("research_variable_id", "dataset_variable_id", name="uq_research_dataset_variable_mapping"),
+        Index("ix_variable_mapping_org_project", "organization_id", "project_id"),
+    )
+
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    project_id = Column(String, ForeignKey("research_projects.id", ondelete="CASCADE"), nullable=False)
+    research_variable_id = Column(String, ForeignKey("research_variables.id", ondelete="CASCADE"), nullable=False)
+    dataset_variable_id = Column(String, ForeignKey("dataset_variables.id", ondelete="CASCADE"), nullable=False)
+    mapping_role = Column(String, nullable=False, default="MEASURE")
+    created_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+
+
+class AcademicHandoff(Base):
+    __tablename__ = "academic_handoffs"
+    __table_args__ = (
+        UniqueConstraint("idempotency_key", name="uq_academic_handoff_idempotency"),
+        Index("ix_handoff_org_project_status", "organization_id", "project_id", "status"),
+    )
+
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    project_id = Column(String, ForeignKey("research_projects.id", ondelete="CASCADE"), nullable=False)
+    handoff_type = Column(String, nullable=False)
+    source_entity_type = Column(String, nullable=False)
+    source_entity_id = Column(String, nullable=False)
+    source_version = Column(String, nullable=True)
+    source_fingerprint = Column(String, nullable=True)
+    target_domain = Column(String, nullable=False)
+    target_entity_type = Column(String, nullable=True)
+    target_entity_id = Column(String, nullable=True)
+    payload_json = Column(JSON, nullable=False)
+    schema_version = Column(Integer, nullable=False, default=1)
+    status = Column(String, nullable=False, default="PENDING")
+    idempotency_key = Column(String, nullable=False)
+    created_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+    accepted_at = Column(String, nullable=True)
+    stale_at = Column(String, nullable=True)
+
+
+class AnalysisAssetDependency(Base):
+    __tablename__ = "analysis_asset_dependencies"
+    __table_args__ = (
+        UniqueConstraint("analysis_id", "scholarly_asset_id", name="uq_analysis_asset_dependency"),
+        Index("ix_analysis_asset_org_project", "organization_id", "project_id"),
+    )
+
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    project_id = Column(String, ForeignKey("research_projects.id", ondelete="CASCADE"), nullable=False)
+    analysis_id = Column(String, ForeignKey("research_analyses.id", ondelete="RESTRICT"), nullable=False)
+    scholarly_asset_id = Column(String, ForeignKey("core_scholarly_assets.id", ondelete="CASCADE"), nullable=False)
+    analysis_engine_version = Column(String, nullable=False)
+    dataset_version_id = Column(String, ForeignKey("dataset_versions.id", ondelete="RESTRICT"), nullable=False)
+    status = Column(String, nullable=False, default="CURRENT")
+    created_at = Column(String, nullable=False)
+    needs_review_at = Column(String, nullable=True)
+
+
+class ResearchLineageEdge(Base):
+    __tablename__ = "research_lineage_edges"
+    __table_args__ = (
+        UniqueConstraint("relationship_type", "source_entity_type", "source_entity_id", "target_entity_type", "target_entity_id", name="uq_research_lineage_edge"),
+        Index("ix_lineage_org_project", "organization_id", "project_id"),
+    )
+
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    project_id = Column(String, ForeignKey("research_projects.id", ondelete="CASCADE"), nullable=False)
+    source_entity_type = Column(String, nullable=False)
+    source_entity_id = Column(String, nullable=False)
+    source_version = Column(String, nullable=True)
+    relationship_type = Column(String, nullable=False)
+    target_entity_type = Column(String, nullable=False)
+    target_entity_id = Column(String, nullable=False)
+    target_version = Column(String, nullable=True)
+    created_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+
+
 
 class ResearchVariable(Base):
     __tablename__ = "research_variables"
@@ -1319,6 +1519,3 @@ class AIRun(Base):
     retrieval_count = Column(Integer, nullable=True)
     idempotency_key = Column(String, nullable=True, index=True)
     created_at = Column(String, nullable=False, index=True)
-
-
-

@@ -7,13 +7,13 @@ import { WorkspaceRiskPanel } from './components/WorkspaceRiskPanel';
 import { WorkspaceCommentsPanel } from './components/WorkspaceCommentsPanel';
 import { NEW_STUDY_DESIGN_STEPS } from '../../config/newStudyDesignSteps';
 import { 
-  Sparkles,
   Unlock,
   ChevronRight,
   ChevronLeft
 } from 'lucide-react';
 import { Card } from '../../design-system/components/Card';
 import { Button } from '../../design-system/components/Button';
+import { PathPanel } from '../../design-system/components/Navigation';
 
 export const NewStudyDesignWorkspace: React.FC = () => {
   const { stepId } = useParams<{ stepId?: string }>();
@@ -59,73 +59,68 @@ export const NewStudyDesignWorkspace: React.FC = () => {
   return (
     <div className="space-y-6 max-w-[1550px] mx-auto pb-24">
       {/* ── Path Header ── */}
-      <Card className="p-6 bg-gradient-to-r from-purple-900 via-indigo-950 to-zinc-950 border-[var(--ds-border-subtle)] text-white rounded-3xl shadow-xl overflow-hidden relative">
-        <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-          <Sparkles size={160} />
-        </div>
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+      <PathPanel accent="var(--ds-path-research)">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-md text-[9px] font-black bg-purple-500/25 border border-purple-400/30 text-purple-300 tracking-wider">
+              <span className="px-2.5 py-0.5 rounded-md text-[9px] font-black bg-[var(--ds-primary-soft)] border border-[var(--ds-primary)]/25 text-[var(--ds-primary)] tracking-wider">
                 {language === 'ar' ? 'مساحة تصميم الدراسة' : 'STUDY DESIGN WORKSPACE'}
               </span>
               {isSecureMode && (
-                <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[9px] font-bold">
+                <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--ds-success-soft)] text-[var(--ds-success)] border border-[var(--ds-success)]/30 text-[9px] font-bold">
                   <Unlock size={10} />
                   <span>{language === 'ar' ? 'وضع آمن' : 'SECURE'}</span>
                 </div>
               )}
             </div>
-            <h3 className="text-xl md:text-3xl font-black m-0 leading-tight">
+            <h3 className="text-xl md:text-3xl font-black m-0 leading-tight text-ink">
               {language === 'ar' ? activeProject.titleAr : activeProject.titleEn}
             </h3>
-            <p className="text-xs text-zinc-300 font-medium m-0">
+            <p className="text-xs text-secondary font-medium m-0">
               {language === 'ar' ? `المؤسسة: ${activeProject.institutionAr || 'مساحة شخصية'}` : `Institution: ${activeProject.institutionEn || 'Personal Workspace'}`}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-4 shrink-0">
-            {/* Mode toggle */}
-            <div className="flex bg-zinc-900 p-1.5 rounded-xl border border-zinc-800">
+            <div className="flex bg-[var(--ds-surface-secondary)] p-1.5 rounded-xl border border-subtle">
               <button 
                 onClick={() => setMode('guided')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
-                  mode === 'guided' ? 'bg-purple-600 text-white shadow-md' : 'text-zinc-400 hover:text-zinc-200'
+                className={`px-3 py-1.5 rounded-lg text-xs font-black ds-transition cursor-pointer ${
+                  mode === 'guided' ? 'bg-action text-on-action' : 'text-muted hover:text-secondary'
                 }`}
               >
                 {language === 'ar' ? 'توجيه خطوة بخطوة' : 'Guided'}
               </button>
               <button 
                 onClick={() => setMode('expert')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
-                  mode === 'expert' ? 'bg-purple-600 text-white shadow-md' : 'text-zinc-400 hover:text-zinc-200'
+                className={`px-3 py-1.5 rounded-lg text-xs font-black ds-transition cursor-pointer ${
+                  mode === 'expert' ? 'bg-action text-on-action' : 'text-muted hover:text-secondary'
                 }`}
               >
                 {language === 'ar' ? 'التحكم المتقدم' : 'Expert'}
               </button>
             </div>
 
-            {/* Progress bar */}
-            <div className="text-center lg:text-right space-y-1">
-              <div className="text-xs font-black text-purple-300">{progressPct}% {language === 'ar' ? 'مكتمل' : 'Completed'}</div>
-              <div className="h-2 w-32 bg-zinc-800 rounded-full overflow-hidden">
-                <div className="h-full bg-purple-500 transition-all duration-300" style={{ width: `${progressPct}%` }} />
+            <div className="text-center lg:text-end space-y-1">
+              <div className="text-xs font-black text-[var(--ds-primary)]">{progressPct}% {language === 'ar' ? 'مكتمل' : 'Completed'}</div>
+              <div className="h-2 w-32 bg-[var(--ds-surface-tertiary)] rounded-full overflow-hidden">
+                <div className="h-full bg-[var(--ds-primary)] ds-transition" style={{ width: `${progressPct}%` }} />
               </div>
             </div>
           </div>
         </div>
-      </Card>
+      </PathPanel>
 
       {/* ── Path Overview Metrics ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
         {[
-          { key: 'design', labelAr: 'اكتمال التصميم', labelEn: 'Design Progress', val: `${progressPct}%`, col: 'text-purple-600' },
-          { key: 'consistency', labelAr: 'الاتساق المنهجي', labelEn: 'Consistency Index', val: (activeProject.variables?.length || 0) > 0 ? '90/100' : '50/100', col: 'text-indigo-600' },
-          { key: 'sample', labelAr: 'جاهزية العينة', labelEn: 'Sample Power', val: activeProject.sampleSettings?.populationSize ? '80%' : '0%', col: 'text-emerald-600' },
-          { key: 'evidence', labelAr: 'جودة الأدلة', labelEn: 'Evidence Weight', val: activeProject.pooledEffectSize ? 'A (High)' : 'N/A', col: 'text-cyan-600' },
-          { key: 'risk', labelAr: 'مؤشر المخاطر', labelEn: 'Risk Index', val: activeProject.preRegistrationLockedAt ? 'LOW' : 'MEDIUM', col: 'text-rose-600' },
-          { key: 'prereg', labelAr: 'التسجيل المسبق', labelEn: 'Pre-Reg Status', val: activeProject.preRegistrationLockedAt ? (language === 'ar' ? 'مؤمن' : 'LOCKED') : (language === 'ar' ? 'مسودة' : 'DRAFT'), col: 'text-amber-600' },
-          { key: 'readiness', labelAr: 'جاهزية النشر', labelEn: 'Ready Score', val: activeProject.preRegistrationLockedAt ? '92%' : '64%', col: 'text-teal-600' }
+          { key: 'design', labelAr: 'اكتمال التصميم', labelEn: 'Design Progress', val: `${progressPct}%`, col: 'text-ai' },
+          { key: 'consistency', labelAr: 'الاتساق المنهجي', labelEn: 'Consistency Index', val: (activeProject.variables?.length || 0) > 0 ? '90/100' : '50/100', col: 'text-path-identity' },
+          { key: 'sample', labelAr: 'جاهزية العينة', labelEn: 'Sample Power', val: activeProject.sampleSettings?.populationSize ? '80%' : '0%', col: 'text-success' },
+          { key: 'evidence', labelAr: 'جودة الأدلة', labelEn: 'Evidence Weight', val: activeProject.pooledEffectSize ? 'A (High)' : 'N/A', col: 'text-ai' },
+          { key: 'risk', labelAr: 'مؤشر المخاطر', labelEn: 'Risk Index', val: activeProject.preRegistrationLockedAt ? 'LOW' : 'MEDIUM', col: 'text-danger' },
+          { key: 'prereg', labelAr: 'التسجيل المسبق', labelEn: 'Pre-Reg Status', val: activeProject.preRegistrationLockedAt ? (language === 'ar' ? 'مؤمن' : 'LOCKED') : (language === 'ar' ? 'مسودة' : 'DRAFT'), col: 'text-warning' },
+          { key: 'readiness', labelAr: 'جاهزية النشر', labelEn: 'Ready Score', val: activeProject.preRegistrationLockedAt ? '92%' : '64%', col: 'text-path-data' }
         ].map((m) => (
           <Card key={m.key} className="p-3 text-center border-[var(--ds-border-subtle)] space-y-1 rounded-2xl shadow-sm">
             <span className="text-[10px] font-bold text-[var(--ds-text-muted)] uppercase block truncate">

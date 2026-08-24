@@ -200,7 +200,7 @@ export const WizardStep6To7: React.FC<WizardStep6To7Props> = ({ engine }) => {
                   onClick={() => setSyntaxTab(tab)}
                   className={`px-2 py-1 rounded text-[10px] font-bold uppercase transition-all cursor-pointer border-none ${
                     syntaxTab === tab
-                      ? 'bg-[var(--ds-primary)] text-white'
+                      ? 'bg-[var(--ds-primary-soft)] text-ink'
                       : 'text-[var(--ds-text-muted)] hover:bg-[var(--ds-surface-tertiary)] bg-transparent'
                   }`}
                 >

@@ -158,10 +158,10 @@ const deleteEdge = (id: string) => {
 
   const getVariableTypeColor = (type: string) => {
     switch (type) {
-      case 'independent': return 'border-purple-500 bg-purple-500/10 text-purple-700 dark:text-purple-300';
-      case 'dependent':   return 'border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300';
-      case 'mediator':    return 'border-blue-500 bg-blue-500/10 text-blue-700 dark:text-blue-300';
-      case 'moderator':   return 'border-amber-500 bg-amber-500/10 text-amber-700 dark:text-amber-300';
+      case 'independent': return 'border-ai bg-ai/10 text-ai';
+      case 'dependent':   return 'border-success bg-action/10 text-success';
+      case 'mediator':    return 'border-info bg-info/10 text-path-publication dark:text-path-publication';
+      case 'moderator':   return 'border-warning bg-warning/10 text-warning';
       case 'control':     return 'border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)]';
       default:            return 'border-[var(--ds-border-subtle)]';
     }
@@ -173,10 +173,10 @@ const deleteEdge = (id: string) => {
     svgContent += `
       <defs>
         <marker id="arrow-v2" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-          <path d="M 0 0 L 10 5 L 0 10 z" fill="#8b5cf6" />
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--ds-chart-4)" />
         </marker>
         <marker id="arrow-mod" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-          <path d="M 0 0 L 10 5 L 0 10 z" fill="#f59e0b" />
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--ds-chart-5)" />
         </marker>
       </defs>
     `;
@@ -192,8 +192,8 @@ const deleteEdge = (id: string) => {
       const isMod = edge.type === 'moderating';
       
       svgContent += `
-        <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${isMod ? '#f59e0b' : '#8b5cf6'}" stroke-width="2" stroke-dasharray="${edge.type === 'mediating' ? '5,5' : '0'}" marker-end="${isMod ? 'url(#arrow-mod)' : 'url(#arrow-v2)'}" />
-        <circle cx="${midX}" cy="${midY}" r="12" fill="${isMod ? '#d97706' : '#7c3aed'}" />
+        <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${isMod ? 'var(--ds-chart-5)' : 'var(--ds-chart-4)'}" stroke-width="2" stroke-dasharray="${edge.type === 'mediating' ? '5,5' : '0'}" marker-end="${isMod ? 'url(#arrow-mod)' : 'url(#arrow-v2)'}" />
+        <circle cx="${midX}" cy="${midY}" r="12" fill="${isMod ? 'var(--ds-chart-5)' : 'var(--ds-chart-4)'}" />
         <text x="${midX}" y="${midY + 4}" fill="#ffffff" font-size="9" font-weight="bold" text-anchor="middle">${edge.hypothesisCode}</text>
       `;
     });
@@ -203,18 +203,18 @@ const deleteEdge = (id: string) => {
       const variable = activeProject.variables.find(v => v.id === node.variableId);
       if (!variable) return;
       
-      let strokeColor = '#8b5cf6';
-      let fillColor = '#1e1b4b';
-      if (variable.type === 'dependent') { strokeColor = '#10b981'; fillColor = '#022c22'; }
-      else if (variable.type === 'mediator') { strokeColor = '#3b82f6'; fillColor = '#172554'; }
-      else if (variable.type === 'moderator') { strokeColor = '#f59e0b'; fillColor = '#451a03'; }
-      else if (variable.type === 'control') { strokeColor = '#4b5563'; fillColor = '#111827'; }
+      let strokeColor = '#4C5D8A';
+      let fillColor = '#0B1F33';
+      if (variable.type === 'dependent') { strokeColor = '#0B5D3B'; fillColor = '#041E14'; }
+      else if (variable.type === 'mediator') { strokeColor = '#2E5A80'; fillColor = '#081726'; }
+      else if (variable.type === 'moderator') { strokeColor = '#C6A15B'; fillColor = '#0B1F33'; }
+      else if (variable.type === 'control') { strokeColor = '#6B7585'; fillColor = '#0B1F33'; }
 
       const label = language === 'ar' ? variable.nameAr : variable.nameEn;
 
       svgContent += `
         <rect x="${node.x}" y="${node.y}" width="144" height="60" rx="12" fill="${fillColor}" stroke="${strokeColor}" stroke-width="2" />
-        <text x="${node.x + 72}" y="${node.y + 20}" fill="#9ca3af" font-size="8" font-weight="bold" text-anchor="middle" letter-spacing="1">${variable.type.toUpperCase()}</text>
+        <text x="${node.x + 72}" y="${node.y + 20}" fill="#9AA3B0" font-size="8" font-weight="bold" text-anchor="middle" letter-spacing="1">${variable.type.toUpperCase()}</text>
         <text x="${node.x + 72}" y="${node.y + 40}" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">${label.substring(0, 20)}${label.length > 20 ? '...' : ''}</text>
       `;
     });
@@ -360,10 +360,10 @@ const deleteEdge = (id: string) => {
         <svg className="absolute inset-0 w-full h-full pointer-events-none">
           <defs>
             <marker id="arrow-v2" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8b5cf6" />
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--ds-chart-4)" />
             </marker>
             <marker id="arrow-mod" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="#f59e0b" />
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--ds-chart-5)" />
             </marker>
           </defs>
 
@@ -379,13 +379,13 @@ const deleteEdge = (id: string) => {
               <g key={edge.id}>
                 <line
                   x1={x1} y1={y1} x2={x2} y2={y2}
-                  stroke={isMod ? '#f59e0b' : '#8b5cf6'}
+                  stroke={isMod ? 'var(--ds-chart-5)' : 'var(--ds-chart-4)'}
                   strokeWidth={2}
                   strokeDasharray={edge.type === 'mediating' ? '5,5' : '0'}
                   markerEnd={isMod ? 'url(#arrow-mod)' : 'url(#arrow-v2)'}
                 />
                 <g transform={`translate(${midX - 12}, ${midY - 12})`}>
-                  <circle r={12} cx={12} cy={12} fill={isMod ? '#d97706' : '#7c3aed'} />
+                  <circle r={12} cx={12} cy={12} fill={isMod ? 'var(--ds-chart-5)' : 'var(--ds-chart-4)'} />
                   <text x={12} y={16} fill="#ffffff" fontSize={9} fontWeight="bold" textAnchor="middle">
                     {edge.hypothesisCode}
                   </text>
@@ -440,7 +440,7 @@ const deleteEdge = (id: string) => {
                 className="flex justify-between items-center p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg text-xs font-semibold text-[var(--ds-text-secondary)]"
               >
                 <div className="flex items-center gap-1.5">
-                  <span className="bg-purple-600 text-white w-5 h-5 rounded-full flex items-center justify-center font-bold text-[9px]">
+                  <span className="bg-action text-on-action w-5 h-5 rounded-full flex items-center justify-center font-bold text-[9px]">
                     {e.hypothesisCode}
                   </span>
                   <span className="truncate max-w-[60px]">{getVariableLabel(nodes.find(n => n.id === e.fromNodeId)?.variableId || '')}</span>
@@ -449,7 +449,7 @@ const deleteEdge = (id: string) => {
                 </div>
                 <button
                   onClick={() => deleteEdge(e.id)}
-                  className="text-rose-500 hover:text-rose-400 cursor-pointer transition-colors shrink-0"
+                  className="text-danger hover:text-danger cursor-pointer transition-colors shrink-0"
                 >
                   <Trash size={14} />
                 </button>

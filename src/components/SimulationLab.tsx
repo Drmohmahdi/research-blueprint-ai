@@ -296,18 +296,18 @@ export const SimulationLab: React.FC = () => {
                   </div>
                   <div className="p-3.5 bg-[var(--ds-surface-secondary)] rounded-xl space-y-1">
                     <span className="text-[10px] text-[var(--ds-text-muted)] font-bold uppercase tracking-wider block">{language === 'ar' ? 'القوة الإحصائية المحققة' : 'Simulated Power'}</span>
-                    <span className="text-base font-black text-emerald-600 dark:text-emerald-400">{(result.summary.statisticalPower * 100).toFixed(0)}%</span>
+                    <span className="text-base font-black text-success">{(result.summary.statisticalPower * 100).toFixed(0)}%</span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
                   <div className="p-3.5 bg-[var(--ds-surface-secondary)] rounded-xl space-y-1">
                     <span className="text-[10px] text-[var(--ds-text-muted)] font-bold uppercase tracking-wider block">{language === 'ar' ? 'الفقد الناتج (تسرب)' : 'Attrition Count'}</span>
-                    <span className="text-xs font-black text-rose-500">{result.summary.attritionCount} {language === 'ar' ? 'طلاب' : 'students'}</span>
+                    <span className="text-xs font-black text-danger">{result.summary.attritionCount} {language === 'ar' ? 'طلاب' : 'students'}</span>
                   </div>
                   <div className="p-3.5 bg-[var(--ds-surface-secondary)] rounded-xl space-y-1">
                     <span className="text-[10px] text-[var(--ds-text-muted)] font-bold uppercase tracking-wider block">{language === 'ar' ? 'احتمال الدلالة (p-value)' : 'Simulated p-value'}</span>
-                    <span className="text-xs font-black text-blue-500">{result.summary.pValue}</span>
+                    <span className="text-xs font-black text-path-publication">{result.summary.pValue}</span>
                   </div>
                   <div className="p-3.5 bg-[var(--ds-surface-secondary)] rounded-xl space-y-1 col-span-2">
                     <span className="text-[10px] text-[var(--ds-text-muted)] font-bold uppercase tracking-wider block">{language === 'ar' ? 'مؤشر أولي لقابلية النشر' : 'Preliminary Publication Indicator'}</span>
@@ -368,9 +368,9 @@ export const SimulationLab: React.FC = () => {
                         <th className="p-2.5">{language === 'ar' ? 'مستمر' : 'Status'}</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 text-[var(--ds-text-secondary)]">
+                    <tbody className="divide-y divide-subtle text-[var(--ds-text-secondary)]">
                       {result.observedActualData.slice(0, 10).map((row) => (
-                        <tr key={row.studentId} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/60 transition-colors">
+                        <tr key={row.studentId} className="hover:bg-surface-subtle/60 transition-colors">
                           <td className="p-2.5 font-mono">{row.studentId}</td>
                           <td className="p-2.5">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${row.group === 'treatment' ? 'bg-[var(--ds-primary-soft)] text-[var(--ds-primary)]' : 'bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)]'}`}>
@@ -383,7 +383,7 @@ export const SimulationLab: React.FC = () => {
                           </td>
                           <td className="p-2.5">{(row.engagement * 100).toFixed(0)}%</td>
                           <td className="p-2.5">
-                            <span className={`w-2 h-2 rounded-full inline-block ${row.retained ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                            <span className={`w-2 h-2 rounded-full inline-block ${row.retained ? 'bg-action' : 'bg-danger'}`} />
                           </td>
                         </tr>
                       ))}
@@ -398,7 +398,7 @@ export const SimulationLab: React.FC = () => {
             </div>
           ) : (
             <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-16 text-center text-[var(--ds-text-muted)] italic text-xs h-[400px] flex flex-col justify-center items-center gap-3">
-              <PlayCircle size={40} className="text-zinc-300 dark:text-zinc-700 animate-pulse" />
+              <PlayCircle size={40} className="text-secondary dark:text-secondary animate-pulse" />
               <p className="m-0">
                 {language === 'ar' 
                   ? 'الرجاء إدخال معلمات المحاكاة وتشغيل المحرك لعرض المخططات والنتائج.' 

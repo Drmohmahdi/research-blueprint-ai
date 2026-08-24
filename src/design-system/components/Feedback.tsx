@@ -26,15 +26,15 @@ export const Badge: React.FC<BadgeProps> = ({
   const baseStyles = 'inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold border';
   
   const variantStyles = {
-    draft: 'bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 border-zinc-500/20',
-    active: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
-    completed: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
-    'needs-review': 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
-    warning: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
-    critical: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20',
-    simulated: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20',
-    predicted: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
-    observed: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+    draft: 'bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-muted)] border-[var(--ds-border-default)]',
+    active: 'bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] border-[var(--ds-primary)]/20',
+    completed: 'bg-[var(--ds-success-soft)] text-[var(--ds-success)] border-[var(--ds-success)]/20',
+    'needs-review': 'bg-[var(--ds-information-soft)] text-[var(--ds-information)] border-[var(--ds-information)]/20',
+    warning: 'bg-[var(--ds-warning-soft)] text-[var(--ds-warning)] border-[var(--ds-warning)]/20',
+    critical: 'bg-[var(--ds-danger-soft)] text-[var(--ds-danger)] border-[var(--ds-danger)]/20',
+    simulated: 'bg-[var(--ds-data-teal-soft)] text-[var(--ds-data-teal)] border-[var(--ds-data-teal)]/20',
+    predicted: 'bg-[var(--ds-navy-soft)] text-[var(--ds-navy-elevated)] dark:text-[var(--ds-text-secondary)] border-[var(--ds-navy-elevated)]/20',
+    observed: 'bg-[var(--ds-success-soft)] text-[var(--ds-success)] border-[var(--ds-success)]/20',
   };
 
   const icons = {
@@ -82,17 +82,17 @@ export const Alert: React.FC<AlertProps> = ({
     success: 'bg-[var(--ds-success-soft)] border-[var(--ds-success)]/20 text-[var(--ds-text-primary)]',
     warning: 'bg-[var(--ds-warning-soft)] border-[var(--ds-warning)]/20 text-[var(--ds-text-primary)]',
     danger: 'bg-[var(--ds-danger-soft)] border-[var(--ds-danger)]/20 text-[var(--ds-text-primary)]',
-    ethical: 'bg-amber-500/5 border-amber-500/20 text-amber-700 dark:text-amber-400',
-    'simulation-disclaimer': 'bg-purple-500/5 border-purple-500/20 text-purple-700 dark:text-purple-300',
+    ethical: 'bg-[var(--ds-accent-gold-soft)] border-[var(--ds-accent-gold)]/25 text-[var(--ds-text-primary)]',
+    'simulation-disclaimer': 'bg-[var(--ds-data-teal-soft)] border-[var(--ds-data-teal)]/20 text-[var(--ds-text-primary)]',
   };
 
   const icons = {
-    info: <Info size={16} className="text-sky-500 shrink-0 mt-0.5" />,
-    success: <CheckCircle2 size={16} className="text-emerald-500 shrink-0 mt-0.5" />,
-    warning: <AlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />,
-    danger: <XCircle size={16} className="text-rose-500 shrink-0 mt-0.5" />,
-    ethical: <AlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />,
-    'simulation-disclaimer': <FlaskConical size={16} className="text-purple-500 shrink-0 mt-0.5" />,
+    info: <Info size={16} className="text-[var(--ds-information)] shrink-0 mt-0.5" />,
+    success: <CheckCircle2 size={16} className="text-[var(--ds-success)] shrink-0 mt-0.5" />,
+    warning: <AlertTriangle size={16} className="text-[var(--ds-warning)] shrink-0 mt-0.5" />,
+    danger: <XCircle size={16} className="text-[var(--ds-danger)] shrink-0 mt-0.5" />,
+    ethical: <AlertTriangle size={16} className="text-[var(--ds-accent-gold)] shrink-0 mt-0.5" />,
+    'simulation-disclaimer': <FlaskConical size={16} className="text-[var(--ds-data-teal)] shrink-0 mt-0.5" />,
   };
 
   return (
@@ -132,7 +132,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   return (
     <div className={`relative group inline-block ${className}`}>
       {children}
-      <div role="tooltip" className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block group-focus-within:block z-50 bg-zinc-950 text-white text-[10px] p-2.5 rounded-xl shadow-lg border border-zinc-800 leading-normal select-none pointer-events-none">
+      <div role="tooltip" className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block group-focus-within:block z-50 bg-[var(--ds-navy)] text-white text-[10px] p-2.5 rounded-xl border border-white/10 leading-normal select-none pointer-events-none">
         {content}
       </div>
     </div>
@@ -163,7 +163,7 @@ export const Progress: React.FC<ProgressProps> = ({
   return (
     <div role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.max(0, Math.min(100, value))} className={`h-2 w-full bg-[var(--ds-background-subtle)] rounded-full overflow-hidden ${className}`}>
       <div 
-        className={`h-full transition-all duration-300 ${barColors[variant]}`}
+        className={`h-full ds-transition ${barColors[variant]}`}
         style={{ width: `${Math.max(0, Math.min(100, value))}%` }}
       />
     </div>
@@ -189,7 +189,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
       : 'rounded-xl';
 
   return (
-    <div aria-hidden="true" className={`animate-pulse bg-[var(--ds-surface-tertiary)] ${shapeClass} ${className}`} />
+    <div aria-hidden="true" className={`ds-shimmer ${shapeClass} ${className}`} />
   );
 };
 

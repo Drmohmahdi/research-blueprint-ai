@@ -198,7 +198,7 @@ export const UnifiedProfileEditor: React.FC = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <div className="w-12 h-12 rounded-full border-4 border-purple-600 border-t-transparent animate-spin"></div>
+        <div className="w-12 h-12 rounded-full border-4 border-ai border-t-transparent animate-spin"></div>
         <p className="text-[var(--ds-text-secondary)] text-sm font-semibold">
           {language === 'ar' ? 'جاري تحميل الملف الأكاديمي الموحد...' : 'Loading Unified Academic Profile...'}
         </p>
@@ -208,7 +208,7 @@ export const UnifiedProfileEditor: React.FC = () => {
 
   if (!profile) {
     return (
-      <div className="p-6 text-center text-red-500">
+      <div className="p-6 text-center text-danger">
         {language === 'ar' ? 'فشل تحميل البيانات.' : 'Failed to load profile data.'}
       </div>
     );
@@ -216,8 +216,8 @@ export const UnifiedProfileEditor: React.FC = () => {
 
   // Completeness score color mapping
   const score = profile.completeness_score || 0;
-  const scoreColor = score >= 80 ? 'text-emerald-500' : score >= 50 ? 'text-amber-500' : 'text-purple-500';
-  const scoreBg = score >= 80 ? 'bg-emerald-500/10 border-emerald-500/20' : score >= 50 ? 'bg-amber-500/10 border-amber-500/20' : 'bg-purple-500/10 border-purple-500/20';
+  const scoreColor = score >= 80 ? 'text-success' : score >= 50 ? 'text-warning' : 'text-ai';
+  const scoreBg = score >= 80 ? 'bg-action/10 border-success/20' : score >= 50 ? 'bg-warning/10 border-warning/20' : 'bg-ai/10 border-ai/20';
 
   const t = {
     title: language === 'ar' ? 'الملف الأكاديمي الموحد' : 'Unified Academic Profile',
@@ -254,7 +254,7 @@ export const UnifiedProfileEditor: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] p-6 rounded-2xl shadow-sm">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Award className="w-7 h-7 text-purple-500" />
+            <Award className="w-7 h-7 text-ai" />
             <span>{t.title}</span>
           </h2>
           <p className="text-xs text-[var(--ds-text-secondary)] mt-1">{t.desc}</p>
@@ -263,7 +263,7 @@ export const UnifiedProfileEditor: React.FC = () => {
         <button
           onClick={() => handleSave()}
           disabled={saving}
-          className="w-full md:w-auto px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-bold shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 transition-all cursor-pointer"
+          className="w-full md:w-auto px-5 py-2.5 bg-action hover:bg-action-hover text-on-action rounded-lg text-sm font-bold shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 ds-transition cursor-pointer"
         >
           {saving ? t.saving : t.save}
         </button>
@@ -271,7 +271,7 @@ export const UnifiedProfileEditor: React.FC = () => {
 
       {msg && (
         <div className={`p-4 rounded-xl border flex items-center gap-2 text-sm ${
-          msg.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+          msg.type === 'success' ? 'bg-action/10 border-success/20 text-success' : 'bg-danger/10 border-danger/20 text-danger'
         }`}>
           {msg.type === 'success' ? <CheckCircle className="w-5 h-5 shrink-0" /> : <AlertCircle className="w-5 h-5 shrink-0" />}
           <span>{msg.text}</span>
@@ -287,7 +287,7 @@ export const UnifiedProfileEditor: React.FC = () => {
           {/* Completeness Card */}
           <div className={`border p-6 rounded-2xl ${scoreBg} transition-all`}>
             <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--ds-text-secondary)] mb-4 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-purple-400" />
+              <Sparkles className="w-4 h-4 text-ai" />
               <span>{t.completeness}</span>
             </h3>
             
@@ -334,27 +334,27 @@ export const UnifiedProfileEditor: React.FC = () => {
             <div className="mt-5 pt-4 border-t border-[var(--ds-border-subtle)] space-y-2 text-[11px] text-[var(--ds-text-secondary)] font-medium">
               <div className="flex justify-between">
                 <span>{language === 'ar' ? 'الاسم والبيانات الأساسية' : 'Name and basic details'}</span>
-                <span className="text-purple-400 font-bold">+20%</span>
+                <span className="text-ai font-bold">+20%</span>
               </div>
               <div className="flex justify-between">
                 <span>{language === 'ar' ? 'البريد الأكاديمي المعتمد' : 'Verified Academic Email'}</span>
-                <span className="text-purple-400 font-bold">+10%</span>
+                <span className="text-ai font-bold">+10%</span>
               </div>
               <div className="flex justify-between">
                 <span>{language === 'ar' ? 'التخصص الدقيق والعام' : 'General & Specific Fields'}</span>
-                <span className="text-purple-400 font-bold">+20%</span>
+                <span className="text-ai font-bold">+20%</span>
               </div>
               <div className="flex justify-between">
                 <span>{language === 'ar' ? 'السيرة الذاتية المختصرة والكاملة' : 'Short & Full Biography'}</span>
-                <span className="text-purple-400 font-bold">+30%</span>
+                <span className="text-ai font-bold">+30%</span>
               </div>
               <div className="flex justify-between">
                 <span>{language === 'ar' ? 'المعرفات الأكاديمية (ORCID)' : 'Identifiers (ORCID, Scholar)'}</span>
-                <span className="text-purple-400 font-bold">+10%</span>
+                <span className="text-ai font-bold">+10%</span>
               </div>
               <div className="flex justify-between">
                 <span>{language === 'ar' ? 'الانتماءات الوظيفية والشهادات' : 'Academic Affiliations'}</span>
-                <span className="text-purple-400 font-bold">+10%</span>
+                <span className="text-ai font-bold">+10%</span>
               </div>
             </div>
           </div>
@@ -365,7 +365,7 @@ export const UnifiedProfileEditor: React.FC = () => {
               onClick={() => setActiveTab('general')}
               className={`w-full px-4 py-3 rounded-xl text-xs font-bold text-right flex items-center gap-2.5 transition-all cursor-pointer ${
                 activeTab === 'general'
-                  ? 'bg-purple-600 text-white'
+                  ? 'bg-[var(--ds-primary-soft)] text-ink'
                   : 'text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-secondary)]'
               }`}
             >
@@ -377,7 +377,7 @@ export const UnifiedProfileEditor: React.FC = () => {
               onClick={() => setActiveTab('identifiers')}
               className={`w-full px-4 py-3 rounded-xl text-xs font-bold text-right flex items-center gap-2.5 transition-all cursor-pointer ${
                 activeTab === 'identifiers'
-                  ? 'bg-purple-600 text-white'
+                  ? 'bg-[var(--ds-primary-soft)] text-ink'
                   : 'text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-secondary)]'
               }`}
             >
@@ -389,7 +389,7 @@ export const UnifiedProfileEditor: React.FC = () => {
               onClick={() => setActiveTab('affiliations')}
               className={`w-full px-4 py-3 rounded-xl text-xs font-bold text-right flex items-center gap-2.5 transition-all cursor-pointer ${
                 activeTab === 'affiliations'
-                  ? 'bg-purple-600 text-white'
+                  ? 'bg-[var(--ds-primary-soft)] text-ink'
                   : 'text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-secondary)]'
               }`}
             >
@@ -406,7 +406,7 @@ export const UnifiedProfileEditor: React.FC = () => {
             
             {activeTab === 'general' && (
               <div className="space-y-4">
-                <h2 className="text-sm font-bold border-b border-[var(--ds-border-subtle)] pb-2 text-purple-400">
+                <h2 className="text-sm font-bold border-b border-[var(--ds-border-subtle)] pb-2 text-ai">
                   {language === 'ar' ? 'البيانات الشخصية والمهنية العامة' : 'General Personal & Professional Data'}
                 </h2>
 
@@ -447,7 +447,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                       type="text"
                       value={profile.preferred_name_ar || ''}
                       onChange={(e) => setProfile({ ...profile, preferred_name_ar: e.target.value })}
-                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-purple-500 focus:outline-none"
+                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-ai focus:outline-none"
                     />
                   </div>
                   <div>
@@ -456,7 +456,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                       type="text"
                       value={profile.preferred_name_en || ''}
                       onChange={(e) => setProfile({ ...profile, preferred_name_en: e.target.value })}
-                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-purple-500 focus:outline-none"
+                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-ai focus:outline-none"
                     />
                   </div>
                 </div>
@@ -469,7 +469,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                       placeholder={language === 'ar' ? 'أستاذ مشارك، أستاذ مساعد، إلخ' : 'Assistant Professor, Associate Professor'}
                       value={profile.current_rank || ''}
                       onChange={(e) => setProfile({ ...profile, current_rank: e.target.value })}
-                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-purple-500 focus:outline-none"
+                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-ai focus:outline-none"
                     />
                   </div>
                   <div>
@@ -479,7 +479,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                       placeholder={language === 'ar' ? 'أستاذ بروفيسور، أستاذ مشارك، إلخ' : 'Professor, Associate Professor'}
                       value={profile.target_rank || ''}
                       onChange={(e) => setProfile({ ...profile, target_rank: e.target.value })}
-                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-purple-500 focus:outline-none"
+                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-ai focus:outline-none"
                     />
                   </div>
                 </div>
@@ -491,7 +491,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                       type="text"
                       value={profile.discipline || ''}
                       onChange={(e) => setProfile({ ...profile, discipline: e.target.value })}
-                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-purple-500 focus:outline-none"
+                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-ai focus:outline-none"
                     />
                   </div>
                   <div>
@@ -500,7 +500,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                       type="text"
                       value={profile.general_specialization || ''}
                       onChange={(e) => setProfile({ ...profile, general_specialization: e.target.value })}
-                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-purple-500 focus:outline-none"
+                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-ai focus:outline-none"
                     />
                   </div>
                   <div>
@@ -509,7 +509,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                       type="text"
                       value={profile.specific_specialization || ''}
                       onChange={(e) => setProfile({ ...profile, specific_specialization: e.target.value })}
-                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-purple-500 focus:outline-none"
+                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-ai focus:outline-none"
                     />
                   </div>
                 </div>
@@ -521,7 +521,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                       type="email"
                       value={profile.institutional_email || ''}
                       onChange={(e) => setProfile({ ...profile, institutional_email: e.target.value })}
-                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-purple-500 focus:outline-none"
+                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-ai focus:outline-none"
                     />
                   </div>
                   <div>
@@ -530,7 +530,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                       type="email"
                       value={profile.public_email || ''}
                       onChange={(e) => setProfile({ ...profile, public_email: e.target.value })}
-                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-purple-500 focus:outline-none"
+                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-ai focus:outline-none"
                     />
                   </div>
                   <div>
@@ -539,7 +539,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                       type="text"
                       value={profile.phone || ''}
                       onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-purple-500 focus:outline-none"
+                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-ai focus:outline-none"
                     />
                   </div>
                 </div>
@@ -551,7 +551,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                       rows={3}
                       value={profile.short_bio_ar || ''}
                       onChange={(e) => setProfile({ ...profile, short_bio_ar: e.target.value })}
-                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-purple-500 focus:outline-none"
+                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-ai focus:outline-none"
                     />
                   </div>
                   <div>
@@ -560,7 +560,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                       rows={3}
                       value={profile.short_bio_en || ''}
                       onChange={(e) => setProfile({ ...profile, short_bio_en: e.target.value })}
-                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-purple-500 focus:outline-none"
+                      className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:ring-1 focus:ring-ai focus:outline-none"
                     />
                   </div>
                 </div>
@@ -570,7 +570,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                   <select
                     value={profile.visibility_status || 'PUBLIC'}
                     onChange={(e) => setProfile({ ...profile, visibility_status: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-purple-500"
+                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-ai"
                   >
                     <option value="PUBLIC">{language === 'ar' ? 'عام (متاح للجميع)' : 'Public (Visible to everyone)'}</option>
                     <option value="INSTITUTIONAL">{language === 'ar' ? 'مؤسسي (منسوبي الجامعة فقط)' : 'Institutional (My university only)'}</option>
@@ -583,24 +583,24 @@ export const UnifiedProfileEditor: React.FC = () => {
             {activeTab === 'identifiers' && (
               <div className="space-y-4">
                 <div className="flex justify-between items-center border-b border-[var(--ds-border-subtle)] pb-2">
-                  <h2 className="text-sm font-bold text-purple-400">
+                  <h2 className="text-sm font-bold text-ai">
                     {language === 'ar' ? 'المعرفات والقنوات الأكاديمية' : 'Academic Identifiers & Channels'}
                   </h2>
                   <button
                     type="button"
                     onClick={addIdentifier}
-                    className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                    className="px-3 py-1.5 bg-action hover:bg-action-hover text-on-action rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>{t.addIdent}</span>
                   </button>
                 </div>
 
-                <div className="bg-amber-500/5 border border-amber-500/10 p-4 rounded-xl flex gap-2.5 text-xs text-amber-400">
+                <div className="bg-warning/5 border border-warning/10 p-4 rounded-xl flex gap-2.5 text-xs text-warning">
                   <AlertCircle className="w-5 h-5 shrink-0" />
                   <div>
                     <span className="font-bold">{language === 'ar' ? 'ملاحظة حول موثوقية المعرفات' : 'Note on Identifier Authenticity'}</span>
-                    <p className="mt-1 leading-relaxed text-[11px] text-amber-300/80">
+                    <p className="mt-1 leading-relaxed text-[11px] text-warning/80">
                       {language === 'ar' 
                         ? 'تخضع كافة قنوات النشر المضافة لتدقيق يدوي ومراجعة موثوقية من قِبل اللجنة الأكاديمية، ولا يتم منح شارة التحقق التلقائي بدون مطابقة البصمة الأكاديمية.'
                         : 'All added academic identifiers are subject to manual verification and authority checks by the academic committee. Auto-verification is not granted without authority alignment.'
@@ -672,7 +672,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                           <div className="flex flex-col items-center">
                             <span className="text-[9px] font-semibold text-[var(--ds-text-secondary)]">{language === 'ar' ? 'حالة التحقق' : 'Status'}</span>
                             <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold mt-1 ${
-                              ident.status === 'VERIFIED' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-purple-500/10 text-purple-400'
+                              ident.status === 'VERIFIED' ? 'bg-action/10 text-success' : 'bg-ai/10 text-ai'
                             }`}>
                               {ident.status === 'VERIFIED' 
                                 ? (language === 'ar' ? 'مؤكد' : 'Verified') 
@@ -684,7 +684,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => removeIdentifier(idx)}
-                            className="p-1.5 text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all mt-3 cursor-pointer"
+                            className="p-1.5 text-danger hover:bg-danger/10 rounded-lg transition-all mt-3 cursor-pointer"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -699,13 +699,13 @@ export const UnifiedProfileEditor: React.FC = () => {
             {activeTab === 'affiliations' && (
               <div className="space-y-4">
                 <div className="flex justify-between items-center border-b border-[var(--ds-border-subtle)] pb-2">
-                  <h2 className="text-sm font-bold text-purple-400">
+                  <h2 className="text-sm font-bold text-ai">
                     {language === 'ar' ? 'تاريخ الانتماءات الأكاديمية والشهادات' : 'Academic Affiliations & Degrees'}
                   </h2>
                   <button
                     type="button"
                     onClick={addAffiliation}
-                    className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                    className="px-3 py-1.5 bg-action hover:bg-action-hover text-on-action rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>{t.addAff}</span>
@@ -721,13 +721,13 @@ export const UnifiedProfileEditor: React.FC = () => {
                     profile.affiliations.map((aff: any, idx: number) => (
                       <div key={idx} className="p-4 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl space-y-3">
                         <div className="flex justify-between items-center">
-                          <span className="text-xs font-bold text-purple-400">
+                          <span className="text-xs font-bold text-ai">
                             {language === 'ar' ? `الانتماء الأكاديمي #${idx + 1}` : `Academic Affiliation #${idx + 1}`}
                           </span>
                           <button
                             type="button"
                             onClick={() => removeAffiliation(idx)}
-                            className="p-1 text-rose-400 hover:bg-rose-500/10 rounded transition-all cursor-pointer"
+                            className="p-1 text-danger hover:bg-danger/10 rounded transition-all cursor-pointer"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -834,7 +834,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                               id={`is-current-${idx}`}
                               checked={aff.is_current || false}
                               onChange={(e) => updateAffiliation(idx, 'is_current', e.target.checked)}
-                              className="rounded border-[var(--ds-border-subtle)] text-purple-600 focus:ring-purple-500 w-4 h-4 cursor-pointer"
+                              className="rounded border-[var(--ds-border-subtle)] text-ai focus:ring-ai w-4 h-4 cursor-pointer"
                             />
                             <label htmlFor={`is-current-${idx}`} className="text-xs font-semibold text-[var(--ds-text-secondary)] cursor-pointer">
                               {language === 'ar' ? 'انتماء وظيفي حالي' : 'Current affiliation'}
@@ -847,7 +847,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                             <span className="text-[10px] font-bold text-[var(--ds-text-secondary)]">
                               {language === 'ar' ? 'مستند الإثبات / المرفق:' : 'Evidence Attachment:'}
                             </span>
-                            <span className="text-[10px] text-purple-400 font-medium">
+                            <span className="text-[10px] text-ai font-medium">
                               {aff.evidence_file_id 
                                 ? (language === 'ar' ? 'تم الرفع بنجاح' : 'Uploaded successfully') 
                                 : (language === 'ar' ? 'لا يوجد ملف إثبات مرفق' : 'No evidence document attached')
@@ -858,7 +858,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                           <div className="flex items-center gap-2">
                             <span className="text-[9px] font-semibold text-[var(--ds-text-secondary)]">{language === 'ar' ? 'التحقق من الانتماء' : 'Verification'}</span>
                             <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold ${
-                              aff.verification_status === 'VERIFIED' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-purple-500/10 text-purple-400'
+                              aff.verification_status === 'VERIFIED' ? 'bg-action/10 text-success' : 'bg-ai/10 text-ai'
                             }`}>
                               {aff.verification_status === 'VERIFIED' 
                                 ? (language === 'ar' ? 'تم التحقق' : 'Verified') 

@@ -81,7 +81,7 @@ export const ResearchOutputsCenter: React.FC<ResearchOutputsCenterProps> = ({ pr
 
     // HTML format
     return `<div style="font-family: system-ui, sans-serif; direction: ${isAr ? 'rtl' : 'ltr'}; padding: 16px; color: var(--ds-text-primary);">
-      <h2 style="color: #8b5cf6; border-bottom: 2px solid var(--ds-border-subtle); padding-bottom: 8px;">${isAr ? activeReport.nameAr : activeReport.nameEn}</h2>
+      <h2 style="color: var(--ds-ai-accent); border-bottom: 2px solid var(--ds-border-subtle); padding-bottom: 8px;">${isAr ? activeReport.nameAr : activeReport.nameEn}</h2>
       <p><strong>${isAr ? 'المشروع الأكاديمي:' : 'Academic Project:'}</strong> ${data.project_title}</p>
       <p><strong>${isAr ? 'المؤسسة/القسم:' : 'Institution/Dept:'}</strong> ${data.institution} - ${data.department}</p>
       <hr style="border: 0; border-top: 1px solid var(--ds-border-subtle); margin: 16px 0;" />
@@ -112,7 +112,7 @@ export const ResearchOutputsCenter: React.FC<ResearchOutputsCenterProps> = ({ pr
               onClick={() => setSelectedReportId(report.id)}
               className={`w-full text-start p-2 rounded-lg text-xs font-semibold transition-all border border-transparent cursor-pointer ${
                 selectedReportId === report.id
-                  ? 'bg-[var(--ds-primary)] text-white shadow-sm'
+                  ? 'bg-[var(--ds-primary-soft)] text-ink shadow-sm'
                   : 'bg-transparent text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-primary)]'
               }`}
             >
@@ -140,7 +140,7 @@ export const ResearchOutputsCenter: React.FC<ResearchOutputsCenterProps> = ({ pr
                   onClick={() => setPreviewFormat(fmt as any)}
                   className={`px-2 py-1 rounded transition-all border-none cursor-pointer ${
                     previewFormat === fmt
-                      ? 'bg-purple-600 text-white shadow-sm'
+                      ? 'bg-[var(--ds-primary-soft)] text-ink shadow-sm'
                       : 'text-[var(--ds-text-secondary)] bg-transparent'
                   }`}
                 >

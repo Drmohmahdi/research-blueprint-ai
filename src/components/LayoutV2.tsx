@@ -117,7 +117,8 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
       titleAr: 'المنظومة الأكاديمية',
       titleEn: 'Baseerah Portal',
       items: [
-        { id: 'portal', labelAr: 'البوابة الرئيسية', labelEn: 'Portal Gateway', icon: LayoutDashboard }
+        { id: 'portal', labelAr: 'البوابة الرئيسية', labelEn: 'Portal Gateway', icon: LayoutDashboard },
+        { id: 'lifecycle', labelAr: 'مركز قيادة المشروع', labelEn: 'Project Command Center', icon: GitBranch }
       ]
     };
 
@@ -143,6 +144,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
           titleEn: 'Scientific Research',
           items: [
             { id: 'dashboard', labelAr: 'لوحة التحكم', labelEn: 'Dashboard', icon: LayoutDashboard },
+            { id: 'lifecycle', labelAr: 'دورة حياة البحث', labelEn: 'Research Lifecycle', icon: GitBranch },
             { id: 'decisionCenter', labelAr: 'مركز قرارات البحث', labelEn: 'Research Decision Center', icon: GitBranch },
             { id: 'planning', labelAr: 'خطة البحث', labelEn: 'Research Plan', icon: ClipboardList },
             { id: 'pathSelector', labelAr: 'اختيار المسار', labelEn: 'Path Selector', icon: Map },
@@ -179,6 +181,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
           items: [
             { id: 'preReg', labelAr: 'التسجيل المسبق', labelEn: 'Pre-registration', icon: FileLock2 },
             { id: 'dataQuality', labelAr: 'جودة البيانات', labelEn: 'Data Inspector', icon: Database },
+            { id: 'researchData', labelAr: 'البيانات والتحليل', labelEn: 'Data & Analysis Studio', icon: BarChart3 },
             { id: 'fidelity', labelAr: 'متابعة التنفيذ', labelEn: 'Field Monitoring', icon: Activity }
           ]
         },
@@ -341,6 +344,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
     const parentMap: Record<string, { ar: string; en: string }> = {
       portal: { ar: 'بصيرة الأكاديمية', en: 'Baseerah Suite' },
       dashboard: { ar: 'البحث العلمي', en: 'Research' },
+      lifecycle: { ar: 'دورة حياة البحث', en: 'Research Lifecycle' },
       decisionCenter: { ar: 'البحث العلمي', en: 'Research' },
       planning: { ar: 'البحث العلمي', en: 'Research' },
       pathSelector: { ar: 'البحث العلمي', en: 'Research' },
@@ -354,6 +358,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
       simulation: { ar: 'المحاكاة والتنبؤ', en: 'Simulation' },
       outcomePredictor: { ar: 'المحاكاة والتنبؤ', en: 'Simulation' },
       dataQuality: { ar: 'التنفيذ والبيانات', en: 'Operations' },
+      researchData: { ar: 'التنفيذ والبيانات', en: 'Operations' },
       preReg: { ar: 'التنفيذ والبيانات', en: 'Operations' },
       fidelity: { ar: 'التنفيذ والبيانات', en: 'Operations' },
       litSynthesizer: { ar: 'الأدلة والبحوث', en: 'Literature' },
@@ -380,6 +385,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
     const titleMap: Record<string, { ar: string; en: string }> = {
       portal: { ar: 'البوابة الرئيسية', en: 'Portal Gateway' },
       dashboard: { ar: 'لوحة التحكم', en: 'Dashboard' },
+      lifecycle: { ar: 'مركز قيادة المشروع', en: 'Project Command Center' },
       decisionCenter: { ar: 'مركز قرارات البحث', en: 'Research Decision Center' },
       planning: { ar: 'خطة البحث', en: 'Research Plan' },
       pathSelector: { ar: 'اختيار المسار', en: 'Path Selector' },
@@ -393,6 +399,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
       simulation: { ar: 'مختبر المحاكاة', en: 'Simulation Lab' },
       outcomePredictor: { ar: 'محرك التنبؤ بالنتائج', en: 'Prediction Engine' },
       dataQuality: { ar: 'جودة البيانات', en: 'Data Quality' },
+      researchData: { ar: 'البيانات والتحليل', en: 'Data & Analysis' },
       preReg: { ar: 'التسجيل المسبق', en: 'Pre-registration' },
       fidelity: { ar: 'متابعة التنفيذ', en: 'Field Monitoring' },
       litSynthesizer: { ar: 'تحليل الدراسات السابقة', en: 'Literature' },
@@ -425,18 +432,18 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--ds-background-canvas)] text-[var(--ds-text-primary)] transition-colors duration-180 antialiased">
+    <div className="min-h-screen flex flex-col bg-[var(--ds-background-canvas)] text-[var(--ds-text-primary)] ds-transition antialiased">
       <a className="ds-skip-link" href="#main-content">
         {language === 'ar' ? 'تخطَّ إلى المحتوى الرئيسي' : 'Skip to main content'}
       </a>
       {/* Top Banner Warning (Ethical warning required) */}
-      <div className="bg-[var(--ds-accent-gold-soft)] border-b border-[var(--ds-accent-gold)]/25 px-4 py-2 flex items-center justify-center gap-2 text-xs md:text-sm text-[var(--ds-warning)] font-bold z-50">
-        <AlertTriangle size={16} className="shrink-0 text-[var(--ds-warning)]" />
+      <div className="bg-[var(--ds-accent-gold-soft)] border-b border-[var(--ds-accent-gold)]/25 px-4 py-2 flex items-center justify-center gap-2 text-xs md:text-sm text-[var(--ds-text-primary)] font-bold z-50">
+        <AlertTriangle size={16} className="shrink-0 text-[var(--ds-accent-gold-hover)] dark:text-[var(--ds-accent-gold)]" />
         <span className="text-center">{getTranslation(language, 'ethicalAlert')}</span>
       </div>
 
       {/* Premium V2 Header */}
-      <header className="baseerah-glass sticky top-0 z-40 w-full h-[4.5rem] border-b border-[var(--ds-border-subtle)] shadow-[0_12px_35px_-30px_rgba(8,76,72,0.8)]">
+      <header className="baseerah-glass sticky top-0 z-40 w-full h-[4.5rem] border-b border-[var(--ds-border-subtle)] shadow-[var(--ds-shadow-layered)]">
         <div className="mx-auto flex h-full w-full max-w-[1920px] min-w-0 items-center justify-between gap-1.5 px-2 min-[380px]:px-3 sm:gap-2 sm:px-6 2xl:px-10">
           
           {/* Logo & Platform Info */}
@@ -449,7 +456,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
             >
               <Menu size={20} />
             </button>
-            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[var(--ds-primary)] to-[#164E63] text-white font-extrabold shadow-lg shadow-teal-950/15 ring-1 ring-white/20 before:absolute before:inset-0 before:bg-gradient-to-tr before:from-transparent before:to-white/15 sm:h-11 sm:w-11 sm:rounded-2xl sm:text-lg">
+            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[var(--ds-action-fill)] text-on-action font-extrabold shadow-[var(--ds-shadow-glow)] ring-1 ring-[var(--ds-accent-gold)]/25 sm:h-11 sm:w-11 sm:rounded-2xl sm:text-lg">
               {language === 'ar' ? 'ب' : 'B'}
             </div>
             <div className="min-w-0">
@@ -562,7 +569,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
         {/* Intelligent Sidebar V2 (Desktop Only) */}
         <aside 
           aria-label={language === 'ar' ? 'التنقل الرئيسي' : 'Primary navigation'}
-          className={`hidden lg:flex flex-col border-l border-r border-[var(--ds-border-subtle)] bg-[color-mix(in_srgb,var(--ds-surface-primary)_94%,transparent)] shadow-[8px_0_30px_-28px_rgba(8,76,72,0.6)] transition-all duration-180 shrink-0 ${
+          className={`hidden lg:flex flex-col border-l border-r border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] shadow-[var(--ds-shadow-layered)] transition-all duration-200 shrink-0 ${
             isCollapsed ? 'w-20' : 'w-[280px]'
           }`}
         >
@@ -645,12 +652,15 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
                             onClick={() => setCurrentView(item.id)}
                             aria-label={language === 'ar' ? item.labelAr : item.labelEn}
                             aria-current={isActive ? 'page' : undefined}
-                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all relative group cursor-pointer ${
+                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold ds-transition relative group cursor-pointer ${
                               isActive
-                                ? 'bg-[var(--ds-primary-soft)] text-[var(--ds-primary-active)] dark:text-[var(--ds-primary)] border border-[var(--ds-primary)]/30 shadow-sm'
+                                ? 'bg-[var(--ds-primary-soft)] text-[var(--ds-primary-active)] dark:text-[var(--ds-primary)] border border-[var(--ds-primary)]/25'
                                 : 'text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-secondary)] border border-transparent'
                             }`}
                           >
+                            {isActive && (
+                              <span className="absolute start-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-[var(--ds-primary)]" />
+                            )}
                             <Icon size={16} className={`shrink-0 ${isActive ? 'text-[var(--ds-primary)]' : 'text-[var(--ds-text-muted)]'}`} />
                             {!isCollapsed && (
                               <span className="truncate">{language === 'ar' ? item.labelAr : item.labelEn}</span>
@@ -658,7 +668,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
 
                             {/* Collapsed Tooltip overlay */}
                             {isCollapsed && (
-                              <div className="absolute right-full left-auto ml-0 mr-2 transform translate-x-[-10px] hidden group-hover:block z-50 bg-zinc-950 text-white text-[10px] py-1.5 px-3 rounded-lg shadow-xl font-bold border border-zinc-800 whitespace-nowrap">
+                              <div className="absolute right-full left-auto ml-0 mr-2 transform translate-x-[-10px] hidden group-hover:block z-50 bg-[var(--ds-navy)] text-white text-[10px] py-1.5 px-3 rounded-lg shadow-xl font-bold border border-white/10 whitespace-nowrap">
                                 {language === 'ar' ? item.labelAr : item.labelEn}
                               </div>
                             )}
@@ -675,7 +685,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
 
         {/* Mobile Navigation Drawer Overlay */}
         {mobileMenuOpen && (
-          <div className="fixed inset-0 z-50 flex lg:hidden bg-black/60 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label={language === 'ar' ? 'قائمة التنقل' : 'Navigation menu'}>
+          <div className="fixed inset-0 z-50 flex lg:hidden bg-[var(--ds-surface-overlay)]" role="dialog" aria-modal="true" aria-label={language === 'ar' ? 'قائمة التنقل' : 'Navigation menu'}>
             <div ref={mobileMenuRef} className="w-[min(88vw,320px)] bg-[var(--ds-surface-primary)] h-full flex flex-col animate-slide-in relative border-l border-[var(--ds-border-subtle)]">
               <div className="p-4 border-b border-[var(--ds-border-subtle)] flex justify-between items-center">
                 <span className="text-xs font-black">{language === 'ar' ? 'التنقل البحثي' : 'Research Navigation'}</span>
@@ -769,11 +779,16 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
 
           {/* Research Lifecycle Stepper V2 — Only show inside Research module */}
           {pathname.startsWith('/app/research') && (
-            <div className="sticky top-0 z-30 mb-6 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-4 shadow-sm backdrop-blur-sm">
+            <div className="sticky top-0 z-30 mb-6 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-4 shadow-[var(--ds-shadow-layered)]">
               <span className="text-[9px] font-black text-[var(--ds-text-muted)] uppercase tracking-widest block mb-3.5">
                 {language === 'ar' ? 'دورة حياة البحث العلمي النشطة' : 'Active Scientific Research Lifecycle'}
               </span>
-              <div className="flex items-center justify-between overflow-x-auto gap-4 py-1 no-scrollbar">
+              <div
+                className="flex items-center justify-between overflow-x-auto gap-4 py-1 no-scrollbar"
+                role="region"
+                aria-label="مراحل سير العمل البحثي"
+                tabIndex={0}
+              >
                 {lifecycleStages.map((stage, idx) => {
                   const currentStage = getLifecycleStage();
                   const isPassed = idx < currentStage;
@@ -782,12 +797,12 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
                   return (
                     <div key={idx} className="flex items-center gap-2 shrink-0">
                       <div className="flex flex-col items-center gap-1">
-                        <div className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-black border transition-all duration-300 ${
+                        <div className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-black border ds-transition ${
                           isPassed 
                             ? 'bg-[var(--ds-success-soft)] text-[var(--ds-success)] border-[var(--ds-success)]/30' 
                             : isCurrent 
-                              ? 'bg-[var(--ds-primary)] text-white border-[var(--ds-primary)] shadow-sm ring-4 ring-[var(--ds-primary-soft)] scale-105' 
-                              : 'bg-zinc-800 text-white border-zinc-600'
+                              ? 'bg-action text-on-action border-[var(--ds-action-fill)] ring-4 ring-[var(--ds-primary-soft)]'
+                              : 'bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-muted)] border-[var(--ds-border-default)]'
                         }`}>
                           {idx + 1}
                         </div>
@@ -798,8 +813,8 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
                         </span>
                       </div>
                       {idx < lifecycleStages.length - 1 && (
-                        <div className={`h-[1px] w-6 md:w-10 ${
-                          idx < currentStage ? 'bg-[var(--ds-success)]/40' : 'bg-[var(--ds-border-subtle)]'
+                        <div className={`h-px w-8 md:w-12 rounded-full ${
+                          idx < currentStage ? 'bg-[var(--ds-success)]/50' : 'bg-[var(--ds-border-subtle)]'
                         }`} />
                       )}
                     </div>
@@ -828,10 +843,10 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
 
       </div>
 
-      <footer className="border-t border-[var(--ds-border-subtle)] bg-[color-mix(in_srgb,var(--ds-surface-primary)_92%,transparent)] px-4 py-5 text-[var(--ds-text-secondary)] backdrop-blur-xl md:px-8">
+      <footer className="border-t border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] px-4 py-5 text-[var(--ds-text-secondary)] md:px-8">
         <div className="mx-auto flex max-w-[1800px] flex-col items-center justify-between gap-3 text-center sm:flex-row sm:text-start">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--ds-primary)] to-[#164E63] text-sm font-black text-white shadow-sm">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--ds-action-fill)] text-sm font-black text-on-action shadow-[var(--ds-shadow-glow)]">
               {language === 'ar' ? 'ب' : 'B'}
             </div>
             <div>

@@ -34,7 +34,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
             {tooltipText && (
               <div className="relative group cursor-help">
                 <HelpCircle size={13} className="text-[var(--ds-text-disabled)]" />
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block z-50 bg-zinc-950 text-white text-[10px] p-2 rounded shadow-lg border border-zinc-800 leading-normal">
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block z-50 bg-[var(--ds-navy)] text-white text-[10px] p-2 rounded-xl border border-white/10 leading-normal">
                   {tooltipText}
                 </div>
               </div>
@@ -56,8 +56,8 @@ export const MetricCard: React.FC<MetricCardProps> = ({
           
           {trend && (
             <span className={`inline-flex items-center gap-1 font-bold ${
-              trend === 'up' ? 'text-emerald-500' :
-              trend === 'down' ? 'text-rose-500' : 'text-zinc-500'
+              trend === 'up' ? 'text-[var(--ds-success)]' :
+              trend === 'down' ? 'text-[var(--ds-danger)]' : 'text-[var(--ds-text-muted)]'
             }`}>
               {trend === 'up' && <TrendingUp size={12} />}
               {trend === 'down' && <TrendingDown size={12} />}

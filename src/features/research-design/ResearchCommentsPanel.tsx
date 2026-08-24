@@ -74,11 +74,11 @@ export const ResearchCommentsPanel: React.FC<ResearchCommentsPanelProps> = ({
   return (
     <div className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 font-bold text-xs">
+        <div className="flex items-center gap-2 text-ai font-bold text-xs">
           <MessageSquare size={16} />
           <span>{isAr ? 'ملاحظات المشرف الأكاديمي للخطوة' : 'Step Supervisor Comments'}</span>
         </div>
-        <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300">
+        <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-ai/10 text-ai dark:bg-ai/10 dark:text-ai">
           {comments.filter(c => !c.resolved).length} {isAr ? 'مفتوحة' : 'Open'}
         </span>
       </div>
@@ -90,7 +90,7 @@ export const ResearchCommentsPanel: React.FC<ResearchCommentsPanelProps> = ({
           value={newCommentText}
           onChange={(e) => setNewCommentText(e.target.value)}
           placeholder={isAr ? 'اكتب ملاحظة أو توجيه أكاديمي لهذه الخطوة...' : 'Add supervisor feedback or direction for this step...'}
-          className="w-full p-2.5 rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-[var(--ds-text-primary)] text-xs focus:ring-1 focus:ring-purple-500 outline-none resize-none"
+          className="w-full p-2.5 rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-[var(--ds-text-primary)] text-xs focus:ring-1 focus:ring-ai outline-none resize-none"
         />
         <div className="flex items-center justify-between gap-2">
           <select
@@ -106,7 +106,7 @@ export const ResearchCommentsPanel: React.FC<ResearchCommentsPanelProps> = ({
           <button
             type="submit"
             disabled={loading || !newCommentText.trim()}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-purple-600 hover:bg-purple-700 text-white border-none cursor-pointer disabled:opacity-50 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-action hover:bg-action-hover text-on-action border-none cursor-pointer disabled:opacity-50 ds-transition"
           >
             <Send size={12} />
             <span>{isAr ? 'إرسال الملاحظة' : 'Post Comment'}</span>
@@ -126,7 +126,7 @@ export const ResearchCommentsPanel: React.FC<ResearchCommentsPanelProps> = ({
               key={c.id}
               className={`p-2.5 rounded-lg border text-xs space-y-1 ${
                 c.resolved
-                  ? 'bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 opacity-60'
+                  ? 'bg-surface-subtle border-subtle opacity-60'
                   : 'bg-[var(--ds-surface-primary)] border-[var(--ds-border-subtle)]'
               }`}
             >
@@ -136,9 +136,9 @@ export const ResearchCommentsPanel: React.FC<ResearchCommentsPanelProps> = ({
                 </span>
                 <button
                   onClick={() => handleToggleResolve(c.id, c.resolved)}
-                  className="flex items-center gap-1 text-[11px] text-[var(--ds-text-secondary)] hover:text-purple-600 border-none bg-transparent cursor-pointer"
+                  className="flex items-center gap-1 text-[11px] text-[var(--ds-text-secondary)] hover:text-ai border-none bg-transparent cursor-pointer"
                 >
-                  <CheckCircle size={12} className={c.resolved ? 'text-emerald-500' : ''} />
+                  <CheckCircle size={12} className={c.resolved ? 'text-success' : ''} />
                   <span>{c.resolved ? (isAr ? 'معالجة' : 'Resolved') : (isAr ? 'تحديد كمعالجة' : 'Resolve')}</span>
                 </button>
               </div>

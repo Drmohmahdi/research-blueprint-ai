@@ -4,6 +4,8 @@ import { login } from './helpers';
 const staticAuthenticatedRoutes = [
   '/app',
   '/app/research',
+  '/app/research/lifecycle',
+  '/app/research/data-analysis',
   '/app/research/paths',
   '/app/research/decisions',
   '/app/research/planning',
@@ -62,15 +64,11 @@ for (const viewport of viewports) {
       await page.goto(route, { waitUntil: 'domcontentloaded' });
       await expect(page.locator('main'), `${viewport.name} ${route} should render its main landmark`).toHaveCount(1);
 
-      const overflow = await page.evaluate(() => ({
-        documentWidth: document.documentElement.scrollWidth,
-        viewportWidth: window.innerWidth,
-      }));
-
-      expect(
-        overflow.documentWidth,
-        `${viewport.name} ${route} must not create horizontal page overflow`,
-      ).toBeLessThanOrEqual(overflow.viewportWidth);
+      await expect.poll(async () => page.evaluate(() =>
+        document.documentElement.scrollWidth <= window.innerWidth,
+      ).catch(() => false), {
+        message: `${viewport.name} ${route} must not create horizontal page overflow`,
+      }).toBe(true);
     }
   });
 }

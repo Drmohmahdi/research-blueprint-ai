@@ -3,6 +3,7 @@ import { useProject } from '../context/ProjectContext';
 import { checkConsistency } from '../utils/ruleEngine';
 import { Card } from '../design-system/components/Card';
 import { Button } from '../design-system/components/Button';
+import { PathPanel } from '../design-system/components/Navigation';
 import {
   UserCheck,
   ShieldAlert,
@@ -222,10 +223,10 @@ export const PublicationReadinessReviewer: React.FC = () => {
 
   // ── UI helpers ────────────────────────────────────────────────────────────
   const decisionStyles: Record<Decision, string> = {
-    accepted:       'bg-emerald-500/10 text-emerald-500 border-emerald-500/30 dark:bg-emerald-500/5',
-    minor_revision: 'bg-blue-500/10    text-blue-500    border-blue-500/30    dark:bg-blue-500/5',
-    major_revision: 'bg-amber-500/10   text-amber-500   border-amber-500/30   dark:bg-amber-500/5',
-    rejected:       'bg-rose-500/10    text-rose-500    border-rose-500/30    dark:bg-rose-500/5'
+    accepted:       'bg-action/10 text-success border-success/30 dark:bg-action/5',
+    minor_revision: 'bg-info/10    text-path-publication    border-info/30    dark:bg-[var(--ds-path-publication)]/5',
+    major_revision: 'bg-warning/10   text-warning   border-warning/30   dark:bg-warning/5',
+    rejected:       'bg-danger/10    text-danger    border-danger/30    dark:bg-danger/5'
   };
 
   const decisionLabel = (d: Decision) => {
@@ -239,17 +240,17 @@ export const PublicationReadinessReviewer: React.FC = () => {
   };
 
   const scoreColor = (score: number) => {
-    if (score >= 85) return 'text-emerald-500';
-    if (score >= 70) return 'text-blue-500';
-    if (score >= 50) return 'text-amber-500';
-    return 'text-rose-500';
+    if (score >= 85) return 'text-success';
+    if (score >= 70) return 'text-path-publication';
+    if (score >= 50) return 'text-warning';
+    return 'text-danger';
   };
 
   const scoreBg = (score: number) => {
-    if (score >= 85) return 'bg-emerald-500';
-    if (score >= 70) return 'bg-blue-500';
-    if (score >= 50) return 'bg-amber-500';
-    return 'bg-rose-500';
+    if (score >= 85) return 'bg-action';
+    if (score >= 70) return 'bg-[var(--ds-path-publication)]';
+    if (score >= 50) return 'bg-warning';
+    return 'bg-danger';
   };
 
   // Radar Data calculation
@@ -264,12 +265,12 @@ export const PublicationReadinessReviewer: React.FC = () => {
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-16">
 
-      {/* Header Card */}
-      <div className="bg-gradient-to-r from-purple-900/30 via-violet-900/10 to-transparent border border-purple-500/20 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-md">
+      <PathPanel accent="var(--ds-path-publication)">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2 mb-1">
-            <UserCheck size={20} className="text-purple-400" />
-            <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest">
+            <UserCheck size={20} className="text-ai" />
+            <span className="text-[10px] font-black text-ai uppercase tracking-widest">
               {language === 'ar' ? 'تحكيم متعدد الأبعاد' : 'Multi-Dimensional Peer Review'}
             </span>
           </div>
@@ -300,10 +301,11 @@ export const PublicationReadinessReviewer: React.FC = () => {
           </span>
         </Button>
       </div>
+      </PathPanel>
 
       {/* Disclaimer */}
-      <div className="flex items-start gap-3 p-4 rounded-xl border border-amber-500/20 bg-amber-500/5">
-        <Info size={16} className="text-amber-500 shrink-0 mt-0.5" />
+      <div className="flex items-start gap-3 p-4 rounded-xl border border-warning/20 bg-warning/5">
+        <Info size={16} className="text-warning shrink-0 mt-0.5" />
         <p className="text-xs text-[var(--ds-text-secondary)] leading-relaxed m-0">
           {language === 'ar'
             ? 'هذا التقييم استرشادي وتنبؤي، يستند إلى البيانات المدخلة في المنصة. لا يُغني عن التحكيم العلمي الرسمي من مجلة أو مؤتمر أكاديمي.'
@@ -333,7 +335,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
                       <circle cx="18" cy="18" r="15.9" fill="none"
                         stroke="var(--ds-border-subtle)" strokeWidth="3" />
                       <circle cx="18" cy="18" r="15.9" fill="none"
-                        stroke={reviewResult.overallIndex >= 85 ? '#10b981' : reviewResult.overallIndex >= 70 ? '#3b82f6' : reviewResult.overallIndex >= 50 ? '#f59e0b' : '#ef4444'}
+                        stroke={reviewResult.overallIndex >= 85 ? 'var(--ds-chart-1)' : reviewResult.overallIndex >= 70 ? 'var(--ds-chart-3)' : reviewResult.overallIndex >= 50 ? 'var(--ds-chart-5)' : 'var(--ds-chart-6)'}
                         strokeWidth="3"
                         strokeDasharray={`${reviewResult.overallIndex} ${100 - reviewResult.overallIndex}`}
                         strokeLinecap="round" />
@@ -373,7 +375,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
                       <div key={dim.id} className="space-y-1">
                         <div className="flex items-center justify-between text-[10px] font-bold">
                           <div className="flex items-center gap-1.5 text-[var(--ds-text-secondary)]">
-                            <Icon size={12} className="text-purple-500" />
+                            <Icon size={12} className="text-ai" />
                             <span>{language === 'ar' ? dim.labelAr : dim.labelEn}</span>
                           </div>
                           <span className={`font-black ${scoreColor(dim.score)}`}>{dim.score}</span>
@@ -393,9 +395,9 @@ export const PublicationReadinessReviewer: React.FC = () => {
 
             {/* Right Column: Recharts Radar Chart (5/12 width) */}
             <div className="lg:col-span-5">
-              <Card className="p-6 border border-purple-500/20 bg-gradient-to-b from-[var(--ds-surface-primary)] to-[var(--ds-surface-secondary)] shadow-lg space-y-4 sticky top-6">
+              <Card className="p-6 border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] shadow-[var(--ds-shadow-layered)] space-y-4 sticky top-6">
                 <div className="flex items-center gap-1.5 pb-2 border-b border-[var(--ds-border-subtle)]">
-                  <TrendingUp size={14} className="text-purple-600 dark:text-purple-400" />
+                  <TrendingUp size={14} className="text-ai" />
                   <h4 className="text-[10px] font-black text-[var(--ds-text-secondary)] uppercase tracking-wider m-0">
                     {language === 'ar' ? 'بصمة الجاهزية خماسية الأبعاد' : '5D Readiness Assessment Web'}
                   </h4>
@@ -417,15 +419,15 @@ export const PublicationReadinessReviewer: React.FC = () => {
                       <Radar 
                         name="Readiness" 
                         dataKey="score" 
-                        stroke="#8b5cf6" 
-                        fill="#8b5cf6" 
+                        stroke="var(--ds-chart-4)"
+                        fill="var(--ds-chart-4)"
                         fillOpacity={0.25} 
                       />
                     </RadarChart>
                   </ResponsiveContainer>
                 </div>
                 
-                <div className="p-3 bg-purple-500/5 border border-purple-500/10 rounded-xl text-[10px] text-[var(--ds-text-muted)] leading-relaxed font-semibold">
+                <div className="p-3 bg-ai/5 border border-ai/10 rounded-xl text-[10px] text-[var(--ds-text-muted)] leading-relaxed font-semibold">
                   {language === 'ar'
                     ? 'يمثل مخطط الرادار بصمة جودة بحثك. كلما اتسعت المساحة المظللة واقتربت من الأطراف، زادت احتمالية القبول الأكاديمي المباشر وتفادي الرفض المكتبي.'
                     : 'The radar chart represents your study quality footprint. A larger shaded area closer to the edges indicates higher peer review acceptance rates.'}
@@ -449,7 +451,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
                 <div
                   key={dim.id}
                   className={`bg-[var(--ds-surface-primary)] border rounded-2xl shadow-sm transition-all duration-200 ${
-                    hasMajor ? 'border-rose-500/20' : 'border-[var(--ds-border-subtle)]'
+                    hasMajor ? 'border-danger/20' : 'border-[var(--ds-border-subtle)]'
                   }`}
                 >
                   {/* Dimension header — clickable */}
@@ -458,7 +460,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
                     onClick={() => setExpandedDim(isExpanded ? null : dim.id)}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-xl ${hasMajor ? 'bg-rose-500/10 text-rose-500' : 'bg-purple-500/10 text-purple-500'}`}>
+                      <div className={`p-2 rounded-xl ${hasMajor ? 'bg-danger/10 text-danger' : 'bg-ai/10 text-ai'}`}>
                         <Icon size={16} />
                       </div>
                       <div className="text-right">
@@ -480,7 +482,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
                       <div className="hidden sm:block w-20 h-1.5 bg-[var(--ds-surface-secondary)] rounded-full overflow-hidden">
                         <div className={`h-full rounded-full ${scoreBg(dim.score)}`} style={{ width: `${dim.score}%` }} />
                       </div>
-                      {hasMajor && <AlertTriangle size={14} className="text-rose-500 animate-bounce" />}
+                      {hasMajor && <AlertTriangle size={14} className="text-danger " />}
                       {isExpanded
                         ? <ChevronUp size={16} className="text-[var(--ds-text-muted)]" />
                         : <ChevronDown size={16} className="text-[var(--ds-text-muted)]" />
@@ -494,12 +496,12 @@ export const PublicationReadinessReviewer: React.FC = () => {
 
                       {dim.majorComments.length > 0 && (
                         <div className="space-y-2">
-                          <span className="text-[9px] font-black text-rose-500 uppercase tracking-wider flex items-center gap-1.5">
+                          <span className="text-[9px] font-black text-danger uppercase tracking-wider flex items-center gap-1.5">
                             <ShieldAlert size={13} />
                             {language === 'ar' ? 'ملاحظات جوهرية (Major Comments)' : 'Major Comments'}
                           </span>
                           {dim.majorComments.map((c, i) => (
-                            <div key={i} className="p-3.5 bg-rose-500/5 border border-rose-500/15 rounded-xl text-xs text-[var(--ds-text-secondary)] font-bold leading-relaxed">
+                            <div key={i} className="p-3.5 bg-danger/5 border border-danger/15 rounded-xl text-xs text-[var(--ds-text-secondary)] font-bold leading-relaxed">
                               {language === 'ar' ? c.ar : c.en}
                             </div>
                           ))}
@@ -508,12 +510,12 @@ export const PublicationReadinessReviewer: React.FC = () => {
 
                       {dim.minorComments.length > 0 && (
                         <div className="space-y-2">
-                          <span className="text-[9px] font-black text-blue-500 uppercase tracking-wider flex items-center gap-1.5">
+                          <span className="text-[9px] font-black text-path-publication uppercase tracking-wider flex items-center gap-1.5">
                             <CheckCircle2 size={13} />
                             {language === 'ar' ? 'توصيات تحسينية (Minor Comments)' : 'Minor / Improvement Comments'}
                           </span>
                           {dim.minorComments.map((c, i) => (
-                            <div key={i} className="p-3.5 bg-blue-500/5 border border-blue-500/15 rounded-xl text-xs text-[var(--ds-text-secondary)] font-bold leading-relaxed">
+                            <div key={i} className="p-3.5 bg-[var(--ds-path-publication)]/5 border border-info/15 rounded-xl text-xs text-[var(--ds-text-secondary)] font-bold leading-relaxed">
                               {language === 'ar' ? c.ar : c.en}
                             </div>
                           ))}

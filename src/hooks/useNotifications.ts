@@ -15,11 +15,10 @@ export function useNotifications(userId: string | null) {
   useEffect(() => {
     if (!userId) return;
 
-    // Connect to WebSocket using current host but ws protocol
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.hostname;
-    // Assuming backend runs on 8000
-    const wsUrl = `${protocol}//${host}:8000/ws/notifications/${userId}`;
+    const apiBase = import.meta.env.VITE_API_BASE_URL ?? `${window.location.protocol}//${window.location.hostname}:8000/api`;
+    const root = String(apiBase).replace(/\/api\/?$/, '');
+    const wsRoot = root.replace(/^http/, 'ws');
+    const wsUrl = `${wsRoot}/ws/notifications/${userId}`;
     
     const socket = new WebSocket(wsUrl);
 

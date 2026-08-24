@@ -137,10 +137,10 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
   return (
     <div className="space-y-6">
       {/* Active Workspace Status Card */}
-      <Card className="p-6 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent border-[var(--ds-border-subtle)] rounded-3xl relative overflow-hidden">
+      <Card className="p-6 bg-[var(--ds-surface-primary)] border-[var(--ds-border-subtle)] rounded-3xl relative overflow-hidden">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-purple-500/10 text-purple-600 flex items-center justify-center shadow-md">
+            <div className="h-12 w-12 rounded-2xl bg-ai/10 text-ai flex items-center justify-center shadow-md">
               <Building2 size={24} />
             </div>
             <div>
@@ -177,14 +177,14 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
       </Card>
 
       {message && (
-        <div className="p-3.5 border border-emerald-500/20 bg-emerald-500/5 text-emerald-500 rounded-2xl text-xs font-bold flex items-center gap-2">
+        <div className="p-3.5 border border-success/20 bg-action/5 text-success rounded-2xl text-xs font-bold flex items-center gap-2">
           <CheckCircle size={16} />
           <span>{message}</span>
         </div>
       )}
 
       {error && (
-        <div className="p-3.5 border border-rose-500/20 bg-rose-500/5 text-rose-500 rounded-2xl text-xs font-bold flex items-center gap-2">
+        <div className="p-3.5 border border-danger/20 bg-danger/5 text-danger rounded-2xl text-xs font-bold flex items-center gap-2">
           <Shield size={16} />
           <span>{error}</span>
         </div>
@@ -198,7 +198,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
           {/* Create Workspace */}
           <Card className="p-6 border-[var(--ds-border-subtle)] rounded-3xl bg-[var(--ds-surface-primary)]">
             <h4 className="text-sm font-black mb-4 flex items-center gap-2">
-              <Plus size={18} className="text-purple-600" />
+              <Plus size={18} className="text-ai" />
               <span>{language === 'ar' ? 'إنشاء مساحة عمل جديدة' : 'Create New Workspace'}</span>
             </h4>
             <form onSubmit={handleCreateOrg} className="space-y-4">
@@ -209,7 +209,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
                   required
                   value={newOrgName}
                   onChange={(e) => setNewOrgName(e.target.value)}
-                  className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-2xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-purple-500"
+                  className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-2xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-ai"
                 />
               </div>
               
@@ -220,7 +220,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
                 <select
                   value={parentId}
                   onChange={(e) => setParentId(e.target.value)}
-                  className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-2xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-purple-500 text-[var(--ds-text-secondary)]"
+                  className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-2xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-ai text-[var(--ds-text-secondary)]"
                 >
                   <option value="">{language === 'ar' ? 'بدون (مساحة عمل رئيسية)' : 'None (Root Workspace)'}</option>
                   {organizations.map(org => (
@@ -239,7 +239,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
           {invitations.length > 0 && (
             <Card className="p-6 border-[var(--ds-border-subtle)] rounded-3xl bg-[var(--ds-surface-primary)]">
               <h4 className="text-sm font-black mb-4 flex items-center gap-2">
-                <Mail size={18} className="text-purple-600" />
+                <Mail size={18} className="text-ai" />
                 <span>{language === 'ar' ? 'الدعوات المعلقة' : 'Pending Invitations'}</span>
               </h4>
               <div className="space-y-3">
@@ -269,7 +269,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
         <div className="space-y-6">
           <Card className="p-6 border-[var(--ds-border-subtle)] rounded-3xl bg-[var(--ds-surface-primary)]">
             <h4 className="text-sm font-black mb-4 flex items-center gap-2">
-              <Users size={18} className="text-purple-600" />
+              <Users size={18} className="text-ai" />
               <span>{language === 'ar' ? 'فريق العمل النشط' : 'Active Team Members'}</span>
             </h4>
             <div className="space-y-3 mb-6 max-h-[220px] overflow-y-auto pr-1">
@@ -279,7 +279,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
                     <div className="text-xs font-black">{member.username}</div>
                     <div className="text-[10px] text-[var(--ds-text-muted)] font-semibold mt-0.5">{member.email}</div>
                   </div>
-                  <div className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-600 text-[10px] font-extrabold uppercase border border-purple-500/20">
+                  <div className="px-3 py-1 rounded-full bg-ai/10 text-ai text-[10px] font-extrabold uppercase border border-ai/20">
                     {member.role}
                   </div>
                 </div>

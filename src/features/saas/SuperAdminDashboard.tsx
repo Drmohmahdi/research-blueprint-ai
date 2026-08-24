@@ -43,9 +43,9 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ langua
   return (
     <div className="space-y-6">
       {/* Overview Header */}
-      <Card className="p-6 bg-gradient-to-r from-purple-500/10 via-indigo-500/5 to-transparent border-[var(--ds-border-subtle)] rounded-3xl">
+      <Card className="p-6 bg-[var(--ds-surface-primary)] border-[var(--ds-border-subtle)] rounded-3xl">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 bg-purple-500/15 text-purple-600 rounded-xl flex items-center justify-center shadow-sm">
+          <div className="h-10 w-10 bg-ai/15 text-ai rounded-xl flex items-center justify-center shadow-sm">
             <Shield size={20} />
           </div>
           <div>
@@ -87,7 +87,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ langua
                     <React.Fragment key={log.id}>
                       <tr className="hover:bg-[var(--ds-surface-secondary)] transition-colors">
                         <td className="px-6 py-4 font-black">
-                          <span className="inline-flex items-center gap-1.5 text-purple-600">
+                          <span className="inline-flex items-center gap-1.5 text-ai">
                             <Terminal size={14} className="shrink-0" />
                             <span>{log.action}</span>
                           </span>
@@ -113,7 +113,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ langua
                         <td className="px-6 py-4 text-center">
                           <button
                             onClick={() => toggleExpand(log.id)}
-                            className="inline-flex items-center gap-1 text-[var(--ds-text-secondary)] hover:text-purple-600 hover:underline cursor-pointer"
+                            className="inline-flex items-center gap-1 text-[var(--ds-text-secondary)] hover:text-ai hover:underline cursor-pointer"
                           >
                             <span>{isExpanded ? (language === 'ar' ? 'إغلاق' : 'Close') : (language === 'ar' ? 'عرض' : 'View')}</span>
                             {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -124,7 +124,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ langua
                       {isExpanded && (
                         <tr className="bg-[var(--ds-surface-secondary)]/50">
                           <td colSpan={5} className="px-6 py-4">
-                            <div className="p-4 bg-zinc-950 text-emerald-400 rounded-2xl border border-zinc-800 text-[10px] font-mono leading-relaxed overflow-x-auto max-h-[200px] no-scrollbar">
+                            <div className="p-4 bg-canvas text-success rounded-2xl border border-subtle text-[10px] font-mono leading-relaxed overflow-x-auto max-h-[200px] no-scrollbar">
                               <pre className="m-0 whitespace-pre-wrap">{JSON.stringify(log.details || {}, null, 2)}</pre>
                             </div>
                           </td>

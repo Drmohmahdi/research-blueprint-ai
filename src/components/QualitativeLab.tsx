@@ -208,8 +208,8 @@ export const QualitativeLab: React.FC = () => {
     <div className="space-y-8 max-w-[1280px] mx-auto animate-fade-in pb-16">
       {/* Success Notification Banner */}
       {successMessage && (
-        <div className="bg-[var(--ds-success-soft)] border border-[var(--ds-success)]/20 text-emerald-800 dark:text-emerald-400 rounded-lg p-4 flex items-center gap-3">
-          <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
+        <div className="bg-[var(--ds-success-soft)] border border-[var(--ds-success)]/20 text-success dark:text-success rounded-lg p-4 flex items-center gap-3">
+          <CheckCircle2 size={18} className="text-success shrink-0" />
           <span className="text-xs font-bold">{successMessage}</span>
         </div>
       )}
@@ -261,7 +261,7 @@ export const QualitativeLab: React.FC = () => {
             </div>
 
             {redactionNotice && (
-              <p role="status" className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md p-2 m-0">
+              <p role="status" className="text-[10px] font-semibold text-success bg-success/10 border border-success rounded-md p-2 m-0">
                 {redactionNotice}
               </p>
             )}
@@ -298,8 +298,8 @@ export const QualitativeLab: React.FC = () => {
           </Card>
 
           {/* Ethical Warning Alert */}
-          <div className="p-4 rounded-lg bg-[var(--ds-warning-soft)] border border-[var(--ds-warning)]/20 text-amber-700 dark:text-amber-400 text-xs flex gap-3 leading-relaxed font-bold">
-            <AlertTriangle size={18} className="shrink-0 text-amber-500" />
+          <div className="p-4 rounded-lg bg-[var(--ds-warning-soft)] border border-[var(--ds-warning)]/20 text-warning dark:text-warning text-xs flex gap-3 leading-relaxed font-bold">
+            <AlertTriangle size={18} className="shrink-0 text-warning" />
             <div className="space-y-1">
               <span>{language === 'ar' ? 'أمان البيانات النوعية:' : 'Qualitative Data Security:'}</span>
               <p className="text-[10px] text-[var(--ds-text-secondary)] font-medium m-0 leading-normal">
@@ -371,7 +371,7 @@ export const QualitativeLab: React.FC = () => {
                         <div className="flex justify-end pt-1">
                           <button
                             onClick={() => handleAddVariable(theme)}
-                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[9px] font-black bg-[var(--ds-primary)] hover:bg-[var(--ds-primary-hover)] text-white shadow-sm cursor-pointer"
+                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[9px] font-black bg-action hover:bg-action-hover text-on-action shadow-sm cursor-pointer"
                           >
                             <Plus size={12} />
                             <span>{language === 'ar' ? 'إضافة كمتغير كمي للمشروع' : 'Add as Quantitative Variable'}</span>

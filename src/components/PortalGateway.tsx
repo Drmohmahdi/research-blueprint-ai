@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { Card } from '../design-system/components/Card';
 import { Button } from '../design-system/components/Button';
+import { PathPanel } from '../design-system/components/Navigation';
 import { apiGetMyProfile, apiListScholarlyAssets } from '../utils/api';
 import { 
   FlaskConical, 
@@ -10,10 +11,8 @@ import {
   Award, 
   Briefcase, 
   ChevronRight, 
-  LayoutGrid, 
   ShieldCheck,
   Globe,
-  User,
   Activity
 } from 'lucide-react';
 import { ROUTES } from '../router/routes';
@@ -84,8 +83,7 @@ export const PortalGateway: React.FC = () => {
       descAr: 'صمم دراستك، وابنِ نموذجها المنهجي، وحدد العينة، وحاكِ النتائج، وتابع تنفيذها وحلل مخرجاتها.',
       descEn: 'Design your study, build its conceptual model, calculate sample sizes, simulate outcomes, and monitor research execution.',
       icon: FlaskConical,
-      colorClass: 'border-blue-500/20 hover:border-blue-500/50 bg-blue-500/5 text-blue-500',
-      btnColor: 'bg-blue-600 hover:bg-blue-700',
+      accent: 'var(--ds-path-research)',
       path: ROUTES.DASHBOARD,
       statusAr: 'جاهز للعمل',
       statusEn: 'Ready',
@@ -110,8 +108,7 @@ export const PortalGateway: React.FC = () => {
       descAr: 'راجع مخطوطتك، وقِس جاهزيتها، واختر المجلة المناسبة، وجهز حزمة التقديم، وتابع التحكيم والتعديلات.',
       descEn: 'Review your manuscript, evaluate journal match, prepare submission packages, and track peer review revisions.',
       icon: BookOpen,
-      colorClass: 'border-emerald-500/20 hover:border-emerald-500/50 bg-emerald-500/5 text-emerald-500',
-      btnColor: 'bg-emerald-600 hover:bg-emerald-700',
+      accent: 'var(--ds-path-publication)',
       path: ROUTES.REVIEW_SIM,
       statusAr: 'يحتاج مراجعة',
       statusEn: 'Needs review',
@@ -136,8 +133,7 @@ export const PortalGateway: React.FC = () => {
       descAr: 'نفذ تحكيمًا منهجيًا وإحصائيًا وأخلاقيًا للمخطوطات، وأنشئ تقارير مراجعة موثقة ومفسرة.',
       descEn: 'Perform scientific peer reviews, audit statistics, evaluate methodology, and generate certified referee reports.',
       icon: Award,
-      colorClass: 'border-purple-500/20 hover:border-purple-500/50 bg-purple-500/5 text-purple-500',
-      btnColor: 'bg-purple-600 hover:bg-purple-700',
+      accent: 'var(--ds-path-review)',
       path: ROUTES.PEER_REVIEW,
       statusAr: 'مهمة مفتوحة',
       statusEn: 'Open assignment',
@@ -162,8 +158,7 @@ export const PortalGateway: React.FC = () => {
       descAr: 'افهم لائحة الترقية، ونظم إنتاجك العلمي، وابنِ ملفك، واكشف النواقص، واستعد للمراجعة والتقديم.',
       descEn: 'Understand promotion bylaws, index scientific production, calculate qualification points, and evaluate file readiness.',
       icon: Briefcase,
-      colorClass: 'border-amber-500/20 hover:border-amber-500/50 bg-amber-500/5 text-amber-500',
-      btnColor: 'bg-amber-600 hover:bg-amber-700',
+      accent: 'var(--ds-path-promotion)',
       path: ROUTES.PROMOTION,
       statusAr: 'ملف غير مكتمل',
       statusEn: 'Incomplete file',
@@ -188,8 +183,7 @@ export const PortalGateway: React.FC = () => {
       descAr: 'ابنِ حضورك الرقمي المتسق، وتجنب تكرار وتداخل ملفاتك البحثية، وتابع قوة انتشار إنتاجك الأكاديمي.',
       descEn: 'Build a consistent digital presence, unify your academic name variants, and optimize citation metrics.',
       icon: Globe,
-      colorClass: 'border-indigo-500/20 hover:border-indigo-500/50 bg-indigo-500/5 text-indigo-500',
-      btnColor: 'bg-indigo-600 hover:bg-indigo-700',
+      accent: 'var(--ds-path-identity)',
       path: ROUTES.VISIBILITY,
       statusAr: 'تحسين مقترح',
       statusEn: 'Improvement suggested',
@@ -210,96 +204,89 @@ export const PortalGateway: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto py-8 px-4 animate-fade-in pb-16">
+    <div className="space-y-8 max-w-6xl mx-auto py-8 px-4 pb-16">
       
-      {/* Upper Navigation for profile and assets registry */}
-      <div className="flex flex-wrap gap-4 items-center justify-between bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] p-5 rounded-xl shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[var(--ds-primary-soft)] border border-[var(--ds-primary)]/20 flex items-center justify-center text-[var(--ds-primary)]">
-            <User className="w-5 h-5" />
+      <PathPanel accent="var(--ds-path-research)" className="p-0">
+      <section className="relative overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 baseerah-knowledge opacity-70" />
+        <div className="relative space-y-5">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="space-y-2 max-w-2xl">
+              <p className="m-0 text-[10px] font-bold uppercase tracking-widest text-[var(--ds-accent-gold)]">
+                {isAr ? 'مركز القيادة الأكاديمية' : 'Academic Command Center'}
+              </p>
+              <h2 className="text-2xl md:text-3xl font-black text-[var(--ds-text-primary)] m-0 leading-tight">
+                {isAr ? 'مرحباً بك في منظومة بصيرة' : 'Welcome to Baseerah'}
+              </h2>
+              <p className="text-sm text-[var(--ds-text-secondary)] font-medium m-0 leading-relaxed">
+                {isAr
+                  ? 'اختر المسار الأكاديمي التالي. الهوية واحدة، والتمييز باللون محدود على الأيقونة والحالة.'
+                  : 'Choose the next academic path. One identity, with color used only as a quiet accent.'}
+              </p>
+            </div>
+            <div className="flex gap-2.5">
+              <Button onClick={() => navigate(ROUTES.PROFILE)} variant="primary" className="text-xs">
+                {isAr ? 'الملف الأكاديمي الموحد' : 'Unified Profile'}
+              </Button>
+              <Button onClick={() => navigate(ROUTES.ASSETS)} variant="secondary" className="text-xs">
+                {isAr ? 'سجل الأصول العلمية' : 'Scholarly Assets'}
+              </Button>
+            </div>
           </div>
-          <div>
-            <h4 className="text-xs font-black text-[var(--ds-text-primary)]">
-              {isAr ? 'الملف الشخصي المشترك والأصول العلمية الموحدة' : 'Shared Profile & Scholarly Assets Registry'}
-            </h4>
-            <p className="text-[10px] text-[var(--ds-text-secondary)] mt-0.5">
-              {isAr 
-                ? `مؤشر اكتمال الملف: ${completeness}% | إجمالي الأصول العلمية: ${totalAssetsCount}` 
-                : `Profile Completeness: ${completeness}% | Total Scholarly Assets: ${totalAssetsCount}`}
-            </p>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {portalSummary.map((item) => (
+              <div
+                key={item.label}
+                className="rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] px-4 py-3"
+              >
+                <div className="text-[10px] font-bold text-[var(--ds-text-muted)]">{item.label}</div>
+                <div className="mt-1 text-lg font-black text-[var(--ds-text-primary)] ds-numeric">{item.value}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-start gap-3 rounded-xl border border-[var(--ds-primary)]/20 bg-[var(--ds-primary-soft)] p-4">
+            <Activity size={16} className="text-[var(--ds-primary)] shrink-0 mt-0.5" />
+            <div>
+              <p className="m-0 text-[10px] font-bold uppercase tracking-widest text-[var(--ds-primary)]">
+                {isAr ? 'الإجراء الأكاديمي التالي' : 'Next academic action'}
+              </p>
+              <p className="m-0 mt-1 text-xs font-semibold text-[var(--ds-text-primary)]">
+                {isAr
+                  ? `اكتمال الملف ${completeness}% · ${openActions} إجراءات مفتوحة · ${projects.length} مشروعات`
+                  : `Profile ${completeness}% · ${openActions} open actions · ${projects.length} projects`}
+              </p>
+            </div>
           </div>
         </div>
-
-        <div className="flex gap-2.5">
-          <Button 
-            onClick={() => navigate(ROUTES.PROFILE)}
-            variant="primary"
-            className="flex items-center gap-1.5 text-xs font-black px-4 py-2 cursor-pointer rounded-lg"
-          >
-            <span>{isAr ? 'الملف الأكاديمي الموحد' : 'Unified Profile'}</span>
-          </Button>
-
-          <Button 
-            onClick={() => navigate(ROUTES.ASSETS)}
-            variant="secondary"
-            className="flex items-center gap-1.5 text-xs font-black bg-[var(--ds-surface-secondary)] text-[var(--ds-text-primary)] hover:bg-[var(--ds-surface-tertiary)] px-4 py-2 cursor-pointer rounded-lg shadow-sm"
-          >
-            <span>{isAr ? 'سجل الأصول العلمية' : 'Scholarly Assets'}</span>
-          </Button>
-        </div>
-      </div>
+      </section>
+      </PathPanel>
 
       {metricsStatus === 'unavailable' && (
-        <div role="alert" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-800">
+        <div role="alert" className="rounded-lg border border-[var(--ds-warning)]/25 bg-[var(--ds-warning-soft)] p-3 text-xs font-semibold text-[var(--ds-warning)]">
           {isAr
             ? 'تعذر تحميل مؤشرات الملف والأصول حالياً؛ ستظهر القيم عند عودة الاتصال بالخدمة.'
             : 'Profile and asset metrics are temporarily unavailable; values will appear when the service reconnects.'}
         </div>
       )}
 
-      {/* Title block */}
-      <div className="text-center space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--ds-primary-soft)] border border-[var(--ds-primary)]/20 text-xs font-black text-[var(--ds-primary)]">
-          <LayoutGrid size={13} />
-          <span>{isAr ? 'منظومة الذكاء الأكاديمي' : 'Academic Intelligence Suite'}</span>
-        </div>
-        <h2 className="text-3xl md:text-4xl font-black text-[var(--ds-text-primary)] m-0 leading-tight">
-          {isAr ? 'مرحبًا بك في منظومة بصيرة الأكاديمية' : 'Welcome to Baseerah Academic Suite'}
-        </h2>
-        <p className="text-sm text-[var(--ds-text-secondary)] font-medium max-w-xl mx-auto m-0 leading-relaxed">
-          {isAr 
-            ? 'اختر مساحة العمل أو الموديول العلمي الذي ترغب بالبدء فيه الآن للتكامل مع الأصل البحثي الموحد.' 
-            : 'Select the scholarly workspace or module you wish to start with to integrate with your academic assets.'}
-        </p>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {portalSummary.map((item) => (
-          <div
-            key={item.label}
-            className="rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] px-4 py-3 text-center shadow-sm"
-          >
-            <div className="text-[10px] font-bold text-[var(--ds-text-muted)]">{item.label}</div>
-            <div className="mt-1 text-lg font-black text-[var(--ds-text-primary)]">{item.value}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Grid of Modules */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pt-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {modules.map((m) => {
           const Icon = m.icon;
           return (
             <Card 
               key={m.id} 
-              className={`p-5 border transition-all duration-300 hover:-translate-y-0.5 flex flex-col justify-between min-h-[380px] rounded-xl ${m.colorClass}`}
+              variant="interactive"
+              className="p-5 flex flex-col justify-between min-h-[360px] relative overflow-hidden"
+              style={{ ['--path-accent' as string]: m.accent }}
             >
+              <div className="absolute inset-x-0 top-0 h-1" style={{ background: m.accent }} />
               <div className="space-y-4">
-                {/* Header Icon + Title */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="p-2.5 rounded-lg bg-current/10 shrink-0">
-                    <Icon size={20} className="stroke-[2.5]" />
+                    <div className="p-2.5 rounded-lg shrink-0" style={{ background: 'color-mix(in srgb, var(--path-accent) 14%, transparent)', color: m.accent }}>
+                    <Icon size={20} className="stroke-[2]" />
                     </div>
                     <h2 className="text-base font-extrabold text-[var(--ds-text-primary)] m-0 leading-snug">
                       {isAr ? m.titleAr : m.titleEn}
@@ -315,11 +302,10 @@ export const PortalGateway: React.FC = () => {
                 </p>
 
                 <div className="flex items-center gap-2 rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] p-3 text-xs font-bold text-[var(--ds-text-primary)]">
-                  <Activity size={15} className="text-[var(--ds-primary)] shrink-0" />
+                  <Activity size={15} className="shrink-0" style={{ color: m.accent }} />
                   <span className="leading-relaxed">{isAr ? m.nextActionAr : m.nextActionEn}</span>
                 </div>
 
-                {/* Micro Stats Grid */}
                 <div className="grid grid-cols-2 gap-2 pt-2 text-right">
                   {m.stats.map((s, idx) => (
                     <div 
@@ -329,7 +315,7 @@ export const PortalGateway: React.FC = () => {
                       <span className="text-[9px] text-[var(--ds-text-muted)] font-bold block truncate">
                         {s.label}
                       </span>
-                      <span className="text-xs font-black text-[var(--ds-text-primary)] block truncate">
+                      <span className="text-xs font-black text-[var(--ds-text-primary)] ds-numeric block truncate">
                         {s.value}
                       </span>
                     </div>
@@ -337,11 +323,10 @@ export const PortalGateway: React.FC = () => {
                 </div>
               </div>
 
-              {/* Enter Button */}
               <div className="pt-4 border-t border-[var(--ds-border-subtle)] flex justify-end">
                 <Button 
                   onClick={() => navigate(m.path)}
-                  className={`flex items-center gap-1 text-xs font-black text-white px-4 py-2 cursor-pointer rounded-xl ${m.btnColor}`}
+                  className="flex items-center gap-1 text-xs"
                 >
                   <span>{isAr ? 'فتح الإجراء التالي' : 'Open next action'}</span>
                   <ChevronRight size={14} className="rtl:rotate-180 shrink-0" />
@@ -352,7 +337,6 @@ export const PortalGateway: React.FC = () => {
         })}
       </div>
 
-      {/* Info card */}
       <div className="flex items-start gap-3 p-4 rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] max-w-2xl mx-auto">
         <ShieldCheck size={16} className="text-[var(--ds-primary)] shrink-0 mt-0.5" />
         <p className="text-[10px] text-[var(--ds-text-secondary)] leading-relaxed m-0 font-medium">

@@ -44,7 +44,7 @@ export const ResearchRiskPanel: React.FC<ResearchRiskPanelProps> = ({ project, l
 
   return (
     <div className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl p-4 space-y-3">
-      <div className="flex items-center gap-2 text-rose-500 font-bold text-xs">
+      <div className="flex items-center gap-2 text-danger font-bold text-xs">
         <ShieldAlert size={16} />
         <span>{isAr ? 'فحص المخاطر والصدق المنهجي' : 'Risk & Validity Audit'}</span>
       </div>
@@ -52,14 +52,14 @@ export const ResearchRiskPanel: React.FC<ResearchRiskPanelProps> = ({ project, l
       {risks.length > 0 ? (
         <div className="space-y-2">
           {risks.map((risk, idx) => (
-            <div key={idx} className="flex items-start gap-2 text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/20 p-2.5 rounded-lg border border-rose-500/25">
+            <div key={idx} className="flex items-start gap-2 text-xs text-danger bg-danger/10/20 p-2.5 rounded-lg border border-danger/25">
               <AlertTriangle className="shrink-0 mt-0.5" size={14} />
               <span>{risk}</span>
             </div>
           ))}
         </div>
       ) : (
-        <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-xs bg-emerald-50 dark:bg-emerald-950/20 p-2.5 rounded-lg border border-emerald-500/20">
+        <div className="flex items-center gap-2 text-success text-xs bg-success/10/20 p-2.5 rounded-lg border border-success/20">
           <CheckCircle2 size={16} />
           <span>{isAr ? 'لا توجد مخاطر منهجية حرجة تم رصدها حالياً.' : 'No major methodological risks detected.'}</span>
         </div>

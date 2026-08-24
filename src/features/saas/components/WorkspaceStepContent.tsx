@@ -68,7 +68,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
 
         <div className="flex items-center gap-2 shrink-0">
           {isCompleted ? (
-            <Button variant="secondary" onClick={handleMarkStepIncomplete} className="px-3.5 py-1.5 text-[10px] font-black rounded-xl text-emerald-600 cursor-pointer">
+            <Button variant="secondary" onClick={handleMarkStepIncomplete} className="px-3.5 py-1.5 text-[10px] font-black rounded-xl text-success cursor-pointer">
               <Check size={12} />
               <span>{language === 'ar' ? 'مكتملة ✓' : 'Completed ✓'}</span>
             </Button>
@@ -192,8 +192,8 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
                   <Card key={idx} className="p-3 border-[var(--ds-border-subtle)] text-xs font-bold bg-[var(--ds-surface-primary)]">
                     <div>{language === 'ar' ? v.nameAr : v.nameEn}</div>
                     <div className="flex gap-2 mt-2">
-                      <span className="px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600 text-[9px] uppercase">{v.type}</span>
-                      <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 text-[9px] uppercase">{v.scale}</span>
+                      <span className="px-2 py-0.5 rounded-full bg-ai/10 text-ai text-[9px] uppercase">{v.type}</span>
+                      <span className="px-2 py-0.5 rounded-full bg-info/10 text-path-identity text-[9px] uppercase">{v.scale}</span>
                     </div>
                   </Card>
                 ))}
@@ -291,7 +291,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
           {/* 18. Final research plan */}
           {activeStep === 'finalResearchPlan' && (
             <div className="space-y-6">
-              <div className="p-4 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent border-[var(--ds-border-subtle)] rounded-2xl text-xs font-bold text-[var(--ds-text-secondary)]">
+              <div className="p-4 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-2xl text-xs font-bold text-[var(--ds-text-secondary)]">
                 {language === 'ar' ? 'خطة البحث العلمي المكتملة وجاهزة للتصدير كملف مجمع.' : 'Academic Research Blueprint compiled and ready for printing.'}
               </div>
 
@@ -308,7 +308,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
               </div>
 
               <div className="flex gap-3 justify-center">
-                <Button onClick={() => window.print()} className="flex items-center gap-1 bg-purple-600 text-white cursor-pointer">
+                <Button onClick={() => window.print()} className="flex items-center gap-1 cursor-pointer">
                   <Printer size={14} />
                   <span>{language === 'ar' ? 'طباعة التقرير (HTML)' : 'Print Blueprint'}</span>
                 </Button>

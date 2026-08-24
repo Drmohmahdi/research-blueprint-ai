@@ -90,11 +90,20 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
         setShowPreferences(false);
       }
     };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setIsOpen(false);
+        setShowPreferences(false);
+      }
+    };
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen]);
 
@@ -161,11 +170,11 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
       case 'PROMOTION':
         return <Award size={15} className="text-[var(--ds-primary)]" />;
       case 'PEER_REVIEW':
-        return <BookOpen size={15} className="text-amber-500" />;
+        return <BookOpen size={15} className="text-warning" />;
       case 'RESEARCH_WORKFLOW':
-        return <FolderGit2 size={15} className="text-emerald-500" />;
+        return <FolderGit2 size={15} className="text-success" />;
       default:
-        return <Sliders size={15} className="text-blue-500" />;
+        return <Sliders size={15} className="text-path-publication" />;
     }
   };
 
@@ -249,7 +258,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
           role="dialog"
           aria-modal="false"
           aria-label={language === 'ar' ? 'مركز الإشعارات الأكاديمية' : 'Academic notification center'}
-          className="absolute top-full mt-2 left-0 sm:left-auto sm:right-0 w-[92vw] sm:w-[420px] max-h-[85vh] bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+          className="absolute top-full mt-2 left-0 sm:left-auto sm:right-0 w-[92vw] sm:w-[420px] max-h-[85vh] bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl shadow-[var(--ds-shadow-overlay)] z-50 flex flex-col overflow-hidden ds-transition"
         >
           {/* Header */}
           <div className="p-4 border-b border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)]/50 flex items-center justify-between">
@@ -275,7 +284,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                 }}
                 className={`p-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                   showPreferences
-                    ? 'bg-[var(--ds-primary)] text-white'
+                    ? 'bg-[var(--ds-primary-soft)] text-ink'
                     : 'text-[var(--ds-text-muted)] hover:text-[var(--ds-text-primary)] hover:bg-[var(--ds-surface-secondary)]'
                 }`}
                 title={language === 'ar' ? 'إعدادات الإشعارات' : 'Notification Preferences'}
@@ -370,7 +379,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                 <button
                   onClick={handleSavePreferences}
                   disabled={savingPrefs}
-                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[var(--ds-primary)] text-white text-xs font-black shadow-sm hover:opacity-90 transition-all cursor-pointer disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-action hover:bg-action-hover text-on-action text-xs font-black shadow-sm ds-transition cursor-pointer disabled:opacity-50"
                 >
                   {saveSuccess ? <Check size={14} /> : null}
                   <span>{saveSuccess ? (language === 'ar' ? 'تم الحفظ' : 'Saved') : (language === 'ar' ? 'حفظ التفضيلات' : 'Save Preferences')}</span>
@@ -423,7 +432,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                     onClick={() => setCategoryFilter(cat)}
                     className={`px-2 py-0.5 rounded-full font-bold transition-all shrink-0 cursor-pointer ${
                       categoryFilter === cat
-                        ? 'bg-[var(--ds-primary)] text-white shadow-2xs'
+                        ? 'bg-[var(--ds-primary-soft)] text-ink shadow-2xs'
                         : 'bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-secondary)]/80'
                     }`}
                   >

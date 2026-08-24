@@ -400,7 +400,7 @@ export const LiteratureSynthesizer: React.FC = () => {
               {language === 'ar' ? 'الملف المحدد:' : 'Selected file:'} {selectedFile.name}
             </p>
           )}
-          {fileError && <div role="alert" className="text-xs font-semibold text-red-700 bg-red-50 border border-red-200 rounded-md p-2">{fileError}</div>}
+          {fileError && <div role="alert" className="text-xs font-semibold text-danger bg-danger/10 border border-danger rounded-md p-2">{fileError}</div>}
           <p className="text-[10px] text-[var(--ds-text-muted)] m-0">
             {language === 'ar' ? 'اختيار PDF مرجع للمراجعة؛ أدخل بيانات الدراسة يدوياً إلى أن تتوفر خدمة استخراج فعلية.' : 'The PDF is retained as a review reference; enter study data manually until extraction is available.'}
           </p>

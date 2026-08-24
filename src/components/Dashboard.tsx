@@ -6,7 +6,7 @@ import { checkConsistency } from '../utils/ruleEngine';
 import { VIEW_TO_PATH } from '../router/routes';
 import { apiGetActiveOrganization } from '../utils/api';
 import { researchStorage } from '../utils/researchStorage';
-import { Badge, Progress, EmptyState, Alert, Button } from '../design-system';
+import { Badge, Progress, EmptyState, Alert, Button, PathPanel } from '../design-system';
 import { 
   FolderGit2, 
   Sparkles, 
@@ -146,10 +146,10 @@ export const Dashboard: React.FC = () => {
   ];
 
   const unresolvedComments = dbComments.filter(c => !c.resolved).slice(0, 3);
-  const heroPanelClass = 'bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm';
+  const heroPanelClass = 'flex flex-col md:flex-row items-center justify-between gap-6';
   const accentPillClass = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] border border-[var(--ds-primary)]/20 mb-2';
-  const primaryActionClass = 'flex items-center gap-2 px-5 py-3 rounded-lg font-bold bg-[var(--ds-primary)] hover:bg-[var(--ds-primary-hover)] text-white shadow-sm transition-all hover:-translate-y-0.5 cursor-pointer shrink-0';
-  const dashboardCardClass = 'group relative overflow-hidden bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-4 transition-all hover:-translate-y-0.5 hover:border-[var(--ds-border-default)] hover:shadow-md';
+  const primaryActionClass = 'flex items-center gap-2 px-5 py-3 rounded-lg font-bold bg-action hover:bg-action-hover text-on-action shadow-sm ds-transition cursor-pointer shrink-0';
+  const dashboardCardClass = 'group relative overflow-hidden bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-4 ds-transition hover:border-[var(--ds-border-default)] hover:shadow-md';
   const cardIconClass = 'h-10 w-10 rounded-lg flex items-center justify-center border shrink-0';
   const quickActionClass = 'w-full flex items-center justify-between gap-3 p-3 rounded-lg border border-[var(--ds-border-subtle)] hover:bg-[var(--ds-surface-secondary)] text-sm font-semibold text-[var(--ds-text-secondary)] transition-colors text-start cursor-pointer';
   const panelCardClass = 'bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-6 shadow-sm space-y-4';
@@ -310,6 +310,7 @@ export const Dashboard: React.FC = () => {
       {dashboardRole === 'RESEARCHER' && (
         <>
           {/* Top Banner section */}
+          <PathPanel accent="var(--ds-path-research)">
           <div className={heroPanelClass}>
             <div className="space-y-2">
               {activeOrg && (
@@ -336,6 +337,7 @@ export const Dashboard: React.FC = () => {
               <ArrowRight size={16} className={language === 'ar' ? 'rotate-180' : ''} />
             </button>
           </div>
+          </PathPanel>
 
           {/* KPI Cards Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -641,6 +643,7 @@ export const Dashboard: React.FC = () => {
       {dashboardRole === 'SUPERVISOR' && (
         <div className="space-y-6">
           {/* Supervisor Top Banner */}
+          <PathPanel accent="var(--ds-path-review)">
           <div className={heroPanelClass}>
             <div className="space-y-2">
               <div className={accentPillClass}>
@@ -657,6 +660,7 @@ export const Dashboard: React.FC = () => {
               </p>
             </div>
           </div>
+          </PathPanel>
 
           {/* Supervisor KPIs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -734,7 +738,7 @@ export const Dashboard: React.FC = () => {
                         onClick={() => {
                           showToast('info', language === 'ar' ? `جاري تحميل نموذج الطالب ${stud.name} لمراجعته.` : `Loading research model of ${stud.name} for review.`);
                         }}
-                        className="px-3.5 py-1.5 bg-[var(--ds-primary)] hover:bg-[var(--ds-primary-hover)] text-white rounded-lg text-[10px] font-black cursor-pointer shadow-sm transition-colors"
+                        className="px-3.5 py-1.5 bg-action hover:bg-action-hover text-on-action rounded-lg text-[10px] font-black cursor-pointer shadow-sm ds-transition"
                       >
                         {language === 'ar' ? 'مراجعة المنهجية' : 'Review Study'}
                       </button>
@@ -772,6 +776,7 @@ export const Dashboard: React.FC = () => {
       {dashboardRole === 'ADMIN' && (
         <div className="space-y-6">
           {/* Admin Top Banner */}
+          <PathPanel accent="var(--ds-path-identity)">
           <div className={heroPanelClass}>
             <div className="space-y-2">
               <div className={accentPillClass}>
@@ -788,6 +793,7 @@ export const Dashboard: React.FC = () => {
               </p>
             </div>
           </div>
+          </PathPanel>
 
           {/* Admin KPIs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">

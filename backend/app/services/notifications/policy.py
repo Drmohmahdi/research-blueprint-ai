@@ -11,7 +11,11 @@ class NotificationPolicy:
             return NotificationCategory.PROMOTION.value
         elif aggregate_type == AggregateType.PEER_REVIEW_CASE.value or "REVIEW" in event_type:
             return NotificationCategory.PEER_REVIEW.value
-        elif aggregate_type == AggregateType.RESEARCH_PROJECT.value or "PROJECT" in event_type:
+        elif aggregate_type in {
+            AggregateType.RESEARCH_PROJECT.value,
+            AggregateType.ACADEMIC_HANDOFF.value,
+            AggregateType.RESEARCH_DATASET.value,
+        } or any(token in event_type for token in ("PROJECT", "HANDOFF", "DATASET", "DOWNSTREAM")):
             return NotificationCategory.RESEARCH_WORKFLOW.value
         return NotificationCategory.SYSTEM.value
 

@@ -37,7 +37,7 @@ export const ResearchDesignOverview: React.FC<ResearchDesignOverviewProps> = ({
       titleAr: 'اكتمال التصميم',
       titleEn: 'Design Completeness',
       value: `${designProgress}%`,
-      color: 'text-purple-600 dark:text-purple-400',
+      color: 'text-ai',
       explanationAr: 'نسبة إنجاز الـ 18 خطوة المنهجية المحددة بالمسار.',
       explanationEn: 'Overall progress percentage across all 18 methodological steps.'
     },
@@ -45,7 +45,7 @@ export const ResearchDesignOverview: React.FC<ResearchDesignOverviewProps> = ({
       titleAr: 'الاتساق المنهجي',
       titleEn: 'Methodological Consistency',
       value: project.variables && project.variables.length >= 2 ? '95%' : '40%',
-      color: project.variables && project.variables.length >= 2 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-500',
+      color: project.variables && project.variables.length >= 2 ? 'text-success' : 'text-warning',
       explanationAr: 'مدى تطابق وتكامل العنوان، الأسئلة، المتغيرات وخطة التحليل إحصائياً.',
       explanationEn: 'Alignment strength between title, questions, variables, and analysis plan.'
     },
@@ -53,7 +53,7 @@ export const ResearchDesignOverview: React.FC<ResearchDesignOverviewProps> = ({
       titleAr: 'جاهزية العينة',
       titleEn: 'Sample Readiness',
       value: project.sampleSettings?.confidenceLevel ? '100%' : '20%',
-      color: project.sampleSettings?.confidenceLevel ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-500',
+      color: project.sampleSettings?.confidenceLevel ? 'text-success' : 'text-muted',
       explanationAr: 'تحديد حجم العينة الأدنى المناسب للقوة الإحصائية المستهدفة.',
       explanationEn: 'Confidence parameters and minimum sample size calculations.'
     },
@@ -61,7 +61,7 @@ export const ResearchDesignOverview: React.FC<ResearchDesignOverviewProps> = ({
       titleAr: 'جودة الأدلة',
       titleEn: 'Evidence Quality',
       value: isAr ? 'متوسطة' : 'Medium',
-      color: 'text-purple-600 dark:text-purple-400',
+      color: 'text-ai',
       explanationAr: 'درجة الاستناد إلى أدبيات ودراسات سابقة قوية ذات معاملات حقيقية.',
       explanationEn: 'Strength and citation count of referenced academic literature.'
     },
@@ -69,7 +69,7 @@ export const ResearchDesignOverview: React.FC<ResearchDesignOverviewProps> = ({
       titleAr: 'جودة القياس',
       titleEn: 'Measurement Quality',
       value: project.variables && project.variables.length > 0 ? '90%' : '10%',
-      color: project.variables && project.variables.length > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500',
+      color: project.variables && project.variables.length > 0 ? 'text-success' : 'text-danger',
       explanationAr: 'وضوح المقاييس للتعريفات الإجرائية وربطها بالمتغير التابع.',
       explanationEn: 'Reliability metrics defined for independent/dependent variables.'
     },
@@ -77,7 +77,7 @@ export const ResearchDesignOverview: React.FC<ResearchDesignOverviewProps> = ({
       titleAr: 'جودة خطة التحليل',
       titleEn: 'Analysis Plan Quality',
       value: project.hypotheses && project.hypotheses.length > 0 ? '95%' : '30%',
-      color: project.hypotheses && project.hypotheses.length > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500',
+      color: project.hypotheses && project.hypotheses.length > 0 ? 'text-success' : 'text-danger',
       explanationAr: 'مطابقة الفرضيات للاختبارات الإحصائية البارامترية وغير البارامترية.',
       explanationEn: 'Mapping of statistical tests to hypotheses and assumptions.'
     },
@@ -85,7 +85,7 @@ export const ResearchDesignOverview: React.FC<ResearchDesignOverviewProps> = ({
       titleAr: 'جودة التنبؤ',
       titleEn: 'Prediction Quality',
       value: project.preRegistrationHash ? '95%' : '60%',
-      color: 'text-purple-600 dark:text-purple-400',
+      color: 'text-ai',
       explanationAr: 'مستوى الثقة في النموذج التنبؤي (استكشافي، دراسات سابقة، استطلاعي).',
       explanationEn: 'Bayesian prediction quality based on prior literature and pilot data.'
     },
@@ -93,7 +93,7 @@ export const ResearchDesignOverview: React.FC<ResearchDesignOverviewProps> = ({
       titleAr: 'المخاطر المنهجية',
       titleEn: 'Methodological Risk',
       value: project.variables && project.variables.length < 2 ? (isAr ? 'عالية' : 'High') : (isAr ? 'منخفضة' : 'Low'),
-      color: project.variables && project.variables.length < 2 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400',
+      color: project.variables && project.variables.length < 2 ? 'text-danger' : 'text-success',
       explanationAr: 'رصد أي تناقضات أو مهددات للصدق الداخلي والخارجي للدراسة.',
       explanationEn: 'Methodological contradictions or internal validity threats detected.'
     },
@@ -101,7 +101,7 @@ export const ResearchDesignOverview: React.FC<ResearchDesignOverviewProps> = ({
       titleAr: 'جاهزية التسجيل المسبق',
       titleEn: 'Pre-Registration Readiness',
       value: project.preRegistrationHash ? '100%' : '50%',
-      color: project.preRegistrationHash ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-500',
+      color: project.preRegistrationHash ? 'text-success' : 'text-warning',
       explanationAr: 'تجميد التصميم البحثي والتأكيد لمنع تحيز التقرير (HARKing).',
       explanationEn: 'Readiness to lock design parameters with a cryptographic hash.'
     }
@@ -112,7 +112,7 @@ export const ResearchDesignOverview: React.FC<ResearchDesignOverviewProps> = ({
       {/* Project Card Header */}
       <div className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl p-5 shadow-sm space-y-4">
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-purple-100 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400">
+          <div className="p-3 rounded-xl bg-ai/10 text-ai">
             <BookOpen size={24} />
           </div>
           <div>

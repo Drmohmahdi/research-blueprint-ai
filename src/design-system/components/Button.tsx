@@ -25,12 +25,12 @@ export const Button: React.FC<ButtonProps> = ({
   const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-lg ds-transition border border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-primary-soft)] disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer';
   
   const variantStyles = {
-    primary: 'bg-[var(--ds-primary)] hover:bg-[var(--ds-primary-hover)] text-white shadow-sm active:scale-[0.98]',
-    secondary: 'bg-[var(--ds-surface-tertiary)] hover:bg-[var(--ds-background-subtle)] text-[var(--ds-text-primary)] border-[var(--ds-border-subtle)] active:scale-[0.98]',
-    outline: 'border-[var(--ds-border-default)] hover:border-[var(--ds-border-strong)] hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-primary)] active:scale-[0.98]',
+    primary: 'bg-[var(--ds-action-fill)] hover:bg-[var(--ds-action-fill-hover)] text-[var(--ds-on-action)] shadow-[var(--ds-shadow-glow)] active:brightness-95',
+    secondary: 'bg-[var(--ds-surface-tertiary)] hover:bg-[var(--ds-background-subtle)] text-[var(--ds-text-primary)] border-[var(--ds-border-subtle)] active:brightness-95',
+    outline: 'border-[var(--ds-border-default)] hover:border-[var(--ds-border-strong)] hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-primary)] active:brightness-95',
     ghost: 'hover:bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-secondary)] hover:text-[var(--ds-text-primary)]',
-    danger: 'bg-[var(--ds-danger)] hover:brightness-95 text-white shadow-sm active:scale-[0.98]',
-    success: 'bg-[var(--ds-success)] hover:brightness-95 text-white shadow-sm active:scale-[0.98]',
+    danger: 'bg-[var(--ds-danger)] hover:brightness-95 text-white shadow-sm active:brightness-95',
+    success: 'bg-[var(--ds-success)] hover:brightness-95 text-white shadow-sm active:brightness-95',
   };
 
   const sizeStyles = {
@@ -80,12 +80,12 @@ export const IconButton: React.FC<IconButtonProps> = ({
   const baseStyles = 'inline-flex items-center justify-center rounded-lg ds-transition border border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-primary-soft)] disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer';
 
   const variantStyles = {
-    primary: 'bg-[var(--ds-primary)] hover:bg-[var(--ds-primary-hover)] text-white shadow-sm active:scale-[0.98]',
-    secondary: 'bg-[var(--ds-surface-tertiary)] hover:bg-[var(--ds-background-subtle)] text-[var(--ds-text-primary)] border-[var(--ds-border-subtle)] active:scale-[0.98]',
-    outline: 'border-[var(--ds-border-default)] hover:border-[var(--ds-border-strong)] hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-primary)] active:scale-[0.98]',
+    primary: 'bg-[var(--ds-action-fill)] hover:bg-[var(--ds-action-fill-hover)] text-[var(--ds-on-action)] shadow-[var(--ds-shadow-glow)] active:brightness-95',
+    secondary: 'bg-[var(--ds-surface-tertiary)] hover:bg-[var(--ds-background-subtle)] text-[var(--ds-text-primary)] border-[var(--ds-border-subtle)] active:brightness-95',
+    outline: 'border-[var(--ds-border-default)] hover:border-[var(--ds-border-strong)] hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-primary)] active:brightness-95',
     ghost: 'hover:bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-secondary)] hover:text-[var(--ds-text-primary)]',
-    danger: 'bg-[var(--ds-danger)] hover:brightness-95 text-white shadow-sm active:scale-[0.98]',
-    success: 'bg-[var(--ds-success)] hover:brightness-95 text-white shadow-sm active:scale-[0.98]',
+    danger: 'bg-[var(--ds-danger)] hover:brightness-95 text-white shadow-sm active:brightness-95',
+    success: 'bg-[var(--ds-success)] hover:brightness-95 text-white shadow-sm active:brightness-95',
   };
 
   const sizeStyles = {
