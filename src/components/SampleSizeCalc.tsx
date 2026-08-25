@@ -3,6 +3,8 @@ import { useProject } from '../context/ProjectContext';
 import { calculatePowerSampleSize, calculateDescriptiveSampleSize, normalCDF, normalInverse } from '../utils/stats';
 import { getTranslation } from '../utils/translations';
 import { Button } from '../design-system/components/Button';
+import { PathPanel } from '../design-system/components/Navigation';
+import { dsChartAxisTick } from '../design-system/components/ChartPrimitives';
 import { 
   Info, 
   CheckCircle2, 
@@ -147,12 +149,12 @@ export const SampleSizeCalc: React.FC = () => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] p-2.5 rounded-xl shadow-lg text-[10px] font-bold">
-          <p className="m-0 text-[var(--ds-text-primary)]">
-            {language === 'ar' ? `حجم العينة (N): ${data.n}` : `Sample Size (N): ${data.n}`}
+        <div className="bg-[var(--ds-navy)] text-white border border-white/10 p-2.5 rounded-xl shadow-lg text-[10px] font-bold" dir="ltr">
+          <p className="m-0">
+            {language === 'ar' ? `N: ${data.n}` : `Sample Size (N): ${data.n}`}
           </p>
-          <p className="m-0 text-ai">
-            {language === 'ar' ? `القوة الإحصائية: ${(data.powerVal * 100).toFixed(0)}%` : `Statistical Power: ${(data.powerVal * 100).toFixed(0)}%`}
+          <p className="m-0 text-[var(--ds-chart-2)]">
+            {language === 'ar' ? `Power: ${(data.powerVal * 100).toFixed(0)}%` : `Statistical Power: ${(data.powerVal * 100).toFixed(0)}%`}
           </p>
         </div>
       );
@@ -162,9 +164,18 @@ export const SampleSizeCalc: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto pb-16">
-      {/* Success Notification Banner */}
+      <PathPanel accent="var(--ds-path-data)">
+        <div className="space-y-1">
+          <h2 className="text-lg font-black text-ink m-0">{getTranslation(language, 'sampleCalc')}</h2>
+          <p className="text-xs text-secondary m-0">
+            {language === 'ar'
+              ? 'احسب حجم العينة المقبول علمياً وفق نوع الاختبار والقوة الإحصائية ومعدل الفقد.'
+              : 'Calculate a scientifically acceptable sample size from test type, power, and attrition.'}
+          </p>
+        </div>
+      </PathPanel>
       {successMessage && (
-        <div className="bg-action/10 border border-success/20 text-success dark:text-success rounded-xl p-4 flex items-center gap-3 animate-pulse">
+        <div className="bg-[var(--ds-success-soft)] border border-success/20 text-success rounded-xl p-4 flex items-center gap-3">
           <CheckCircle2 size={18} className="text-success shrink-0" />
           <span className="text-xs font-bold">{successMessage}</span>
         </div>
@@ -189,7 +200,7 @@ export const SampleSizeCalc: React.FC = () => {
             <select
               value={testType}
               onChange={(e) => setTestType(e.target.value)}
-              className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 text-xs font-bold focus:outline-none text-[var(--ds-text-primary)]"
+              className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)] text-[var(--ds-text-primary)]"
             >
               <option value="t_test_independent">{language === 'ar' ? 'اختبار ت للمجموعات المستقلة' : 'Independent samples t-test'}</option>
               <option value="t_test_paired">{language === 'ar' ? 'اختبار ت للمجموعات المرتبطة' : 'Paired samples t-test'}</option>
@@ -214,7 +225,7 @@ export const SampleSizeCalc: React.FC = () => {
                     setAlpha(clamp(e.currentTarget.valueAsNumber, 0.001, 0.5));
                   }
                 }}
-                className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 text-xs font-bold focus:outline-none text-[var(--ds-text-primary)]"
+                className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)] text-[var(--ds-text-primary)]"
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -226,7 +237,7 @@ export const SampleSizeCalc: React.FC = () => {
                   type="number"
                   value={popSize || ''}
                   onChange={(e) => setPopSize(parseInt(e.target.value) || undefined)}
-                  className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 text-xs font-bold focus:outline-none text-[var(--ds-text-primary)]"
+                  className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)] text-[var(--ds-text-primary)]"
                 />
               ) : (
                 <div className="space-y-1.5">
@@ -241,7 +252,7 @@ export const SampleSizeCalc: React.FC = () => {
                         setPower(clamp(e.currentTarget.valueAsNumber, 0.5, 0.99));
                       }
                     }}
-                    className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 text-xs font-bold focus:outline-none text-[var(--ds-text-primary)]"
+                    className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)] text-[var(--ds-text-primary)]"
                   />
                   {/* Power Presets */}
                   <div className="flex gap-1">
@@ -275,7 +286,7 @@ export const SampleSizeCalc: React.FC = () => {
                     setEffectSize(clamp(e.currentTarget.valueAsNumber, 0.01, effectSizeMaximum));
                   }
                 }}
-                className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 text-xs font-bold focus:outline-none text-[var(--ds-text-primary)]"
+                className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)] text-[var(--ds-text-primary)]"
               />
               <div className="flex gap-1.5">
                 {effectSizePresets.map((preset) => (
@@ -304,7 +315,7 @@ export const SampleSizeCalc: React.FC = () => {
                   setAttrition(clamp(e.currentTarget.valueAsNumber, 0, 99));
                 }
               }}
-              className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 text-xs font-bold focus:outline-none text-[var(--ds-text-primary)]"
+              className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)] text-[var(--ds-text-primary)]"
             />
           </div>
         </div>
@@ -318,7 +329,7 @@ export const SampleSizeCalc: React.FC = () => {
                 <span className="text-[10px] font-black text-[var(--ds-text-secondary)] uppercase tracking-wider block">
                   {getTranslation(language, 'recommendedSample')}
                 </span>
-                <span className="text-4xl font-black text-ai block">
+                <span className="text-4xl font-black text-ink ds-numeric block">
                   {result.recommended}
                 </span>
                 <span className="text-[9px] text-[var(--ds-text-muted)] font-semibold block">
@@ -330,7 +341,7 @@ export const SampleSizeCalc: React.FC = () => {
                 <span className="text-[10px] font-black text-[var(--ds-text-secondary)] uppercase tracking-wider block">
                   {getTranslation(language, 'adjustedSample')}
                 </span>
-                <span className="text-3xl font-black text-success block">
+                <span className="text-3xl font-black text-success ds-numeric block">
                   {result.adjusted}
                 </span>
                 <span className="text-[9px] text-[var(--ds-text-muted)] font-semibold block">
@@ -352,7 +363,7 @@ export const SampleSizeCalc: React.FC = () => {
 
             <div className="p-4 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl text-xs space-y-3">
               <h4 className="font-black text-[var(--ds-text-primary)] flex items-center gap-1.5 m-0 text-[11px]">
-                <Info size={14} className="text-ai" />
+                <Info size={14} className="text-secondary" />
                 <span>{language === 'ar' ? 'تفاصيل التخصيص للمجموعات' : 'Group Allocation Details'}</span>
               </h4>
               
@@ -371,13 +382,13 @@ export const SampleSizeCalc: React.FC = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted">{language === 'ar' ? 'عينة كل مجموعة' : 'Sample per Group'}</span>
-                      <span className="font-bold text-ai">{result.adjusted / allocationGroupCount}</span>
+                      <span className="font-bold text-ink ds-numeric">{result.adjusted / allocationGroupCount}</span>
                     </div>
                   </>
                 ) : (
                   <div className="flex justify-between">
                     <span className="text-muted">{language === 'ar' ? 'عينة المجموعة التجريبية' : 'Experimental N'}</span>
-                    <span className="font-bold text-ai">
+                    <span className="font-bold text-ink ds-numeric">
                       {testType === 't_test_independent' ? result.adjusted / 2 : result.adjusted}
                     </span>
                   </div>
@@ -385,7 +396,7 @@ export const SampleSizeCalc: React.FC = () => {
                 {testType.includes('independent') && (
                   <div className="flex justify-between">
                     <span className="text-muted">{language === 'ar' ? 'عينة المجموعة الضابطة' : 'Control N'}</span>
-                    <span className="font-bold text-ai">
+                    <span className="font-bold text-ink ds-numeric">
                       {result.adjusted / 2}
                     </span>
                   </div>
@@ -398,24 +409,24 @@ export const SampleSizeCalc: React.FC = () => {
           {testType !== 'descriptive_survey' && chartData.length > 0 && (
             <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl p-5 shadow-sm space-y-4">
               <div className="flex items-center gap-1.5">
-                <TrendingUp size={14} className="text-ai" />
+                <TrendingUp size={14} className="text-path-data" />
                 <h4 className="text-[10px] font-black text-[var(--ds-text-secondary)] uppercase tracking-wider m-0">
                   {getTranslation(language, 'powerCurve')}
                 </h4>
               </div>
               
-              <div className="w-full h-52 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl p-3">
+              <div className="w-full h-52 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl p-3" dir="ltr">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData} margin={{ top: 15, right: 15, left: -20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--ds-border-subtle)" />
-                    <XAxis 
-                      dataKey="n" 
-                      tick={{ fontSize: 9, fontWeight: 'bold', fill: 'var(--ds-text-secondary)' }} 
+                    <XAxis
+                      dataKey="n"
+                      tick={dsChartAxisTick}
                     />
                     <YAxis 
                       domain={[0, 1]} 
                       tickFormatter={(v) => `${(v * 100).toFixed(0)}%`}
-                      tick={{ fontSize: 9, fontWeight: 'bold', fill: 'var(--ds-text-secondary)' }}
+                      tick={dsChartAxisTick}
                     />
                     <Tooltip content={<CustomTooltip />} />
                     <Line 
@@ -456,11 +467,11 @@ export const SampleSizeCalc: React.FC = () => {
                   ? 'يقوم هذا النموذج بمحاكاة متى يمكن لمتغير دخيل لم يتم قياسه (Unmeasured Confounder) أن يُلغي الدلالة الإحصائية للنتائج:' 
                   : 'This model simulates the threshold at which an unmeasured confounding variable cancels out the statistical significance of your treatment:'}
               </p>
-              <div className="p-3.5 bg-ai/5 border border-ai/25 rounded-xl text-xs space-y-1">
-                <span className="font-black text-ai">
+              <div className="p-3.5 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl text-xs space-y-1">
+                <span className="font-black text-ink">
                   {language === 'ar' ? 'عتبة التأثير للمتغير الدخيل:' : 'Confounder Effect Threshold:'}
                 </span>{' '}
-                <span className="font-mono font-black text-ai">
+                <span className="font-mono font-black text-ink ds-numeric">
                   d &gt; {(effectSize * 0.7).toFixed(2)}
                 </span>
                 <p className="mt-1 mb-0 text-[10px] text-[var(--ds-text-muted)] leading-relaxed font-medium">

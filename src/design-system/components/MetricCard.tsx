@@ -40,7 +40,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
               </div>
             )}
           </div>
-          <div className="text-2xl font-black text-[var(--ds-text-primary)]">{metric}</div>
+          <div className="text-2xl font-black text-ink ds-numeric">{metric}</div>
         </div>
 
         {icon && (

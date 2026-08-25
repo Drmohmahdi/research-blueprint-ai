@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { PathPanel } from '../design-system/components/Navigation';
+import { EmptyState } from '../design-system/components/Feedback';
 import { apiGetPublicProfile, apiGetPublicPhotoUrl } from '../utils/api';
 import { getChannelLabel } from '../config/academicChannels';
 import {
@@ -50,7 +52,7 @@ export const PublicResearcherProfile: React.FC = () => {
   if (loading) {
     return wrap(
       <div className="flex items-center justify-center gap-2 py-24 text-[var(--ds-text-muted)]">
-        <Loader2 size={18} className="animate-spin" />
+        <Loader2 size={18} className="motion-safe:animate-spin" />
         <span className="text-sm font-bold">{isAr ? 'جارِ تحميل الملف...' : 'Loading profile...'}</span>
       </div>
     );
@@ -58,15 +60,13 @@ export const PublicResearcherProfile: React.FC = () => {
 
   if (notFound || !profile) {
     return wrap(
-      <div className="text-center py-24 space-y-3">
-        <ShieldAlert className="mx-auto text-danger" size={32} />
-        <h1 className="text-lg font-bold">{isAr ? 'هذا الملف غير متاح' : 'This profile is not available'}</h1>
-        <p className="text-sm text-[var(--ds-text-secondary)]">
-          {isAr
-            ? 'قد يكون الرابط غير صحيح، أو أن صاحب الملف لم يجعله عامًا بعد.'
-            : 'The link may be incorrect, or the owner hasn’t made this profile public yet.'}
-        </p>
-      </div>
+      <EmptyState
+        illustration={<ShieldAlert size={32} />}
+        title={isAr ? 'هذا الملف غير متاح' : 'This profile is not available'}
+        description={isAr
+          ? 'قد يكون الرابط غير صحيح، أو أن صاحب الملف لم يجعله عامًا بعد.'
+          : 'The link may be incorrect, or the owner hasn’t made this profile public yet.'}
+      />
     );
   }
 
@@ -91,14 +91,14 @@ export const PublicResearcherProfile: React.FC = () => {
       <div className="flex justify-end">
         <button
           onClick={() => setIsAr(v => !v)}
-          className="text-[11px] font-bold text-path-identity hover:underline cursor-pointer"
+          className="text-[11px] font-bold text-action hover:underline cursor-pointer"
         >
           {isAr ? 'English' : 'عربي'}
         </button>
       </div>
 
-      {/* Header */}
-      <div className="flex items-start gap-4 pb-4 border-b border-[var(--ds-border-subtle)]">
+      <PathPanel accent="var(--ds-path-identity)">
+        <div className="flex items-start gap-4">
         {profile.has_photo && username && (
           <img
             src={apiGetPublicPhotoUrl(username)}
@@ -113,9 +113,9 @@ export const PublicResearcherProfile: React.FC = () => {
               {isAr ? 'الملف الأكاديمي العام' : 'Public Academic Profile'}
             </span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold">{displayName}</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold m-0">{displayName}</h1>
           {(profile.academic_title || profile.current_rank) && (
-            <p className="text-sm text-[var(--ds-text-secondary)] font-bold">
+            <p className="text-sm text-secondary font-bold m-0">
               {[profile.academic_title, profile.current_rank].filter(Boolean).join(' — ')}
             </p>
           )}
@@ -126,10 +126,11 @@ export const PublicResearcherProfile: React.FC = () => {
             </div>
           )}
           {profile.public_email && (
-            <p className="text-xs text-[var(--ds-text-muted)]">{profile.public_email}</p>
+            <p className="text-xs text-[var(--ds-text-muted)] m-0">{profile.public_email}</p>
           )}
         </div>
-      </div>
+        </div>
+      </PathPanel>
 
       {/* Bio */}
       {bio && (
@@ -169,7 +170,7 @@ export const PublicResearcherProfile: React.FC = () => {
               <div key={idx} className="flex items-center justify-between text-sm p-2.5 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg">
                 <span className="font-bold">{aff.organization_name}{aff.position_title ? ` — ${aff.position_title}` : ''}</span>
                 {aff.is_current && (
-                  <span className="text-[9px] font-bold text-success bg-action/10 border border-success/20 px-1.5 py-0.5 rounded shrink-0">
+                  <span className="text-[9px] font-bold text-success bg-[var(--ds-success-soft)] border border-success/20 px-1.5 py-0.5 rounded shrink-0">
                     {isAr ? 'حالي' : 'Current'}
                   </span>
                 )}
@@ -190,7 +191,7 @@ export const PublicResearcherProfile: React.FC = () => {
               <div key={a.id} className="p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <span className="inline-block mb-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-ai/10 text-ai border border-ai/20">
+                    <span className="inline-block mb-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-[var(--ds-information-soft)] text-[var(--ds-information)] border border-info/20">
                       {ASSET_TYPE_LABELS[a.asset_type] ? (isAr ? ASSET_TYPE_LABELS[a.asset_type].ar : ASSET_TYPE_LABELS[a.asset_type].en) : a.asset_type}
                     </span>
                     <p className="text-sm font-bold m-0">{isAr ? (a.title_ar || a.title_en) : (a.title_en || a.title_ar)}</p>

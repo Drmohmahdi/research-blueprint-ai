@@ -27,7 +27,7 @@ export const Badge: React.FC<BadgeProps> = ({
   
   const variantStyles = {
     draft: 'bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-muted)] border-[var(--ds-border-default)]',
-    active: 'bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] border-[var(--ds-primary)]/20',
+    active: 'bg-[var(--ds-primary-soft)] text-ink border-[var(--ds-primary)]/20',
     completed: 'bg-[var(--ds-success-soft)] text-[var(--ds-success)] border-[var(--ds-success)]/20',
     'needs-review': 'bg-[var(--ds-information-soft)] text-[var(--ds-information)] border-[var(--ds-information)]/20',
     warning: 'bg-[var(--ds-warning-soft)] text-[var(--ds-warning)] border-[var(--ds-warning)]/20',
@@ -202,6 +202,8 @@ export interface EmptyStateProps {
   illustration?: React.ReactNode;
   actionButton?: React.ReactNode;
   className?: string;
+  /** Strip the extra card chrome when already nested in a Card or panel. */
+  bare?: boolean;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
@@ -209,10 +211,11 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   description,
   illustration,
   actionButton,
-  className = ''
+  className = '',
+  bare = false,
 }) => {
   return (
-    <div className={`p-8 text-center flex flex-col items-center justify-center gap-4 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl ${className}`}>
+    <div className={`p-8 text-center flex flex-col items-center justify-center gap-4 ${bare ? '' : 'bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl'} ${className}`}>
       {illustration && (
         <div className="text-[var(--ds-text-disabled)] opacity-80">
           {illustration}

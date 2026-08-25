@@ -4,6 +4,8 @@ import { checkConsistency } from '../utils/ruleEngine';
 import { Card } from '../design-system/components/Card';
 import { Button } from '../design-system/components/Button';
 import { PathPanel } from '../design-system/components/Navigation';
+import { EmptyState } from '../design-system/components/Feedback';
+import { dsChartAxisTick } from '../design-system/components/ChartPrimitives';
 import {
   UserCheck,
   ShieldAlert,
@@ -73,12 +75,11 @@ export const PublicationReadinessReviewer: React.FC = () => {
   // ── No project guard ──────────────────────────────────────────────────────
   if (!activeProject) {
     return (
-      <div className="rounded-2xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] p-10 text-center shadow-sm">
-        <FileSearch size={40} className="mx-auto mb-3 text-[var(--ds-text-disabled)]" />
-        <p className="text-sm text-[var(--ds-text-secondary)]">
-          {language === 'ar' ? 'الرجاء تحديد مشروع نشط أولاً.' : 'Please select an active project first.'}
-        </p>
-      </div>
+      <EmptyState
+        illustration={<FileSearch size={40} />}
+        title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No active project'}
+        description={language === 'ar' ? 'اختر مشروعًا نشطًا لتقييم جاهزية النشر.' : 'Select an active project to assess publication readiness.'}
+      />
     );
   }
 
@@ -223,8 +224,8 @@ export const PublicationReadinessReviewer: React.FC = () => {
 
   // ── UI helpers ────────────────────────────────────────────────────────────
   const decisionStyles: Record<Decision, string> = {
-    accepted:       'bg-action/10 text-success border-success/30 dark:bg-action/5',
-    minor_revision: 'bg-info/10    text-path-publication    border-info/30    dark:bg-[var(--ds-path-publication)]/5',
+    accepted:       'bg-[var(--ds-success-soft)] text-success border-success/30 dark:bg-action/5',
+    minor_revision: 'bg-[var(--ds-information-soft)] text-[var(--ds-information)] border-info/30',
     major_revision: 'bg-warning/10   text-warning   border-warning/30   dark:bg-warning/5',
     rejected:       'bg-danger/10    text-danger    border-danger/30    dark:bg-danger/5'
   };
@@ -241,7 +242,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
 
   const scoreColor = (score: number) => {
     if (score >= 85) return 'text-success';
-    if (score >= 70) return 'text-path-publication';
+    if (score >= 70) return 'text-ink';
     if (score >= 50) return 'text-warning';
     return 'text-danger';
   };
@@ -269,8 +270,8 @@ export const PublicationReadinessReviewer: React.FC = () => {
       <div className="flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2 mb-1">
-            <UserCheck size={20} className="text-ai" />
-            <span className="text-[10px] font-black text-ai uppercase tracking-widest">
+            <UserCheck size={20} className="text-path-publication" />
+            <span className="text-[10px] font-black text-path-publication uppercase tracking-widest">
               {language === 'ar' ? 'تحكيم متعدد الأبعاد' : 'Multi-Dimensional Peer Review'}
             </span>
           </div>
@@ -291,7 +292,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
           className="flex items-center gap-2 px-6 py-3 font-bold cursor-pointer shrink-0 text-xs rounded-xl"
         >
           {running
-            ? <span className="animate-spin inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
+            ? <span className="motion-safe:animate-spin inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
             : <Sparkles size={16} />
           }
           <span>
@@ -315,7 +316,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
 
       {/* Results Layout */}
       {reviewResult && (
-        <div className="space-y-6 animate-fade-in">
+        <div className="space-y-6">
           
           {/* Main Grid splits: Left statistics & List, Right Radar Chart */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -341,7 +342,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
                         strokeLinecap="round" />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className={`text-2xl font-black ${scoreColor(reviewResult.overallIndex)}`}>
+                      <span className={`text-2xl font-black ds-numeric ${scoreColor(reviewResult.overallIndex)}`}>
                         {reviewResult.overallIndex}
                       </span>
                       <span className="text-[9px] text-[var(--ds-text-muted)] font-bold">/100</span>
@@ -375,7 +376,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
                       <div key={dim.id} className="space-y-1">
                         <div className="flex items-center justify-between text-[10px] font-bold">
                           <div className="flex items-center gap-1.5 text-[var(--ds-text-secondary)]">
-                            <Icon size={12} className="text-ai" />
+                            <Icon size={12} className="text-path-publication" />
                             <span>{language === 'ar' ? dim.labelAr : dim.labelEn}</span>
                           </div>
                           <span className={`font-black ${scoreColor(dim.score)}`}>{dim.score}</span>
@@ -397,7 +398,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
             <div className="lg:col-span-5">
               <Card className="p-6 border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] shadow-[var(--ds-shadow-layered)] space-y-4 sticky top-6">
                 <div className="flex items-center gap-1.5 pb-2 border-b border-[var(--ds-border-subtle)]">
-                  <TrendingUp size={14} className="text-ai" />
+                  <TrendingUp size={14} className="text-path-publication" />
                   <h4 className="text-[10px] font-black text-[var(--ds-text-secondary)] uppercase tracking-wider m-0">
                     {language === 'ar' ? 'بصمة الجاهزية خماسية الأبعاد' : '5D Readiness Assessment Web'}
                   </h4>
@@ -409,12 +410,12 @@ export const PublicationReadinessReviewer: React.FC = () => {
                       <PolarGrid stroke="var(--ds-border-subtle)" />
                       <PolarAngleAxis 
                         dataKey="subject" 
-                        tick={{ fontSize: 8, fontWeight: 'bold', fill: 'var(--ds-text-secondary)' }}
+                        tick={dsChartAxisTick}
                       />
                       <PolarRadiusAxis 
                         angle={30} 
                         domain={[0, 100]} 
-                        tick={{ fontSize: 7, fill: 'var(--ds-text-muted)' }}
+                        tick={dsChartAxisTick}
                       />
                       <Radar 
                         name="Readiness" 
@@ -427,7 +428,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
                   </ResponsiveContainer>
                 </div>
                 
-                <div className="p-3 bg-ai/5 border border-ai/10 rounded-xl text-[10px] text-[var(--ds-text-muted)] leading-relaxed font-semibold">
+                <div className="p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl text-[10px] text-[var(--ds-text-muted)] leading-relaxed font-semibold">
                   {language === 'ar'
                     ? 'يمثل مخطط الرادار بصمة جودة بحثك. كلما اتسعت المساحة المظللة واقتربت من الأطراف، زادت احتمالية القبول الأكاديمي المباشر وتفادي الرفض المكتبي.'
                     : 'The radar chart represents your study quality footprint. A larger shaded area closer to the edges indicates higher peer review acceptance rates.'}
@@ -460,7 +461,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
                     onClick={() => setExpandedDim(isExpanded ? null : dim.id)}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-xl ${hasMajor ? 'bg-danger/10 text-danger' : 'bg-ai/10 text-ai'}`}>
+                      <div className={`p-2 rounded-xl ${hasMajor ? 'bg-danger/10 text-danger' : 'bg-[var(--ds-success-soft)] text-success'}`}>
                         <Icon size={16} />
                       </div>
                       <div className="text-right">
@@ -510,12 +511,12 @@ export const PublicationReadinessReviewer: React.FC = () => {
 
                       {dim.minorComments.length > 0 && (
                         <div className="space-y-2">
-                          <span className="text-[9px] font-black text-path-publication uppercase tracking-wider flex items-center gap-1.5">
+                          <span className="text-[9px] font-black text-[var(--ds-information)] uppercase tracking-wider flex items-center gap-1.5">
                             <CheckCircle2 size={13} />
                             {language === 'ar' ? 'توصيات تحسينية (Minor Comments)' : 'Minor / Improvement Comments'}
                           </span>
                           {dim.minorComments.map((c, i) => (
-                            <div key={i} className="p-3.5 bg-[var(--ds-path-publication)]/5 border border-info/15 rounded-xl text-xs text-[var(--ds-text-secondary)] font-bold leading-relaxed">
+                            <div key={i} className="p-3.5 bg-[var(--ds-information-soft)] border border-info/15 rounded-xl text-xs text-[var(--ds-text-secondary)] font-bold leading-relaxed">
                               {language === 'ar' ? c.ar : c.en}
                             </div>
                           ))}

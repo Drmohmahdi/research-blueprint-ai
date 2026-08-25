@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import { Card } from '../design-system/components/Card';
 import { Button } from '../design-system/components/Button';
+import { PathPanel } from '../design-system/components/Navigation';
+import { EmptyState } from '../design-system/components/Feedback';
 
 const redactIdentifiers = (text: string) => {
   let redactionCount = 0;
@@ -68,7 +70,6 @@ export const QualitativeLab: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [redactionNotice, setRedactionNotice] = useState('');
   const analysisRunId = useRef(0);
-  const softPanelClass = 'rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] shadow-sm';
   const accentBadgeClass = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--ds-primary-soft)] border border-[var(--ds-primary)]/20 text-xs font-bold text-[var(--ds-primary)]';
 
   const handlePresetClick = (text: string) => {
@@ -205,32 +206,30 @@ export const QualitativeLab: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 max-w-[1280px] mx-auto animate-fade-in pb-16">
-      {/* Success Notification Banner */}
+    <div className="space-y-8 max-w-[1280px] mx-auto pb-16">
+      <PathPanel accent="var(--ds-path-data)">
+        <div className="space-y-1.5">
+          <div className={accentBadgeClass}>
+            <Sparkles size={13} />
+            <span>{language === 'ar' ? 'البحوث النوعية والمختلطة' : 'Qualitative Lab'}</span>
+          </div>
+          <h2 className="text-2xl font-black text-ink m-0">
+            {language === 'ar' ? 'مختبر ترميز المقابلات النوعية بالذكاء الاصطناعي' : 'Qualitative Interview AI Coding Lab'}
+          </h2>
+          <p className="text-xs text-secondary font-medium m-0">
+            {language === 'ar' 
+              ? 'قم بتحليل نصوص المقابلات المفتوحة، التغذية الراجعة، وملاحظات الميدان واستخرج المحاور والرموز بدقة علمية.'
+              : 'Analyze open-ended interview transcripts, field notes, and feedback to extract thematic codes.'}
+          </p>
+        </div>
+      </PathPanel>
+
       {successMessage && (
         <div className="bg-[var(--ds-success-soft)] border border-[var(--ds-success)]/20 text-success dark:text-success rounded-lg p-4 flex items-center gap-3">
           <CheckCircle2 size={18} className="text-success shrink-0" />
           <span className="text-xs font-bold">{successMessage}</span>
         </div>
       )}
-
-      {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--ds-border-subtle)] pb-5">
-        <div className="space-y-1.5">
-          <div className={accentBadgeClass}>
-            <Sparkles size={13} />
-            <span>{language === 'ar' ? 'البحوث النوعية والمختلطة' : 'Qualitative Lab'}</span>
-          </div>
-          <h2 className="text-2xl font-black text-[var(--ds-text-primary)] m-0">
-            {language === 'ar' ? 'مختبر ترميز المقابلات النوعية بالذكاء الاصطناعي' : 'Qualitative Interview AI Coding Lab'}
-          </h2>
-          <p className="text-xs text-[var(--ds-text-secondary)] font-medium m-0">
-            {language === 'ar' 
-              ? 'قم بتحليل نصوص المقابلات المفتوحة، التغذية الراجعة، وملاحظات الميدان واستخرج المحاور والرموز بدقة علمية.'
-              : 'Analyze open-ended interview transcripts, field notes, and feedback to extract thematic codes.'}
-          </p>
-        </div>
-      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
@@ -316,23 +315,21 @@ export const QualitativeLab: React.FC = () => {
           
           {loading && (
             <Card className="space-y-4">
-              <div className="h-4 bg-[var(--ds-surface-secondary)] rounded w-1/3 animate-pulse" />
+              <div className="h-4 bg-[var(--ds-surface-secondary)] rounded w-1/3 motion-safe:animate-pulse" />
               <div className="space-y-2">
-                <div className="h-8 bg-[var(--ds-surface-secondary)] rounded animate-pulse" />
-                <div className="h-8 bg-[var(--ds-surface-secondary)] rounded animate-pulse" />
-                <div className="h-8 bg-[var(--ds-surface-secondary)] rounded animate-pulse" />
+                <div className="h-8 bg-[var(--ds-surface-secondary)] rounded motion-safe:animate-pulse" />
+                <div className="h-8 bg-[var(--ds-surface-secondary)] rounded motion-safe:animate-pulse" />
+                <div className="h-8 bg-[var(--ds-surface-secondary)] rounded motion-safe:animate-pulse" />
               </div>
             </Card>
           )}
 
           {!loading && !themes && (
-            <div className={`${softPanelClass} p-16 text-center text-[var(--ds-text-muted)] italic flex flex-col items-center justify-center gap-4 h-[350px]`}>
-              <ClipboardList size={64} strokeWidth={1.5} className="text-[var(--ds-text-disabled)]" />
-              <div className="space-y-1 font-bold">
-                <p className="m-0 text-sm text-[var(--ds-text-secondary)]">{language === 'ar' ? 'لا توجد محاور مستخرجة بعد' : 'No themes extracted yet'}</p>
-                <p className="m-0 text-[11px] text-[var(--ds-text-muted)] font-medium">{language === 'ar' ? 'يرجى كتابة أو اختيار المقابلة، ثم تشغيل المحلل الذكي.' : 'Input transcripts on the left and start thematic coding analysis.'}</p>
-              </div>
-            </div>
+            <EmptyState
+              illustration={<ClipboardList size={40} />}
+              title={language === 'ar' ? 'لا توجد محاور مستخرجة بعد' : 'No themes extracted yet'}
+              description={language === 'ar' ? 'اكتب أو الصق نص المقابلة، ثم شغّل المحلل لاستخراج المحاور والرموز.' : 'Paste a transcript, then run the analyzer to extract themes and codes.'}
+            />
           )}
 
           {themes && (

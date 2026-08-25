@@ -16,7 +16,7 @@ from .db import engine, Base
 from .config import settings
 from .observability import log_event, request_id_context
 from .services.site_gate import GATE_COOKIE_NAME, get_expected_site_gate_token
-from .routers import projects, analyzer, stats, auth, prediction, comments, organizations, storage, analytics, notifications, academic_visibility, academic_foundation, literature, promotions, peer_reviews, external_reviews, reports, billing, search, ai, admin, site_gate, research_data, research_lifecycle
+from .routers import projects, analyzer, stats, auth, prediction, comments, organizations, storage, analytics, notifications, academic_visibility, academic_foundation, literature, promotions, peer_reviews, external_reviews, reports, billing, search, ai, admin, site_gate, research_data, research_lifecycle, publication_intelligence, thesis_workflow, external_thesis_examiners
 
 
 settings.validate_production()
@@ -139,6 +139,9 @@ app.include_router(admin.router, prefix="/api")
 app.include_router(site_gate.router, prefix="/api")
 app.include_router(research_data.router, prefix="/api")
 app.include_router(research_lifecycle.router, prefix="/api")
+app.include_router(publication_intelligence.router, prefix="/api")
+app.include_router(thesis_workflow.router, prefix="/api")
+app.include_router(external_thesis_examiners.router, prefix="/api")
 
 
 

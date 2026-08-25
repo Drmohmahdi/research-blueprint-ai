@@ -10,6 +10,7 @@ import { ResearchOutcomePredictor } from '../../components/ResearchOutcomePredic
 import { ConsistencyChecker } from '../../components/ConsistencyChecker';
 import { PreRegistration } from '../../components/PreRegistration';
 import { ResearchOutputsCenter } from './ResearchOutputsCenter';
+import { EmptyState } from '../../design-system/components/Feedback';
 
 interface ResearchDesignStepPageProps {
   stepId: ResearchStepId;
@@ -39,9 +40,10 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
 
   if (!project) {
     return (
-      <div className="text-center py-10 text-[var(--ds-text-secondary)] text-sm">
-        {isAr ? 'برجاء اختيار مشروع أولاً' : 'Please select a project first'}
-      </div>
+      <EmptyState
+        title={isAr ? 'لا يوجد مشروع نشط' : 'No active project'}
+        description={isAr ? 'اختر مشروعًا نشطًا لمتابعة خطوات التصميم البحثي.' : 'Select an active project to continue the research design steps.'}
+      />
     );
   }
 
@@ -71,7 +73,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
                 value={domain}
                 onChange={(e) => setDomain(e.target.value)}
                 placeholder={isAr ? 'مثال: مناهج وطرق تدريس' : 'e.g. Curriculum and Instruction'}
-                className="w-full p-2.5 rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-[var(--ds-text-primary)] outline-none"
+                className="w-full p-2.5 rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-[var(--ds-text-primary)] outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
               />
             </div>
             <div>
@@ -83,7 +85,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
                 value={ideaText}
                 onChange={(e) => setIdeaText(e.target.value)}
                 placeholder={isAr ? 'اكتب بالتفصيل الفكرة البحثية والمشكلة والسياق العام للدراسة...' : 'Write details about your research idea, context, and problem...'}
-                className="w-full p-2.5 rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-[var(--ds-text-primary)] outline-none resize-none"
+                className="w-full p-2.5 rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-[var(--ds-text-primary)] outline-none resize-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
               />
             </div>
             <button
@@ -122,7 +124,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
                 value={problemStatement}
                 onChange={(e) => setProblemStatement(e.target.value)}
                 placeholder={isAr ? 'وضح المشكلة البحثية والفجوة المعرفية التي تسعى الدراسة لملئها بدقة...' : 'Formulate the exact study problem and gap in literature...'}
-                className="w-full p-2.5 rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-[var(--ds-text-primary)] outline-none resize-none"
+                className="w-full p-2.5 rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-[var(--ds-text-primary)] outline-none resize-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
               />
             </div>
             <button
@@ -149,7 +151,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
               <input
                 type="text"
                 defaultValue={project.descriptionAr || ''}
-                className="w-full p-2.5 rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-[var(--ds-text-primary)] outline-none"
+                className="w-full p-2.5 rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-[var(--ds-text-primary)] outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                 placeholder={isAr ? 'مثال: قياس أثر التدريب في تنمية المهارات...' : 'e.g. Measuring the effect of training on skill development...'}
               />
             </div>
@@ -160,7 +162,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
               <textarea
                 rows={3}
                 defaultValue={isAr ? '1. التعرف على المهارات الأساسية المطلوبة\n2. قياس مستوى التحصيل قبل وبعد التجربة' : '1. Identify core skills\n2. Measure achievement scores'}
-                className="w-full p-2.5 rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-[var(--ds-text-primary)] outline-none resize-none"
+                className="w-full p-2.5 rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-[var(--ds-text-primary)] outline-none resize-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
               />
             </div>
           </div>
@@ -175,20 +177,28 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
           </h3>
           <div className="bg-[var(--ds-surface-secondary)] p-4 rounded-xl border border-[var(--ds-border-subtle)] space-y-4 text-xs">
             <div>
-              <h4 className="font-bold text-ai mb-2">{isAr ? 'أسئلة الدراسة المفتوحة:' : 'Research Questions:'}</h4>
-              <ul className="list-decimal list-inside space-y-1 text-[var(--ds-text-secondary)]">
-                {project.questions?.map((q) => (
-                  <li key={q.id}>{isAr ? q.textAr : q.textEn}</li>
-                )) || <li>{isAr ? 'لا توجد أسئلة مسجلة' : 'No questions recorded'}</li>}
-              </ul>
+              <h4 className="font-bold text-ink mb-2">{isAr ? 'أسئلة الدراسة المفتوحة:' : 'Research Questions:'}</h4>
+              {project.questions?.length ? (
+                <ul className="list-decimal list-inside space-y-1 text-[var(--ds-text-secondary)]">
+                  {project.questions.map((q) => (
+                    <li key={q.id}>{isAr ? q.textAr : q.textEn}</li>
+                  ))}
+                </ul>
+              ) : (
+                <EmptyState bare className="py-3" title={isAr ? 'لا توجد أسئلة مسجلة' : 'No questions recorded'} description={isAr ? 'أضف أسئلة الدراسة من معالج البحث.' : 'Add research questions from the research wizard.'} />
+              )}
             </div>
             <div className="border-t border-[var(--ds-border-subtle)] pt-3">
-              <h4 className="font-bold text-success mb-2">{isAr ? 'الفرضيات الإحصائية المقابلة:' : 'Corresponding Hypotheses:'}</h4>
-              <ul className="list-disc list-inside space-y-1 text-[var(--ds-text-secondary)]">
-                {project.hypotheses?.map((h) => (
-                  <li key={h.id}>{isAr ? h.textAr : h.textEn}</li>
-                )) || <li>{isAr ? 'لا توجد فرضيات مسجلة' : 'No hypotheses recorded'}</li>}
-              </ul>
+              <h4 className="font-bold text-ink mb-2">{isAr ? 'الفرضيات الإحصائية المقابلة:' : 'Corresponding Hypotheses:'}</h4>
+              {project.hypotheses?.length ? (
+                <ul className="list-disc list-inside space-y-1 text-[var(--ds-text-secondary)]">
+                  {project.hypotheses.map((h) => (
+                    <li key={h.id}>{isAr ? h.textAr : h.textEn}</li>
+                  ))}
+                </ul>
+              ) : (
+                <EmptyState bare className="py-3" title={isAr ? 'لا توجد فرضيات مسجلة' : 'No hypotheses recorded'} description={isAr ? 'أضف فرضية واحدة على الأقل لربطها بخطة التحليل.' : 'Add at least one hypothesis to connect it to the analysis plan.'} />
+              )}
             </div>
           </div>
         </div>
@@ -226,7 +236,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
               <select
                 value={project.studyDesign}
                 onChange={(e) => onUpdateProject({ ...project, studyDesign: e.target.value as any })}
-                className="w-full p-2.5 rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-[var(--ds-text-primary)]"
+                className="w-full p-2.5 rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
               >
                 <option value="quasi_experimental_pre_post">{isAr ? 'شبه تجريبي (قياس قبلي وبعدي)' : 'Quasi-Experimental (Pre-Post)'}</option>
                 <option value="experimental_rct">{isAr ? 'تجريبي كامل عشوائي' : 'Randomized Experimental'}</option>
@@ -240,7 +250,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
               <textarea
                 rows={3}
                 defaultValue={isAr ? 'تم اختيار التصميم شبه التجريبي لملائمته لطبيعة الفصل الدراسي والتحكم بالمتغيرات الدخيلة.' : 'Selected quasi-experimental design because random assignment is not feasible in classrooms.'}
-                className="w-full p-2.5 rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-[var(--ds-text-primary)] outline-none resize-none"
+                className="w-full p-2.5 rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-[var(--ds-text-primary)] outline-none resize-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
               />
             </div>
           </div>
@@ -269,7 +279,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
             </p>
             {project.variables?.filter(v => v.type === 'dependent').map((v) => (
               <div key={v.id} className="p-2.5 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg">
-                <span className="font-bold block mb-1 text-ai">{v.nameAr}</span>
+                <span className="font-bold block mb-1 text-ink">{v.nameAr}</span>
                 <div className="grid grid-cols-2 gap-2 text-[10px] text-[var(--ds-text-secondary)]">
                   <span>{isAr ? 'نوع الأداة: اختبار تحصيلي' : 'Instrument: Test'}</span>
                   <span>{isAr ? 'طريقة الصدق: صدق المحتوى والتحكيم' : 'Validity: Content & Panel review'}</span>
@@ -293,7 +303,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
             {project.hypotheses?.map((h, idx) => (
               <div key={h.id} className="p-2.5 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg flex justify-between items-center">
                 <span>{h.textAr}</span>
-                <span className="px-2 py-0.5 bg-ai/10 text-ai dark:bg-ai/10 dark:text-ai rounded font-bold text-[10px]">
+                <span className="px-2 py-0.5 bg-[var(--ds-information-soft)] text-[var(--ds-information)] rounded font-bold text-[10px]">
                   {idx === 0 ? 'ANCOVA' : 'Independent t-test'}
                 </span>
               </div>
@@ -350,11 +360,11 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
           </h3>
           <div className="bg-[var(--ds-surface-secondary)] p-4 rounded-xl border border-[var(--ds-border-subtle)] space-y-3">
             <div className="flex items-center gap-2">
-              <input type="checkbox" defaultChecked />
+              <input type="checkbox" defaultChecked className="h-4 w-4 rounded border-[var(--ds-border-default)] text-[var(--ds-primary)] focus:ring-[var(--ds-primary)] cursor-pointer" />
               <label>{isAr ? 'موافقة لجنة أخلاقيات البحث العلمي بالمؤسسة (IRB)' : 'Institutional IRB Approval'}</label>
             </div>
             <div className="flex items-center gap-2">
-              <input type="checkbox" defaultChecked />
+              <input type="checkbox" defaultChecked className="h-4 w-4 rounded border-[var(--ds-border-default)] text-[var(--ds-primary)] focus:ring-[var(--ds-primary)] cursor-pointer" />
               <label>{isAr ? 'حماية خصوصية بيانات الطلاب وتطبيق تشفير الهوية' : 'Anonymization and privacy protection'}</label>
             </div>
           </div>

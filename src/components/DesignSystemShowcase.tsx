@@ -399,14 +399,14 @@ export const DesignSystemShowcase: React.FC = () => {
                 <tr className="hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-primary)]">
                   <td className="p-3 font-semibold">TR-01</td>
                   <td className="p-3"><Badge variant="completed">Experimental</Badge></td>
-                  <td className="p-3 font-bold text-path-identity">35.0</td>
-                  <td className="p-3 font-bold text-success">45.0</td>
+                  <td className="p-3 font-bold text-ink ds-numeric" dir="ltr">35.0</td>
+                  <td className="p-3 font-bold text-ink ds-numeric" dir="ltr">45.0</td>
                 </tr>
                 <tr className="hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-primary)]">
                   <td className="p-3 font-semibold">CON-01</td>
                   <td className="p-3"><Badge variant="draft">Control</Badge></td>
-                  <td className="p-3 font-bold text-path-identity">34.0</td>
-                  <td className="p-3 font-bold text-success">36.0</td>
+                  <td className="p-3 font-bold text-ink ds-numeric" dir="ltr">34.0</td>
+                  <td className="p-3 font-bold text-ink ds-numeric" dir="ltr">36.0</td>
                 </tr>
               </Table>
             </div>

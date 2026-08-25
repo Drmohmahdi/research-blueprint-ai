@@ -24,7 +24,7 @@ export const Card: React.FC<CardProps> = ({
   const variantStyles = {
     default: 'border-[var(--ds-border-subtle)]',
     elevated: 'border-[var(--ds-border-subtle)] shadow-[var(--ds-shadow-layered)]',
-    interactive: 'border-[var(--ds-border-subtle)] hover:border-[var(--ds-primary)]/35 hover:shadow-[var(--ds-shadow-glow)] cursor-pointer',
+    interactive: 'border-[var(--ds-border-subtle)] hover:border-[var(--ds-primary)]/35 hover:shadow-[var(--ds-shadow-md)] cursor-pointer',
     selected: 'border-[var(--ds-primary)] ring-1 ring-[var(--ds-primary-soft)] bg-[var(--ds-primary-soft)]',
     warning: 'border-[var(--ds-warning)]/30 bg-[var(--ds-warning-soft)]',
     danger: 'border-[var(--ds-danger)]/30 bg-[var(--ds-danger-soft)]',

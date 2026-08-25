@@ -53,7 +53,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
   const isCompleted = activeProject.completedSteps?.includes(activeStep) || false;
 
   return (
-    <Card className="p-6 border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] rounded-3xl shadow-sm space-y-6">
+    <Card className="p-6 border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] rounded-2xl shadow-sm space-y-6">
       
       {/* Step Header */}
       <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-4">
@@ -82,7 +82,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
 
       {/* Step Forms / Tool Adapters */}
       <div className="min-h-[300px]">
-        <Suspense fallback={<div className="p-12 text-center text-xs text-[var(--ds-text-muted)] animate-pulse">Loading step workspace...</div>}>
+        <Suspense fallback={<div className="p-12 text-center text-xs text-[var(--ds-text-muted)] motion-safe:animate-pulse">Loading step workspace...</div>}>
           
           {/* 1. Idea exploration */}
           {activeStep === 'ideaExploration' && (
@@ -94,7 +94,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
                     type="text"
                     value={activeProject.titleAr}
                     onChange={(e) => updateProject({ ...activeProject, titleAr: e.target.value })}
-                    className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3.5 py-2.5 text-xs font-semibold"
+                    className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                   />
                 </div>
                 <div>
@@ -103,7 +103,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
                     type="text"
                     value={activeProject.titleEn}
                     onChange={(e) => updateProject({ ...activeProject, titleEn: e.target.value })}
-                    className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3.5 py-2.5 text-xs font-semibold"
+                    className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                   />
                 </div>
                 <div>
@@ -112,7 +112,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
                     rows={4}
                     value={descriptionAr}
                     onChange={(e) => { setDescriptionAr(e.target.value); setSaveStatus('dirty'); }}
-                    className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3.5 py-2.5 text-xs font-semibold"
+                    className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                   />
                 </div>
               </div>
@@ -135,7 +135,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
                   rows={6}
                   value={problemStatementAr}
                   onChange={(e) => { setProblemStatementAr(e.target.value); setSaveStatus('dirty'); }}
-                  className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3.5 py-2.5 text-xs font-semibold"
+                  className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                 />
               </div>
               <Button onClick={handleSaveTextChanges} className="flex items-center gap-1 cursor-pointer">
@@ -154,7 +154,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
                   rows={6}
                   value={objectives}
                   onChange={(e) => { setObjectives(e.target.value); setSaveStatus('dirty'); }}
-                  className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3.5 py-2.5 text-xs font-semibold"
+                  className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                 />
               </div>
               <Button onClick={handleSaveTextChanges} className="flex items-center gap-1 cursor-pointer">
@@ -192,8 +192,8 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
                   <Card key={idx} className="p-3 border-[var(--ds-border-subtle)] text-xs font-bold bg-[var(--ds-surface-primary)]">
                     <div>{language === 'ar' ? v.nameAr : v.nameEn}</div>
                     <div className="flex gap-2 mt-2">
-                      <span className="px-2 py-0.5 rounded-full bg-ai/10 text-ai text-[9px] uppercase">{v.type}</span>
-                      <span className="px-2 py-0.5 rounded-full bg-info/10 text-path-identity text-[9px] uppercase">{v.scale}</span>
+                      <span className="px-2 py-0.5 rounded-full bg-[var(--ds-primary-soft)] text-ink text-[9px] uppercase">{v.type}</span>
+                      <span className="px-2 py-0.5 rounded-full bg-[var(--ds-information-soft)] text-[var(--ds-information)] text-[9px] uppercase">{v.scale}</span>
                     </div>
                   </Card>
                 ))}
@@ -212,7 +212,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
                 <select
                   value={activeProject.studyDesign}
                   onChange={(e) => updateProject({ ...activeProject, studyDesign: e.target.value as any })}
-                  className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none"
+                  className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                 >
                   <option value="experimental_rct">{language === 'ar' ? 'RCT - تصميم تجريبي حقيقي' : 'RCT - Randomized Controlled'}</option>
                   <option value="quasi_experimental_pre_post">{language === 'ar' ? 'شبه تجريبي - قياس قبلي بعدي' : 'Quasi-Experimental'}</option>
@@ -265,7 +265,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
                     rows={3}
                     value={ethics}
                     onChange={(e) => { setEthics(e.target.value); setSaveStatus('dirty'); }}
-                    className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3.5 py-2.5 text-xs font-semibold"
+                    className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                   />
                 </div>
                 <div>
@@ -274,7 +274,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
                     rows={3}
                     value={timeline}
                     onChange={(e) => { setTimeline(e.target.value); setSaveStatus('dirty'); }}
-                    className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3.5 py-2.5 text-xs font-semibold"
+                    className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                   />
                 </div>
               </div>

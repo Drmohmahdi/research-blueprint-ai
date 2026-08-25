@@ -47,7 +47,7 @@ export const PredictorInputPanel: React.FC<PredictorInputPanelProps> = ({ engine
   const modeButtonClass = (active: boolean) =>
     `w-full text-start px-3.5 py-3 rounded-lg border text-xs font-bold flex flex-col gap-1.5 transition-all cursor-pointer ${
       active
-        ? 'border-[var(--ds-primary)] bg-[var(--ds-primary-soft)] text-[var(--ds-primary)]'
+        ? 'border-[var(--ds-primary)] bg-[var(--ds-primary-soft)] text-ink'
         : 'border-[var(--ds-border-subtle)] hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)]'
     }`;
   const activeDotClass = (active: boolean) => `w-2 h-2 rounded-full ${active ? 'bg-[var(--ds-primary)]' : 'bg-[var(--ds-text-disabled)]'}`;
@@ -284,7 +284,7 @@ export const PredictorInputPanel: React.FC<PredictorInputPanelProps> = ({ engine
               <div className="space-y-1">
                 <div className="flex justify-between text-xs font-medium">
                   <span>{language === 'ar' ? 'معدل التزام المعلمين بالبروتوكول:' : 'Teacher Fidelity Rate:'}</span>
-                  <span className="text-[var(--ds-primary)] font-bold">{(fidelityRate * 100).toFixed(0)}%</span>
+                  <span className="text-ink font-bold ds-numeric">{(fidelityRate * 100).toFixed(0)}%</span>
                 </div>
                 <input
                   type="range"
@@ -299,7 +299,7 @@ export const PredictorInputPanel: React.FC<PredictorInputPanelProps> = ({ engine
               <div className="space-y-1">
                 <div className="flex justify-between text-xs font-medium">
                   <span>{language === 'ar' ? 'معدل حضور ومشاركة العينة:' : 'Student Attendance Rate:'}</span>
-                  <span className="text-[var(--ds-primary)] font-bold">{(attendanceRate * 100).toFixed(0)}%</span>
+                  <span className="text-ink font-bold ds-numeric">{(attendanceRate * 100).toFixed(0)}%</span>
                 </div>
                 <input
                   type="range"

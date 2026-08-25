@@ -181,7 +181,7 @@ export const ResearchPathSelector: React.FC = () => {
         );
       case 'DataAnalysisIllustration':
         return (
-          <svg className="w-12 h-12 text-ai" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="w-12 h-12 text-path-data" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
           </svg>
         );
@@ -222,7 +222,7 @@ export const ResearchPathSelector: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] p-4 shadow-sm">
           <span className="text-[11px] font-black text-[var(--ds-text-muted)] block">{language === 'ar' ? '\u0627\u0644\u0645\u0633\u0627\u0631\u0627\u062a \u0627\u0644\u0645\u062a\u0627\u062d\u0629' : 'Available Paths'}</span>
-          <strong className="text-2xl font-black text-[var(--ds-text-primary)] block mt-1">{RESEARCH_PATHS_CONFIG.length}</strong>
+          <strong className="text-2xl font-black text-ink ds-numeric block mt-1">{RESEARCH_PATHS_CONFIG.length}</strong>
         </div>
         <div className="rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] p-4 shadow-sm">
           <span className="text-[11px] font-black text-[var(--ds-text-muted)] block">{language === 'ar' ? '\u0627\u0644\u0645\u0633\u0627\u0631 \u0627\u0644\u0646\u0634\u0637' : 'Active Path'}</span>
@@ -234,7 +234,7 @@ export const ResearchPathSelector: React.FC = () => {
         </div>
         <div className="rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] p-4 shadow-sm">
           <span className="text-[11px] font-black text-[var(--ds-text-muted)] block">{language === 'ar' ? '\u0627\u0644\u062a\u0635\u0641\u064a\u0629 \u0627\u0644\u062d\u0627\u0644\u064a\u0629' : 'Current Filter'}</span>
-          <strong className="text-sm font-black text-[var(--ds-primary)] block mt-2 leading-5">
+          <strong className="text-sm font-black text-ink block mt-2 leading-5">
             {language === 'ar' ? CATEGORY_LABELS[activeTab].ar : CATEGORY_LABELS[activeTab].en}
           </strong>
         </div>
@@ -293,7 +293,7 @@ export const ResearchPathSelector: React.FC = () => {
                           </span>
                         )}
                         {isActivePath && (
-                          <span className="px-2 py-0.5 rounded-md text-[8px] font-black bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] border border-[var(--ds-primary)]/20">
+                          <span className="px-2 py-0.5 rounded-md text-[8px] font-black bg-[var(--ds-primary-soft)] text-ink border border-[var(--ds-primary)]/20">
                             {language === 'ar' ? '\u0627\u0644\u0645\u0633\u0627\u0631 \u0627\u0644\u0646\u0634\u0637' : 'ACTIVE PATH'}
                           </span>
                         )}
@@ -317,7 +317,7 @@ export const ResearchPathSelector: React.FC = () => {
                           ? `${path.orderedSteps.length} \u0623\u062f\u0648\u0627\u062a \u0645\u0646\u0647\u062c\u064a\u0629`
                           : `${path.orderedSteps.length} tools`}
                       </span>
-                      <span className={isActivePath ? 'text-[var(--ds-primary)] font-black' : 'text-[var(--ds-text-muted)]'}>
+                      <span className={`ds-numeric ${isActivePath ? 'text-ink font-black' : 'text-[var(--ds-text-muted)]'}`}>
                         {language === 'ar' ? `\u0625\u0646\u062c\u0627\u0632 ${progressPercent}%` : `${progressPercent}% Completed`}
                       </span>
                     </div>
@@ -362,7 +362,7 @@ export const ResearchPathSelector: React.FC = () => {
                 <div className="space-y-1.5 p-3 bg-[var(--ds-surface-secondary)] rounded-lg border border-[var(--ds-border-subtle)]">
                   <div className="flex justify-between text-[10px] font-black text-[var(--ds-text-muted)]">
                     <span>{language === 'ar' ? '\u0646\u0633\u0628\u0629 \u0625\u0646\u062c\u0627\u0632 \u062e\u0637\u0648\u0627\u062a \u0627\u0644\u0645\u0633\u0627\u0631:' : 'Path Roadmap Completion:'}</span>
-                    <span>{getCompletedStepsCount(selectedPath)} / {selectedPath.orderedSteps.length}</span>
+                    <span className="ds-numeric">{getCompletedStepsCount(selectedPath)} / {selectedPath.orderedSteps.length}</span>
                   </div>
                   <Progress value={getPathProgressPercent(selectedPath)} variant="primary" />
                 </div>
@@ -373,19 +373,19 @@ export const ResearchPathSelector: React.FC = () => {
                   <span className="block text-[9px] font-black text-[var(--ds-text-muted)]">
                     {language === 'ar' ? '\u0623\u062f\u0648\u0627\u062a \u0623\u0633\u0627\u0633\u064a\u0629' : 'Primary Tools'}
                   </span>
-                  <strong className="mt-1 block text-sm text-[var(--ds-text-primary)]">{selectedPath.primaryTools.length}</strong>
+                  <strong className="mt-1 block text-sm text-ink ds-numeric">{selectedPath.primaryTools.length}</strong>
                 </div>
                 <div className="rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] p-3">
                   <span className="block text-[9px] font-black text-[var(--ds-text-muted)]">
                     {language === 'ar' ? '\u0623\u062f\u0648\u0627\u062a \u0645\u0633\u0627\u0646\u062f\u0629' : 'Supporting Tools'}
                   </span>
-                  <strong className="mt-1 block text-sm text-[var(--ds-text-primary)]">{selectedPath.supportingTools.length}</strong>
+                  <strong className="mt-1 block text-sm text-ink ds-numeric">{selectedPath.supportingTools.length}</strong>
                 </div>
                 <div className="rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] p-3">
                   <span className="block text-[9px] font-black text-[var(--ds-text-muted)]">
                     {language === 'ar' ? '\u0645\u062e\u0631\u062c\u0627\u062a' : 'Outputs'}
                   </span>
-                  <strong className="mt-1 block text-sm text-[var(--ds-text-primary)]">{selectedPath.expectedOutputs.length}</strong>
+                  <strong className="mt-1 block text-sm text-ink ds-numeric">{selectedPath.expectedOutputs.length}</strong>
                 </div>
               </div>
 
@@ -420,14 +420,14 @@ export const ResearchPathSelector: React.FC = () => {
                               isCompleted
                                 ? 'text-success line-through'
                                 : isNextStep
-                                  ? 'text-[var(--ds-primary)] font-black'
+                                  ? 'text-ink font-black'
                                   : 'text-[var(--ds-text-secondary)]'
                             } ${stepPath ? 'cursor-pointer hover:underline' : 'cursor-default opacity-70'}`}
                           >
                             {language === 'ar' ? stepInfo.ar : stepInfo.en}
                           </button>
                           {isNextStep && (
-                            <span className="inline-flex rounded-full bg-[var(--ds-primary-soft)] px-2 py-0.5 text-[9px] font-black text-[var(--ds-primary)] border border-[var(--ds-primary)]/20">
+                            <span className="inline-flex rounded-full bg-[var(--ds-primary-soft)] px-2 py-0.5 text-[9px] font-black text-ink border border-[var(--ds-primary)]/20">
                               {language === 'ar' ? '\u0627\u0644\u062e\u0637\u0648\u0629 \u0627\u0644\u062a\u0627\u0644\u064a\u0629' : 'NEXT STEP'}
                             </span>
                           )}
@@ -443,8 +443,8 @@ export const ResearchPathSelector: React.FC = () => {
                 {!activeProject && (
                   <p className="text-[10px] text-[var(--ds-warning)] font-bold m-0 text-center">
                     {language === 'ar'
-                      ? 'الرجاء اختيار أو إنشاء مشروع نشط أولاً لاعتماد هذا المسار.'
-                      : 'Please select or create an active project first to adopt this path.'}
+                      ? 'اختر أو أنشئ مشروعًا نشطًا لاعتماد هذا المسار.'
+                      : 'Select or create an active project to adopt this path.'}
                   </p>
                 )}
                 <Button
@@ -468,8 +468,8 @@ export const ResearchPathSelector: React.FC = () => {
               illustration={<Compass size={40} />}
               title={language === 'ar' ? 'لم يتم اختيار مسار بعد' : 'No path selected yet'}
               description={language === 'ar'
-                ? 'الرجاء اختيار مسار بحثي من القائمة الجانبية لعرض خارطة الطريق.'
-                : 'Please select a research path to display the interactive timeline.'}
+                ? 'اختر مسارًا بحثيًا من القائمة لعرض خارطة الطريق.'
+                : 'Select a research path from the list to display the roadmap.'}
             />
           )}
         </div>

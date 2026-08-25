@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useProject } from '../context/ProjectContext';
 import { Card } from '../design-system/components/Card';
 import { Button } from '../design-system/components/Button';
+import { PathPanel } from '../design-system/components/Navigation';
+import { EmptyState } from '../design-system/components/Feedback';
 import { Plus, Trash, ArrowRight, GitFork, Download } from 'lucide-react';
 
 interface Node {
@@ -69,12 +71,11 @@ export const ModelBuilder: React.FC = () => {
   // ── Early return AFTER all hooks ─────────────────────────────────────────
   if (!activeProject) {
     return (
-      <div className="rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] p-10 text-center shadow-sm">
-        <GitFork size={40} className="mx-auto mb-3 text-[var(--ds-text-disabled)]" />
-        <p className="text-sm text-[var(--ds-text-secondary)]">
-          {language === 'ar' ? 'الرجاء تحديد مشروع نشط أولاً.' : 'Please select an active project first.'}
-        </p>
-      </div>
+      <EmptyState
+        illustration={<GitFork size={40} />}
+        title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No active project'}
+        description={language === 'ar' ? 'اختر مشروعًا نشطًا لبناء نموذج المتغيرات.' : 'Select an active project to build the variable model.'}
+      />
     );
   }
 
@@ -158,9 +159,9 @@ const deleteEdge = (id: string) => {
 
   const getVariableTypeColor = (type: string) => {
     switch (type) {
-      case 'independent': return 'border-ai bg-ai/10 text-ai';
-      case 'dependent':   return 'border-success bg-action/10 text-success';
-      case 'mediator':    return 'border-info bg-info/10 text-path-publication dark:text-path-publication';
+      case 'independent': return 'border-[var(--ds-primary)] bg-[var(--ds-primary-soft)] text-[var(--ds-primary)]';
+      case 'dependent':   return 'border-success bg-[var(--ds-success-soft)] text-success';
+      case 'mediator':    return 'border-info bg-info/10 text-[var(--ds-information)]';
       case 'moderator':   return 'border-warning bg-warning/10 text-warning';
       case 'control':     return 'border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)]';
       default:            return 'border-[var(--ds-border-subtle)]';
@@ -236,20 +237,18 @@ const deleteEdge = (id: string) => {
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-16">
 
-      {/* Controls card */}
-      <Card className="p-6 space-y-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-3 border-b border-[var(--ds-border-subtle)]">
+      <PathPanel accent="var(--ds-path-research)">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="space-y-1">
-            <h3 className="text-lg font-bold text-[var(--ds-text-primary)] m-0">
+            <h3 className="text-lg font-bold text-ink m-0">
               {language === 'ar' ? 'مصمم النموذج المفاهيمي التفاعلي' : 'Interactive Conceptual Model Designer'}
             </h3>
-            <p className="text-xs text-[var(--ds-text-secondary)] m-0">
+            <p className="text-xs text-secondary m-0">
               {language === 'ar'
                 ? 'اسحب الصناديق لترتيب المتغيرات، وأضف روابط المسار الممثلة للفرضيات.'
                 : 'Drag boxes to rearrange variables and add path lines representing hypotheses.'}
             </p>
           </div>
-          
           <Button
             onClick={handleExportSVG}
             variant="secondary"
@@ -259,6 +258,9 @@ const deleteEdge = (id: string) => {
             <span>{language === 'ar' ? 'تصدير النموذج كصورة SVG' : 'Export SVG Diagram'}</span>
           </Button>
         </div>
+      </PathPanel>
+
+      <Card className="p-6 space-y-4">
 
         {/* Add Edge Form */}
         <form onSubmit={handleAddEdge} className="grid grid-cols-2 md:grid-cols-5 gap-3 items-end">
@@ -270,7 +272,7 @@ const deleteEdge = (id: string) => {
             <select
               value={fromVar}
               onChange={(e) => setFromVar(e.target.value)}
-              className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 text-xs font-semibold text-[var(--ds-text-primary)] focus:outline-none"
+              className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 text-xs font-semibold text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
             >
               <option value="">--</option>
               {activeProject.variables.filter(v => v.type === 'independent').map(v => (
@@ -287,7 +289,7 @@ const deleteEdge = (id: string) => {
             <select
               value={toVar}
               onChange={(e) => setToVar(e.target.value)}
-              className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 text-xs font-semibold text-[var(--ds-text-primary)] focus:outline-none"
+              className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 text-xs font-semibold text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
             >
               <option value="">--</option>
               {activeProject.variables.filter(v => v.type === 'dependent').map(v => (
@@ -307,7 +309,7 @@ const deleteEdge = (id: string) => {
               value={roleVar}
               onChange={(e) => setRoleVar(e.target.value)}
               disabled={edgeType === 'direct'}
-              className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 text-xs font-semibold text-[var(--ds-text-primary)] focus:outline-none disabled:opacity-40"
+              className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 text-xs font-semibold text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)] disabled:opacity-40"
             >
               <option value="">--</option>
               {activeProject.variables
@@ -329,7 +331,7 @@ const deleteEdge = (id: string) => {
                 setEdgeType(e.target.value as 'direct' | 'mediating' | 'moderating');
                 setRoleVar('');
               }}
-              className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 text-xs font-semibold text-[var(--ds-text-primary)] focus:outline-none"
+              className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 text-xs font-semibold text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
             >
               <option value="direct">{language === 'ar' ? 'مباشرة' : 'Direct'}</option>
               <option value="mediating">{language === 'ar' ? 'وساطة' : 'Mediating'}</option>

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Card } from '../../design-system/components/Card';
 import { Button } from '../../design-system/components/Button';
+import { EmptyState } from '../../design-system/components/Feedback';
 import { PathPanel } from '../../design-system/components/Navigation';
 
 export const NewStudyDesignWorkspace: React.FC = () => {
@@ -31,9 +32,11 @@ export const NewStudyDesignWorkspace: React.FC = () => {
 
   if (!activeProject) {
     return (
-      <div className="p-12 text-center text-xs text-[var(--ds-text-muted)] italic font-semibold">
-        {language === 'ar' ? 'الرجاء اختيار مشروع نشط أولاً...' : 'Please select an active project first...'}
-      </div>
+      <EmptyState
+        illustration={<Unlock size={40} />}
+        title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No active project'}
+        description={language === 'ar' ? 'اختر مشروعًا نشطًا لفتح مسار تصميم الدراسة.' : 'Select an active project to open the study design path.'}
+      />
     );
   }
 
@@ -86,7 +89,7 @@ export const NewStudyDesignWorkspace: React.FC = () => {
               <button 
                 onClick={() => setMode('guided')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-black ds-transition cursor-pointer ${
-                  mode === 'guided' ? 'bg-action text-on-action' : 'text-muted hover:text-secondary'
+                  mode === 'guided' ? 'bg-[var(--ds-primary-soft)] text-ink' : 'text-muted hover:text-secondary'
                 }`}
               >
                 {language === 'ar' ? 'توجيه خطوة بخطوة' : 'Guided'}
@@ -94,7 +97,7 @@ export const NewStudyDesignWorkspace: React.FC = () => {
               <button 
                 onClick={() => setMode('expert')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-black ds-transition cursor-pointer ${
-                  mode === 'expert' ? 'bg-action text-on-action' : 'text-muted hover:text-secondary'
+                  mode === 'expert' ? 'bg-[var(--ds-primary-soft)] text-ink' : 'text-muted hover:text-secondary'
                 }`}
               >
                 {language === 'ar' ? 'التحكم المتقدم' : 'Expert'}
@@ -102,7 +105,7 @@ export const NewStudyDesignWorkspace: React.FC = () => {
             </div>
 
             <div className="text-center lg:text-end space-y-1">
-              <div className="text-xs font-black text-[var(--ds-primary)]">{progressPct}% {language === 'ar' ? 'مكتمل' : 'Completed'}</div>
+              <div className="text-xs font-black text-ink ds-numeric">{progressPct}% {language === 'ar' ? 'مكتمل' : 'Completed'}</div>
               <div className="h-2 w-32 bg-[var(--ds-surface-tertiary)] rounded-full overflow-hidden">
                 <div className="h-full bg-[var(--ds-primary)] ds-transition" style={{ width: `${progressPct}%` }} />
               </div>
@@ -114,13 +117,13 @@ export const NewStudyDesignWorkspace: React.FC = () => {
       {/* ── Path Overview Metrics ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
         {[
-          { key: 'design', labelAr: 'اكتمال التصميم', labelEn: 'Design Progress', val: `${progressPct}%`, col: 'text-ai' },
-          { key: 'consistency', labelAr: 'الاتساق المنهجي', labelEn: 'Consistency Index', val: (activeProject.variables?.length || 0) > 0 ? '90/100' : '50/100', col: 'text-path-identity' },
-          { key: 'sample', labelAr: 'جاهزية العينة', labelEn: 'Sample Power', val: activeProject.sampleSettings?.populationSize ? '80%' : '0%', col: 'text-success' },
-          { key: 'evidence', labelAr: 'جودة الأدلة', labelEn: 'Evidence Weight', val: activeProject.pooledEffectSize ? 'A (High)' : 'N/A', col: 'text-ai' },
-          { key: 'risk', labelAr: 'مؤشر المخاطر', labelEn: 'Risk Index', val: activeProject.preRegistrationLockedAt ? 'LOW' : 'MEDIUM', col: 'text-danger' },
-          { key: 'prereg', labelAr: 'التسجيل المسبق', labelEn: 'Pre-Reg Status', val: activeProject.preRegistrationLockedAt ? (language === 'ar' ? 'مؤمن' : 'LOCKED') : (language === 'ar' ? 'مسودة' : 'DRAFT'), col: 'text-warning' },
-          { key: 'readiness', labelAr: 'جاهزية النشر', labelEn: 'Ready Score', val: activeProject.preRegistrationLockedAt ? '92%' : '64%', col: 'text-path-data' }
+          { key: 'design', labelAr: 'اكتمال التصميم', labelEn: 'Design Progress', val: `${progressPct}%`, col: 'text-ink' },
+          { key: 'consistency', labelAr: 'الاتساق المنهجي', labelEn: 'Consistency Index', val: (activeProject.variables?.length || 0) > 0 ? '90/100' : '50/100', col: 'text-ink' },
+          { key: 'sample', labelAr: 'جاهزية العينة', labelEn: 'Sample Power', val: activeProject.sampleSettings?.populationSize ? '80%' : '0%', col: 'text-ink' },
+          { key: 'evidence', labelAr: 'جودة الأدلة', labelEn: 'Evidence Weight', val: activeProject.pooledEffectSize ? 'A (High)' : 'N/A', col: 'text-ink' },
+          { key: 'risk', labelAr: 'مؤشر المخاطر', labelEn: 'Risk Index', val: activeProject.preRegistrationLockedAt ? 'LOW' : 'MEDIUM', col: activeProject.preRegistrationLockedAt ? 'text-success' : 'text-warning' },
+          { key: 'prereg', labelAr: 'التسجيل المسبق', labelEn: 'Pre-Reg Status', val: activeProject.preRegistrationLockedAt ? (language === 'ar' ? 'مؤمن' : 'LOCKED') : (language === 'ar' ? 'مسودة' : 'DRAFT'), col: activeProject.preRegistrationLockedAt ? 'text-success' : 'text-warning' },
+          { key: 'readiness', labelAr: 'جاهزية النشر', labelEn: 'Ready Score', val: activeProject.preRegistrationLockedAt ? '92%' : '64%', col: 'text-ink' }
         ].map((m) => (
           <Card key={m.key} className="p-3 text-center border-[var(--ds-border-subtle)] space-y-1 rounded-2xl shadow-sm">
             <span className="text-[10px] font-bold text-[var(--ds-text-muted)] uppercase block truncate">

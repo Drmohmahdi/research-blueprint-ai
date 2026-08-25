@@ -23,7 +23,7 @@ export const ResearchDesignStepper: React.FC<ResearchDesignStepperProps> = ({
       case 'COMPLETED':
         return <CheckCircle2 className="text-success" size={16} />;
       case 'IN_PROGRESS':
-        return <Clock className="text-ai" size={16} />;
+        return <Clock className="text-[var(--ds-information)]" size={16} />;
       case 'NEEDS_REVIEW':
         return <AlertCircle className="text-warning" size={16} />;
       case 'BLOCKED':
@@ -38,7 +38,7 @@ export const ResearchDesignStepper: React.FC<ResearchDesignStepperProps> = ({
       case 'COMPLETED':
         return <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-success/10 text-success">{isAr ? 'مكتمل' : 'Done'}</span>;
       case 'IN_PROGRESS':
-        return <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-ai/10 text-ai">{isAr ? 'قيد العمل' : 'Progress'}</span>;
+        return <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-[var(--ds-information-soft)] text-[var(--ds-information)]">{isAr ? 'قيد العمل' : 'Progress'}</span>;
       case 'NEEDS_REVIEW':
         return <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-warning/10 text-warning">{isAr ? 'مراجعة' : 'Review'}</span>;
       case 'BLOCKED':
@@ -63,7 +63,7 @@ export const ResearchDesignStepper: React.FC<ResearchDesignStepperProps> = ({
             onClick={() => onSelectStep(step.id)}
             className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-medium transition-all text-left border cursor-pointer ${
               isActive
-                ? 'bg-ai/10 border-ai text-ai font-bold shadow-sm'
+                ? 'bg-[var(--ds-primary-soft)] border-[var(--ds-primary)]/20 text-ink font-bold shadow-sm'
                 : 'bg-transparent border-transparent text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-secondary)] hover:text-[var(--ds-text-primary)]'
             }`}
           >

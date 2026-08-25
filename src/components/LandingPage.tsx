@@ -158,7 +158,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ language, onNavigateTo
       <header className={`fixed top-0 inset-x-0 z-50 ds-transition ${scrolled ? 'baseerah-glass border-b border-[var(--ds-border-subtle)] py-2' : 'py-4'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-[var(--ds-primary)] to-[var(--ds-navy-elevated)] text-white shadow-[var(--ds-shadow-glow)]">
+            <div className="p-2 rounded-xl bg-action text-on-action shadow-[var(--ds-shadow-glow)]">
               <Brain size={20} />
             </div>
             <div>
@@ -445,7 +445,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ language, onNavigateTo
       <footer className="py-10 px-4 sm:px-6 border-t border-[var(--ds-border-subtle)] bg-white/[0.015]">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-[var(--ds-primary)] to-[var(--ds-navy-elevated)] text-white">
+            <div className="p-2 rounded-xl bg-action text-on-action">
               <Brain size={16} />
             </div>
             <div>

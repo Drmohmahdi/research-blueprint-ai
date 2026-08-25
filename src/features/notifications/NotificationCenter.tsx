@@ -24,6 +24,7 @@ import {
   apiGetNotificationPreferences,
   apiUpdateNotificationPreferences
 } from '../../utils/api';
+import { EmptyState } from '../../design-system/components/Feedback';
 
 interface NotificationCenterProps {
   language: 'ar' | 'en';
@@ -238,14 +239,14 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
         aria-expanded={isOpen}
         className={`relative p-2 rounded-xl transition-all cursor-pointer ${
           isOpen
-            ? 'bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] ring-2 ring-[var(--ds-primary)]/20'
+            ? 'bg-[var(--ds-primary-soft)] text-ink ring-2 ring-[var(--ds-primary)]/20'
             : 'hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)]'
         }`}
         title={language === 'ar' ? 'مركز الإشعارات الأكاديمية' : 'Academic Notification Center'}
       >
         <Bell size={18} />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex min-w-[18px] h-[18px] px-1 items-center justify-center rounded-full bg-[var(--ds-danger)] text-[10px] font-black text-white ring-2 ring-[var(--ds-surface-primary)] shadow-sm animate-pulse">
+          <span className="absolute -top-0.5 -right-0.5 flex min-w-[18px] h-[18px] px-1 items-center justify-center rounded-full bg-[var(--ds-danger)] text-[10px] font-black text-white ring-2 ring-[var(--ds-surface-primary)] shadow-sm motion-safe:animate-pulse ds-numeric">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
@@ -345,7 +346,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                             const val = e.target.checked;
                             setPreferences(prev => prev.map(p => p.category === pref.category ? { ...p, in_app_enabled: val } : p));
                           }}
-                          className="rounded text-[var(--ds-primary)] focus:ring-[var(--ds-primary-soft)]"
+                          className="h-4 w-4 rounded border-[var(--ds-border-default)] text-[var(--ds-primary)] focus:ring-[var(--ds-primary)] cursor-pointer"
                         />
                         <span>{language === 'ar' ? 'داخل المنصة' : 'In-App'}</span>
                       </label>
@@ -359,7 +360,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                             const val = e.target.checked;
                             setPreferences(prev => prev.map(p => p.category === pref.category ? { ...p, email_enabled: val } : p));
                           }}
-                          className="rounded text-[var(--ds-primary)] focus:ring-[var(--ds-primary-soft)]"
+                          className="h-4 w-4 rounded border-[var(--ds-border-default)] text-[var(--ds-primary)] focus:ring-[var(--ds-primary)] cursor-pointer"
                         />
                         <span>{language === 'ar' ? 'البريد' : 'Email'}</span>
                       </label>
@@ -395,7 +396,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                     onClick={() => setFilterUnread(false)}
                     className={`px-2 py-1 rounded-md font-bold transition-colors cursor-pointer ${
                       !filterUnread
-                        ? 'bg-[var(--ds-primary-soft)] text-[var(--ds-primary)]'
+                        ? 'bg-[var(--ds-primary-soft)] text-ink'
                         : 'text-[var(--ds-text-muted)] hover:text-[var(--ds-text-primary)]'
                     }`}
                   >
@@ -405,7 +406,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                     onClick={() => setFilterUnread(true)}
                     className={`px-2 py-1 rounded-md font-bold transition-colors cursor-pointer ${
                       filterUnread
-                        ? 'bg-[var(--ds-primary-soft)] text-[var(--ds-primary)]'
+                        ? 'bg-[var(--ds-primary-soft)] text-ink'
                         : 'text-[var(--ds-text-muted)] hover:text-[var(--ds-text-primary)]'
                     }`}
                   >
@@ -416,7 +417,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                 {unreadCount > 0 && (
                   <button
                     onClick={handleMarkAllRead}
-                    className="flex items-center gap-1 text-[11px] font-bold text-[var(--ds-primary)] hover:underline cursor-pointer"
+                    className="flex items-center gap-1 text-[11px] font-bold text-action hover:underline cursor-pointer"
                   >
                     <CheckCheck size={14} />
                     <span>{language === 'ar' ? 'تحديد الكل كمقروء' : 'Mark all as read'}</span>
@@ -450,16 +451,17 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                     {language === 'ar' ? 'جارٍ تحميل الإشعارات...' : 'Loading notifications...'}
                   </div>
                 ) : notifications.length === 0 ? (
-                  <div className="p-10 text-center flex flex-col items-center justify-center gap-2">
-                    <div className="p-3 rounded-full bg-[var(--ds-surface-secondary)] text-[var(--ds-text-muted)]">
-                      <Bell size={24} />
-                    </div>
-                    <p className="text-xs font-bold text-[var(--ds-text-muted)] m-0">
-                      {filterUnread
-                        ? (language === 'ar' ? 'لا توجد إشعارات غير مقروءة' : 'No unread notifications')
-                        : (language === 'ar' ? 'لا توجد إشعارات حالياً' : 'No notifications yet')}
-                    </p>
-                  </div>
+                  <EmptyState
+                    bare
+                    className="py-8"
+                    illustration={<Bell size={24} />}
+                    title={filterUnread
+                      ? (language === 'ar' ? 'لا توجد إشعارات غير مقروءة' : 'No unread notifications')
+                      : (language === 'ar' ? 'لا توجد إشعارات حالياً' : 'No notifications yet')}
+                    description={filterUnread
+                      ? (language === 'ar' ? 'كل الإشعارات مقروءة.' : 'You are caught up.')
+                      : (language === 'ar' ? 'ستظهر هنا تنبيهات المراجعة والترقية والمشاريع.' : 'Review, promotion, and project alerts will appear here.')}
+                  />
                 ) : (
                   notifications.map(notif => {
                     const isUnread = !notif.read_at;

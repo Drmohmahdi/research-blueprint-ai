@@ -15,7 +15,8 @@ class NotificationPolicy:
             AggregateType.RESEARCH_PROJECT.value,
             AggregateType.ACADEMIC_HANDOFF.value,
             AggregateType.RESEARCH_DATASET.value,
-        } or any(token in event_type for token in ("PROJECT", "HANDOFF", "DATASET", "DOWNSTREAM")):
+            AggregateType.THESIS.value,
+        } or any(token in event_type for token in ("PROJECT", "HANDOFF", "DATASET", "DOWNSTREAM", "THESIS")):
             return NotificationCategory.RESEARCH_WORKFLOW.value
         return NotificationCategory.SYSTEM.value
 

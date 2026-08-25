@@ -32,7 +32,7 @@ export const SeminarProposalStepContent: React.FC<SeminarProposalStepContentProp
   const isCompleted = activeProject.completedSteps?.includes(activeStep) || false;
 
   return (
-    <Card className="p-6 border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] rounded-3xl shadow-sm space-y-6">
+    <Card className="p-6 border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] rounded-2xl shadow-sm space-y-6">
       
       {/* Step Header */}
       <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-4">
@@ -61,7 +61,7 @@ export const SeminarProposalStepContent: React.FC<SeminarProposalStepContentProp
 
       {/* Tools Content */}
       <div className="min-h-[300px]">
-        <Suspense fallback={<div className="p-12 text-center text-xs text-[var(--ds-text-muted)] animate-pulse">Loading step workspace...</div>}>
+        <Suspense fallback={<div className="p-12 text-center text-xs text-[var(--ds-text-muted)] motion-safe:animate-pulse">Loading step workspace...</div>}>
           {activeStep === 'analyzer' && <TitleAnalyzer />}
           {activeStep === 'consistency' && <ConsistencyChecker />}
           {activeStep === 'modelBuilder' && <ModelBuilder />}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiListAuditLogs } from '../../utils/api';
 import { Card } from '../../design-system/components/Card';
+import { PathPanel } from '../../design-system/components/Navigation';
 import { Terminal, Shield, User, Globe, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface SuperAdminDashboardProps {
@@ -34,7 +35,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ langua
 
   if (loading) {
     return (
-      <div className="p-12 text-center text-xs font-bold text-[var(--ds-text-muted)] animate-pulse">
+      <div className="p-12 text-center text-xs font-bold text-[var(--ds-text-muted)] motion-safe:animate-pulse">
         {language === 'ar' ? 'جاري تحميل سجلات نظام المراقبة والأمان...' : 'Loading security and system audit logs...'}
       </div>
     );
@@ -42,25 +43,24 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ langua
 
   return (
     <div className="space-y-6">
-      {/* Overview Header */}
-      <Card className="p-6 bg-[var(--ds-surface-primary)] border-[var(--ds-border-subtle)] rounded-3xl">
+      <PathPanel accent="var(--ds-path-identity)">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 bg-ai/15 text-ai rounded-xl flex items-center justify-center shadow-sm">
+          <div className="h-10 w-10 bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] rounded-xl flex items-center justify-center shadow-sm">
             <Shield size={20} />
           </div>
           <div>
-            <h3 className="text-base font-black m-0">
+            <h3 className="text-base font-black m-0 text-ink">
               {language === 'ar' ? 'سجل الرقابة الأمنية والعمليات (Audit Logs)' : 'Security Audit Trail & Logs'}
             </h3>
-            <p className="text-[10px] text-[var(--ds-text-muted)] font-semibold mt-1">
+            <p className="text-[10px] text-[var(--ds-text-muted)] font-semibold mt-1 m-0">
               {language === 'ar' ? 'مراقبة فورية لجميع التعديلات والوصول لبيانات المشاريع الاستخبارية.' : 'Real-time telemetry tracking compliance updates and access logs.'}
             </p>
           </div>
         </div>
-      </Card>
+      </PathPanel>
 
       {/* Logs Table */}
-      <Card className="border-[var(--ds-border-subtle)] rounded-3xl overflow-hidden bg-[var(--ds-surface-primary)]">
+      <Card className="border-[var(--ds-border-subtle)] rounded-2xl overflow-hidden bg-[var(--ds-surface-primary)]">
         <div className="overflow-x-auto">
           <table className="w-full text-right text-xs font-bold">
             <thead>
@@ -87,7 +87,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ langua
                     <React.Fragment key={log.id}>
                       <tr className="hover:bg-[var(--ds-surface-secondary)] transition-colors">
                         <td className="px-6 py-4 font-black">
-                          <span className="inline-flex items-center gap-1.5 text-ai">
+                          <span className="inline-flex items-center gap-1.5 text-ink">
                             <Terminal size={14} className="shrink-0" />
                             <span>{log.action}</span>
                           </span>
@@ -113,7 +113,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ langua
                         <td className="px-6 py-4 text-center">
                           <button
                             onClick={() => toggleExpand(log.id)}
-                            className="inline-flex items-center gap-1 text-[var(--ds-text-secondary)] hover:text-ai hover:underline cursor-pointer"
+                            className="inline-flex items-center gap-1 text-[var(--ds-text-secondary)] hover:text-action hover:underline cursor-pointer"
                           >
                             <span>{isExpanded ? (language === 'ar' ? 'إغلاق' : 'Close') : (language === 'ar' ? 'عرض' : 'View')}</span>
                             {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}

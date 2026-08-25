@@ -12,6 +12,7 @@ import {
 import { Building2, UserPlus, Send, CheckCircle, Mail, Plus, Shield, Users } from 'lucide-react';
 import { Card } from '../../design-system/components/Card';
 import { Button } from '../../design-system/components/Button';
+import { PathPanel } from '../../design-system/components/Navigation';
 
 interface OrganizationSwitcherProps {
   language: 'ar' | 'en';
@@ -137,10 +138,10 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
   return (
     <div className="space-y-6">
       {/* Active Workspace Status Card */}
-      <Card className="p-6 bg-[var(--ds-surface-primary)] border-[var(--ds-border-subtle)] rounded-3xl relative overflow-hidden">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+      <PathPanel accent="var(--ds-path-identity)">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-ai/10 text-ai flex items-center justify-center shadow-md">
+            <div className="h-12 w-12 rounded-2xl bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] flex items-center justify-center">
               <Building2 size={24} />
             </div>
             <div>
@@ -161,7 +162,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
             <select
               value={activeOrg?.id || ''}
               onChange={(e) => handleSwitch(e.target.value)}
-              className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-4 py-2 text-xs font-bold text-[var(--ds-text-secondary)] focus:outline-none"
+              className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-4 py-2 text-xs font-bold text-[var(--ds-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
             >
               {buildHierarchy(organizations).map(org => {
                 const prefix = org.hierarchy_level > 0 ? '\u00A0\u00A0'.repeat(org.hierarchy_level) + '↳ ' : '';
@@ -174,10 +175,10 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
             </select>
           </div>
         </div>
-      </Card>
+      </PathPanel>
 
       {message && (
-        <div className="p-3.5 border border-success/20 bg-action/5 text-success rounded-2xl text-xs font-bold flex items-center gap-2">
+        <div className="p-3.5 border border-success/20 bg-[var(--ds-success-soft)] text-success rounded-2xl text-xs font-bold flex items-center gap-2">
           <CheckCircle size={16} />
           <span>{message}</span>
         </div>
@@ -196,9 +197,9 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
         <div className="space-y-6">
           
           {/* Create Workspace */}
-          <Card className="p-6 border-[var(--ds-border-subtle)] rounded-3xl bg-[var(--ds-surface-primary)]">
+          <Card className="p-6 border-[var(--ds-border-subtle)] rounded-2xl bg-[var(--ds-surface-primary)]">
             <h4 className="text-sm font-black mb-4 flex items-center gap-2">
-              <Plus size={18} className="text-ai" />
+              <Plus size={18} className="text-path-identity" />
               <span>{language === 'ar' ? 'إنشاء مساحة عمل جديدة' : 'Create New Workspace'}</span>
             </h4>
             <form onSubmit={handleCreateOrg} className="space-y-4">
@@ -209,7 +210,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
                   required
                   value={newOrgName}
                   onChange={(e) => setNewOrgName(e.target.value)}
-                  className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-2xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-ai"
+                  className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-2xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                 />
               </div>
               
@@ -220,7 +221,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
                 <select
                   value={parentId}
                   onChange={(e) => setParentId(e.target.value)}
-                  className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-2xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-ai text-[var(--ds-text-secondary)]"
+                  className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-2xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)] text-[var(--ds-text-secondary)]"
                 >
                   <option value="">{language === 'ar' ? 'بدون (مساحة عمل رئيسية)' : 'None (Root Workspace)'}</option>
                   {organizations.map(org => (
@@ -237,9 +238,9 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
 
           {/* Pending Invitations list */}
           {invitations.length > 0 && (
-            <Card className="p-6 border-[var(--ds-border-subtle)] rounded-3xl bg-[var(--ds-surface-primary)]">
+            <Card className="p-6 border-[var(--ds-border-subtle)] rounded-2xl bg-[var(--ds-surface-primary)]">
               <h4 className="text-sm font-black mb-4 flex items-center gap-2">
-                <Mail size={18} className="text-ai" />
+                <Mail size={18} className="text-path-identity" />
                 <span>{language === 'ar' ? 'الدعوات المعلقة' : 'Pending Invitations'}</span>
               </h4>
               <div className="space-y-3">
@@ -267,9 +268,9 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
 
         {/* Team Members List & Invitation Form */}
         <div className="space-y-6">
-          <Card className="p-6 border-[var(--ds-border-subtle)] rounded-3xl bg-[var(--ds-surface-primary)]">
+          <Card className="p-6 border-[var(--ds-border-subtle)] rounded-2xl bg-[var(--ds-surface-primary)]">
             <h4 className="text-sm font-black mb-4 flex items-center gap-2">
-              <Users size={18} className="text-ai" />
+              <Users size={18} className="text-[var(--ds-primary)]" />
               <span>{language === 'ar' ? 'فريق العمل النشط' : 'Active Team Members'}</span>
             </h4>
             <div className="space-y-3 mb-6 max-h-[220px] overflow-y-auto pr-1">
@@ -279,7 +280,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
                     <div className="text-xs font-black">{member.username}</div>
                     <div className="text-[10px] text-[var(--ds-text-muted)] font-semibold mt-0.5">{member.email}</div>
                   </div>
-                  <div className="px-3 py-1 rounded-full bg-ai/10 text-ai text-[10px] font-extrabold uppercase border border-ai/20">
+                  <div className="px-3 py-1 rounded-full bg-[var(--ds-information-soft)] text-[var(--ds-information)] text-[10px] font-extrabold uppercase border border-info/20">
                     {member.role}
                   </div>
                 </div>
@@ -300,12 +301,12 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
                     required
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
-                    className="flex-1 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-2xl px-4 py-2.5 text-xs font-bold focus:outline-none"
+                    className="flex-1 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-2xl px-4 py-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                   />
                   <select
                     value={inviteRole}
                     onChange={(e) => setInviteRole(e.target.value)}
-                    className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-2xl px-3 py-2 text-xs font-bold text-[var(--ds-text-secondary)] focus:outline-none"
+                    className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-2xl px-3 py-2 text-xs font-bold text-[var(--ds-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                   >
                     <option value="ADMIN">{language === 'ar' ? 'مشرف (Admin)' : 'Admin'}</option>
                     <option value="MEMBER">{language === 'ar' ? 'باحث (Member)' : 'Member'}</option>

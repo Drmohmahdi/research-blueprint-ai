@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { MessageSquare, Send, CheckCircle } from 'lucide-react';
+import { EmptyState } from '../../design-system/components/Feedback';
 
 import type { ResearchStepId } from './researchDesignConfig';
 import { apiListProjectComments, apiCreateProjectComment, apiResolveProjectComment } from '../../utils/api';
@@ -74,12 +75,12 @@ export const ResearchCommentsPanel: React.FC<ResearchCommentsPanelProps> = ({
   return (
     <div className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-ai font-bold text-xs">
+        <div className="flex items-center gap-2 text-ink font-bold text-xs">
           <MessageSquare size={16} />
           <span>{isAr ? 'ملاحظات المشرف الأكاديمي للخطوة' : 'Step Supervisor Comments'}</span>
         </div>
-        <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-ai/10 text-ai dark:bg-ai/10 dark:text-ai">
-          {comments.filter(c => !c.resolved).length} {isAr ? 'مفتوحة' : 'Open'}
+        <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-[var(--ds-information-soft)] text-[var(--ds-information)]">
+          <span className="ds-numeric">{comments.filter(c => !c.resolved).length}</span> {isAr ? 'مفتوحة' : 'Open'}
         </span>
       </div>
 
@@ -90,13 +91,13 @@ export const ResearchCommentsPanel: React.FC<ResearchCommentsPanelProps> = ({
           value={newCommentText}
           onChange={(e) => setNewCommentText(e.target.value)}
           placeholder={isAr ? 'اكتب ملاحظة أو توجيه أكاديمي لهذه الخطوة...' : 'Add supervisor feedback or direction for this step...'}
-          className="w-full p-2.5 rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-[var(--ds-text-primary)] text-xs focus:ring-1 focus:ring-ai outline-none resize-none"
+          className="w-full p-2.5 rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-[var(--ds-text-primary)] text-xs focus:ring-2 focus:ring-[var(--ds-primary-soft)] outline-none resize-none"
         />
         <div className="flex items-center justify-between gap-2">
           <select
             value={priority}
             onChange={(e: any) => setPriority(e.target.value)}
-            className="px-2 py-1 text-xs rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-[var(--ds-text-primary)]"
+            className="px-2 py-1 text-xs rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
           >
             <option value="NORMAL">{isAr ? 'أولوية عادية' : 'Normal Priority'}</option>
             <option value="HIGH">{isAr ? 'أولوية عالية' : 'High Priority'}</option>
@@ -117,9 +118,12 @@ export const ResearchCommentsPanel: React.FC<ResearchCommentsPanelProps> = ({
       {/* Comments List */}
       <div className="space-y-2 max-h-60 overflow-y-auto pt-2 border-t border-[var(--ds-border-subtle)]">
         {comments.length === 0 ? (
-          <p className="text-xs text-[var(--ds-text-secondary)] text-center py-2">
-            {isAr ? 'لا توجد ملاحظات مسجلة على هذه الخطوة بعد.' : 'No comments recorded for this step yet.'}
-          </p>
+          <EmptyState
+            bare
+            className="py-2"
+            title={isAr ? 'لا توجد ملاحظات بعد' : 'No comments yet'}
+            description={isAr ? 'سجّل ملاحظة على هذه الخطوة ليراجعها المشرف.' : 'Record a note on this step for the supervisor to review.'}
+          />
         ) : (
           comments.map((c) => (
             <div
@@ -136,7 +140,7 @@ export const ResearchCommentsPanel: React.FC<ResearchCommentsPanelProps> = ({
                 </span>
                 <button
                   onClick={() => handleToggleResolve(c.id, c.resolved)}
-                  className="flex items-center gap-1 text-[11px] text-[var(--ds-text-secondary)] hover:text-ai border-none bg-transparent cursor-pointer"
+                  className="flex items-center gap-1 text-[11px] text-[var(--ds-text-secondary)] hover:text-action border-none bg-transparent cursor-pointer"
                 >
                   <CheckCircle size={12} className={c.resolved ? 'text-success' : ''} />
                   <span>{c.resolved ? (isAr ? 'معالجة' : 'Resolved') : (isAr ? 'تحديد كمعالجة' : 'Resolve')}</span>

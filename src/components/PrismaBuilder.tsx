@@ -2,6 +2,8 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useProject } from '../context/ProjectContext';
 import { Download, Cloud, Database, RefreshCw, CheckCircle2, AlertCircle, RotateCcw } from 'lucide-react';
 import { Button } from '../design-system/components/Button';
+import { PathPanel } from '../design-system/components/Navigation';
+import { EmptyState } from '../design-system/components/Feedback';
 import { apiGetPrismaFlow, apiSavePrismaFlow, apiResetPrismaFlow } from '../utils/api';
 import { researchStorage } from '../utils/researchStorage';
 
@@ -256,7 +258,19 @@ export const PrismaBuilder: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto animate-fade-in">
+    <div className="space-y-6 max-w-5xl mx-auto">
+      <PathPanel accent="var(--ds-path-publication)">
+        <div className="space-y-1">
+          <h2 className="text-lg font-black text-ink m-0">
+            {language === 'ar' ? 'مخطط PRISMA لتدفق الدراسات' : 'PRISMA Study Flow Diagram'}
+          </h2>
+          <p className="text-xs text-secondary m-0">
+            {language === 'ar'
+              ? 'وثّق أعداد الكشف والاستبعاد والإدراج وفق تقرير المراجعة المنهجية.'
+              : 'Document identification, exclusion, and inclusion counts for the systematic review report.'}
+          </p>
+        </div>
+      </PathPanel>
       {/* Persistence Status Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg px-4 py-2.5 text-xs">
         <div className="flex items-center gap-2">
@@ -280,7 +294,7 @@ export const PrismaBuilder: React.FC = () => {
         <div className="flex items-center gap-2">
           {isSyncing && (
             <span className="flex items-center gap-1.5 text-[var(--ds-primary)] font-medium">
-              <RefreshCw size={13} className="animate-spin" />
+              <RefreshCw size={13} className="motion-safe:animate-spin" />
               {language === 'ar' ? 'جارٍ المزامنة...' : 'Syncing...'}
             </span>
           )}
@@ -393,9 +407,14 @@ export const PrismaBuilder: React.FC = () => {
             </h4>
           </div>
 
-          {identified === 0 && <p className="m-0 text-xs text-[var(--ds-text-muted)]">{language === 'ar' ? 'أدخل أعداد البحث والفحص الفعلية لإنشاء مخطط تدفق موثق.' : 'Enter actual search and screening counts to create a documented flow diagram.'}</p>}
-
-          {/* SVG Diagram Canvas */}
+          {identified === 0 ? (
+            <EmptyState
+              bare
+              illustration={<Database size={36} />}
+              title={language === 'ar' ? 'لا يوجد مخطط بعد' : 'No flow diagram yet'}
+              description={language === 'ar' ? 'أدخل أعداد البحث والفحص الفعلية لإنشاء مخطط تدفق موثق.' : 'Enter actual search and screening counts to create a documented flow diagram.'}
+            />
+          ) : (
           <div className="w-full h-[450px] bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg p-2 flex items-center justify-center overflow-x-auto">
             <svg id="prisma-svg" width="460" height="420" viewBox="0 0 460 420" className="max-w-full">
               <defs>
@@ -486,6 +505,7 @@ export const PrismaBuilder: React.FC = () => {
               </text>
             </svg>
           </div>
+          )}
         </div>
       </div>
     </div>

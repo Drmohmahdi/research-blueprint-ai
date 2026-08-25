@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useProject } from '../../context/ProjectContext';
 import { MessageSquare, Send, Check, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { EmptyState } from '../../design-system/components/Feedback';
 import { researchStorage } from '../../utils/researchStorage';
 
 interface Comment {
@@ -75,7 +76,7 @@ export const SupervisorPanel: React.FC = () => {
   const priorityColors: Record<string, string> = {
     CRITICAL: 'bg-danger/10 text-danger border-danger/20',
     HIGH: 'bg-warning/10 text-warning border-warning/20',
-    NORMAL: 'bg-info/10 text-path-publication border-info/20',
+    NORMAL: 'bg-[var(--ds-information-soft)] text-[var(--ds-information)] border-info/20',
     LOW: 'bg-[var(--ds-surface-secondary)] text-[var(--ds-text-muted)] border-[var(--ds-border-subtle)]',
   };
 
@@ -87,7 +88,7 @@ export const SupervisorPanel: React.FC = () => {
         className="w-full flex items-center justify-between p-4 cursor-pointer hover:bg-[var(--ds-surface-secondary)] transition-colors"
       >
         <div className="flex items-center gap-2">
-          <MessageSquare size={16} className="text-ai" />
+          <MessageSquare size={16} className="text-path-review" />
           <span className="text-sm font-bold text-[var(--ds-text-primary)]">
             {language === 'ar' ? 'ملاحظات المشرف' : 'Supervisor Comments'}
           </span>
@@ -110,12 +111,12 @@ export const SupervisorPanel: React.FC = () => {
               onChange={e => setNewComment(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleAdd()}
               placeholder={language === 'ar' ? 'أضف ملاحظة...' : 'Add a comment...'}
-              className="flex-1 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--ds-text-primary)] placeholder:text-[var(--ds-text-muted)] focus:outline-none focus:ring-1 focus:ring-ai/50"
+              className="flex-1 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--ds-text-primary)] placeholder:text-[var(--ds-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
             />
             <select
               value={newPriority}
               onChange={e => setNewPriority(e.target.value)}
-              className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-2 py-1 text-[10px] font-bold text-[var(--ds-text-secondary)] focus:outline-none"
+              className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-2 py-1 text-[10px] font-bold text-[var(--ds-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
             >
               <option value="LOW">{language === 'ar' ? 'منخفض' : 'Low'}</option>
               <option value="NORMAL">{language === 'ar' ? 'عادي' : 'Normal'}</option>
@@ -134,7 +135,7 @@ export const SupervisorPanel: React.FC = () => {
           {/* Filter toggle */}
           <div className="flex items-center gap-2">
             <label className="flex items-center gap-1.5 cursor-pointer">
-              <input type="checkbox" checked={filterResolved} onChange={() => setFilterResolved(!filterResolved)} className="rounded" />
+              <input type="checkbox" checked={filterResolved} onChange={() => setFilterResolved(!filterResolved)} className="h-4 w-4 rounded border-[var(--ds-border-default)] text-[var(--ds-primary)] focus:ring-[var(--ds-primary)] cursor-pointer" />
               <span className="text-[10px] text-[var(--ds-text-muted)] font-semibold">
                 {language === 'ar' ? 'إظهار المحلولة' : 'Show resolved'}
               </span>
@@ -144,9 +145,12 @@ export const SupervisorPanel: React.FC = () => {
           {/* Comments list */}
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {filtered.length === 0 ? (
-              <p className="text-center text-xs text-[var(--ds-text-muted)] py-4">
-                {language === 'ar' ? 'لا ملاحظات حالياً' : 'No comments yet'}
-              </p>
+              <EmptyState
+                bare
+                className="py-3"
+                title={language === 'ar' ? 'لا ملاحظات حالياً' : 'No comments yet'}
+                description={language === 'ar' ? 'أضف ملاحظة للمشرف أو للفريق على هذا المشروع.' : 'Add a note for the supervisor or team on this project.'}
+              />
             ) : (
               filtered.map(c => (
                 <div

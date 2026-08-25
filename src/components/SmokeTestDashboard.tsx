@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PathPanel } from '../design-system/components/Navigation';
 import { useProject } from '../context/ProjectContext';
 import { apiAnalyzeTitle } from '../utils/api';
 import { localLiteratureForecast } from '../utils/predictionFallback';
@@ -347,7 +348,8 @@ export const SmokeTestDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between border-b border-subtle pb-4">
+      <PathPanel accent="var(--ds-path-identity)">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-ink m-0">
             {language === 'ar' ? 'لوحة فحوصات الدخان والجاهزية (Smoke Tests)' : 'Baseline Diagnostics & Smoke Tests'}
@@ -362,12 +364,13 @@ export const SmokeTestDashboard: React.FC = () => {
         <button
           onClick={runAllTests}
           disabled={isRunning}
-          className="px-4 py-2 bg-action hover:bg-action-hover text-on-action rounded-lg text-xs font-bold ds-transition flex items-center gap-1.5 cursor-pointer shadow-md"
+          className="px-4 py-2 bg-action hover:bg-action-hover text-on-action rounded-lg text-xs font-bold ds-transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
         >
-          <Play size={14} className={isRunning ? 'animate-spin' : ''} />
+          <Play size={14} className={isRunning ? 'motion-safe:animate-spin' : ''} />
           <span>{isRunning ? (language === 'ar' ? 'جاري الفحص...' : 'Running Diagnostics...') : (language === 'ar' ? 'تشغيل اختبارات الدخان' : 'Run Diagnostics')}</span>
         </button>
-      </div>
+        </div>
+      </PathPanel>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Test Cases List */}
@@ -379,7 +382,7 @@ export const SmokeTestDashboard: React.FC = () => {
             >
               <div className="mt-0.5 shrink-0">
                 {tc.status === 'PENDING' && <Settings size={20} className="text-muted" />}
-                {tc.status === 'RUNNING' && <RefreshCw size={20} className="text-ai animate-spin" />}
+                {tc.status === 'RUNNING' && <RefreshCw size={20} className="text-ai motion-safe:animate-spin" />}
                 {tc.status === 'PASSED' && <CheckCircle size={20} className="text-success" />}
                 {tc.status === 'FAILED' && <XCircle size={20} className="text-danger" />}
               </div>

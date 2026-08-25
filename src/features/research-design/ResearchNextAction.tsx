@@ -66,7 +66,7 @@ export const ResearchNextAction: React.FC<ResearchNextActionProps> = ({
       {isComplete && (
         <button
           onClick={onNavigateNext}
-          className="flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg bg-action hover:bg-action-hover text-on-action border-none cursor-pointer shadow-[var(--ds-shadow-glow)] ds-transition mt-2"
+          className="flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg bg-action hover:bg-action-hover text-on-action border-none cursor-pointer shadow-sm ds-transition mt-2"
         >
           <span>{isAr ? 'الانتقال للخطوة التالية' : 'Proceed to Next Step'}</span>
           <ArrowRight className={isAr ? "rotate-180" : ""} size={14} />

@@ -3,6 +3,7 @@ import { apiGetBilling, apiSubscribe, apiListPlans, apiGetDownloadUrl } from '..
 import { CreditCard, Check, ArrowUpCircle, Download, Activity, HardDrive } from 'lucide-react';
 import { Card } from '../../design-system/components/Card';
 import { Button } from '../../design-system/components/Button';
+import { PathPanel } from '../../design-system/components/Navigation';
 
 interface BillingDashboardProps {
   language: 'ar' | 'en';
@@ -48,7 +49,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
 
   if (loading) {
     return (
-      <div className="p-12 text-center text-xs font-bold text-[var(--ds-text-muted)] animate-pulse">
+      <div className="p-12 text-center text-xs font-bold text-[var(--ds-text-muted)] motion-safe:animate-pulse">
         {language === 'ar' ? 'جاري تحميل تفاصيل الفوترة والاشتراكات...' : 'Loading subscription and billing details...'}
       </div>
     );
@@ -65,6 +66,18 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
 
   return (
     <div className="space-y-8">
+      <PathPanel accent="var(--ds-path-identity)">
+        <div className="space-y-1">
+          <h2 className="text-lg font-black text-ink m-0">
+            {language === 'ar' ? 'الاشتراك والفوترة' : 'Subscription & Billing'}
+          </h2>
+          <p className="text-xs text-secondary m-0">
+            {language === 'ar'
+              ? 'راجع الخطة الحالية والاستخدام والفواتير دون مغادرة مساحة العمل.'
+              : 'Review the current plan, usage, and invoices without leaving the workspace.'}
+          </p>
+        </div>
+      </PathPanel>
       {/* Messages */}
       {message && (
         <div className="p-3.5 border border-success/20 bg-action/5 text-success rounded-2xl text-xs font-bold">
@@ -87,13 +100,13 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Active subscription card */}
-        <Card className="lg:col-span-1 p-6 border-[var(--ds-border-subtle)] rounded-3xl bg-[var(--ds-surface-primary)] relative">
+        <Card className="lg:col-span-1 p-6 border-[var(--ds-border-subtle)] rounded-2xl bg-[var(--ds-surface-primary)] relative">
           <div className="space-y-4">
             <span className="text-[10px] font-black text-[var(--ds-text-muted)] uppercase tracking-widest block">
               {language === 'ar' ? 'الاشتراك الحالي' : 'Current Subscription'}
             </span>
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-ai/15 text-ai flex items-center justify-center">
+              <div className="h-10 w-10 rounded-xl bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] flex items-center justify-center">
                 <CreditCard size={20} />
               </div>
               <div>
@@ -117,14 +130,14 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
               </div>
               <div className="flex justify-between font-bold">
                 <span className="text-[var(--ds-text-muted)]">{language === 'ar' ? 'القيمة:' : 'Price:'}</span>
-                <span className="text-ai">{activePlan?.price} {activePlan?.currency}</span>
+                <span className="text-ink ds-numeric">{activePlan?.price} {activePlan?.currency}</span>
               </div>
             </div>
           </div>
         </Card>
 
         {/* Usage meters card */}
-        <Card className="lg:col-span-2 p-6 border-[var(--ds-border-subtle)] rounded-3xl bg-[var(--ds-surface-primary)]">
+        <Card className="lg:col-span-2 p-6 border-[var(--ds-border-subtle)] rounded-2xl bg-[var(--ds-surface-primary)]">
           <span className="text-[10px] font-black text-[var(--ds-text-muted)] uppercase tracking-widest block mb-4">
             {language === 'ar' ? 'استهلاك الحصص والحدود' : 'Entitlements & Usage Limits'}
           </span>
@@ -133,7 +146,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
             <div className="space-y-2">
               <div className="flex justify-between text-xs font-bold">
                 <span className="flex items-center gap-1.5 text-[var(--ds-text-secondary)]">
-                  <Activity size={14} className="text-ai" />
+                  <Activity size={14} className="text-[var(--ds-primary)]" />
                   <span>{language === 'ar' ? 'عدد المشاريع البحثية' : 'Research Projects'}</span>
                 </span>
                 <span>{usage.projects_count} / {limits.max_projects}</span>
@@ -150,7 +163,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
             <div className="space-y-2">
               <div className="flex justify-between text-xs font-bold">
                 <span className="flex items-center gap-1.5 text-[var(--ds-text-secondary)]">
-                  <HardDrive size={14} className="text-ai" />
+                  <HardDrive size={14} className="text-[var(--ds-primary)]" />
                   <span>{language === 'ar' ? 'مساحة ملفات المستندات' : 'Document File Storage'}</span>
                 </span>
                 <span>{usage.storage_mb.toFixed(2)} MB / {limits.max_storage_mb} MB</span>
@@ -181,9 +194,9 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
             return (
               <Card 
                 key={plan.id} 
-                className={`p-6 border-[var(--ds-border-subtle)] rounded-3xl flex flex-col justify-between relative overflow-hidden transition-all duration-180 hover:shadow-lg ${
+                className={`p-6 border-[var(--ds-border-subtle)] rounded-2xl flex flex-col justify-between relative overflow-hidden transition-all duration-180 hover:shadow-lg ${
                   isCurrent 
-                    ? 'ring-2 ring-action bg-ai/[0.02] border-ai/30'
+                    ? 'ring-2 ring-action bg-[var(--ds-primary-soft)]/40 border-[var(--ds-primary)]/30'
                     : 'bg-[var(--ds-surface-primary)]'
                 }`}
               >
@@ -200,7 +213,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
                   </div>
 
                   <div className="flex items-baseline gap-1.5">
-                    <span className="text-2xl font-black text-[var(--ds-text-primary)]">{plan.price}</span>
+                    <span className="text-2xl font-black text-ink ds-numeric">{plan.price}</span>
                     <span className="text-xs font-bold text-[var(--ds-text-muted)]">{plan.currency} / {plan.billing_interval}</span>
                   </div>
 
@@ -249,7 +262,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
           <h3 className="text-sm font-black mb-4 uppercase tracking-widest text-[var(--ds-text-muted)]">
             {language === 'ar' ? 'سجل الفواتير والمدفوعات' : 'Billing & Invoice History'}
           </h3>
-          <Card className="border-[var(--ds-border-subtle)] rounded-3xl overflow-hidden bg-[var(--ds-surface-primary)]">
+          <Card className="border-[var(--ds-border-subtle)] rounded-2xl overflow-hidden bg-[var(--ds-surface-primary)]">
             <div className="overflow-x-auto">
               <table className="w-full text-right text-xs font-bold">
                 <thead>
@@ -266,9 +279,9 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
                     <tr key={inv.id} className="hover:bg-[var(--ds-surface-secondary)] transition-colors">
                       <td className="px-6 py-4 font-black">{inv.id}</td>
                       <td className="px-6 py-4">{new Date(inv.created_at).toLocaleDateString()}</td>
-                      <td className="px-6 py-4 text-ai">{inv.amount} {inv.currency}</td>
+                      <td className="px-6 py-4 text-ink ds-numeric">{inv.amount} {inv.currency}</td>
                       <td className="px-6 py-4">
-                        <span className="px-2.5 py-0.5 rounded-full bg-action/10 text-success border border-success/20 text-[10px] font-extrabold">
+                        <span className="px-2.5 py-0.5 rounded-full bg-[var(--ds-success-soft)] text-success border border-success/20 text-[10px] font-extrabold">
                           {inv.status}
                         </span>
                       </td>
@@ -277,7 +290,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
                           href={apiGetDownloadUrl(inv.id)} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-ai hover:text-ai hover:underline cursor-pointer"
+                          className="inline-flex items-center gap-1 text-action hover:underline cursor-pointer"
                         >
                           <Download size={14} />
                           <span>PDF</span>

@@ -923,6 +923,432 @@ class ScholarlyAssetFile(Base):
     uploaded_file = relationship("UploadedFile")
 
 
+# Publication Intelligence extends ScholarlyAsset without duplicating research truth.
+class PublicationManuscriptVersion(Base):
+    __tablename__ = "publication_manuscript_versions"
+    __table_args__ = (UniqueConstraint("asset_id", "version_number", name="uq_publication_manuscript_version"),)
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    asset_id = Column(String, ForeignKey("core_scholarly_assets.id", ondelete="CASCADE"), nullable=False, index=True)
+    version_number = Column(Integer, nullable=False)
+    article_type = Column(String, nullable=False)
+    change_summary = Column(String, nullable=True)
+    fingerprint = Column(String, nullable=False)
+    source_dependencies_json = Column(JSON, default=list, nullable=False)
+    declarations_json = Column(JSON, default=dict, nullable=False)
+    created_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+
+
+class PublicationManuscriptSection(Base):
+    __tablename__ = "publication_manuscript_sections"
+    __table_args__ = (UniqueConstraint("manuscript_version_id", "section_key", name="uq_publication_section_key"),)
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    manuscript_version_id = Column(String, ForeignKey("publication_manuscript_versions.id", ondelete="CASCADE"), nullable=False, index=True)
+    section_key = Column(String, nullable=False)
+    status = Column(String, default="NOT_STARTED", nullable=False)
+    content_json = Column(JSON, default=dict, nullable=False)
+    dependencies_json = Column(JSON, default=list, nullable=False)
+    stale_at = Column(String, nullable=True)
+    updated_at = Column(String, nullable=False)
+
+
+class PublicationJournal(Base):
+    __tablename__ = "publication_journals"
+    id = Column(String, primary_key=True)
+    canonical_key = Column(String, unique=True, nullable=False, index=True)
+    title = Column(String, nullable=False)
+    issn = Column(String, nullable=True, index=True)
+    eissn = Column(String, nullable=True, index=True)
+    publisher = Column(String, nullable=True)
+    metadata_json = Column(JSON, default=dict, nullable=False)
+    provider_name = Column(String, nullable=False)
+    provider_record_id = Column(String, nullable=True)
+    retrieved_at = Column(String, nullable=False)
+    verified_at = Column(String, nullable=True)
+    stale_after = Column(String, nullable=False)
+
+
+class PublicationJournalRequirement(Base):
+    __tablename__ = "publication_journal_requirements"
+    id = Column(String, primary_key=True)
+    journal_id = Column(String, ForeignKey("publication_journals.id", ondelete="CASCADE"), nullable=False, index=True)
+    requirement_type = Column(String, nullable=False)
+    value_json = Column(JSON, default=dict, nullable=False)
+    severity = Column(String, default="BLOCKING", nullable=False)
+    source_url = Column(String, nullable=False)
+    verified_at = Column(String, nullable=False)
+
+
+class PublicationJournalMatch(Base):
+    __tablename__ = "publication_journal_matches"
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    asset_id = Column(String, ForeignKey("core_scholarly_assets.id", ondelete="CASCADE"), nullable=False, index=True)
+    manuscript_version_id = Column(String, ForeignKey("publication_manuscript_versions.id", ondelete="CASCADE"), nullable=False)
+    journal_id = Column(String, ForeignKey("publication_journals.id", ondelete="CASCADE"), nullable=False)
+    eligibility = Column(String, nullable=False)
+    score = Column(Float, nullable=True)
+    factors_json = Column(JSON, default=dict, nullable=False)
+    concerns_json = Column(JSON, default=list, nullable=False)
+    metadata_snapshot_json = Column(JSON, default=dict, nullable=False)
+    created_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+
+
+class PublicationJournalShortlist(Base):
+    __tablename__ = "publication_journal_shortlists"
+    __table_args__ = (UniqueConstraint("asset_id", "journal_id", name="uq_publication_shortlist_journal"),)
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    asset_id = Column(String, ForeignKey("core_scholarly_assets.id", ondelete="CASCADE"), nullable=False, index=True)
+    journal_id = Column(String, ForeignKey("publication_journals.id", ondelete="CASCADE"), nullable=False)
+    position = Column(String, nullable=False)
+    selected_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+
+
+class PublicationSubmission(Base):
+    __tablename__ = "publication_submissions"
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    asset_id = Column(String, ForeignKey("core_scholarly_assets.id", ondelete="CASCADE"), nullable=False, index=True)
+    journal_id = Column(String, ForeignKey("publication_journals.id", ondelete="RESTRICT"), nullable=False)
+    manuscript_version_id = Column(String, ForeignKey("publication_manuscript_versions.id", ondelete="RESTRICT"), nullable=False)
+    status = Column(String, default="PREPARING", nullable=False)
+    raw_external_status = Column(String, nullable=True)
+    submission_identifier = Column(String, nullable=True)
+    package_snapshot_json = Column(JSON, default=dict, nullable=False)
+    submitted_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    submitted_at = Column(String, nullable=True)
+    created_at = Column(String, nullable=False)
+    updated_at = Column(String, nullable=False)
+
+
+# Thesis Supervision & Examination owns academic workflow only; research/data/publication
+# truth remains referenced through project_id and explicit dependency snapshots.
+class ThesisPolicy(Base):
+    __tablename__ = "thesis_policies"
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    degree_type = Column(String, nullable=False)
+    program_code = Column(String, nullable=True)
+    version = Column(Integer, nullable=False)
+    status = Column(String, default="DRAFT", nullable=False)
+    rules_json = Column(JSON, default=dict, nullable=False)
+    effective_from = Column(String, nullable=True)
+    created_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+
+
+class ThesisRecord(Base):
+    __tablename__ = "thesis_records"
+    __table_args__ = (UniqueConstraint("project_id", name="uq_thesis_project"),)
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    project_id = Column(String, ForeignKey("research_projects.id", ondelete="RESTRICT"), nullable=False, index=True)
+    student_user_id = Column(String, ForeignKey("users.id", ondelete="RESTRICT"), nullable=False, index=True)
+    policy_id = Column(String, ForeignKey("thesis_policies.id", ondelete="RESTRICT"), nullable=False)
+    policy_snapshot_json = Column(JSON, nullable=False)
+    degree_type = Column(String, nullable=False)
+    program_name = Column(String, nullable=False)
+    title_ar = Column(String, nullable=False)
+    title_en = Column(String, nullable=False)
+    title_history_json = Column(JSON, default=list, nullable=False)
+    current_stage = Column(String, default="REGISTRATION", nullable=False)
+    stage_states_json = Column(JSON, default=dict, nullable=False)
+    status = Column(String, default="ACTIVE", nullable=False)
+    registration_date = Column(String, nullable=True)
+    expected_completion_date = Column(String, nullable=True)
+    final_version_id = Column(String, nullable=True)
+    created_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+    updated_at = Column(String, nullable=False)
+
+
+class ThesisSupervisionAssignment(Base):
+    __tablename__ = "thesis_supervision_assignments"
+    __table_args__ = (UniqueConstraint("thesis_id", "user_id", "role", name="uq_thesis_supervision_role"),)
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    thesis_id = Column(String, ForeignKey("thesis_records.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(String, ForeignKey("users.id", ondelete="RESTRICT"), nullable=False, index=True)
+    role = Column(String, nullable=False)
+    can_final_recommend = Column(Boolean, default=False, nullable=False)
+    status = Column(String, default="ACTIVE", nullable=False)
+    assigned_at = Column(String, nullable=False)
+    ended_at = Column(String, nullable=True)
+
+
+class ThesisMilestone(Base):
+    __tablename__ = "thesis_milestones"
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    thesis_id = Column(String, ForeignKey("thesis_records.id", ondelete="CASCADE"), nullable=False, index=True)
+    code = Column(String, nullable=False)
+    title = Column(String, nullable=False)
+    applicability = Column(String, nullable=False)
+    status = Column(String, default="NOT_STARTED", nullable=False)
+    due_at = Column(String, nullable=True)
+    completed_at = Column(String, nullable=True)
+    evidence_json = Column(JSON, default=dict, nullable=False)
+
+
+class ThesisMeeting(Base):
+    __tablename__ = "thesis_meetings"
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    thesis_id = Column(String, ForeignKey("thesis_records.id", ondelete="CASCADE"), nullable=False, index=True)
+    scheduled_at = Column(String, nullable=False)
+    status = Column(String, default="SCHEDULED", nullable=False)
+    agenda_json = Column(JSON, default=list, nullable=False)
+    decisions_json = Column(JSON, default=list, nullable=False)
+    private_supervisor_notes = Column(String, nullable=True)
+    recorded_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+
+
+class ThesisAction(Base):
+    __tablename__ = "thesis_actions"
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    thesis_id = Column(String, ForeignKey("thesis_records.id", ondelete="CASCADE"), nullable=False, index=True)
+    meeting_id = Column(String, ForeignKey("thesis_meetings.id", ondelete="SET NULL"), nullable=True)
+    title = Column(String, nullable=False)
+    owner_user_id = Column(String, ForeignKey("users.id", ondelete="RESTRICT"), nullable=False)
+    priority = Column(String, default="NORMAL", nullable=False)
+    status = Column(String, default="OPEN", nullable=False)
+    due_at = Column(String, nullable=True)
+    completed_at = Column(String, nullable=True)
+
+
+class ThesisChapter(Base):
+    __tablename__ = "thesis_chapters"
+    __table_args__ = (UniqueConstraint("thesis_id", "chapter_key", name="uq_thesis_chapter_key"),)
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    thesis_id = Column(String, ForeignKey("thesis_records.id", ondelete="CASCADE"), nullable=False, index=True)
+    chapter_key = Column(String, nullable=False)
+    title = Column(String, nullable=False)
+    sort_order = Column(Integer, nullable=False)
+    status = Column(String, default="NOT_STARTED", nullable=False)
+    current_version_number = Column(Integer, default=0, nullable=False)
+    approved_version_id = Column(String, nullable=True)
+    dependencies_json = Column(JSON, default=list, nullable=False)
+    stale_at = Column(String, nullable=True)
+
+
+class ThesisChapterVersion(Base):
+    __tablename__ = "thesis_chapter_versions"
+    __table_args__ = (UniqueConstraint("chapter_id", "version_number", name="uq_thesis_chapter_version"),)
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    chapter_id = Column(String, ForeignKey("thesis_chapters.id", ondelete="RESTRICT"), nullable=False, index=True)
+    version_number = Column(Integer, nullable=False)
+    file_id = Column(String, ForeignKey("uploaded_files.id", ondelete="RESTRICT"), nullable=True)
+    content_snapshot_json = Column(JSON, default=dict, nullable=False)
+    fingerprint = Column(String, nullable=False)
+    change_summary = Column(String, nullable=True)
+    status = Column(String, default="SUBMITTED", nullable=False)
+    submitted_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    submitted_at = Column(String, nullable=False)
+
+
+class ThesisFeedback(Base):
+    __tablename__ = "thesis_feedback"
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    thesis_id = Column(String, ForeignKey("thesis_records.id", ondelete="CASCADE"), nullable=False, index=True)
+    chapter_version_id = Column(String, ForeignKey("thesis_chapter_versions.id", ondelete="RESTRICT"), nullable=False, index=True)
+    category = Column(String, nullable=False)
+    severity = Column(String, nullable=False)
+    location_json = Column(JSON, default=dict, nullable=False)
+    comment_text = Column(String, nullable=False)
+    student_response = Column(String, nullable=True)
+    resolution_status = Column(String, default="OPEN", nullable=False)
+    created_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    resolved_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+    resolved_at = Column(String, nullable=True)
+
+
+class ThesisCommitteeMember(Base):
+    __tablename__ = "thesis_committee_members"
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    thesis_id = Column(String, ForeignKey("thesis_records.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    external_name = Column(String, nullable=True)
+    external_email = Column(String, nullable=True)
+    institution = Column(String, nullable=True)
+    role = Column(String, nullable=False)
+    eligibility_status = Column(String, default="NEEDS_VERIFICATION", nullable=False)
+    coi_json = Column(JSON, default=dict, nullable=False)
+    appointment_status = Column(String, default="PROPOSED", nullable=False)
+    appointment_history_json = Column(JSON, default=list, nullable=False)
+
+
+class ThesisExaminationRound(Base):
+    __tablename__ = "thesis_examination_rounds"
+    __table_args__ = (UniqueConstraint("thesis_id", "round_number", name="uq_thesis_examination_round"),)
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    thesis_id = Column(String, ForeignKey("thesis_records.id", ondelete="CASCADE"), nullable=False, index=True)
+    round_number = Column(Integer, nullable=False)
+    thesis_snapshot_json = Column(JSON, nullable=False)
+    policy_snapshot_json = Column(JSON, nullable=False)
+    status = Column(String, default="SCHEDULED", nullable=False)
+    defense_at = Column(String, nullable=True)
+    human_decision = Column(String, nullable=True)
+    decision_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    decision_at = Column(String, nullable=True)
+    created_at = Column(String, nullable=False)
+
+
+class ThesisCorrection(Base):
+    __tablename__ = "thesis_corrections"
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    thesis_id = Column(String, ForeignKey("thesis_records.id", ondelete="CASCADE"), nullable=False, index=True)
+    examination_round_id = Column(String, ForeignKey("thesis_examination_rounds.id", ondelete="RESTRICT"), nullable=False)
+    correction_type = Column(String, nullable=False)
+    description = Column(String, nullable=False)
+    status = Column(String, default="OPEN", nullable=False)
+    due_at = Column(String, nullable=True)
+    response_text = Column(String, nullable=True)
+    evidence_version_id = Column(String, ForeignKey("thesis_chapter_versions.id", ondelete="RESTRICT"), nullable=True)
+    details_json = Column(JSON, default=dict, nullable=False)
+    verified_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    verified_at = Column(String, nullable=True)
+
+
+class ThesisExaminerAssignment(Base):
+    __tablename__ = "thesis_examiner_assignments"
+    __table_args__ = (
+        UniqueConstraint("examination_round_id", "committee_member_id", name="uq_thesis_examiner_round_member"),
+        Index("ix_thesis_examiner_org_thesis", "organization_id", "thesis_id"),
+    )
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    thesis_id = Column(String, ForeignKey("thesis_records.id", ondelete="CASCADE"), nullable=False)
+    examination_round_id = Column(String, ForeignKey("thesis_examination_rounds.id", ondelete="CASCADE"), nullable=False)
+    committee_member_id = Column(String, ForeignKey("thesis_committee_members.id", ondelete="RESTRICT"), nullable=False)
+    frozen_thesis_fingerprint = Column(String, nullable=False)
+    frozen_thesis_snapshot_json = Column(JSON, nullable=False)
+    status = Column(String, default="PROPOSED", nullable=False)
+    due_at = Column(String, nullable=True)
+    eligibility_status = Column(String, default="NEEDS_VERIFICATION", nullable=False)
+    eligibility_evidence_json = Column(JSON, default=list, nullable=False)
+    coi_status = Column(String, default="MISSING", nullable=False)
+    report_status = Column(String, default="NOT_STARTED", nullable=False)
+    replacement_of_id = Column(String, ForeignKey("thesis_examiner_assignments.id", ondelete="SET NULL"), nullable=True)
+    replacement_reason = Column(String, nullable=True)
+    created_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+
+
+class ThesisExaminerToken(Base):
+    __tablename__ = "thesis_examiner_tokens"
+    id = Column(String, primary_key=True)
+    assignment_id = Column(String, ForeignKey("thesis_examiner_assignments.id", ondelete="CASCADE"), nullable=False, index=True)
+    token_hash = Column(String, unique=True, nullable=False, index=True)
+    expires_at = Column(String, nullable=False)
+    accepted_at = Column(String, nullable=True)
+    revoked_at = Column(String, nullable=True)
+    revoked_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+
+
+class ThesisExaminerReport(Base):
+    __tablename__ = "thesis_examiner_reports"
+    __table_args__ = (UniqueConstraint("assignment_id", name="uq_thesis_examiner_report_assignment"),)
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    thesis_id = Column(String, ForeignKey("thesis_records.id", ondelete="CASCADE"), nullable=False, index=True)
+    examination_round_id = Column(String, ForeignKey("thesis_examination_rounds.id", ondelete="CASCADE"), nullable=False)
+    assignment_id = Column(String, ForeignKey("thesis_examiner_assignments.id", ondelete="CASCADE"), nullable=False)
+    rubric_version = Column(String, nullable=False)
+    rubric_response_json = Column(JSON, default=dict, nullable=False)
+    general_assessment = Column(String, nullable=True)
+    strengths = Column(String, nullable=True)
+    major_concerns = Column(String, nullable=True)
+    required_corrections_json = Column(JSON, default=list, nullable=False)
+    recommendation = Column(String, nullable=True)
+    confidential_comments = Column(String, nullable=True)
+    confidentiality_level = Column(String, default="COMMITTEE_ONLY", nullable=False)
+    thesis_fingerprint = Column(String, nullable=False)
+    report_fingerprint = Column(String, nullable=True)
+    status = Column(String, default="DRAFT", nullable=False)
+    submitted_at = Column(String, nullable=True)
+    created_at = Column(String, nullable=False)
+
+
+class ThesisDefenseSession(Base):
+    __tablename__ = "thesis_defense_sessions"
+    __table_args__ = (UniqueConstraint("examination_round_id", name="uq_thesis_defense_round"),)
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    thesis_id = Column(String, ForeignKey("thesis_records.id", ondelete="CASCADE"), nullable=False, index=True)
+    examination_round_id = Column(String, ForeignKey("thesis_examination_rounds.id", ondelete="CASCADE"), nullable=False)
+    scheduled_at = Column(String, nullable=False)
+    venue_type = Column(String, nullable=False)
+    venue_json = Column(JSON, default=dict, nullable=False)
+    attendance_json = Column(JSON, default=list, nullable=False)
+    status = Column(String, default="SCHEDULED", nullable=False)
+    thesis_fingerprint = Column(String, nullable=False)
+    created_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+
+
+class ThesisFinalVersion(Base):
+    __tablename__ = "thesis_final_versions"
+    __table_args__ = (UniqueConstraint("thesis_id", "version_type", name="uq_thesis_final_version_type"),)
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    thesis_id = Column(String, ForeignKey("thesis_records.id", ondelete="CASCADE"), nullable=False, index=True)
+    examination_round_id = Column(String, ForeignKey("thesis_examination_rounds.id", ondelete="RESTRICT"), nullable=False)
+    file_id = Column(String, ForeignKey("uploaded_files.id", ondelete="RESTRICT"), nullable=True)
+    content_snapshot_json = Column(JSON, nullable=False)
+    fingerprint = Column(String, nullable=False)
+    version_type = Column(String, default="FINAL_APPROVED_VERSION", nullable=False)
+    policy_snapshot_json = Column(JSON, nullable=False)
+    corrections_snapshot_json = Column(JSON, nullable=False)
+    frozen_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    frozen_at = Column(String, nullable=False)
+
+
+class ThesisFinalApproval(Base):
+    __tablename__ = "thesis_final_approvals"
+    __table_args__ = (UniqueConstraint("thesis_id", name="uq_thesis_final_approval"),)
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    thesis_id = Column(String, ForeignKey("thesis_records.id", ondelete="CASCADE"), nullable=False)
+    final_version_id = Column(String, ForeignKey("thesis_final_versions.id", ondelete="RESTRICT"), nullable=False)
+    status = Column(String, default="APPROVED", nullable=False)
+    approved_by = Column(String, ForeignKey("users.id", ondelete="RESTRICT"), nullable=False)
+    approved_at = Column(String, nullable=False)
+    rationale = Column(String, nullable=True)
+
+
+class ThesisDeposit(Base):
+    __tablename__ = "thesis_deposits"
+    __table_args__ = (UniqueConstraint("thesis_id", name="uq_thesis_deposit"),)
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    thesis_id = Column(String, ForeignKey("thesis_records.id", ondelete="CASCADE"), nullable=False)
+    final_version_id = Column(String, ForeignKey("thesis_final_versions.id", ondelete="RESTRICT"), nullable=False)
+    status = Column(String, default="PENDING", nullable=False)
+    repository_mode = Column(String, default="MANUAL", nullable=False)
+    repository_url = Column(String, nullable=True)
+    external_reference = Column(String, nullable=True)
+    embargo_json = Column(JSON, default=dict, nullable=False)
+    metadata_json = Column(JSON, default=dict, nullable=False)
+    clearance_json = Column(JSON, default=dict, nullable=False)
+    verified_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    verified_at = Column(String, nullable=True)
+
+
 class PromotionPolicy(Base):
     __tablename__ = "promotion_policies"
 

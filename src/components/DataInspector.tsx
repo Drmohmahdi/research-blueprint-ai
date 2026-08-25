@@ -3,6 +3,8 @@ import { useProject } from '../context/ProjectContext';
 import { AlertTriangle, CheckCircle2, Database } from 'lucide-react';
 import { apiInspectData } from '../utils/api';
 import { Button } from '../design-system/components/Button';
+import { EmptyState } from '../design-system/components/Feedback';
+import { PathPanel } from '../design-system/components/Navigation';
 
 export const DataInspector: React.FC = () => {
   const { activeProject, language } = useProject();
@@ -35,9 +37,11 @@ export const DataInspector: React.FC = () => {
 
   if (!activeProject) {
     return (
-      <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-8 shadow-sm text-center">
-        <p className="text-[var(--ds-text-secondary)] text-sm">{language === 'ar' ? 'الرجاء تحديد مشروع نشط أولاً.' : 'Please select an active project first.'}</p>
-      </div>
+      <EmptyState
+        illustration={<Database size={40} />}
+        title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No active project'}
+        description={language === 'ar' ? 'اختر مشروعًا نشطًا لفحص جودة البيانات.' : 'Select an active project to inspect data quality.'}
+      />
     );
   }
 
@@ -128,17 +132,29 @@ export const DataInspector: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
+      <PathPanel accent="var(--ds-path-data)">
+        <div className="space-y-1">
+          <h2 className="text-lg font-black text-ink m-0">
+            {language === 'ar' ? 'مدقق وفاحص جودة البيانات الميدانية' : 'Field Data Quality Inspector'}
+          </h2>
+          <p className="text-xs text-secondary m-0">
+            {language === 'ar'
+              ? 'افحص القيم المفقودة والمتطرفة وسلامة الفروض الإحصائية قبل التحليل الفعلي.'
+              : 'Inspect missing values, outliers, and test assumptions before analysis.'}
+          </p>
+        </div>
+      </PathPanel>
       {/* Upload zone mockup */}
       <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-6 shadow-sm space-y-4 text-center">
         <Database size={40} className="text-[var(--ds-primary)] mx-auto" />
         <div>
           <h3 className="text-md font-bold text-[var(--ds-text-primary)] m-0">
-            {language === 'ar' ? 'مدقق وفاحص جودة البيانات الميدانية' : 'Field Data Quality Inspector'}
+            {language === 'ar' ? 'رفع ملف البيانات' : 'Upload a data file'}
           </h3>
           <p className="text-xs text-[var(--ds-text-secondary)] mt-1 max-w-lg mx-auto">
             {language === 'ar'
-              ? 'ارفع ملف درجات الطلاب أو الاستبانة (CSV/XLSX) لفحص القيم المفقودة، المتطرفة، وسلامة الفروض الإحصائية قبل البدء في التحليل الفعلي.'
-              : 'Upload student scores or survey files (CSV/XLSX) to inspect for missing data, outliers, and test assumptions.'}
+              ? 'ارفع ملف درجات الطلاب أو الاستبانة (CSV/XLSX) لفحص الجودة قبل التحليل.'
+              : 'Upload student scores or survey files (CSV/XLSX) to inspect quality before analysis.'}
           </p>
         </div>
 
@@ -198,7 +214,7 @@ export const DataInspector: React.FC = () => {
               {language === 'ar' ? 'مؤشر جودة البيانات الفعلي' : 'Actual Data Quality Score'}
             </h4>
             <div className="w-20 h-20 rounded-full border-4 flex flex-col items-center justify-center" style={{ borderColor: `${qualityTone}33` }}>
-              <span className="text-2xl font-black" style={{ color: qualityTone }}>
+              <span className="text-2xl font-black ds-numeric" style={{ color: qualityTone }}>
                 {qualityScore}
               </span>
               <span className="text-[8px] text-[var(--ds-text-muted)] font-bold uppercase tracking-wider">/ 100</span>

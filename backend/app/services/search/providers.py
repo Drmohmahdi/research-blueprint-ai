@@ -619,6 +619,44 @@ class FileProvider(BaseProvider):
         return {"classification"}
 
 
+# ── THESIS (relationship-scoped; no confidential content is indexed) ─────────
+
+@register
+class ThesisProvider(BaseProvider):
+    domain = "THESIS"
+
+    def build_base(self, db, ctx):
+        query = db.query(models.ThesisRecord).filter(models.ThesisRecord.organization_id == ctx.organization.id)
+        if ctx.is_global_admin or (ctx.role or "").upper() in {"OWNER", "ORGANIZATION_ADMIN"}:
+            return query
+        assigned = select(models.ThesisSupervisionAssignment.thesis_id).where(
+            models.ThesisSupervisionAssignment.organization_id == ctx.organization.id,
+            models.ThesisSupervisionAssignment.user_id == ctx.user.id,
+            models.ThesisSupervisionAssignment.status == "ACTIVE",
+        )
+        return query.filter(or_(models.ThesisRecord.student_user_id == ctx.user.id, models.ThesisRecord.id.in_(assigned)))
+
+    def apply_q(self, query, ctx, q, q_norm, filters):
+        if not q: return query
+        pattern = f"%{escape_like(q_norm, _CHAR)}%"
+        return query.filter(or_(func.lower(models.ThesisRecord.title_ar).ilike(pattern, escape=_CHAR), func.lower(models.ThesisRecord.title_en).ilike(pattern, escape=_CHAR), func.lower(models.ThesisRecord.program_name).ilike(pattern, escape=_CHAR), func.lower(models.ThesisRecord.degree_type).ilike(pattern, escape=_CHAR)))
+
+    def apply_filters(self, query, ctx, filters):
+        if filters.get("degree_type"): query=query.filter(models.ThesisRecord.degree_type==filters["degree_type"])
+        if filters.get("thesis_stage"): query=query.filter(models.ThesisRecord.current_stage==filters["thesis_stage"])
+        return query
+
+    def order(self, query, sort, q_norm):
+        if sort == "title": return query.order_by(models.ThesisRecord.title_en.asc(), models.ThesisRecord.id.asc())
+        if sort == "oldest": return query.order_by(models.ThesisRecord.created_at.asc(), models.ThesisRecord.id.asc())
+        return query.order_by(models.ThesisRecord.updated_at.desc(), models.ThesisRecord.id.asc())
+
+    def project(self, row, ctx):
+        return schemas.SearchResultItem(domain=self.domain, entity_id=row.id, title=row.title_ar or row.title_en, subtitle=f"{row.degree_type} · {row.program_name}", snippet=None, status=row.current_stage, updated_at=row.updated_at, target=f"/organizations/{row.organization_id}/projects/{row.project_id}/paths/thesis-defense", metadata={"degreeType":row.degree_type,"stage":row.current_stage,"program":row.program_name})
+
+    def filters_whitelist(self): return {"degree_type", "thesis_stage"}
+
+
 # ── UnifiedSearchService ──────────────────────────────────────────────────────
 
 class UnifiedSearchService:

@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, X, Loader2, ChevronLeft, ChevronRight, FileText, FolderGit2, BookOpen, User as UserIcon, Award, ClipboardList, Database, Sparkles } from 'lucide-react';
+import { PathPanel } from '../design-system/components/Navigation';
+import { EmptyState } from '../design-system/components/Feedback';
 import { useProject } from '../context/ProjectContext';
 import {
   apiSearch,
@@ -147,13 +149,19 @@ export const SearchPage: React.FC = () => {
 
   return (
     <div dir={isAr ? 'rtl' : 'ltr'} className="max-w-5xl mx-auto px-4 py-6 space-y-5">
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <Sparkles size={20} className="text-[var(--ds-primary)]" />
-        <h2 className="text-lg font-black text-[var(--ds-text-primary)] m-0">
-          {isAr ? 'البحث الأكاديمي الموحد' : 'Unified Academic Search'}
-        </h2>
-      </div>
+      <PathPanel accent="var(--ds-path-research)">
+        <div className="flex items-center gap-2">
+          <Sparkles size={20} className="text-[var(--ds-primary)]" />
+          <div>
+            <h2 className="text-lg font-black text-ink m-0">
+              {isAr ? 'البحث الأكاديمي الموحد' : 'Unified Academic Search'}
+            </h2>
+            <p className="text-xs text-secondary font-medium m-0 mt-1">
+              {isAr ? 'ابحث عبر المشاريع والدراسات والأصول والملفات الأكاديمية من مكان واحد.' : 'Search projects, literature, assets, and academic profiles from one place.'}
+            </p>
+          </div>
+        </div>
+      </PathPanel>
 
       {/* Search input */}
       <label className="relative block">
@@ -241,7 +249,7 @@ export const SearchPage: React.FC = () => {
               setFilters((prev) => ({ ...prev, doi_present: e.target.checked }));
               setPage(1);
             }}
-            className="accent-[var(--ds-primary)]"
+            className="h-4 w-4 rounded border-[var(--ds-border-default)] text-[var(--ds-primary)] focus:ring-[var(--ds-primary)] cursor-pointer"
           />
           {isAr ? 'بمعرف DOI فقط' : 'Has DOI only'}
         </label>
@@ -254,7 +262,7 @@ export const SearchPage: React.FC = () => {
           <span>
             {data.total === 0
               ? isAr ? 'لا توجد نتائج' : 'No results'
-              : isAr ? `${data.total} نتيجة` : `${data.total} results`}
+              : <span className="ds-numeric">{isAr ? `${data.total} نتيجة` : `${data.total} results`}</span>}
           </span>
         )}
       </div>
@@ -268,17 +276,15 @@ export const SearchPage: React.FC = () => {
 
       {/* Empty state */}
       {!loading && !error && data && data.total === 0 && hasSearched && (
-        <div className="text-center py-14 space-y-2">
-          <div className="text-4xl opacity-40">🔍</div>
-          <p className="text-sm font-bold text-[var(--ds-text-secondary)]">
-            {query.length < 1
-              ? isAr ? 'أدخل استعلامًا للبحث، أو استخدم الفلاتر للتصفح.' : 'Enter a query to search, or use filters to browse.'
-              : isAr ? 'لا توجد نتائج مطابقة لبحثك.' : 'No results matched your search.'}
-          </p>
-          <p className="text-xs text-[var(--ds-text-muted)] font-semibold">
-            {isAr ? 'حاول بكلمات مختلفة أو عدّل الفلاتر.' : 'Try different keywords or adjust your filters.'}
-          </p>
-        </div>
+        <EmptyState
+          illustration={<Search size={40} />}
+          title={query.length < 1
+            ? (isAr ? 'ابدأ البحث أو التصفية' : 'Start a search or filter')
+            : (isAr ? 'لا توجد نتائج مطابقة' : 'No matching results')}
+          description={query.length < 1
+            ? (isAr ? 'أدخل استعلامًا للبحث، أو استخدم الفلاتر للتصفح.' : 'Enter a query to search, or use filters to browse.')
+            : (isAr ? 'حاول بكلمات مختلفة أو عدّل الفلاتر.' : 'Try different keywords or adjust your filters.')}
+        />
       )}
 
       {/* Results */}
@@ -330,7 +336,7 @@ export const SearchPage: React.FC = () => {
           >
             {isAr ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
           </button>
-          <span className="text-xs font-bold text-[var(--ds-text-secondary)]">
+          <span className="text-xs font-bold text-ink ds-numeric">
             {isAr ? `صفحة ${page} من ${totalPages}` : `Page ${page} of ${totalPages}`}
           </span>
           <button
@@ -346,7 +352,7 @@ export const SearchPage: React.FC = () => {
 
       {loading && (
         <div className="flex items-center justify-center py-10">
-          <Loader2 className="animate-spin text-[var(--ds-primary)]" size={22} />
+          <Loader2 className="motion-safe:animate-spin text-[var(--ds-primary)]" size={22} />
         </div>
       )}
     </div>

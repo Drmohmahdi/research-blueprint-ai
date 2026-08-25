@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { BarChart, Bar, LineChart, Line, RadarChart, Radar, PolarGrid, PolarAngleAxis, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend, LabelList } from 'recharts';
 import { TrendingUp, BarChart2, Target, Zap, ArrowUpRight, ArrowDownRight, Minus, Activity } from 'lucide-react';
+import { dsChartAxisTick, dsChartTooltipItemStyle, dsChartTooltipStyle } from '../design-system/components/ChartPrimitives';
 
 interface GroupComparisonChartProps {
   language: 'ar' | 'en';
@@ -114,7 +115,7 @@ export const GroupComparisonChart: React.FC<GroupComparisonChartProps> = ({
   }
 
   const interpretEffect = (d: number) => {
-    if (d >= 0.8) return { label: isArabic ? 'كبير' : 'Large', color: 'text-success bg-action/10' };
+    if (d >= 0.8) return { label: isArabic ? 'كبير' : 'Large', color: 'text-success bg-[var(--ds-success-soft)]' };
     if (d >= 0.5) return { label: isArabic ? 'متوسط' : 'Medium', color: 'text-warning bg-warning/10' };
     return { label: isArabic ? 'صغير' : 'Small', color: 'text-danger bg-danger/10' };
   };
@@ -141,7 +142,7 @@ export const GroupComparisonChart: React.FC<GroupComparisonChartProps> = ({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h3 className="text-lg font-bold text-[var(--ds-text-primary)] flex items-center gap-2">
-            <Activity className="w-5 h-5 text-ai" />
+            <Activity className="w-5 h-5 text-path-data" />
             {simulationData ? t.simData : t.noSimData}
           </h3>
           <p className="text-sm text-[var(--ds-text-secondary)] mt-1">
@@ -194,11 +195,12 @@ export const GroupComparisonChart: React.FC<GroupComparisonChartProps> = ({
                 </pattern>
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--ds-text-secondary)', fontSize: 12 }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--ds-text-secondary)', fontSize: 12 }} />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={dsChartAxisTick} />
+              <YAxis axisLine={false} tickLine={false} tick={dsChartAxisTick} />
               <RechartsTooltip 
-                contentStyle={{ backgroundColor: 'var(--ds-surface-elevated)', borderColor: 'var(--ds-border-default)', borderRadius: '0.5rem', color: 'var(--ds-text-primary)' }}
-                itemStyle={{ color: 'var(--ds-text-primary)' }}
+                contentStyle={dsChartTooltipStyle}
+                itemStyle={dsChartTooltipItemStyle}
+                labelStyle={{ color: '#FFFFFF', direction: 'ltr' }}
                 cursor={{ fill: 'var(--ds-surface-secondary)', opacity: 0.4 }}
               />
               <Bar dataKey="pre" name={t.pre} fill="url(#ds-bar-pre)" radius={[4, 4, 0, 0]} isAnimationActive={!reduceMotion}>
@@ -211,10 +213,12 @@ export const GroupComparisonChart: React.FC<GroupComparisonChartProps> = ({
           ) : activeTab === 'line' ? (
             <LineChart data={barData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--ds-text-secondary)', fontSize: 12 }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--ds-text-secondary)', fontSize: 12 }} />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={dsChartAxisTick} />
+              <YAxis axisLine={false} tickLine={false} tick={dsChartAxisTick} />
               <RechartsTooltip 
-                contentStyle={{ backgroundColor: 'var(--ds-surface-elevated)', borderColor: 'var(--ds-border-default)', borderRadius: '0.5rem', color: 'var(--ds-text-primary)' }}
+                contentStyle={dsChartTooltipStyle}
+                itemStyle={dsChartTooltipItemStyle}
+                labelStyle={{ color: '#FFFFFF', direction: 'ltr' }}
               />
               <Line type="monotone" dataKey="pre" name={`${t.pre} (solid)`} stroke={chartColors.pre} strokeWidth={3} strokeDasharray="0" dot={{ r: 5, strokeWidth: 2, fill: chartColors.pre }} isAnimationActive={!reduceMotion} />
               <Line type="monotone" dataKey="post" name={`${t.post} (dashed)`} stroke={chartColors.post} strokeWidth={3} strokeDasharray="7 4" dot={{ r: 4, strokeWidth: 2, fill: 'var(--ds-surface-primary)', stroke: chartColors.post }} isAnimationActive={!reduceMotion} />
@@ -223,12 +227,14 @@ export const GroupComparisonChart: React.FC<GroupComparisonChartProps> = ({
           ) : (
             <RadarChart outerRadius="80%" data={radarData}>
               <PolarGrid stroke={chartColors.grid} />
-              <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--ds-text-secondary)', fontSize: 12 }} />
+              <PolarAngleAxis dataKey="subject" tick={dsChartAxisTick} />
               <Radar name={`${t.control} (solid)`} dataKey={t.control} stroke={chartColors.control} fill={chartColors.control} fillOpacity={0.18} strokeWidth={2} isAnimationActive={!reduceMotion} />
               <Radar name={`${t.treatment} (dashed)`} dataKey={t.treatment} stroke={chartColors.treatment} fill={chartColors.treatment} fillOpacity={0.12} strokeDasharray="6 4" strokeWidth={2} isAnimationActive={!reduceMotion} />
               <Legend wrapperStyle={{ fontSize: '12px', color: 'var(--ds-text-secondary)' }} />
               <RechartsTooltip 
-                contentStyle={{ backgroundColor: 'var(--ds-surface-elevated)', borderColor: 'var(--ds-border-default)', borderRadius: '0.5rem', color: 'var(--ds-text-primary)' }}
+                contentStyle={dsChartTooltipStyle}
+                itemStyle={dsChartTooltipItemStyle}
+                labelStyle={{ color: '#FFFFFF', direction: 'ltr' }}
               />
             </RadarChart>
           )}

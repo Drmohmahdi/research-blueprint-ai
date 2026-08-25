@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card } from '../../../design-system/components/Card';
+import { EmptyState } from '../../../design-system/components/Feedback';
 import { History } from 'lucide-react';
 import type { usePredictorEngine } from '../usePredictorEngine';
 
@@ -27,7 +28,7 @@ export const PredictorHistoryPanel: React.FC<PredictorHistoryPanelProps> = ({ en
       
       <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
         {loadingRuns ? (
-          <div className="text-xs text-[var(--ds-text-muted)] italic py-2">
+          <div className="text-xs text-[var(--ds-text-muted)] py-2">
             {language === 'ar' ? 'جاري تحميل السجل...' : 'Loading history...'}
           </div>
         ) : (
@@ -38,7 +39,7 @@ export const PredictorHistoryPanel: React.FC<PredictorHistoryPanelProps> = ({ en
                 onClick={() => loadRunDetails(r.id)}
                 className={`w-full text-start p-2.5 rounded-lg border text-xs font-bold block transition-all cursor-pointer ${
                   selectedRun?.run?.id === r.id
-                    ? 'border-[var(--ds-primary)] bg-[var(--ds-primary-soft)] text-[var(--ds-primary)]'
+                    ? 'border-[var(--ds-primary)] bg-[var(--ds-primary-soft)] text-ink'
                     : 'border-[var(--ds-border-subtle)] hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)]'
                 }`}
               >
@@ -49,9 +50,12 @@ export const PredictorHistoryPanel: React.FC<PredictorHistoryPanelProps> = ({ en
               </button>
             ))}
             {runs.length === 0 && (
-              <div className="text-xs text-[var(--ds-text-muted)] italic py-2">
-                {language === 'ar' ? 'لا توجد عمليات سابقة.' : 'No previous prediction records.'}
-              </div>
+              <EmptyState
+                bare
+                className="py-3"
+                title={language === 'ar' ? 'لا توجد عمليات سابقة' : 'No previous runs'}
+                description={language === 'ar' ? 'ستظهر هنا تشغيلات التنبؤ بعد أول حساب.' : 'Forecast runs will appear here after the first calculation.'}
+              />
             )}
           </>
         )}

@@ -29,11 +29,14 @@ const LiteratureSynthesizer     = lazy(() => import('../components/LiteratureSyn
 const PrismaBuilder             = lazy(() => import('../components/PrismaBuilder').then(m => ({ default: m.PrismaBuilder })));
 const QualitativeLab            = lazy(() => import('../components/QualitativeLab').then(m => ({ default: m.QualitativeLab })));
 const PublicationReadinessReviewer = lazy(() => import('../components/PublicationReadinessReviewer').then(m => ({ default: m.PublicationReadinessReviewer })));
+const PublicationCommandCenter = lazy(() => import('../features/publication/PublicationCommandCenter'));
 const ResearchProgressDashboard   = lazy(() => import('../features/progress/ResearchProgressDashboard').then(m => ({ default: m.ResearchProgressDashboard })));
 const MethodologyChat             = lazy(() => import('../features/ai-assistant/MethodologyChat').then(m => ({ default: m.MethodologyChat })));
 const ReviewerDashboard           = lazy(() => import('../features/review-portal/ReviewerDashboard').then(m => ({ default: m.ReviewerDashboard })));
 const ExportPanel                 = lazy(() => import('../features/report-export/ExportPanel').then(m => ({ default: m.ExportPanel })));
 const SmokeTestDashboard        = lazy(() => import('../components/SmokeTestDashboard').then(m => ({ default: m.SmokeTestDashboard })));
+const ThesisOperationsCenter    = lazy(() => import('../features/thesis/ThesisOperationsCenter'));
+const GraduateStudiesDashboard  = lazy(() => import('../features/thesis/GraduateStudiesDashboard'));
 
 const DesignSystemUnavailable: React.FC = () => (
   <div className="p-6">
@@ -45,7 +48,7 @@ const NotFound: React.FC = () => {
   const { language } = useProject();
   return (
     <section className="mx-auto flex min-h-[45vh] max-w-xl flex-col items-center justify-center gap-4 text-center" aria-labelledby="not-found-title">
-      <span className="text-5xl font-black text-[var(--ds-primary)]" aria-hidden="true">404</span>
+      <span className="text-5xl font-black text-ink ds-numeric" aria-hidden="true">404</span>
       <h2 id="not-found-title" className="m-0 text-2xl font-extrabold text-[var(--ds-text-primary)]">
         {language === 'ar' ? 'الصفحة غير موجودة' : 'Page not found'}
       </h2>
@@ -138,6 +141,7 @@ export const AppRouter: React.FC = () => {
       <Route path={ROUTES.ASSISTANT}        element={<SafeRoute><MethodologyChat /></SafeRoute>} />
       {/* Publishing Module Routes */}
       <Route path={ROUTES.PUBLISHING}       element={<SafeRoute><PublicationReadinessReviewer /></SafeRoute>} />
+      <Route path={ROUTES.PUBLISHING}       element={<SafeRoute><PublicationCommandCenter /></SafeRoute>} />
       <Route path={ROUTES.REVIEW_SIM}       element={<SafeRoute><PublicationReadinessReviewer /></SafeRoute>} />
       <Route path={ROUTES.EXPORT}           element={<SafeRoute><ExportPanel /></SafeRoute>} />
 
@@ -205,6 +209,8 @@ export const AppRouter: React.FC = () => {
       {/* Thesis Defense Path Routes */}
       <Route path={ROUTES.THESIS_DEFENSE} element={<SafeRoute><ThesisDefenseWorkspace /></SafeRoute>} />
       <Route path={ROUTES.THESIS_DEFENSE_STEP} element={<SafeRoute><ThesisDefenseWorkspace /></SafeRoute>} />
+      <Route path={ROUTES.THESIS_OPERATIONS} element={<SafeRoute><ThesisOperationsCenter /></SafeRoute>} />
+      <Route path={ROUTES.GRADUATE_STUDIES} element={<SafeRoute><GraduateStudiesDashboard /></SafeRoute>} />
 
       {/* Explicit not-found experience; does not reveal resource existence. */}
       <Route path="*" element={<NotFound />} />

@@ -39,7 +39,7 @@ export const WorkspaceRiskPanel: React.FC<WorkspaceRiskPanelProps> = ({ engine }
   }
 
   return (
-    <Card className="p-5 border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] rounded-3xl space-y-3 shadow-sm">
+    <Card className="p-5 border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] rounded-2xl space-y-3 shadow-sm">
       <h5 className="text-xs font-black text-warning uppercase tracking-widest flex items-center gap-1.5 m-0">
         <AlertTriangle size={15} />
         <span>{language === 'ar' ? 'مؤشرات الأخطار والعيوب' : 'Methodology Risks'}</span>

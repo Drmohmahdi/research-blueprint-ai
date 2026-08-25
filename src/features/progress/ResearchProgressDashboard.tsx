@@ -11,6 +11,7 @@ import {
   Download
 } from 'lucide-react';
 import { Button } from '../../design-system/components/Button';
+import { EmptyState } from '../../design-system/components/Feedback';
 import { PathPanel } from '../../design-system/components/Navigation';
 import { ROUTES } from '../../router/routes';
 import { calculateProtocolHash } from '../../utils/protocolIntegrity';
@@ -58,9 +59,11 @@ export const ResearchProgressDashboard: React.FC = () => {
 
   if (!activeProject) {
     return (
-      <div className="flex items-center justify-center h-64 text-[var(--ds-text-muted)] text-sm">
-        {language === 'ar' ? 'اختر مشروعاً لعرض لوحة التحليلات' : 'Select a project to view analytics dashboard'}
-      </div>
+      <EmptyState
+        illustration={<TrendingUp size={40} />}
+        title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No active project'}
+        description={language === 'ar' ? 'اختر مشروعًا لعرض لوحة تقدم المسار البحثي.' : 'Select a project to view the research progress dashboard.'}
+      />
     );
   }
 
@@ -133,7 +136,7 @@ export const ResearchProgressDashboard: React.FC = () => {
         <div className="mt-8 space-y-2 max-w-xl">
           <div className="flex justify-between text-sm font-black">
             <span className="text-secondary">{language === 'ar' ? 'الإنجاز الكلي للمسار المنهجي' : 'Overall Path Progress'}</span>
-            <span className="text-[var(--ds-primary)]">{overallPercent}%</span>
+            <span className="text-ink ds-numeric">{overallPercent}%</span>
           </div>
           <div className="h-4 rounded-full bg-[var(--ds-surface-tertiary)] overflow-hidden border border-[var(--ds-border-subtle)]">
             <div
@@ -151,8 +154,8 @@ export const ResearchProgressDashboard: React.FC = () => {
           {/* Quick stats grid */}
           <div className="grid grid-cols-2 gap-3">
             {[
-              { labelAr: 'البيانات', labelEn: 'Data', value: `${dataCompletion}%`, color: dataCompletion >= 80 ? 'text-success' : 'text-warning' },
-              { labelAr: 'الخطوات', labelEn: 'Steps', value: `${completedInPath}/${totalSteps}`, color: 'text-ai' },
+              { labelAr: 'البيانات', labelEn: 'Data', value: `${dataCompletion}%`, color: dataCompletion >= 80 ? 'text-success ds-numeric' : 'text-warning ds-numeric' },
+              { labelAr: 'الخطوات', labelEn: 'Steps', value: `${completedInPath}/${totalSteps}`, color: 'text-ink ds-numeric' },
               { labelAr: 'التسجيل', labelEn: 'Pre-reg', value: preRegValue, color: protocolStatus === 'checking' ? 'text-warning' : hasPreReg ? 'text-success' : 'text-danger' },
               { labelAr: 'المسار', labelEn: 'Path', value: activePath ? (language === 'ar' ? activePath.titleAr.substring(0, 10) : activePath.titleEn.substring(0, 10)) : '—', color: 'text-[var(--ds-text-primary)]' },
             ].map((stat, i) => (
@@ -181,7 +184,7 @@ export const ResearchProgressDashboard: React.FC = () => {
 
                 return (
                   <div key={phase.id} className="flex items-center gap-3">
-                    <div className={`p-2 rounded-xl ${pct === 100 ? 'bg-action/10' : 'bg-[var(--ds-surface-secondary)]'}`}>
+                    <div className={`p-2 rounded-xl ${pct === 100 ? 'bg-[var(--ds-success-soft)]' : 'bg-[var(--ds-surface-secondary)]'}`}>
                       <Icon size={14} className={pct === 100 ? 'text-success' : 'text-[var(--ds-text-muted)]'} />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -189,12 +192,12 @@ export const ResearchProgressDashboard: React.FC = () => {
                         <span className="text-xs font-bold text-[var(--ds-text-primary)]">
                           {language === 'ar' ? phase.nameAr : phase.nameEn}
                         </span>
-                        <span className="text-[10px] font-bold text-[var(--ds-text-muted)]">{done}/{total}</span>
+                        <span className="text-[10px] font-bold text-[var(--ds-text-muted)] ds-numeric">{done}/{total}</span>
                       </div>
                       <div className="h-1.5 rounded-full bg-[var(--ds-surface-secondary)] overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all duration-500 ${
-                            pct === 100 ? 'bg-action' : pct > 0 ? 'bg-ai' : 'bg-transparent'
+                            pct === 100 ? 'bg-action' : pct > 0 ? 'bg-info' : 'bg-transparent'
                           }`}
                           style={{ width: `${pct}%` }}
                         />

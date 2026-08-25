@@ -5,3 +5,4 @@ export * from './FormControls';
 export * from './Feedback';
 export * from './Overlay';
 export * from './Navigation';
+export * from './ChartPrimitives';

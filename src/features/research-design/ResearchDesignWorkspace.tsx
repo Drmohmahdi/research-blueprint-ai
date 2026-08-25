@@ -11,7 +11,7 @@ import { ResearchNextAction } from './ResearchNextAction';
 import { ResearchRiskPanel } from './ResearchRiskPanel';
 import { ResearchPredictionPanel } from './ResearchPredictionPanel';
 import { ResearchCommentsPanel } from './ResearchCommentsPanel';
-import { SkeletonGrid } from '../../components/SkeletonCard';
+import { EmptyState } from '../../design-system/components/Feedback';
 
 export const ResearchDesignWorkspace: React.FC = () => {
   const { projectId, stepId } = useParams<{ projectId: string; stepId?: string }>();
@@ -52,9 +52,10 @@ export const ResearchDesignWorkspace: React.FC = () => {
 
   if (!activeProject) {
     return (
-      <div className="p-6">
-        <SkeletonGrid cards={4} />
-      </div>
+      <EmptyState
+        title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No active project'}
+        description={language === 'ar' ? 'اختر مشروعًا لفتح مساحة تصميم الدراسة.' : 'Select a project to open the study design workspace.'}
+      />
     );
   }
 

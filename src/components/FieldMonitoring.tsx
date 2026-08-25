@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Activity, AlertTriangle, CheckCircle2, ClipboardCheck, Plus, Users } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
 import { Button } from '../design-system/components/Button';
+import { EmptyState } from '../design-system/components/Feedback';
+import { PathPanel } from '../design-system/components/Navigation';
 import { ROUTES } from '../router/routes';
 import { calculateProtocolHash } from '../utils/protocolIntegrity';
 import { researchStorage } from '../utils/researchStorage';
@@ -195,16 +197,28 @@ export const FieldMonitoring: React.FC = () => {
 
   if (!activeProject) {
     return (
-      <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-8 shadow-sm text-center">
-        <p className="text-[var(--ds-text-secondary)] text-sm">
-          {language === 'ar' ? 'الرجاء تحديد مشروع نشط أولاً.' : 'Please select an active project first.'}
-        </p>
-      </div>
+      <EmptyState
+        illustration={<Activity size={40} />}
+        title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No active project'}
+        description={language === 'ar' ? 'اختر مشروعًا نشطًا لتوثيق التنفيذ الميداني.' : 'Select an active project to document field implementation.'}
+      />
     );
   }
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
+      <PathPanel accent="var(--ds-path-data)">
+        <div className="space-y-1">
+          <h2 className="text-lg font-black text-ink m-0">
+            {language === 'ar' ? 'المتابعة الميدانية وجمع البيانات' : 'Field Monitoring & Data Collection'}
+          </h2>
+          <p className="text-xs text-secondary m-0">
+            {language === 'ar'
+              ? 'وثّق التجنيد والجلسات والامتثال للبروتوكول المسجل قبل التحليل.'
+              : 'Record enrollment, sessions, and protocol compliance before analysis.'}
+          </p>
+        </div>
+      </PathPanel>
       {protocolStatus !== 'verified' ? (
         <div role="alert" className="bg-[var(--ds-warning-soft)] border border-[var(--ds-warning)]/25 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-start gap-3"><AlertTriangle size={18} className="shrink-0 text-[var(--ds-warning)] mt-0.5" /><div><h3 className="m-0 text-sm font-bold text-[var(--ds-text-primary)]">{language === 'ar' ? 'التنفيذ الميداني متوقف حتى التحقق من البروتوكول' : 'Field recording paused pending protocol verification'}</h3><p className="m-0 mt-1 text-xs leading-5 text-[var(--ds-text-secondary)]">{protocolStatus === 'missing' ? (language === 'ar' ? 'سجّل البروتوكول مسبقاً قبل توثيق التجنيد أو جلسات التنفيذ.' : 'Preregister the protocol before recording enrollment or field sessions.') : protocolStatus === 'mismatch' ? (language === 'ar' ? 'تغيرت الخطة بعد آخر تسجيل؛ سجّل مراجعة بروتوكول جديدة قبل متابعة التنفيذ.' : 'The plan changed after the latest registration; register a revised protocol before continuing execution.') : (language === 'ar' ? 'جارٍ التحقق من سلامة البروتوكول. ستُتاح الكتابة عند اكتمال التحقق.' : 'Protocol integrity is being verified. Recording will be enabled when verification completes.')}</p></div></div>
@@ -220,20 +234,20 @@ export const FieldMonitoring: React.FC = () => {
             <Users size={16} className="text-[var(--ds-primary)]" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-2xl font-black text-[var(--ds-text-primary)] m-0">
+            <h3 className="text-2xl font-black text-ink ds-numeric m-0">
               {enrolled} / {target}
             </h3>
             <div className="w-full bg-[var(--ds-surface-secondary)] h-2 rounded-full mt-2">
               <div className="bg-[var(--ds-primary)] h-2 rounded-full transition-all" style={{ width: `${progressPercent}%` }} />
             </div>
-            <span className="text-[10px] text-[var(--ds-text-muted)] font-bold block mt-1">
+              <span className="text-[10px] text-[var(--ds-text-muted)] font-bold block mt-1 ds-numeric">
               {progressPercent}% {language === 'ar' ? 'مكتمل' : 'Complete'}
             </span>
             <form onSubmit={handleUpdateEnrollment} noValidate className="flex items-center gap-2 pt-2">
               <label htmlFor="enrolled-count" className="text-[10px] text-[var(--ds-text-muted)] whitespace-nowrap">
                 {language === 'ar' ? 'العدد الحالي' : 'Current count'}
               </label>
-              <input id="enrolled-count" type="number" min="0" max={target} step="1" value={enrolledDraft} onChange={event => setEnrolledDraft(event.target.value)} className="w-20 rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-2 py-1 text-xs text-[var(--ds-text-primary)]" />
+              <input id="enrolled-count" type="number" min="0" max={target} step="1" value={enrolledDraft} onChange={event => setEnrolledDraft(event.target.value)} className="w-20 rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-2 py-1 text-xs text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" />
               <Button type="submit" variant="ghost" size="sm">
                 {language === 'ar' ? 'حفظ' : 'Save'}
               </Button>
@@ -248,7 +262,7 @@ export const FieldMonitoring: React.FC = () => {
             <ClipboardCheck size={16} className="text-[var(--ds-success)]" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-2xl font-black text-[var(--ds-success)] m-0">{fidelityScore}%</h3>
+            <h3 className="text-2xl font-black text-[var(--ds-success)] ds-numeric m-0">{fidelityScore}%</h3>
             <span className="text-[10px] text-[var(--ds-text-muted)] font-medium block">
               {language === 'ar' ? 'قياس مدى الالتزام ببروتوكول التجربة' : 'Measurement of experimental adherence'}
             </span>
@@ -261,7 +275,7 @@ export const FieldMonitoring: React.FC = () => {
             <Activity size={16} className="text-[var(--ds-warning)]" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-2xl font-black text-[var(--ds-warning)] m-0">{attritionRate.toFixed(0)}%</h3>
+            <h3 className="text-2xl font-black text-[var(--ds-warning)] ds-numeric m-0">{attritionRate.toFixed(0)}%</h3>
             <span className="text-[10px] text-[var(--ds-text-muted)] font-medium block">
               {language === 'ar' ? 'النسبة المعتمدة في الخطة' : 'Adherence rate in plan'}
             </span>
@@ -315,8 +329,8 @@ export const FieldMonitoring: React.FC = () => {
                   <tr key={`${row.sessionEn}-${row.date}-${index}`} className="hover:bg-[var(--ds-surface-secondary)] transition-colors">
                     <td className="p-3 font-semibold text-[var(--ds-text-primary)]">{language === 'ar' ? row.sessionAr : row.sessionEn}</td>
                     <td className="p-3 font-mono">{row.date}</td>
-                    <td className="p-3">{row.attendance}%</td>
-                    <td className="p-3">{row.compliance}%</td>
+                    <td className="p-3 ds-numeric text-ink">{row.attendance}%</td>
+                    <td className="p-3 ds-numeric text-ink">{row.compliance}%</td>
                     <td className="p-3">
                       <span className={row.protocolHash === activeProject.preRegistrationHash ? 'text-[var(--ds-success)] font-semibold' : 'text-[var(--ds-warning)] font-semibold'}>
                         {row.protocolHash === activeProject.preRegistrationHash
@@ -348,10 +362,10 @@ export const FieldMonitoring: React.FC = () => {
             <span>{language === 'ar' ? 'تسجيل جلسة جديدة' : 'Record a new session'}</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <input value={sessionName} onChange={event => setSessionName(event.target.value)} placeholder={language === 'ar' ? 'اسم الجلسة' : 'Session name'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)]" />
-            <input type="date" value={sessionDate} onChange={event => setSessionDate(event.target.value)} aria-label={language === 'ar' ? 'تاريخ الجلسة' : 'Session date'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)]" />
-            <input type="number" min="0" max="100" step="1" value={attendance} onChange={event => setAttendance(event.target.value)} placeholder={language === 'ar' ? 'الحضور %' : 'Attendance %'} aria-label={language === 'ar' ? 'نسبة الحضور' : 'Attendance percentage'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)]" />
-            <input type="number" min="0" max="100" step="1" value={compliance} onChange={event => setCompliance(event.target.value)} placeholder={language === 'ar' ? 'مطابقة المدرب %' : 'Trainer compliance %'} aria-label={language === 'ar' ? 'نسبة مطابقة المدرب' : 'Trainer compliance percentage'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)]" />
+            <input value={sessionName} onChange={event => setSessionName(event.target.value)} placeholder={language === 'ar' ? 'اسم الجلسة' : 'Session name'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" />
+            <input type="date" value={sessionDate} onChange={event => setSessionDate(event.target.value)} aria-label={language === 'ar' ? 'تاريخ الجلسة' : 'Session date'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" />
+            <input type="number" min="0" max="100" step="1" value={attendance} onChange={event => setAttendance(event.target.value)} placeholder={language === 'ar' ? 'الحضور %' : 'Attendance %'} aria-label={language === 'ar' ? 'نسبة الحضور' : 'Attendance percentage'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" />
+            <input type="number" min="0" max="100" step="1" value={compliance} onChange={event => setCompliance(event.target.value)} placeholder={language === 'ar' ? 'مطابقة المدرب %' : 'Trainer compliance %'} aria-label={language === 'ar' ? 'نسبة مطابقة المدرب' : 'Trainer compliance percentage'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" />
           </div>
           <Button type="submit" variant="secondary" size="sm" iconBefore={<Plus size={14} />}>
             {language === 'ar' ? 'إضافة إلى سجل التنفيذ' : 'Add to monitoring log'}

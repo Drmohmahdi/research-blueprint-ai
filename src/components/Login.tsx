@@ -159,7 +159,7 @@ export const Login: React.FC = () => {
       </div>
 
       {/* ── Login Glassmorphism Box ── */}
-      <div className="w-full max-w-4xl z-10 space-y-6 animate-fade-in">
+      <main className="w-full max-w-4xl z-10 space-y-6 animate-fade-in">
         
         {/* Main Content Layout */}
         <Card className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] shadow-[var(--ds-shadow-layered)] rounded-[32px] overflow-hidden grid grid-cols-1 lg:grid-cols-12">
@@ -364,7 +364,7 @@ export const Login: React.FC = () => {
               >
                 {isLoading ? (
                   <>
-                    <Loader2 size={14} className="animate-spin" />
+                    <Loader2 size={14} className="motion-safe:animate-spin" />
                     <span>{language === 'ar' ? 'جاري التحقق...' : 'Authenticating...'}</span>
                   </>
                 ) : (
@@ -394,7 +394,7 @@ export const Login: React.FC = () => {
 
           </div>
         </Card>
-      </div>
+      </main>
 
       {/* Styled Animations Injected */}
       <style>{`

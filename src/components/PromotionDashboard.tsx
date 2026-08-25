@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useProject } from '../context/ProjectContext';
 import { Card } from '../design-system/components/Card';
 import { Button } from '../design-system/components/Button';
+import { EmptyState } from '../design-system/components/Feedback';
 import { PathPanel } from '../design-system/components/Navigation';
 import { 
   Briefcase, 
@@ -205,7 +206,7 @@ export const PromotionDashboard: React.FC = () => {
   const pointsPercentage = pointsRequired > 0 ? Math.min(100, Math.round((pointsEarned / pointsRequired) * 100)) : 0;
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-16 animate-fade-in">
+    <div className="space-y-6 max-w-5xl mx-auto pb-16">
       
       {/* Persistence and Decision Support Banner */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-4 py-2.5 text-xs">
@@ -219,15 +220,15 @@ export const PromotionDashboard: React.FC = () => {
         <div className="flex items-center gap-3">
           {isLoading && (
             <span className="flex items-center gap-1.5 text-[var(--ds-primary)] font-medium">
-              <RefreshCw size={13} className="animate-spin" />
+              <RefreshCw size={13} className="motion-safe:animate-spin" />
               {isAr ? 'جارٍ التحديث...' : 'Updating...'}
             </span>
           )}
           {application?.status && (
             <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-              application.status === 'SUBMITTED' ? 'bg-info/10 text-path-publication border border-info/20' :
+              application.status === 'SUBMITTED' ? 'bg-[var(--ds-information-soft)] text-[var(--ds-information)] border border-info/20' :
               application.status === 'UNDER_REVIEW' ? 'bg-warning/10 text-warning border border-warning/20' :
-              application.status === 'COMPLETED' ? 'bg-action/10 text-success border border-success/20' :
+              application.status === 'COMPLETED' ? 'bg-[var(--ds-success-soft)] text-success border border-success/20' :
               'bg-muted/10 text-secondary border border-muted/20'
             }`}>
               {application.status}
@@ -313,7 +314,7 @@ export const PromotionDashboard: React.FC = () => {
           <Button
             onClick={() => handleRankSwitch(targetRank)}
             variant="primary"
-            className="bg-warning hover:bg-[var(--ds-accent-gold-hover)] text-white font-bold text-xs"
+            className="font-bold text-xs"
           >
             {isAr ? 'بدء إعداد ملف الترقية الآن' : 'Initialize Promotion Portfolio'}
           </Button>
@@ -344,10 +345,10 @@ export const PromotionDashboard: React.FC = () => {
                     strokeLinecap="round" />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-2xl font-black text-warning">
+                  <span className={`text-2xl font-black ds-numeric ${readinessScore >= 100 ? 'text-success' : 'text-warning'}`}>
                     {readinessScore}%
                   </span>
-                  <span className="text-[9px] text-[var(--ds-text-muted)] font-bold">
+                  <span className="text-[9px] text-[var(--ds-text-muted)] font-bold ds-numeric">
                     {evaluation?.criteria_results.filter(c => c.status === 'SATISFIED').length || 0} / {evaluation?.criteria_results.length || activePolicy?.criteria.length || 4}
                   </span>
                 </div>
@@ -361,7 +362,7 @@ export const PromotionDashboard: React.FC = () => {
               </span>
               
               <div className="space-y-1">
-                <span className="text-3xl font-black text-warning block">
+                <span className={`text-3xl font-black ds-numeric block ${pointsEarned >= pointsRequired ? 'text-success' : 'text-warning'}`}>
                   {pointsEarned.toFixed(1)}
                 </span>
                 <span className="text-xs text-[var(--ds-text-secondary)] font-bold block">
@@ -370,7 +371,7 @@ export const PromotionDashboard: React.FC = () => {
               </div>
               
               <div className="w-full bg-[var(--ds-surface-secondary)] rounded-full h-2 overflow-hidden">
-                <div className="bg-warning h-full rounded-full transition-all duration-500" style={{ width: `${pointsPercentage}%` }} />
+                <div className={`h-full rounded-full transition-all duration-500 ${pointsEarned >= pointsRequired ? 'bg-[var(--ds-success)]' : 'bg-warning'}`} style={{ width: `${pointsPercentage}%` }} />
               </div>
             </Card>
           </div>
@@ -386,9 +387,9 @@ export const PromotionDashboard: React.FC = () => {
                 type="button"
                 onClick={handleEvaluateNow}
                 disabled={isEvaluating}
-                className="flex items-center gap-1 text-[11px] text-[var(--ds-primary)] hover:underline cursor-pointer font-bold"
+                className="flex items-center gap-1 text-[11px] text-action hover:underline cursor-pointer font-bold"
               >
-                <RefreshCw size={12} className={isEvaluating ? 'animate-spin' : ''} />
+                <RefreshCw size={12} className={isEvaluating ? 'motion-safe:animate-spin' : ''} />
                 <span>{isAr ? 'إعادة التقييم' : 'Re-Evaluate'}</span>
               </button>
             </div>
@@ -405,7 +406,7 @@ export const PromotionDashboard: React.FC = () => {
                         {isAr ? item.title_ar : item.title_en}
                       </span>
                       {item.status === 'SATISFIED' ? (
-                        <div className="flex items-center gap-1 text-[10px] font-bold text-success bg-action/10 border border-success/20 px-2 py-0.5 rounded-lg">
+                        <div className="flex items-center gap-1 text-[10px] font-bold text-success bg-[var(--ds-success-soft)] border border-success/20 px-2 py-0.5 rounded-lg">
                           <CheckCircle2 size={13} className="text-success shrink-0" />
                           <span>{isAr ? 'مستوفى' : 'Satisfied'}</span>
                         </div>
@@ -465,7 +466,7 @@ export const PromotionDashboard: React.FC = () => {
                   disabled={isSubmitting || (application?.evidence_selections.length || 0) === 0}
                   variant="primary"
                   size="sm"
-                  className="bg-warning hover:bg-[var(--ds-accent-gold-hover)] text-white shrink-0"
+                  className="shrink-0"
                   iconBefore={<Send size={13} />}
                 >
                   <span>{isAr ? 'تقديم الملف للجنة الترقية' : 'Submit to Committee'}</span>
@@ -492,9 +493,13 @@ export const PromotionDashboard: React.FC = () => {
             
             <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
               {!application?.evidence_selections || application.evidence_selections.length === 0 ? (
-                <p className="text-xs text-[var(--ds-text-muted)] text-center py-4">
-                  {isAr ? 'لم يتم إدراج أي أوراق علمية في الملف بعد.' : 'No scholarly assets attached to dossier yet.'}
-                </p>
+                <EmptyState
+                  bare
+                  className="py-4"
+                  illustration={<BookOpen size={28} />}
+                  title={isAr ? 'لا توجد أوراق في الملف' : 'No papers in the dossier'}
+                  description={isAr ? 'أدرج بحثًا موثَّقًا من أصولك العلمية لتقييم جاهزية الترقية.' : 'Attach a verified scholarly asset to evaluate promotion readiness.'}
+                />
               ) : (
                 application.evidence_selections.map(ev => {
                   const snap = ev.evidence_snapshot_json || {};
@@ -556,7 +561,7 @@ export const PromotionDashboard: React.FC = () => {
                     <select
                       value={selectedAssetId}
                       onChange={e => setSelectedAssetId(e.target.value)}
-                      className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl p-2 text-xs font-bold text-[var(--ds-text-primary)] focus:outline-none"
+                      className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl p-2 text-xs font-bold text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                     >
                       <option value="">{isAr ? '-- اختر ورقة علمية --' : '-- Select a Paper --'}</option>
                       {availableAssets.map(asset => (
@@ -566,9 +571,12 @@ export const PromotionDashboard: React.FC = () => {
                       ))}
                     </select>
                   ) : (
-                    <p className="text-[11px] text-[var(--ds-text-muted)]">
-                      {isAr ? 'جميع أبحاثك الموثقة مدرجة بالملف، أو لا توجد أبحاث مسجلة بعد.' : 'All verified assets already added, or none available.'}
-                    </p>
+                    <EmptyState
+                      bare
+                      className="py-2"
+                      title={isAr ? 'لا أوراق متاحة للإضافة' : 'No papers left to add'}
+                      description={isAr ? 'جميع أبحاثك الموثقة مدرجة بالملف، أو لم تُسجَّل أبحاث بعد.' : 'All verified assets are already in the dossier, or none are registered yet.'}
+                    />
                   )}
                 </div>
 
@@ -576,7 +584,7 @@ export const PromotionDashboard: React.FC = () => {
                   type="submit"
                   disabled={!selectedAssetId || isLoading}
                   variant="primary"
-                  className="w-full flex items-center justify-center gap-1.5 font-bold text-xs rounded-xl mt-2 bg-warning hover:bg-[var(--ds-accent-gold-hover)]"
+                  className="w-full flex items-center justify-center gap-1.5 font-bold text-xs rounded-xl mt-2"
                 >
                   <Plus size={14} />
                   <span>{isAr ? 'إدراج الورقة واحتساب النقاط' : 'Add Paper & Score Points'}</span>

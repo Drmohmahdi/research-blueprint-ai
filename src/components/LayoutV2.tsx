@@ -38,7 +38,8 @@ import {
   ClipboardList,
   Ruler,
   BarChart3,
-  Search
+  Search,
+  GraduationCap
 } from 'lucide-react';
 import { GuidedFlowSidebar } from '../features/guided-flow/GuidedFlowSidebar';
 import { SupervisorPanel } from '../features/comments/SupervisorPanel';
@@ -145,6 +146,8 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
           items: [
             { id: 'dashboard', labelAr: 'لوحة التحكم', labelEn: 'Dashboard', icon: LayoutDashboard },
             { id: 'lifecycle', labelAr: 'دورة حياة البحث', labelEn: 'Research Lifecycle', icon: GitBranch },
+            { id: 'thesisOperations', labelAr: 'تشغيل الرسالة العلمية', labelEn: 'Thesis operations', icon: GraduationCap },
+            { id: 'graduateStudies', labelAr: 'عمليات الدراسات العليا', labelEn: 'Graduate Studies', icon: ClipboardList },
             { id: 'decisionCenter', labelAr: 'مركز قرارات البحث', labelEn: 'Research Decision Center', icon: GitBranch },
             { id: 'planning', labelAr: 'خطة البحث', labelEn: 'Research Plan', icon: ClipboardList },
             { id: 'pathSelector', labelAr: 'اختيار المسار', labelEn: 'Path Selector', icon: Map },
@@ -386,6 +389,8 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
       portal: { ar: 'البوابة الرئيسية', en: 'Portal Gateway' },
       dashboard: { ar: 'لوحة التحكم', en: 'Dashboard' },
       lifecycle: { ar: 'مركز قيادة المشروع', en: 'Project Command Center' },
+      thesisOperations: { ar: 'تشغيل الرسالة العلمية', en: 'Thesis operations' },
+      graduateStudies: { ar: 'عمليات الدراسات العليا', en: 'Graduate Studies' },
       decisionCenter: { ar: 'مركز قرارات البحث', en: 'Research Decision Center' },
       planning: { ar: 'خطة البحث', en: 'Research Plan' },
       pathSelector: { ar: 'اختيار المسار', en: 'Path Selector' },
@@ -460,7 +465,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
               {language === 'ar' ? 'ب' : 'B'}
             </div>
             <div className="min-w-0">
-              <div className="max-w-[92px] truncate text-xs font-black leading-none tracking-tight text-[var(--ds-text-primary)] min-[380px]:max-w-[130px] sm:max-w-none sm:text-base">
+              <div className="max-w-[92px] truncate text-xs font-black leading-none tracking-tight text-[var(--ds-text-primary)] min-[380px]:max-w-[130px] sm:max-w-[180px] lg:max-w-none sm:text-base">
                 {getTranslation(language, 'title')}
               </div>
               <p className="text-[10px] text-[var(--ds-text-muted)] m-0 mt-1.5 hidden sm:block font-bold">
@@ -654,7 +659,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
                             aria-current={isActive ? 'page' : undefined}
                             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold ds-transition relative group cursor-pointer ${
                               isActive
-                                ? 'bg-[var(--ds-primary-soft)] text-[var(--ds-primary-active)] dark:text-[var(--ds-primary)] border border-[var(--ds-primary)]/25'
+                                ? 'bg-[var(--ds-primary-soft)] text-ink border border-[var(--ds-primary)]/25'
                                 : 'text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-secondary)] border border-transparent'
                             }`}
                           >
@@ -738,7 +743,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
                           }}
                           className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold border ${
                             isActive
-                              ? 'bg-[var(--ds-primary-soft)] text-[var(--ds-primary-active)] dark:text-[var(--ds-primary)] border-[var(--ds-primary)]/30'
+                              ? 'bg-[var(--ds-primary-soft)] text-ink border-[var(--ds-primary)]/30'
                               : 'text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-secondary)] border-transparent'
                           }`}
                         >
@@ -770,8 +775,8 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
             </div>
             
             {activeProject?.activePathId && pathname.startsWith('/app/research') && (
-              <div className="px-3.5 py-1.5 rounded-lg bg-[var(--ds-primary-soft)] border border-[var(--ds-primary)]/20 text-xs font-bold text-[var(--ds-primary)] flex items-center gap-1.5 shrink-0">
-                <Sparkles size={13} />
+              <div className="px-3.5 py-1.5 rounded-lg bg-[var(--ds-primary-soft)] border border-[var(--ds-primary)]/20 text-xs font-bold text-ink flex items-center gap-1.5 shrink-0">
+                <Sparkles size={13} className="text-[var(--ds-primary)]" />
                 <span>{language === 'ar' ? 'المسار:' : 'Path:'} {activeProject.activePathId}</span>
               </div>
             )}
@@ -801,13 +806,13 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
                           isPassed 
                             ? 'bg-[var(--ds-success-soft)] text-[var(--ds-success)] border-[var(--ds-success)]/30' 
                             : isCurrent 
-                              ? 'bg-action text-on-action border-[var(--ds-action-fill)] ring-4 ring-[var(--ds-primary-soft)]'
+                              ? 'bg-[var(--ds-primary-soft)] text-ink border-[var(--ds-primary)]/30 ring-4 ring-[var(--ds-primary-soft)]'
                               : 'bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-muted)] border-[var(--ds-border-default)]'
                         }`}>
                           {idx + 1}
                         </div>
                         <span className={`text-[10px] font-bold ${
-                          isPassed ? 'text-[var(--ds-success)]' : isCurrent ? 'text-[var(--ds-primary)] font-extrabold' : 'text-[var(--ds-text-muted)]'
+                          isPassed ? 'text-[var(--ds-success)]' : isCurrent ? 'text-ink font-extrabold' : 'text-[var(--ds-text-muted)]'
                         }`}>
                           {language === 'ar' ? stage.labelAr : stage.labelEn}
                         </span>

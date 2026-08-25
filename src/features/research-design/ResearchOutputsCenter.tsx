@@ -97,7 +97,7 @@ export const ResearchOutputsCenter: React.FC<ResearchOutputsCenterProps> = ({ pr
   return (
     <div className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-[var(--ds-primary)] font-bold text-xs">
+        <div className="flex items-center gap-2 text-ink font-bold text-xs">
           <FileText size={16} />
           <span>{isAr ? 'مركز المخرجات والتقارير النهائي' : 'Outputs & Reports Center'}</span>
         </div>

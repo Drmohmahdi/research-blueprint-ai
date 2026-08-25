@@ -178,8 +178,12 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   });
 
   const [user, setUser] = useState<{ id?: string; username: string; role: string } | null>(() => {
-    const saved = localStorage.getItem('rb_user');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem('rb_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
   });
 
   const [projects, setProjects] = useState<ResearchProject[]>(() => {
@@ -187,8 +191,12 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (!legacyResearchStorageEnabled || localStorage.getItem('rb_secure_mode') === 'true') {
       return [defaultProject];
     }
-    const saved = researchStorage.getItem('rb_projects');
-    return saved ? JSON.parse(saved) : [defaultProject];
+    try {
+      const saved = researchStorage.getItem('rb_projects');
+      return saved ? JSON.parse(saved) : [defaultProject];
+    } catch {
+      return [defaultProject];
+    }
   });
   
   const [activeProject, setActiveProjectState] = useState<ResearchProject | null>(null);

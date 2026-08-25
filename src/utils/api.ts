@@ -175,6 +175,125 @@ export async function apiLogin(username: string, password: string): Promise<{ to
   return null;
 }
 
+export async function apiPublicationCommandCenter(assetId: string): Promise<any | null> {
+  const res = await fetch(`${API_BASE_URL}/publication-intelligence/assets/${encodeURIComponent(assetId)}/command-center`, { headers: getHeaders() });
+  if (res.ok) return res.json();
+  if (res.status === 404) return null;
+  throw new Error(`Publication command center failed (${res.status})`);
+}
+
+export async function apiCreateManuscriptVersion(assetId: string, articleType: string): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/publication-intelligence/assets/${encodeURIComponent(assetId)}/versions`, {
+    method: 'POST', headers: getHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ article_type: articleType, dependencies: [] })
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function apiThesisForProject(projectId: string): Promise<{ id: string } | null> {
+  const res = await fetch(`${API_BASE_URL}/theses/projects/${encodeURIComponent(projectId)}`, { headers: getHeaders() });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Thesis lookup failed (${res.status})`);
+  return res.json();
+}
+
+export async function apiThesisCommandCenter(thesisId: string): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/theses/${encodeURIComponent(thesisId)}/command-center`, { headers: getHeaders() });
+  if (!res.ok) throw new Error(`Thesis command center failed (${res.status})`);
+  return res.json();
+}
+
+export async function apiExternalThesisPortal(token: string): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/external-thesis-examiners/portal/${encodeURIComponent(token)}`);
+  if (!res.ok) throw new Error(res.status === 401 ? 'EXPIRED_OR_REVOKED' : 'INVALID_INVITATION');
+  return res.json();
+}
+
+export async function apiExternalThesisRespond(token: string, accept: boolean, coiDisclosure: Record<string, unknown>): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/external-thesis-examiners/portal/${encodeURIComponent(token)}/respond`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({accept,coi_disclosure:coiDisclosure}) });
+  if (!res.ok) throw new Error(await res.text()); return res.json();
+}
+
+export async function apiExternalThesisReport(token: string, payload: Record<string, unknown>): Promise<any> {
+  const base=`${API_BASE_URL}/external-thesis-examiners/portal/${encodeURIComponent(token)}/report`;
+  const saved=await fetch(base,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); if(!saved.ok) throw new Error(await saved.text());
+  const submitted=await fetch(`${base}/submit`,{method:'POST'}); if(!submitted.ok) throw new Error(await submitted.text()); return submitted.json();
+}
+
+export async function apiThesisCommittee(thesisId: string): Promise<any[]> {
+  const res = await fetch(`${API_BASE_URL}/theses/${encodeURIComponent(thesisId)}/committee`, { headers: getHeaders() });
+  if (!res.ok) throw new Error(`Committee lookup failed (${res.status})`);
+  return res.json();
+}
+
+export async function apiThesisCorrections(thesisId: string): Promise<any[]> {
+  const res = await fetch(`${API_BASE_URL}/theses/${encodeURIComponent(thesisId)}/corrections`, { headers: getHeaders() });
+  if (!res.ok) throw new Error(`Corrections lookup failed (${res.status})`);
+  return res.json();
+}
+
+export async function apiRespondThesisCorrection(thesisId: string, correctionId: string, payload: Record<string, unknown>): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/theses/${encodeURIComponent(thesisId)}/corrections/${encodeURIComponent(correctionId)}/respond`, { method: 'POST', headers: getHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(payload) });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function apiVerifyThesisCorrection(thesisId: string, correctionId: string): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/theses/${encodeURIComponent(thesisId)}/corrections/${encodeURIComponent(correctionId)}/verify`, { method: 'POST', headers: getHeaders() });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function apiThesisGraduateOperations(): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/theses/operations/summary`, { headers: getHeaders() });
+  if (res.status === 403) return null;
+  if (!res.ok) throw new Error(`Graduate operations failed (${res.status})`);
+  return res.json();
+}
+
+export async function apiApproveThesisFinal(thesisId: string, finalVersionId: string, rationale?: string): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/theses/${encodeURIComponent(thesisId)}/final-approval`, { method: 'POST', headers: getHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ final_version_id: finalVersionId, rationale }) });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function apiAddThesisCommitteeMember(thesisId: string, payload: Record<string, unknown>): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/theses/${encodeURIComponent(thesisId)}/committee`, { method: 'POST', headers: getHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(payload) });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function apiThesisCoiDecision(thesisId: string, memberId: string, decision: string, reason: string): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/theses/${encodeURIComponent(thesisId)}/committee/${encodeURIComponent(memberId)}/coi-decision`, { method: 'POST', headers: getHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ decision, reason }) });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function apiAddThesisCorrection(thesisId: string, payload: Record<string, unknown>): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/theses/${encodeURIComponent(thesisId)}/corrections`, { method: 'POST', headers: getHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(payload) });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function apiFreezeThesisFinal(thesisId: string, examinationRoundId: string, content: Record<string, unknown>): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/theses/${encodeURIComponent(thesisId)}/final-version`, { method: 'POST', headers: getHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ examination_round_id: examinationRoundId, content }) });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function apiAddThesisDeposit(thesisId: string, payload: Record<string, unknown>): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/theses/${encodeURIComponent(thesisId)}/deposit`, { method: 'POST', headers: getHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(payload) });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function apiUpdateThesisDepositClearance(thesisId: string, payload: Record<string, unknown>): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/theses/${encodeURIComponent(thesisId)}/deposit/clearance`, { method: 'PATCH', headers: getHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(payload) });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
 export type LifecycleStage = {
   key: string;
   status: 'NOT_STARTED' | 'AVAILABLE' | 'IN_PROGRESS' | 'BLOCKED' | 'READY_FOR_HANDOFF' | 'HANDED_OFF' | 'COMPLETED' | 'STALE' | 'NOT_REQUIRED' | 'DEFERRED_CAPABILITY';

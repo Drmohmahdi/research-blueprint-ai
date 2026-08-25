@@ -41,7 +41,7 @@ export const ResearchDesignHeader: React.FC<ResearchDesignHeaderProps> = ({
             <h2 className="text-lg font-bold text-[var(--ds-text-primary)]">
               {isAr ? 'تصميم دراسة جديدة' : 'New Study Design'}
             </h2>
-            <span className="px-2 py-0.5 text-xs rounded-full font-semibold bg-ai/10 text-ai">
+            <span className="px-2 py-0.5 text-xs rounded-full font-semibold bg-[var(--ds-primary-soft)] text-ink">
               {activeStepTitle}
             </span>
           </div>
@@ -80,7 +80,7 @@ export const ResearchDesignHeader: React.FC<ResearchDesignHeaderProps> = ({
         {/* Save Status & Button */}
         <div className="flex items-center gap-2">
           {isSaving && (
-            <span className="text-xs text-[var(--ds-text-secondary)] animate-pulse">
+            <span className="text-xs text-[var(--ds-text-secondary)] motion-safe:animate-pulse">
               {isAr ? 'جاري الحفظ...' : 'Saving...'}
             </span>
           )}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card } from '../../../design-system/components/Card';
 import { Button } from '../../../design-system/components/Button';
+import { EmptyState } from '../../../design-system/components/Feedback';
 import { MetricCard } from '../../../design-system/components/MetricCard';
 import { 
   Scale, 
@@ -12,7 +13,8 @@ import {
   CheckCircle2, 
   GitBranch, 
   Sparkles, 
-  LineChart 
+  LineChart,
+  Gauge
 } from 'lucide-react';
 import type { usePredictorEngine } from '../usePredictorEngine';
 
@@ -52,17 +54,18 @@ export const PredictorResultsPanel: React.FC<PredictorResultsPanelProps> = ({ en
 
   if (!selectedRun) {
     return (
-      <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-16 text-center text-[var(--ds-text-muted)] italic text-xs">
-        {language === 'ar'
-          ? 'الرجاء اختيار مصدر البيانات ومستوى الدلالة من القائمة الجانبية، ثم الضغط على "حساب التنبؤ المنهجي".'
-          : 'Please configure parameters on the left and trigger prediction calculation.'}
-      </div>
+      <EmptyState
+        illustration={<Gauge size={40} />}
+        title={language === 'ar' ? 'لم يُشغَّل التنبؤ بعد' : 'No prediction run yet'}
+        description={language === 'ar'
+          ? 'اختر مصدر البيانات ومستوى الدلالة من القائمة الجانبية، ثم اضغط «حساب التنبؤ المنهجي».'
+          : 'Configure the data source and significance level on the left, then run the methodological forecast.'}
+      />
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* V2 Metric Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* 1. Effect Size Forecast */}
         <MetricCard
@@ -109,7 +112,7 @@ export const PredictorResultsPanel: React.FC<PredictorResultsPanelProps> = ({ en
             <div>
               <div className="flex justify-between text-[11px] font-bold mb-1">
                 <span>{language === 'ar' ? 'نسبة الاحتفاظ بالطلاب (Retention Rate):' : 'Retention Rate:'}</span>
-                <span className="text-[var(--ds-success)] font-extrabold">{((getNestedForecast('completion')?.pointEstimate ?? 0.85) * 100).toFixed(0)}%</span>
+                <span className="text-[var(--ds-success)] font-extrabold ds-numeric">{((getNestedForecast('completion')?.pointEstimate ?? 0.85) * 100).toFixed(0)}%</span>
               </div>
               <div className="h-1.5 w-full bg-[var(--ds-surface-secondary)] rounded-full overflow-hidden">
                 <div className="h-full bg-[var(--ds-success)]" style={{ width: `${(getNestedForecast('completion')?.pointEstimate ?? 0.85) * 100}%` }} />
@@ -119,7 +122,7 @@ export const PredictorResultsPanel: React.FC<PredictorResultsPanelProps> = ({ en
             <div>
               <div className="flex justify-between text-[11px] font-bold mb-1">
                 <span>{language === 'ar' ? 'مؤشر التزام المعلمين بالخطة (Fidelity):' : 'Intervention Fidelity:'}</span>
-                <span className="text-[var(--ds-primary)] font-extrabold">{((getNestedForecast('fidelity')?.pointEstimate ?? 0.90) * 100).toFixed(0)}%</span>
+                <span className="text-ink ds-numeric font-extrabold">{((getNestedForecast('fidelity')?.pointEstimate ?? 0.90) * 100).toFixed(0)}%</span>
               </div>
               <div className="h-1.5 w-full bg-[var(--ds-surface-secondary)] rounded-full overflow-hidden">
                 <div className="h-full bg-[var(--ds-primary)]" style={{ width: `${(getNestedForecast('fidelity')?.pointEstimate ?? 0.90) * 100}%` }} />
@@ -139,7 +142,7 @@ export const PredictorResultsPanel: React.FC<PredictorResultsPanelProps> = ({ en
           <div className="space-y-2 text-xs">
             <div className="flex justify-between items-center">
               <span className="text-[11px] text-[var(--ds-text-secondary)] font-semibold">{language === 'ar' ? 'مؤشر الخطورة الكلي:' : 'Risk index score:'}</span>
-              <span className="text-sm font-black text-[var(--ds-danger)]">{getNestedForecast('risk')?.score ?? 20}/100</span>
+              <span className="text-sm font-black text-[var(--ds-danger)] ds-numeric">{getNestedForecast('risk')?.score ?? 20}/100</span>
             </div>
             {getNestedForecast('risk')?.reasons?.length > 0 ? (
               <div className="space-y-1 text-[11px] text-[var(--ds-danger)]">
@@ -169,7 +172,7 @@ export const PredictorResultsPanel: React.FC<PredictorResultsPanelProps> = ({ en
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
             <div className="text-center p-4 bg-[var(--ds-surface-secondary)] rounded-lg">
               <span className="text-[10px] font-bold text-[var(--ds-text-muted)] uppercase block mb-1">{language === 'ar' ? 'معيار الجاهزية للنشر' : 'Readiness Index'}</span>
-              <span className="text-3xl font-black text-[var(--ds-primary)]">{getNestedForecast('readiness').score}%</span>
+              <span className="text-3xl font-black text-ink ds-numeric">{getNestedForecast('readiness').score}%</span>
             </div>
             <div className="md:col-span-2 text-xs space-y-2">
               {getNestedForecast('readiness').positives.map((p: string, idx: number) => (
@@ -216,11 +219,11 @@ export const PredictorResultsPanel: React.FC<PredictorResultsPanelProps> = ({ en
                       ? sc.scenarioName.replace('Null Effect', 'انعدام التأثير').replace('Conservative', 'المحافظ').replace('Expected', 'المتوقع النموذجي').replace('Optimistic', 'المتفائل').replace('Worst Case', 'الأسوأ خطورة')
                       : sc.scenarioName}
                   </td>
-                  <td className="py-3 font-semibold">{sc.expectedEffectSize.toFixed(2)}</td>
-                  <td className="py-3 font-bold text-[var(--ds-success)]">{(sc.expectedPower * 100).toFixed(0)}%</td>
-                  <td className="py-3 font-mono">{sc.pValue.toFixed(3)}</td>
-                  <td className="py-3">{(sc.retained * 100).toFixed(0)}% / {(sc.attrition * 100).toFixed(0)}%</td>
-                  <td className="py-3 font-mono text-[10px]">
+                  <td className="py-3 font-semibold text-ink ds-numeric">{sc.expectedEffectSize.toFixed(2)}</td>
+                  <td className="py-3 font-bold text-success ds-numeric">{(sc.expectedPower * 100).toFixed(0)}%</td>
+                  <td className="py-3 font-mono text-ink ds-numeric">{sc.pValue.toFixed(3)}</td>
+                  <td className="py-3 text-ink ds-numeric">{(sc.retained * 100).toFixed(0)}% / {(sc.attrition * 100).toFixed(0)}%</td>
+                  <td className="py-3 font-mono text-[10px] text-ink ds-numeric">
                     [{sc.predictionIntervalLower !== undefined ? sc.predictionIntervalLower.toFixed(2) : sc.pi_lower !== undefined ? sc.pi_lower.toFixed(2) : '0.00'}, {sc.predictionIntervalUpper !== undefined ? sc.predictionIntervalUpper.toFixed(2) : sc.pi_upper !== undefined ? sc.pi_upper.toFixed(2) : '0.00'}]
                   </td>
                 </tr>
@@ -339,15 +342,15 @@ export const PredictorResultsPanel: React.FC<PredictorResultsPanelProps> = ({ en
               <div className="grid grid-cols-1 min-[380px]:grid-cols-3 gap-2 text-[10px] text-[var(--ds-text-secondary)] pt-1.5 border-t border-[var(--ds-border-subtle)]">
                 <div>
                   <span>{language === 'ar' ? 'المتوقع:' : 'Predicted:'}</span>{' '}
-                  <span className="font-bold text-[var(--ds-text-primary)] font-mono">{c.metrics.predictedEffectSize.toFixed(2)}</span>
+                  <span className="font-bold text-ink ds-numeric font-mono">{c.metrics.predictedEffectSize.toFixed(2)}</span>
                 </div>
                 <div>
                   <span>{language === 'ar' ? 'المرصود الفعلي:' : 'Observed:'}</span>{' '}
-                  <span className="font-bold text-[var(--ds-text-primary)] font-mono">{c.metrics.observedEffectSize.toFixed(2)}</span>
+                  <span className="font-bold text-ink ds-numeric font-mono">{c.metrics.observedEffectSize.toFixed(2)}</span>
                 </div>
                 <div>
                   <span>{language === 'ar' ? 'قيمة الانحراف:' : 'Deviation (Diff):'}</span>{' '}
-                  <span className="font-bold text-[var(--ds-text-primary)] font-mono">{c.metrics.effectSizeDiff.toFixed(2)}</span>
+                  <span className="font-bold text-ink ds-numeric font-mono">{c.metrics.effectSizeDiff.toFixed(2)}</span>
                 </div>
               </div>
             </div>

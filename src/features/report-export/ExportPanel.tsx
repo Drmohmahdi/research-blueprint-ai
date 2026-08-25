@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useProject } from '../../context/ProjectContext';
 import { Card } from '../../design-system/components/Card';
+import { EmptyState } from '../../design-system/components/Feedback';
 import { PathPanel } from '../../design-system/components/Navigation';
 import { FileText, Download, ShieldCheck, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { apiExportAcademicReport, apiVerifyReport, type ReportVerificationResult } from '../../utils/api';
@@ -25,9 +26,11 @@ export const ExportPanel: React.FC = () => {
 
   if (!activeProject) {
     return (
-      <div className="flex items-center justify-center h-64 text-[var(--ds-text-muted)] text-sm">
-        {isAr ? 'يرجى اختيار مشروع بحثي لعرض مصدّر التقارير الأكاديمية' : 'Please select a research project to show the academic report compiler'}
-      </div>
+      <EmptyState
+        illustration={<FileText size={40} />}
+        title={isAr ? 'لا يوجد مشروع نشط' : 'No active project'}
+        description={isAr ? 'اختر مشروعًا بحثيًا لعرض مصدّر التقارير الأكاديمية.' : 'Select a research project to open the academic report compiler.'}
+      />
     );
   }
 
@@ -114,10 +117,10 @@ export const ExportPanel: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Form: Export Configuration */}
-        <Card className="p-6 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-3xl space-y-5 lg:col-span-2">
+        <Card className="p-6 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl space-y-5 lg:col-span-2">
           <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)] flex items-center justify-between">
             <span>{isAr ? 'إعدادات وثيقة التقرير' : 'Report Document Configuration'}</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-info/10 text-path-identity font-mono">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--ds-surface-secondary)] text-secondary font-mono">
               Phase 05 Engine
             </span>
           </h3>
@@ -131,7 +134,7 @@ export const ExportPanel: React.FC = () => {
               <select
                 value={reportType}
                 onChange={e => setReportType(e.target.value as any)}
-                className="w-full text-xs font-medium p-2.5 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] focus:outline-none focus:border-ai"
+                className="w-full text-xs font-medium p-2.5 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
               >
                 <option value="RESEARCH_PROJECT">{isAr ? 'مخطط البحث العلمي (Research Blueprint)' : 'Research Blueprint'}</option>
                 <option value="LITERATURE_SYNTHESIS">{isAr ? 'توليف الأدبيات والتحليل البعدي (Meta-Analysis)' : 'Literature Synthesis & Meta-Analysis'}</option>
@@ -159,7 +162,7 @@ export const ExportPanel: React.FC = () => {
                     onClick={() => setFormat(fmt.id as any)}
                     className={`py-2 px-1 text-center text-xs font-bold rounded-xl border transition-all cursor-pointer ${
                       format === fmt.id
-                        ? 'bg-action/20 border-ai text-ai shadow-sm'
+                        ? 'bg-[var(--ds-primary-soft)] border-[var(--ds-primary)]/20 text-ink shadow-sm'
                         : 'bg-[var(--ds-surface-secondary)] border-[var(--ds-border-subtle)] text-[var(--ds-text-muted)] hover:border-[var(--ds-border-default)]'
                     }`}
                   >
@@ -177,7 +180,7 @@ export const ExportPanel: React.FC = () => {
               <select
                 value={reportLang}
                 onChange={e => setReportLang(e.target.value as any)}
-                className="w-full text-xs font-medium p-2.5 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] focus:outline-none focus:border-ai"
+                className="w-full text-xs font-medium p-2.5 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
               >
                 <option value="ar">{isAr ? 'العربية (RTL كامل)' : 'Arabic (Full RTL)'}</option>
                 <option value="en">{isAr ? 'الإنجليزية (LTR)' : 'English (LTR)'}</option>
@@ -193,7 +196,7 @@ export const ExportPanel: React.FC = () => {
               <select
                 value={audience}
                 onChange={e => setAudience(e.target.value as any)}
-                className="w-full text-xs font-medium p-2.5 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] focus:outline-none focus:border-ai"
+                className="w-full text-xs font-medium p-2.5 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
               >
                 <option value="RESEARCHER">{isAr ? 'الباحث الرئيسي (Researcher Standard)' : 'Principal Researcher'}</option>
                 <option value="AUTHOR">{isAr ? 'المؤلف (مع حجب هوية المحكمين والملاحظات السرية)' : 'Author (Double-Blind Redacted)'}</option>
@@ -223,11 +226,11 @@ export const ExportPanel: React.FC = () => {
             <button
               onClick={handleExport}
               disabled={isGenerating}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-action hover:bg-action-hover text-on-action font-bold text-xs flex items-center justify-center gap-2 shadow-[var(--ds-shadow-glow)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ds-transition"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-action hover:bg-action-hover text-on-action font-bold text-xs flex items-center justify-center gap-2 shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ds-transition"
             >
               {isGenerating ? (
                 <>
-                  <Loader2 size={16} className="animate-spin" />
+                  <Loader2 size={16} className="motion-safe:animate-spin" />
                   <span>{isAr ? 'جارٍ توليد الوثيقة وحساب النزاهة...' : 'Generating & Computing Hash...'}</span>
                 </>
               ) : (
@@ -254,17 +257,17 @@ export const ExportPanel: React.FC = () => {
           )}
 
           {lastGenerated?.integrityHash && (
-            <div className="p-3 rounded-xl bg-[var(--ds-path-identity)]/10 border border-[var(--ds-path-identity)]/20 text-[10px] text-path-identity font-mono flex items-center gap-2 break-all">
-              <ShieldCheck size={14} className="shrink-0 text-path-identity" />
+            <div className="p-3 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[10px] text-ink font-mono flex items-center gap-2 break-all">
+              <ShieldCheck size={14} className="shrink-0 text-secondary" />
               <span>SHA-256 Integrity: {lastGenerated.integrityHash}</span>
             </div>
           )}
         </Card>
 
         {/* Right Panel: Academic Verification & Document Integrity */}
-        <Card className="p-6 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-3xl space-y-4">
+        <Card className="p-6 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl space-y-4">
           <div className="flex items-center gap-2 pb-3 border-b border-[var(--ds-border-subtle)]">
-            <ShieldCheck size={18} className="text-ai" />
+            <ShieldCheck size={18} className="text-path-publication" />
             <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0">
               {isAr ? 'التحقق من نزاهة الوثائق' : 'Document Verification'}
             </h3>
@@ -286,18 +289,18 @@ export const ExportPanel: React.FC = () => {
                 placeholder="e.g. BSR-A1B2-C3D4"
                 value={verifCode}
                 onChange={e => setVerifCode(e.target.value)}
-                className="w-full text-xs font-mono p-2.5 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] focus:outline-none focus:border-ai uppercase"
+                className="w-full text-xs font-mono p-2.5 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)] uppercase"
               />
             </div>
 
             <button
               type="submit"
               disabled={isVerifying || !verifCode.trim()}
-              className="w-full py-2.5 rounded-xl bg-action/10 hover:bg-action/20 text-ai border border-ai/20 text-xs font-bold transition-all cursor-pointer disabled:opacity-40"
+              className="w-full py-2.5 rounded-xl border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] text-ink text-xs font-bold ds-transition cursor-pointer disabled:opacity-40"
             >
               {isVerifying ? (
                 <span className="flex items-center justify-center gap-1.5">
-                  <Loader2 size={14} className="animate-spin" />
+                  <Loader2 size={14} className="motion-safe:animate-spin" />
                   {isAr ? 'جارٍ التحقق...' : 'Verifying...'}
                 </span>
               ) : (
@@ -309,7 +312,7 @@ export const ExportPanel: React.FC = () => {
           {verifResult && (
             <div className={`p-3.5 rounded-xl border text-xs space-y-2 ${
               verifResult.valid
-                ? 'bg-action/10 border-success/20 text-success'
+                ? 'bg-[var(--ds-success-soft)] border-success/20 text-success'
                 : 'bg-danger/10 border-danger/20 text-danger'
             }`}>
               <div className="font-bold flex items-center gap-1.5">

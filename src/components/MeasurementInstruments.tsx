@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ClipboardCheck, Ruler, Save } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
 import { VIEW_TO_PATH } from '../router/routes';
-import { Alert, Button, Card, EmptyState, Textarea } from '../design-system';
+import { Alert, Button, Card, EmptyState, PathPanel, Textarea } from '../design-system';
 import type { MeasurementInstrument, MeasurementInstrumentKind, ReliabilityMethod } from '../types/research';
 
 type SaveStatus = { type: 'success' | 'error'; message: string } | null;
@@ -52,7 +52,7 @@ export const MeasurementInstruments: React.FC = () => {
       <EmptyState
         illustration={<Ruler size={40} />}
         title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No Active Project'}
-        description={language === 'ar' ? 'اختر مشروعاً نشطاً لتوثيق أدوات القياس.' : 'Select an active project to document measurement instruments.'}
+        description={language === 'ar' ? 'اختر مشروعًا نشطًا لتوثيق أدوات القياس.' : 'Select an active project to document measurement instruments.'}
         actionButton={<Button type="button" variant="primary" size="sm" onClick={() => navigate(VIEW_TO_PATH.wizard)}>{language === 'ar' ? 'فتح معالج البحث' : 'Open Research Wizard'}</Button>}
       />
     );
@@ -92,15 +92,15 @@ export const MeasurementInstruments: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      <Card padding="lg" className="space-y-3">
+      <PathPanel accent="var(--ds-path-data)">
         <div className="flex items-start gap-3">
           <span className="h-10 w-10 shrink-0 rounded-lg border border-[var(--ds-primary)]/20 bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] flex items-center justify-center"><Ruler size={20} /></span>
           <div>
-            <h3 className="m-0 text-xl font-black text-[var(--ds-text-primary)]">{language === 'ar' ? 'أدوات القياس والصدق والثبات' : 'Measurement, Validity, and Reliability'}</h3>
-            <p className="m-0 mt-1 text-sm text-[var(--ds-text-secondary)]">{language === 'ar' ? 'وثّق خطة الأداة لكل متغير تابع قبل جمع البيانات والتسجيل المسبق.' : 'Document an instrument plan for each dependent variable before data collection and preregistration.'}</p>
+            <h3 className="m-0 text-xl font-black text-ink">{language === 'ar' ? 'أدوات القياس والصدق والثبات' : 'Measurement, Validity, and Reliability'}</h3>
+            <p className="m-0 mt-1 text-sm text-secondary">{language === 'ar' ? 'وثّق خطة الأداة لكل متغير تابع قبل جمع البيانات والتسجيل المسبق.' : 'Document an instrument plan for each dependent variable before data collection and preregistration.'}</p>
           </div>
         </div>
-      </Card>
+      </PathPanel>
 
       {status && <Alert variant={status.type === 'success' ? 'success' : 'danger'}>{status.message}</Alert>}
 
@@ -120,17 +120,17 @@ export const MeasurementInstruments: React.FC = () => {
               <p className="m-0 mt-1 text-xs text-[var(--ds-text-secondary)]">{language === 'ar' ? `متغير تابع · ${variable.scale}` : `Dependent variable · ${variable.scale}`}</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <label className="block text-xs font-bold text-[var(--ds-text-secondary)]">{language === 'ar' ? 'اسم الأداة' : 'Instrument name'}<input value={instrument.name} onChange={event => updateInstrument(variable.id, { name: event.target.value })} className="mt-1.5 w-full rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-sm text-[var(--ds-text-primary)]" /></label>
-              <label className="block text-xs font-bold text-[var(--ds-text-secondary)]">{language === 'ar' ? 'نوع الأداة' : 'Instrument type'}<select value={instrument.kind} onChange={event => updateInstrument(variable.id, { kind: event.target.value as MeasurementInstrumentKind })} className="mt-1.5 w-full rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-sm text-[var(--ds-text-primary)]">{kinds.map(kind => <option key={kind.value} value={kind.value}>{language === 'ar' ? kind.ar : kind.en}</option>)}</select></label>
-              <label className="block text-xs font-bold text-[var(--ds-text-secondary)]">{language === 'ar' ? 'عدد البنود (اختياري)' : 'Item count (optional)'}<input type="number" min="1" value={instrument.itemCount ?? ''} onChange={event => updateInstrument(variable.id, { itemCount: event.target.value === '' ? undefined : event.target.valueAsNumber })} className="mt-1.5 w-full rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-sm text-[var(--ds-text-primary)]" /></label>
+              <label className="block text-xs font-bold text-[var(--ds-text-secondary)]">{language === 'ar' ? 'اسم الأداة' : 'Instrument name'}<input value={instrument.name} onChange={event => updateInstrument(variable.id, { name: event.target.value })} className="mt-1.5 w-full rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-sm text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" /></label>
+              <label className="block text-xs font-bold text-[var(--ds-text-secondary)]">{language === 'ar' ? 'نوع الأداة' : 'Instrument type'}<select value={instrument.kind} onChange={event => updateInstrument(variable.id, { kind: event.target.value as MeasurementInstrumentKind })} className="mt-1.5 w-full rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-sm text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]">{kinds.map(kind => <option key={kind.value} value={kind.value}>{language === 'ar' ? kind.ar : kind.en}</option>)}</select></label>
+              <label className="block text-xs font-bold text-[var(--ds-text-secondary)]">{language === 'ar' ? 'عدد البنود (اختياري)' : 'Item count (optional)'}<input type="number" min="1" value={instrument.itemCount ?? ''} onChange={event => updateInstrument(variable.id, { itemCount: event.target.value === '' ? undefined : event.target.valueAsNumber })} className="mt-1.5 w-full rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-sm text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" /></label>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <Textarea label={language === 'ar' ? 'خطة التصحيح وتفسير الدرجات' : 'Scoring and interpretation plan'} value={instrument.scoringPlan} onChange={event => updateInstrument(variable.id, { scoringPlan: event.target.value })} rows={4} />
               <Textarea label={language === 'ar' ? 'خطة الصدق والتحكيم' : 'Validity and review plan'} value={instrument.validityPlan} onChange={event => updateInstrument(variable.id, { validityPlan: event.target.value })} rows={4} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <label className="block text-xs font-bold text-[var(--ds-text-secondary)]">{language === 'ar' ? 'خطة الثبات' : 'Reliability plan'}<select value={instrument.reliabilityMethod} onChange={event => updateInstrument(variable.id, { reliabilityMethod: event.target.value as ReliabilityMethod, reliabilityValue: event.target.value === 'cronbach_alpha' ? instrument.reliabilityValue : undefined })} className="mt-1.5 w-full rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-sm text-[var(--ds-text-primary)]">{reliabilityMethods.map(method => <option key={method.value} value={method.value}>{language === 'ar' ? method.ar : method.en}</option>)}</select></label>
-              {instrument.reliabilityMethod === 'cronbach_alpha' && <label className="block text-xs font-bold text-[var(--ds-text-secondary)]">{language === 'ar' ? 'قيمة ألفا كرونباخ (اختيارية)' : "Cronbach's alpha (optional)"}<input type="number" min="0" max="1" step="0.01" value={instrument.reliabilityValue ?? ''} onChange={event => updateInstrument(variable.id, { reliabilityValue: event.target.value === '' ? undefined : event.target.valueAsNumber })} className="mt-1.5 w-full rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-sm text-[var(--ds-text-primary)]" /></label>}
+              <label className="block text-xs font-bold text-[var(--ds-text-secondary)]">{language === 'ar' ? 'خطة الثبات' : 'Reliability plan'}<select value={instrument.reliabilityMethod} onChange={event => updateInstrument(variable.id, { reliabilityMethod: event.target.value as ReliabilityMethod, reliabilityValue: event.target.value === 'cronbach_alpha' ? instrument.reliabilityValue : undefined })} className="mt-1.5 w-full rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-sm text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]">{reliabilityMethods.map(method => <option key={method.value} value={method.value}>{language === 'ar' ? method.ar : method.en}</option>)}</select></label>
+              {instrument.reliabilityMethod === 'cronbach_alpha' && <label className="block text-xs font-bold text-[var(--ds-text-secondary)]">{language === 'ar' ? 'قيمة ألفا كرونباخ (اختيارية)' : "Cronbach's alpha (optional)"}<input type="number" min="0" max="1" step="0.01" value={instrument.reliabilityValue ?? ''} onChange={event => updateInstrument(variable.id, { reliabilityValue: event.target.value === '' ? undefined : event.target.valueAsNumber })} className="mt-1.5 w-full rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-sm text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" /></label>}
             </div>
           </Card>
         );

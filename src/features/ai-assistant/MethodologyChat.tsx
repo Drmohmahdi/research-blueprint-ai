@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useProject } from '../../context/ProjectContext';
 import { Brain, Send, User, Bot, Sparkles, Loader2, Trash2, FileText, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { PathPanel } from '../../design-system/components/Navigation';
+import { EmptyState } from '../../design-system/components/Feedback';
 import { apiAIAssist } from '../../utils/api';
 import type { AIAssistResponse, AISourceRef } from '../../utils/api';
 import { researchStorage } from '../../utils/researchStorage';
@@ -190,21 +192,21 @@ export const MethodologyChat: React.FC = () => {
   return (
     <div className="space-y-4 max-w-3xl mx-auto">
       {/* Header */}
-      <div className="ds-ai-surface rounded-2xl p-6">
-        <div className="flex items-center gap-3 mb-2">
+      <PathPanel accent="var(--ds-path-data)">
+        <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-2xl bg-action/10">
             <Brain size={22} className="text-ai" />
           </div>
           <div>
-            <h2 className="text-lg font-extrabold text-[var(--ds-text-primary)] m-0">
+            <h2 className="text-lg font-extrabold text-ink m-0">
               {isAr ? 'مساعد المنهجية الذكي' : 'Methodology Assistant'}
             </h2>
-            <p className="text-xs text-[var(--ds-text-secondary)] m-0">
+            <p className="text-xs text-secondary m-0">
               {isAr ? 'اسألني عن تصميم دراستك، الاختبارات الإحصائية، أو أي سؤال منهجي' : 'Ask about study design, statistical tests, or any methodology question'}
             </p>
           </div>
         </div>
-      </div>
+      </PathPanel>
 
       {/* Chat area */}
       <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl shadow-sm overflow-hidden flex flex-col" style={{ height: '500px' }}>
@@ -212,10 +214,13 @@ export const MethodologyChat: React.FC = () => {
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
-              <Sparkles size={32} className="text-ai/40" />
-              <p className="text-sm text-[var(--ds-text-muted)] max-w-xs">
-                {isAr ? 'ابدأ بطرح سؤال منهجي وسأساعدك بناءً على بيانات مشروعك' : 'Start by asking a methodology question — I\'ll use your project data for context'}
-              </p>
+              <EmptyState
+                bare
+                className="py-2"
+                illustration={<Sparkles size={32} />}
+                title={isAr ? 'ابدأ بسؤال منهجي' : 'Start with a methodology question'}
+                description={isAr ? 'سأساعدك بناءً على بيانات مشروعك الحالي.' : "I'll use your project data for context."}
+              />
               {/* Quick suggestions */}
               <div className="flex flex-wrap gap-2 justify-center">
                 {suggestions.map((s, i) => (
@@ -299,7 +304,7 @@ export const MethodologyChat: React.FC = () => {
                 <Bot size={13} className="text-success" />
               </div>
               <div className="px-4 py-3 rounded-2xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-tl-sm">
-                <Loader2 size={14} className="text-ai animate-spin" />
+                <Loader2 size={14} className="text-ai motion-safe:animate-spin" />
               </div>
             </div>
           )}
@@ -317,7 +322,7 @@ export const MethodologyChat: React.FC = () => {
             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
             placeholder={isAr ? 'اكتب سؤالك المنهجي هنا...' : 'Type your methodology question...'}
             aria-label={isAr ? 'سؤال منهجي للمساعد' : 'Methodology question for the assistant'}
-            className="flex-1 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2.5 text-xs text-[var(--ds-text-primary)] placeholder:text-[var(--ds-text-muted)] focus:outline-none focus:ring-1 focus:ring-ai/50"
+            className="flex-1 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2.5 text-xs text-[var(--ds-text-primary)] placeholder:text-[var(--ds-text-muted)] focus:outline-none focus:ring-2 focus:ring-ai/50"
           />
           <button
             onClick={handleSend}

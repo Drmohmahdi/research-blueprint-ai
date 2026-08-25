@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { checkConsistency } from '../utils/ruleEngine';
 import { getTranslation } from '../utils/translations';
 import { Card } from '../design-system/components/Card';
 import { Button } from '../design-system/components/Button';
+import { PathPanel } from '../design-system/components/Navigation';
+import { EmptyState } from '../design-system/components/Feedback';
 import { ROUTES } from '../router/routes';
 import {
   AlertCircle,
   AlertTriangle,
   CheckCircle2,
   Lightbulb,
+  SearchCheck,
   Sparkles,
 } from 'lucide-react';
 
@@ -28,14 +31,18 @@ const SECTION_REDIRECTS: Record<string, string> = {
 export const ConsistencyChecker: React.FC = () => {
   const navigate = useNavigate();
   const { activeProject, language } = useProject();
+  const reduceMotion = useMemo(
+    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    [],
+  );
 
   if (!activeProject) {
     return (
-      <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-8 shadow-sm text-center">
-        <p className="text-sm text-[var(--ds-text-secondary)]">
-          {language === 'ar' ? 'الرجاء تحديد مشروع نشط أولاً.' : 'Please select an active project first.'}
-        </p>
-      </div>
+      <EmptyState
+        illustration={<SearchCheck size={40} />}
+        title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No Active Project'}
+        description={language === 'ar' ? 'اختر مشروعًا نشطًا لفحص اتساق التصميم البحثي.' : 'Select an active project to check research-design consistency.'}
+      />
     );
   }
 
@@ -134,10 +141,11 @@ export const ConsistencyChecker: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto pb-16">
-      <Card className="p-6 border border-[var(--ds-border-subtle)] flex flex-col md:flex-row items-center justify-between gap-6 bg-[var(--ds-surface-primary)]">
+      <PathPanel accent="var(--ds-path-research)">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="space-y-2 text-center md:text-start flex-1">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] text-xs font-bold mb-1">
-            <Sparkles size={12} />
+            <SearchCheck size={12} />
             <span>{language === 'ar' ? 'فحص الاتساق المنهجي' : 'Methodological Alignment'}</span>
           </div>
           <h3 className="text-xl font-black text-[var(--ds-text-primary)] m-0">
@@ -157,7 +165,7 @@ export const ConsistencyChecker: React.FC = () => {
               cx="48"
               cy="48"
               r={radius}
-              className={`transition-all duration-1000 ease-out fill-none ${scoreTone.stroke}`}
+              className={`fill-none ${reduceMotion ? '' : 'transition-all duration-1000 ease-out'} ${scoreTone.stroke}`}
               strokeWidth="6"
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
@@ -165,11 +173,12 @@ export const ConsistencyChecker: React.FC = () => {
             />
           </svg>
           <div className="absolute flex flex-col items-center justify-center">
-            <span className={`text-2xl font-black leading-none ${scoreTone.text}`}>{audit.score}</span>
+            <span className={`text-2xl font-black leading-none ds-numeric ${scoreTone.text}`}>{audit.score}</span>
             <span className="text-[8px] text-[var(--ds-text-muted)] font-extrabold mt-0.5 tracking-wider">/ 100</span>
           </div>
         </div>
-      </Card>
+      </div>
+      </PathPanel>
 
       {audit.issues.length === 0 ? (
         <div className="bg-[var(--ds-success-soft)] border border-[var(--ds-success)]/25 text-[var(--ds-success)] rounded-lg p-6 flex items-center gap-4 shadow-sm">

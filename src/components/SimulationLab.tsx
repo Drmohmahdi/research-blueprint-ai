@@ -3,12 +3,15 @@ import { useProject } from '../context/ProjectContext';
 import type { SimulationParameters } from '../types/research';
 import { getTranslation } from '../utils/translations';
 import { Button } from '../design-system/components/Button';
+import { PathPanel } from '../design-system/components/Navigation';
 import { 
   PlayCircle, 
   TrendingUp, 
   Sliders,
   Sparkles
 } from 'lucide-react';
+import { EmptyState } from '../design-system/components/Feedback';
+import { dsChartAxisTick, dsChartTooltipItemStyle, dsChartTooltipStyle } from '../design-system/components/ChartPrimitives';
 import { 
   ResponsiveContainer, 
   BarChart, 
@@ -33,19 +36,19 @@ export const SimulationLab: React.FC = () => {
   const [lastRunSignature, setLastRunSignature] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const rangeClass = 'w-full accent-[var(--ds-primary)] cursor-pointer h-1.5 bg-[var(--ds-surface-secondary)] rounded-lg appearance-none';
-  const valueClass = 'text-xs font-mono font-bold text-[var(--ds-primary)]';
+  const valueClass = 'text-xs font-mono font-bold text-ink ds-numeric';
   const chartColors = {
-    pre: 'var(--ds-primary)',
-    post: 'var(--ds-success)'
+    pre: 'var(--ds-chart-1)',
+    post: 'var(--ds-chart-2)'
   };
 
   if (!activeProject) {
     return (
-      <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-8 shadow-sm text-center">
-        <p className="text-[var(--ds-text-secondary)] text-sm">
-          {language === 'ar' ? 'الرجاء تحديد مشروع نشط أولاً.' : 'Please select an active project first.'}
-        </p>
-      </div>
+      <EmptyState
+        illustration={<PlayCircle size={40} />}
+        title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No Active Project'}
+        description={language === 'ar' ? 'اختر مشروعًا نشطًا لتشغيل محاكاة المجموعات.' : 'Select an active project to run the group simulation.'}
+      />
     );
   }
 
@@ -120,6 +123,18 @@ export const SimulationLab: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-16">
+      <PathPanel accent="var(--ds-path-data)">
+        <div className="space-y-1">
+          <h2 className="text-lg font-black text-ink m-0">
+            {language === 'ar' ? 'مختبر المحاكاة الإحصائية' : 'Statistical Simulation Lab'}
+          </h2>
+          <p className="text-xs text-secondary m-0">
+            {language === 'ar'
+              ? 'جرّب سيناريوهات الأثر قبل التنفيذ الميداني، مع تثبيت البذرة لإعادة الإنتاج.'
+              : 'Test outcome scenarios before field execution, with a fixed seed for reproducibility.'}
+          </p>
+        </div>
+      </PathPanel>
       {/* Parameters Panel */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
@@ -276,7 +291,7 @@ export const SimulationLab: React.FC = () => {
                     <Sparkles size={16} className="text-[var(--ds-primary)]" />
                     <span>{language === 'ar' ? 'ملخص مخرجات محاكاة مونت كارلو' : 'Monte Carlo Simulation Summary'}</span>
                   </h4>
-                  <span className="text-[9px] font-black bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] border border-[var(--ds-primary)]/20 px-2 py-0.5 rounded">
+                  <span className="text-[9px] font-black bg-[var(--ds-data-teal-soft)] text-[var(--ds-data-teal)] border border-[var(--ds-data-teal)]/20 px-2 py-0.5 rounded">
                     SIMULATED_SYNTHETIC_DATA
                   </span>
                 </div>
@@ -284,30 +299,30 @@ export const SimulationLab: React.FC = () => {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div className="p-3.5 bg-[var(--ds-surface-secondary)] rounded-xl space-y-1">
                     <span className="text-[10px] text-[var(--ds-text-muted)] font-bold uppercase tracking-wider block">{language === 'ar' ? 'متوسط التجريبية البعدي' : 'Post Mean (TR)'}</span>
-                    <span className="text-base font-black text-[var(--ds-text-primary)]">{result.summary.postMeanTreatment}</span>
+                    <span className="text-base font-black text-ink ds-numeric">{result.summary.postMeanTreatment}</span>
                   </div>
                   <div className="p-3.5 bg-[var(--ds-surface-secondary)] rounded-xl space-y-1">
                     <span className="text-[10px] text-[var(--ds-text-muted)] font-bold uppercase tracking-wider block">{language === 'ar' ? 'متوسط الضابطة البعدي' : 'Post Mean (CON)'}</span>
-                    <span className="text-base font-black text-[var(--ds-text-primary)]">{result.summary.postMeanControl}</span>
+                    <span className="text-base font-black text-ink ds-numeric">{result.summary.postMeanControl}</span>
                   </div>
                   <div className="p-3.5 bg-[var(--ds-surface-secondary)] rounded-xl space-y-1">
                     <span className="text-[10px] text-[var(--ds-text-muted)] font-bold uppercase tracking-wider block">{language === 'ar' ? 'حجم الأثر الناتج (d)' : 'Simulated Cohen\'s d'}</span>
-                    <span className="text-base font-black text-[var(--ds-primary)]">{result.summary.cohensD}</span>
+                    <span className="text-base font-black text-ink ds-numeric">{result.summary.cohensD}</span>
                   </div>
                   <div className="p-3.5 bg-[var(--ds-surface-secondary)] rounded-xl space-y-1">
                     <span className="text-[10px] text-[var(--ds-text-muted)] font-bold uppercase tracking-wider block">{language === 'ar' ? 'القوة الإحصائية المحققة' : 'Simulated Power'}</span>
-                    <span className="text-base font-black text-success">{(result.summary.statisticalPower * 100).toFixed(0)}%</span>
+                    <span className="text-base font-black text-success ds-numeric">{(result.summary.statisticalPower * 100).toFixed(0)}%</span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
                   <div className="p-3.5 bg-[var(--ds-surface-secondary)] rounded-xl space-y-1">
                     <span className="text-[10px] text-[var(--ds-text-muted)] font-bold uppercase tracking-wider block">{language === 'ar' ? 'الفقد الناتج (تسرب)' : 'Attrition Count'}</span>
-                    <span className="text-xs font-black text-danger">{result.summary.attritionCount} {language === 'ar' ? 'طلاب' : 'students'}</span>
+                    <span className="text-xs font-black text-danger ds-numeric">{result.summary.attritionCount} {language === 'ar' ? 'طلاب' : 'students'}</span>
                   </div>
                   <div className="p-3.5 bg-[var(--ds-surface-secondary)] rounded-xl space-y-1">
                     <span className="text-[10px] text-[var(--ds-text-muted)] font-bold uppercase tracking-wider block">{language === 'ar' ? 'احتمال الدلالة (p-value)' : 'Simulated p-value'}</span>
-                    <span className="text-xs font-black text-path-publication">{result.summary.pValue}</span>
+                    <span className="text-xs font-black text-ink ds-numeric" dir="ltr">{result.summary.pValue}</span>
                   </div>
                   <div className="p-3.5 bg-[var(--ds-surface-secondary)] rounded-xl space-y-1 col-span-2">
                     <span className="text-[10px] text-[var(--ds-text-muted)] font-bold uppercase tracking-wider block">{language === 'ar' ? 'مؤشر أولي لقابلية النشر' : 'Preliminary Publication Indicator'}</span>
@@ -327,24 +342,19 @@ export const SimulationLab: React.FC = () => {
                   </h4>
                 </div>
                 
-                <div className="h-64 w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl p-3">
+                <div className="h-64 w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl p-3" dir="ltr">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="var(--ds-border-subtle)" />
-                      <XAxis dataKey="name" stroke="var(--ds-text-secondary)" fontSize={10} fontWeight="bold" />
-                      <YAxis stroke="var(--ds-text-secondary)" fontSize={10} fontWeight="bold" />
-                      <RechartsTooltip 
-                        contentStyle={{ 
-                          backgroundColor: 'var(--ds-surface-primary)', 
-                          borderColor: 'var(--ds-border-subtle)',
-                          borderRadius: '12px',
-                          color: 'var(--ds-text-primary)',
-                          fontSize: '11px',
-                          fontWeight: 'bold'
-                        }} 
+                      <XAxis dataKey="name" tick={dsChartAxisTick} axisLine={false} tickLine={false} />
+                      <YAxis tick={dsChartAxisTick} axisLine={false} tickLine={false} />
+                      <RechartsTooltip
+                        contentStyle={dsChartTooltipStyle}
+                        itemStyle={dsChartTooltipItemStyle}
+                        labelStyle={{ color: '#FFFFFF', direction: 'ltr' }}
                       />
-                      <Bar dataKey={language === 'ar' ? 'قبلي' : 'Pre-test'} fill={chartColors.pre} radius={[4, 4, 0, 0]} />
-                      <Bar dataKey={language === 'ar' ? 'بعدي' : 'Post-test'} fill={chartColors.post} radius={[4, 4, 0, 0]} />
+                      <Bar dataKey={language === 'ar' ? 'قبلي' : 'Pre-test'} fill={chartColors.pre} radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                      <Bar dataKey={language === 'ar' ? 'بعدي' : 'Post-test'} fill={chartColors.post} radius={[4, 4, 0, 0]} isAnimationActive={false} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -377,11 +387,11 @@ export const SimulationLab: React.FC = () => {
                               {row.group}
                             </span>
                           </td>
-                          <td className="p-2.5">{row.preScore}</td>
-                          <td className="p-2.5 font-bold text-[var(--ds-text-primary)]">
+                          <td className="p-2.5 ds-numeric">{row.preScore}</td>
+                          <td className="p-2.5 font-bold text-ink ds-numeric">
                             {row.retained ? row.postScore : (language === 'ar' ? 'مفقود' : 'Dropped')}
                           </td>
-                          <td className="p-2.5">{(row.engagement * 100).toFixed(0)}%</td>
+                          <td className="p-2.5 ds-numeric">{(row.engagement * 100).toFixed(0)}%</td>
                           <td className="p-2.5">
                             <span className={`w-2 h-2 rounded-full inline-block ${row.retained ? 'bg-action' : 'bg-danger'}`} />
                           </td>
@@ -397,14 +407,14 @@ export const SimulationLab: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-16 text-center text-[var(--ds-text-muted)] italic text-xs h-[400px] flex flex-col justify-center items-center gap-3">
-              <PlayCircle size={40} className="text-secondary dark:text-secondary animate-pulse" />
-              <p className="m-0">
-                {language === 'ar' 
-                  ? 'الرجاء إدخال معلمات المحاكاة وتشغيل المحرك لعرض المخططات والنتائج.' 
-                  : 'Please configure parameters and click simulate to visualize results.'}
-              </p>
-            </div>
+            <EmptyState
+              className="h-[400px] justify-center"
+              illustration={<PlayCircle size={40} />}
+              title={language === 'ar' ? 'لا توجد نتائج محاكاة بعد' : 'No simulation results yet'}
+              description={language === 'ar'
+                ? 'أدخل معلمات المحاكاة وشغّل المحرك لعرض المخططات والنتائج.'
+                : 'Configure the parameters and run the engine to visualize charts and results.'}
+            />
           )}
         </div>
       </div>

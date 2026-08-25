@@ -79,6 +79,8 @@ export const ROUTES = {
   SEMINAR_PROPOSAL_STEP: '/organizations/:organizationId/projects/:projectId/paths/seminar-proposal/:stepId',
   THESIS_DEFENSE: '/organizations/:organizationId/projects/:projectId/paths/thesis-defense',
   THESIS_DEFENSE_STEP: '/organizations/:organizationId/projects/:projectId/paths/thesis-defense/:stepId',
+  THESIS_OPERATIONS: '/app/research/thesis',
+  GRADUATE_STUDIES: '/app/research/graduate-studies',
 } as const;
 
 export type RouteKey  = keyof typeof ROUTES;
@@ -138,6 +140,8 @@ export const VIEW_TO_PATH: Record<string, string> = {
   seminarProposalStep: ROUTES.SEMINAR_PROPOSAL_STEP,
   thesisDefense:      ROUTES.THESIS_DEFENSE,
   thesisDefenseStep:  ROUTES.THESIS_DEFENSE_STEP,
+  thesisOperations:   ROUTES.THESIS_OPERATIONS,
+  graduateStudies:    ROUTES.GRADUATE_STUDIES,
 };
 
 /** Maps URL paths → old view IDs */

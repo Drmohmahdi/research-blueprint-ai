@@ -4,7 +4,7 @@ import { AlertTriangle, ArrowRight, CheckCircle2, Circle, GitBranch, Sparkles } 
 import { useProject } from '../context/ProjectContext';
 import { checkConsistency, type AuditIssue } from '../utils/ruleEngine';
 import { VIEW_TO_PATH } from '../router/routes';
-import { Button, Card, EmptyState, Progress } from '../design-system';
+import { Button, Card, EmptyState, PathPanel, Progress } from '../design-system';
 
 const severityRank: Record<AuditIssue['type'], number> = {
   critical: 0,
@@ -22,7 +22,7 @@ export const ResearchDecisionCenter: React.FC = () => {
         illustration={<GitBranch size={40} />}
         title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No Active Project'}
         description={language === 'ar'
-          ? 'أنشئ مشروعاً أو اختر مشروعاً نشطاً لعرض عوائق التصميم وإجراءات إصلاحها.'
+          ? 'أنشئ مشروعًا أو اختر مشروعًا نشطًا لعرض عوائق التصميم وإجراءات إصلاحها.'
           : 'Create or select an active project to review design blockers and repair actions.'}
         actionButton={
           <Button
@@ -132,31 +132,33 @@ export const ResearchDecisionCenter: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
-      <Card padding="lg" className="space-y-4">
+      <PathPanel accent="var(--ds-path-research)">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div className="space-y-1">
             <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-[var(--ds-primary)]">
               <Sparkles size={14} />
               {language === 'ar' ? 'تشغيل البحث' : 'Research Operations'}
             </div>
-            <h3 className="m-0 text-xl font-black text-[var(--ds-text-primary)]">
+            <h3 className="m-0 text-xl font-black text-ink">
               {language === 'ar' ? 'مركز قرارات البحث' : 'Research Decision Center'}
             </h3>
-            <p className="m-0 text-sm text-[var(--ds-text-secondary)]">
+            <p className="m-0 text-sm text-secondary">
               {language === 'ar'
                 ? 'رتّب العوائق المنهجية ثم افتح موضع التصحيح المناسب لكل قرار.'
                 : 'Prioritize methodological blockers, then open the right place to resolve each decision.'}
             </p>
           </div>
           <div className="min-w-[126px] rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] px-4 py-3 text-center">
-            <div className="text-2xl font-black text-[var(--ds-text-primary)]">{audit.score}/100</div>
+            <div className="text-2xl font-black text-ink ds-numeric">{audit.score}/100</div>
             <div className="text-[10px] font-bold text-[var(--ds-text-muted)]">
               {language === 'ar' ? 'مؤشر الاتساق' : 'Consistency score'}
             </div>
           </div>
         </div>
-        <Progress value={audit.score} variant={audit.score >= 80 ? 'success' : audit.score >= 50 ? 'warning' : 'danger'} />
-      </Card>
+        <div className="mt-4">
+          <Progress value={audit.score} variant={audit.score >= 80 ? 'success' : audit.score >= 50 ? 'warning' : 'danger'} />
+        </div>
+      </PathPanel>
 
       <Card padding="lg" className="space-y-4">
         <div className="flex items-center gap-2">

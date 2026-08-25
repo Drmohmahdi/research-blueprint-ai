@@ -8,6 +8,7 @@ import { PublicResearcherProfile } from './components/PublicResearcherProfile';
 import { LandingPage } from './components/LandingPage';
 
 const ExternalReviewerPortal = lazy(() => import('./features/review-portal/ExternalReviewerPortal').then(module => ({ default: module.ExternalReviewerPortal })));
+const ExternalThesisExaminerPortal = lazy(() => import('./features/thesis/ExternalThesisExaminerPortal'));
 
 // ── App wrapped in BrowserRouter + ProjectProvider ────────────────────────────
 const App: React.FC = () => {
@@ -35,6 +36,7 @@ const AppContent: React.FC = () => {
         path="/external-review/:token"
         element={<Suspense fallback={<div role="status" className="p-6 text-center">Loading review portal…</div>}><ExternalReviewerPortal /></Suspense>}
       />
+      <Route path="/thesis-examination/:token" element={<Suspense fallback={<div role="status" className="p-6 text-center">Loading examination portal…</div>}><ExternalThesisExaminerPortal /></Suspense>} />
 
       {/* Everything else requires authentication */}
       <Route

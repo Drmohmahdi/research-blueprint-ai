@@ -2,6 +2,8 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useProject } from '../context/ProjectContext';
 import { BookOpen, Cloud, Database, RefreshCw, Trash2, CheckCircle2, AlertCircle, RotateCcw } from 'lucide-react';
 import { Button, IconButton } from '../design-system/components/Button';
+import { PathPanel } from '../design-system/components/Navigation';
+import { EmptyState } from '../design-system/components/Feedback';
 import {
   apiGetLiteratureSynthesis,
   apiAddLiteratureStudy,
@@ -175,9 +177,11 @@ export const LiteratureSynthesizer: React.FC = () => {
 
   if (!activeProject) {
     return (
-      <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-8 shadow-sm text-center">
-        <p className="text-[var(--ds-text-secondary)] text-sm">{language === 'ar' ? 'الرجاء تحديد مشروع نشط أولاً.' : 'Please select an active project first.'}</p>
-      </div>
+      <EmptyState
+        illustration={<BookOpen size={40} />}
+        title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No active project'}
+        description={language === 'ar' ? 'اختر مشروعًا نشطًا لتوليف الدراسات الأدبية.' : 'Select an active project to synthesize literature studies.'}
+      />
     );
   }
 
@@ -321,6 +325,18 @@ export const LiteratureSynthesizer: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
+      <PathPanel accent="var(--ds-path-publication)">
+        <div className="space-y-1">
+          <h2 className="text-lg font-black text-ink m-0">
+            {language === 'ar' ? 'تحليل ومكاملة الأدبيات والدراسات السابقة' : 'Literature Synthesis & Meta-Analysis'}
+          </h2>
+          <p className="text-xs text-secondary m-0">
+            {language === 'ar'
+              ? 'ارفع ملفات الدراسات السابقة لاستخراج المنهجيات والنتائج وأحجام الأثر لبناء نموذج مكامل.'
+              : 'Upload reference papers to extract methodologies, variables, and effect sizes for meta-analysis.'}
+          </p>
+        </div>
+      </PathPanel>
       {/* Persistence Status Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg px-4 py-2.5 text-xs">
         <div className="flex items-center gap-2">
@@ -344,7 +360,7 @@ export const LiteratureSynthesizer: React.FC = () => {
         <div className="flex items-center gap-2">
           {isSyncing && (
             <span className="flex items-center gap-1.5 text-[var(--ds-primary)] font-medium">
-              <RefreshCw size={13} className="animate-spin" />
+              <RefreshCw size={13} className="motion-safe:animate-spin" />
               {language === 'ar' ? 'جارٍ المزامنة...' : 'Syncing...'}
             </span>
           )}
@@ -364,7 +380,7 @@ export const LiteratureSynthesizer: React.FC = () => {
             <button
               type="button"
               onClick={() => projectId && fetchProjectStudies(projectId)}
-              className="flex items-center gap-1 text-[11px] text-[var(--ds-primary)] hover:underline ml-2 cursor-pointer"
+              className="flex items-center gap-1 text-[11px] text-action hover:underline ml-2 cursor-pointer"
             >
               <RotateCcw size={11} />
               {language === 'ar' ? 'إعادة المحاولة' : 'Retry'}
@@ -378,12 +394,12 @@ export const LiteratureSynthesizer: React.FC = () => {
         <BookOpen size={40} className="text-[var(--ds-primary)] mx-auto" />
         <div>
           <h3 className="text-md font-bold text-[var(--ds-text-primary)] m-0">
-            {language === 'ar' ? 'تحليل ومكاملة الأدبيات والدراسات السابقة' : 'Literature Synthesis & Meta-Analysis'}
+            {language === 'ar' ? 'رفع ملف دراسة PDF' : 'Upload a PDF study file'}
           </h3>
           <p className="text-xs text-[var(--ds-text-secondary)] mt-1 max-w-lg mx-auto">
             {language === 'ar'
-              ? 'ارفع ملفات الدراسات السابقة بصيغة PDF لاستخراج المنهجيات والنتائج وأحجام الأثر تلقائياً لبناء نموذج مكامل لخطتك.'
-              : 'Upload reference papers in PDF to auto-extract methodologies, variables, and effect sizes for meta-analysis synthesis.'}
+              ? 'يُحفظ الملف كمرجع للمراجعة؛ أدخل بيانات الدراسة يدوياً إلى أن تتوفر خدمة استخراج فعلية.'
+              : 'The file is kept as a review reference; enter study data until extraction is available.'}
           </p>
         </div>
 
@@ -410,12 +426,12 @@ export const LiteratureSynthesizer: React.FC = () => {
       <form onSubmit={handleAddStudy} noValidate className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-4">
         <h4 className="text-sm font-bold text-[var(--ds-text-primary)] m-0">{language === 'ar' ? 'إضافة دليل دراسة' : 'Add Study Evidence'}</h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <input value={studyDraft.author} onChange={event => setStudyDraft(current => ({ ...current, author: event.target.value }))} placeholder={language === 'ar' ? 'المرجع أو المؤلفون' : 'Reference or authors'} aria-label={language === 'ar' ? 'المرجع أو المؤلفون' : 'Reference or authors'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)]" />
-          <input type="number" value={studyDraft.year} onChange={event => setStudyDraft(current => ({ ...current, year: event.target.value }))} placeholder={language === 'ar' ? 'سنة النشر' : 'Publication year'} aria-label={language === 'ar' ? 'سنة النشر' : 'Publication year'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)]" />
-          <input type="number" min="1" step="1" value={studyDraft.sampleSize} onChange={event => setStudyDraft(current => ({ ...current, sampleSize: event.target.value }))} placeholder={language === 'ar' ? 'حجم العينة' : 'Sample size'} aria-label={language === 'ar' ? 'حجم العينة' : 'Sample size'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)]" />
-          <input type="number" step="any" value={studyDraft.effectSize} onChange={event => setStudyDraft(current => ({ ...current, effectSize: event.target.value }))} placeholder={language === 'ar' ? 'حجم الأثر d' : 'Effect size d'} aria-label={language === 'ar' ? 'حجم الأثر d' : 'Effect size d'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)]" />
-          <input type="number" step="any" value={studyDraft.ciLower} onChange={event => setStudyDraft(current => ({ ...current, ciLower: event.target.value }))} placeholder={language === 'ar' ? 'الحد الأدنى لـ95% CI' : '95% CI lower'} aria-label={language === 'ar' ? 'الحد الأدنى لفاصل الثقة' : 'Confidence interval lower'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)]" />
-          <input type="number" step="any" value={studyDraft.ciUpper} onChange={event => setStudyDraft(current => ({ ...current, ciUpper: event.target.value }))} placeholder={language === 'ar' ? 'الحد الأعلى لـ95% CI' : '95% CI upper'} aria-label={language === 'ar' ? 'الحد الأعلى لفاصل الثقة' : 'Confidence interval upper'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)]" />
+          <input value={studyDraft.author} onChange={event => setStudyDraft(current => ({ ...current, author: event.target.value }))} placeholder={language === 'ar' ? 'المرجع أو المؤلفون' : 'Reference or authors'} aria-label={language === 'ar' ? 'المرجع أو المؤلفون' : 'Reference or authors'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" />
+          <input type="number" value={studyDraft.year} onChange={event => setStudyDraft(current => ({ ...current, year: event.target.value }))} placeholder={language === 'ar' ? 'سنة النشر' : 'Publication year'} aria-label={language === 'ar' ? 'سنة النشر' : 'Publication year'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" />
+          <input type="number" min="1" step="1" value={studyDraft.sampleSize} onChange={event => setStudyDraft(current => ({ ...current, sampleSize: event.target.value }))} placeholder={language === 'ar' ? 'حجم العينة' : 'Sample size'} aria-label={language === 'ar' ? 'حجم العينة' : 'Sample size'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" />
+          <input type="number" step="any" value={studyDraft.effectSize} onChange={event => setStudyDraft(current => ({ ...current, effectSize: event.target.value }))} placeholder={language === 'ar' ? 'حجم الأثر d' : 'Effect size d'} aria-label={language === 'ar' ? 'حجم الأثر d' : 'Effect size d'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" />
+          <input type="number" step="any" value={studyDraft.ciLower} onChange={event => setStudyDraft(current => ({ ...current, ciLower: event.target.value }))} placeholder={language === 'ar' ? 'الحد الأدنى لـ95% CI' : '95% CI lower'} aria-label={language === 'ar' ? 'الحد الأدنى لفاصل الثقة' : 'Confidence interval lower'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" />
+          <input type="number" step="any" value={studyDraft.ciUpper} onChange={event => setStudyDraft(current => ({ ...current, ciUpper: event.target.value }))} placeholder={language === 'ar' ? 'الحد الأعلى لـ95% CI' : '95% CI upper'} aria-label={language === 'ar' ? 'الحد الأعلى لفاصل الثقة' : 'Confidence interval upper'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" />
         </div>
         <Button type="submit" variant="primary" size="sm">{language === 'ar' ? 'إضافة الدراسة' : 'Add study'}</Button>
       </form>
@@ -430,7 +446,7 @@ export const LiteratureSynthesizer: React.FC = () => {
         ].map((item) => (
           <div key={item.label} className="rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] p-4 text-center shadow-sm">
             <div className="text-[10px] font-bold text-[var(--ds-text-muted)]">{item.label}</div>
-            <div className="mt-1 text-lg font-black text-[var(--ds-text-primary)]">{item.value}</div>
+            <div className="mt-1 text-lg font-black text-ink ds-numeric">{item.value}</div>
           </div>
         ))}
       </div>
@@ -444,7 +460,15 @@ export const LiteratureSynthesizer: React.FC = () => {
           </h4>
 
           <div className="space-y-3">
-            {studies.length === 0 ? <p className="text-xs text-[var(--ds-text-muted)] m-0">{language === 'ar' ? 'لا توجد دراسات مسجلة بعد.' : 'No studies recorded yet.'}</p> : studies.map(study => (
+            {studies.length === 0 ? (
+              <EmptyState
+                bare
+                className="p-4"
+                illustration={<BookOpen size={32} />}
+                title={language === 'ar' ? 'لا توجد دراسات مسجلة بعد' : 'No studies recorded yet'}
+                description={language === 'ar' ? 'أضف دليل دراسة يدوياً لبدء المكاملة.' : 'Add a study evidence row to begin the synthesis.'}
+              />
+            ) : studies.map(study => (
               <div key={study.id} className="p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg text-xs space-y-1.5">
                 <div className="flex justify-between items-start gap-2 font-bold text-[var(--ds-text-primary)]">
                   <span>{study.author} ({study.year})</span>

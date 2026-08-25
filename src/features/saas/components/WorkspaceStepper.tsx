@@ -33,7 +33,7 @@ export const WorkspaceStepper: React.FC<WorkspaceStepperProps> = ({ engine }) =>
               onClick={() => handleStepNavigation(step.id)}
               className={`w-full text-right flex items-center justify-between px-3 py-2.5 rounded-xl transition-all cursor-pointer border ${
                 isActive 
-                  ? 'bg-ai/10 text-ai dark:text-ai border-ai/20'
+                  ? 'bg-[var(--ds-primary-soft)] text-ink border-[var(--ds-primary)]/20'
                   : 'text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-secondary)] border-transparent'
               }`}
             >

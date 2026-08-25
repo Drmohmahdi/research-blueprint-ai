@@ -93,9 +93,10 @@ export default defineConfig({
       cwd: './backend',
       url: `${apiOrigin}/health`,
       reuseExistingServer: api.reuse,
-      timeout: 120_000,
+      timeout: 180_000,
       env: {
         ...process.env,
+        PYTHONUNBUFFERED: '1',
         DATABASE_URL: 'sqlite:///./e2e.db',
         TESTING: 'True',
         AUTO_CREATE_TABLES: 'false',

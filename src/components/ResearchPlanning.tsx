@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { BookOpenCheck, CalendarDays, CheckCircle2, ClipboardList, ShieldCheck } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
 import { VIEW_TO_PATH } from '../router/routes';
-import { Alert, Button, Card, EmptyState, Textarea } from '../design-system';
+import { Alert, Button, Card, EmptyState, PathPanel, Textarea } from '../design-system';
 import type { EthicsApprovalStatus, EthicsFeasibilityPlan } from '../types/research';
 
 type SaveStatus = { type: 'success' | 'error'; message: string } | null;
@@ -45,7 +45,7 @@ export const ResearchPlanning: React.FC = () => {
         illustration={<ClipboardList size={40} />}
         title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No Active Project'}
         description={language === 'ar'
-          ? 'اختر مشروعاً نشطاً لتوثيق أهدافه وخطته الزمنية واعتبارات أخلاقياته.'
+          ? 'اختر مشروعًا نشطًا لتوثيق أهدافه وخطته الزمنية واعتبارات أخلاقياته.'
           : 'Select an active project to document its objectives, timeline, and ethical considerations.'}
         actionButton={
           <Button type="button" variant="primary" size="sm" onClick={() => navigate(VIEW_TO_PATH.wizard)}>
@@ -99,23 +99,23 @@ export const ResearchPlanning: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      <Card padding="lg" className="space-y-3">
+      <PathPanel accent="var(--ds-path-research)">
         <div className="flex items-start gap-3">
           <span className="h-10 w-10 shrink-0 rounded-lg border border-[var(--ds-primary)]/20 bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] flex items-center justify-center">
             <ClipboardList size={20} />
           </span>
           <div>
-            <h3 className="m-0 text-xl font-black text-[var(--ds-text-primary)]">
+            <h3 className="m-0 text-xl font-black text-ink">
               {language === 'ar' ? 'خطة البحث' : 'Research Plan'}
             </h3>
-            <p className="m-0 mt-1 text-sm text-[var(--ds-text-secondary)]">
+            <p className="m-0 mt-1 text-sm text-secondary">
               {language === 'ar'
                 ? 'وثّق الأهداف والمعالم الزمنية والاعتبارات الأخلاقية قبل التسجيل المسبق والتنفيذ.'
                 : 'Document objectives, milestones, and ethical considerations before preregistration and execution.'}
             </p>
           </div>
         </div>
-      </Card>
+      </PathPanel>
 
       {status && <Alert variant={status.type === 'success' ? 'success' : 'danger'}>{status.message}</Alert>}
 
@@ -179,7 +179,7 @@ export const ResearchPlanning: React.FC = () => {
             <select
               value={ethicsPlan.approvalStatus}
               onChange={(event) => setEthicsPlan(current => ({ ...current, approvalStatus: event.target.value as EthicsApprovalStatus }))}
-              className="mt-1.5 w-full rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-sm text-[var(--ds-text-primary)]"
+              className="mt-1.5 w-full rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-sm text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
             >
               <option value="planned">{language === 'ar' ? 'قيد طلب / تخطيط' : 'Planned / pending'}</option>
               <option value="approved">{language === 'ar' ? 'تمت الموافقة' : 'Approved'}</option>

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useProject } from '../context/ProjectContext';
 import { AlertTriangle, Award, CheckCircle2, Clock, FileLock2, History } from 'lucide-react';
 import { Button } from '../design-system/components/Button';
+import { EmptyState } from '../design-system/components/Feedback';
+import { PathPanel } from '../design-system/components/Navigation';
 import type { PreRegistrationRevision, ResearchProject } from '../types/research';
 import { calculateProtocolHash, getProtocolPayload } from '../utils/protocolIntegrity';
 
@@ -68,9 +70,11 @@ export const PreRegistration: React.FC = () => {
 
   if (!activeProject) {
     return (
-      <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-8 shadow-sm text-center">
-        <p className="text-[var(--ds-text-secondary)] text-sm">{language === 'ar' ? 'الرجاء تحديد مشروع نشط أولاً.' : 'Please select an active project first.'}</p>
-      </div>
+      <EmptyState
+        illustration={<FileLock2 size={40} />}
+        title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No active project'}
+        description={language === 'ar' ? 'اختر مشروعًا نشطًا لتسجيل البروتوكول مسبقًا.' : 'Select an active project to lock the study protocol.'}
+      />
     );
   }
 
@@ -114,21 +118,22 @@ export const PreRegistration: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-6 shadow-sm space-y-4">
-        <div className="flex justify-between items-start pb-3 border-b border-[var(--ds-border-subtle)]">
+      <PathPanel accent="var(--ds-path-research)">
+        <div className="flex justify-between items-start gap-4">
           <div className="space-y-1">
-            <h3 className="text-lg font-bold text-[var(--ds-text-primary)] m-0">
+            <h3 className="text-lg font-bold text-ink m-0">
               {language === 'ar' ? 'التسجيل المسبق للبروتوكول البحثي (Preregistration)' : 'Study Preregistration'}
             </h3>
-            <p className="text-xs text-[var(--ds-text-secondary)] m-0">
+            <p className="text-xs text-secondary m-0">
               {language === 'ar'
                 ? 'وثّق فرضياتك وخطة التحليل إلكترونياً قبل البدء في جمع البيانات لمنع التحيز وحماية مصداقية البحث.'
                 : 'Document hypotheses and analysis plans before data collection to prevent bias and ensure scientific credibility.'}
             </p>
           </div>
-          <FileLock2 size={24} className="text-[var(--ds-primary)]" />
+          <FileLock2 size={24} className="text-[var(--ds-primary)] shrink-0" />
         </div>
-
+      </PathPanel>
+      <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-6 shadow-sm space-y-4">
         {/* Display Active registration state */}
         {activeProject.preRegistrationHash ? (
           <div className="p-4 bg-[var(--ds-success-soft)] border border-[var(--ds-success)]/20 rounded-lg space-y-3">
@@ -233,7 +238,13 @@ export const PreRegistration: React.FC = () => {
 
         <div className="space-y-3">
           {revisions.length === 0 ? (
-            <div className="p-3 bg-[var(--ds-surface-secondary)]/60 border border-[var(--ds-border-subtle)] rounded-lg text-xs flex items-center gap-2 text-[var(--ds-text-secondary)]"><Clock size={14} /><span>{language === 'ar' ? 'لا توجد مراجعة مسجلة للبروتوكول حتى الآن.' : 'No protocol revision has been registered yet.'}</span></div>
+            <EmptyState
+              bare
+              className="py-3"
+              illustration={<Clock size={20} />}
+              title={language === 'ar' ? 'لا توجد مراجعة مسجّلة' : 'No protocol revision yet'}
+              description={language === 'ar' ? 'سيظهر هنا سجل إصدارات البروتوكول بعد أول قفل.' : 'Protocol revisions will appear here after the first lock.'}
+            />
           ) : revisions.slice().reverse().map((revision, index) => (
             <div key={revision.id} className="p-3 bg-[var(--ds-success-soft)]/60 border border-[var(--ds-success)]/20 rounded-lg text-xs flex justify-between items-center gap-3 text-[var(--ds-text-secondary)]" data-testid="registered-revision">
               <div className="flex min-w-0 items-center gap-2"><Award size={14} className="shrink-0 text-[var(--ds-success)]" /><span className="font-semibold text-[var(--ds-text-primary)]">v{revision.protocolVersion}</span><span>{language === 'ar' ? `مراجعة بروتوكول ${revisions.length - index}` : `Protocol revision ${revisions.length - index}`}</span><span className="hidden sm:inline font-mono truncate">{revision.hash}</span></div>

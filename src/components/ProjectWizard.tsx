@@ -6,7 +6,7 @@ import { WizardStep4To5 } from '../features/guided-flow/components/WizardStep4To
 import { WizardStep6To7 } from '../features/guided-flow/components/WizardStep6To7';
 import { Save } from 'lucide-react';
 import { getTranslation } from '../utils/translations';
-import { Card, Button, Alert, Progress, Modal } from '../design-system';
+import { Card, Button, Alert, Progress, Modal, PathPanel } from '../design-system';
 
 export const ProjectWizard: React.FC = () => {
   const engine = useProjectWizardState();
@@ -67,7 +67,8 @@ export const ProjectWizard: React.FC = () => {
       )}
 
       {/* Data Completion Progress */}
-      <Card padding="sm" className="space-y-2">
+      <PathPanel accent="var(--ds-path-research)">
+        <div className="space-y-2">
         <div className="flex items-center justify-between text-xs font-bold text-[var(--ds-text-secondary)]">
           <span>{language === 'ar' ? 'نسبة اكتمال البيانات' : 'Data Completion'}</span>
           <div className="flex items-center gap-2">
@@ -76,11 +77,12 @@ export const ProjectWizard: React.FC = () => {
                 {language === 'ar' ? 'تغييرات غير محفوظة' : 'Unsaved changes'}
               </span>
             )}
-            <span>{completionPercent}%</span>
+            <span className="text-ink ds-numeric" dir="ltr">{completionPercent}%</span>
           </div>
         </div>
         <Progress value={completionPercent} variant={completionPercent === 100 ? 'success' : 'primary'} />
-      </Card>
+        </div>
+      </PathPanel>
 
       {/* Step Header Indicator */}
       <WizardStepIndicator engine={engine} />

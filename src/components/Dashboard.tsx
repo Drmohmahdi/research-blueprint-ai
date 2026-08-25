@@ -355,7 +355,7 @@ export const Dashboard: React.FC = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-3xl font-black text-[var(--ds-text-primary)] m-0 tracking-tight">
+                    <h3 className="text-3xl font-black text-ink ds-numeric m-0 tracking-tight">
                       {card.value}
                     </h3>
                     <p className="text-xs text-[var(--ds-text-secondary)] font-semibold m-0 leading-5 min-h-[20px]">
@@ -381,8 +381,8 @@ export const Dashboard: React.FC = () => {
                     {language === 'ar' ? 'متابعة عملية من الفكرة حتى المراجعة والنشر' : 'Operational flow from idea to review and publication'}
                   </p>
                 </div>
-                <span className="text-xs font-black text-[var(--ds-primary)] bg-[var(--ds-primary-soft)] border border-[var(--ds-primary)]/20 rounded-full px-3 py-1">
-                  {completeness}% {language === 'ar' ? 'اكتمال' : 'Complete'}
+                <span className="text-xs font-black text-ink bg-[var(--ds-primary-soft)] border border-[var(--ds-primary)]/20 rounded-full px-3 py-1">
+                  <span className="ds-numeric">{completeness}%</span> {language === 'ar' ? 'اكتمال' : 'Complete'}
                 </span>
               </div>
 
@@ -395,7 +395,7 @@ export const Dashboard: React.FC = () => {
                       stage.done
                         ? 'bg-[var(--ds-success-soft)] border-[var(--ds-success)]/25 text-[var(--ds-success)]'
                         : stage === nextStage
-                          ? 'bg-[var(--ds-primary-soft)] border-[var(--ds-primary)]/30 text-[var(--ds-primary)] shadow-sm'
+                          ? 'bg-[var(--ds-primary-soft)] border-[var(--ds-primary)]/30 text-ink shadow-sm'
                           : 'bg-[var(--ds-surface-secondary)] border-[var(--ds-border-subtle)] text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-tertiary)]'
                     }`}
                   >
@@ -452,7 +452,7 @@ export const Dashboard: React.FC = () => {
                       {language === 'ar' ? 'المشروع الحالي' : 'Active Project'}
                       </h3>
                     </div>
-                    <span className="bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] text-xs px-2.5 py-1 rounded-full font-semibold border border-[var(--ds-primary)]/20">
+                    <span className="bg-[var(--ds-primary-soft)] text-ink text-xs px-2.5 py-1 rounded-full font-semibold border border-[var(--ds-primary)]/20">
                       {language === 'ar' ? 'قيد التصميم' : 'In Design'}
                     </span>
                   </div>
@@ -473,15 +473,15 @@ export const Dashboard: React.FC = () => {
                     </div>
                     <div className={statCellClass}>
                       <span className="text-[var(--ds-text-muted)] font-medium block">{language === 'ar' ? 'المتغيرات' : 'Variables'}</span>
-                      <span className="text-[var(--ds-text-secondary)] font-semibold">{activeProject.variables.length}</span>
+                      <span className="text-ink font-semibold ds-numeric">{activeProject.variables.length}</span>
                     </div>
                     <div className={statCellClass}>
                       <span className="text-[var(--ds-text-muted)] font-medium block">{language === 'ar' ? 'أسئلة البحث' : 'Questions'}</span>
-                      <span className="text-[var(--ds-text-secondary)] font-semibold">{activeProject.questions.length}</span>
+                      <span className="text-ink font-semibold ds-numeric">{activeProject.questions.length}</span>
                     </div>
                     <div className={statCellClass}>
                       <span className="text-[var(--ds-text-muted)] font-medium block">{language === 'ar' ? 'حجم المجتمع المتاح' : 'Available Population'}</span>
-                      <span className="text-[var(--ds-text-secondary)] font-semibold">
+                      <span className={`font-semibold ${activeProject.sampleSettings.populationSize ? 'text-ink ds-numeric' : 'text-[var(--ds-text-secondary)]'}`}>
                         {activeProject.sampleSettings.populationSize || (language === 'ar' ? 'غير محدد' : 'Unspecified')}
                       </span>
                     </div>
@@ -613,11 +613,12 @@ export const Dashboard: React.FC = () => {
 
                 <div className="space-y-4 max-h-[300px] overflow-y-auto no-scrollbar">
                   {unresolvedComments.length === 0 ? (
-                    <div className="text-center py-6 text-xs text-[var(--ds-text-muted)] font-semibold">
-                      {language === 'ar' 
-                        ? 'لا توجد ملاحظات معلقة حالياً من المشرف.'
-                        : 'No pending comments from the supervisor currently.'}
-                    </div>
+                    <EmptyState
+                      bare
+                      className="py-4"
+                      title={language === 'ar' ? 'لا ملاحظات معلقة' : 'No pending notes'}
+                      description={language === 'ar' ? 'لا توجد ملاحظات معلقة حالياً من المشرف.' : 'No pending comments from the supervisor currently.'}
+                    />
                   ) : (
                     unresolvedComments.map(c => (
                       <div key={c.id} className="p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg space-y-2 text-xs">
@@ -670,7 +671,7 @@ export const Dashboard: React.FC = () => {
                 <Users size={20} className="text-[var(--ds-primary)]" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-3xl font-extrabold text-[var(--ds-text-primary)] m-0">{supervisedStudents.length}</h3>
+                <h3 className="text-3xl font-extrabold text-ink ds-numeric m-0">{supervisedStudents.length}</h3>
                 <span className="text-xs text-[var(--ds-text-muted)] font-medium">{language === 'ar' ? 'باحثين مسجلين في مسارك' : 'Active students in your track'}</span>
               </div>
             </div>
@@ -680,7 +681,7 @@ export const Dashboard: React.FC = () => {
               <MessageSquareCode size={20} className="text-[var(--ds-warning)]" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-3xl font-extrabold text-[var(--ds-text-primary)] m-0">3</h3>
+                <h3 className="text-3xl font-extrabold text-ink ds-numeric m-0">3</h3>
                 <span className="text-xs text-[var(--ds-text-muted)] font-medium">{language === 'ar' ? 'تعليقات غير محلولة حالياً' : 'Unresolved advisor notes'}</span>
               </div>
             </div>
@@ -690,7 +691,7 @@ export const Dashboard: React.FC = () => {
             <AlertTriangle size={20} className="text-[var(--ds-danger)]" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-3xl font-extrabold text-[var(--ds-text-primary)] m-0">{flaggedStudentsCount}</h3>
+                <h3 className="text-3xl font-extrabold text-ink ds-numeric m-0">{flaggedStudentsCount}</h3>
                 <span className="text-xs text-[var(--ds-text-muted)] font-medium">{language === 'ar' ? 'دراسات تتجاوز حدود الأمان' : 'Studies exceeding risk limits'}</span>
               </div>
             </div>
@@ -700,7 +701,7 @@ export const Dashboard: React.FC = () => {
             <TrendingUp size={20} className="text-[var(--ds-success)]" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-3xl font-extrabold text-[var(--ds-text-primary)] m-0">{avgDesignQuality}%</h3>
+                <h3 className="text-3xl font-extrabold text-ink ds-numeric m-0">{avgDesignQuality}%</h3>
                 <span className="text-xs text-[var(--ds-text-muted)] font-medium">{language === 'ar' ? 'مؤشر جودة التصاميم الإجمالي' : 'Overall student quality score'}</span>
               </div>
             </div>
@@ -857,7 +858,7 @@ export const Dashboard: React.FC = () => {
             <div className={`lg:col-span-2 ${panelCardClass}`}>
               <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)] flex items-center justify-between">
                 <span>{language === 'ar' ? 'الهيكل التنظيمي للمؤسسة ومساحات العمل الفرعية' : 'Workspace Departments & Hierarchical Tree'}</span>
-                <span className="text-[9px] bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] border border-[var(--ds-primary)]/20 px-2 py-0.5 rounded font-black">
+                <span className="text-[9px] bg-[var(--ds-primary-soft)] text-ink border border-[var(--ds-primary)]/20 px-2 py-0.5 rounded font-black">
                   {language === 'ar' ? 'توريث باقة الـ SaaS مفعل' : 'Billing Inheritance Active'}
                 </span>
               </h3>
@@ -868,7 +869,7 @@ export const Dashboard: React.FC = () => {
                     <Building2 size={16} className="text-[var(--ds-primary)]" />
                     <span className="font-extrabold text-xs text-[var(--ds-text-primary)]">{activeOrg ? activeOrg.name : (language === 'ar' ? 'مساحة العمل الأب (المستودع الرئيسي)' : 'Parent root institution')}</span>
                   </div>
-                  <span className="text-[10px] text-[var(--ds-primary)] font-bold bg-[var(--ds-primary-soft)] px-2 py-0.5 rounded border border-[var(--ds-primary)]/10">{language === 'ar' ? 'الكيان المالك للفوترة' : 'Billing Parent'}</span>
+                  <span className="text-[10px] text-ink font-bold bg-[var(--ds-primary-soft)] px-2 py-0.5 rounded border border-[var(--ds-primary)]/10">{language === 'ar' ? 'الكيان المالك للفوترة' : 'Billing Parent'}</span>
                 </div>
                 
                 <div className="mr-4 pl-4 border-r border-[var(--ds-border-subtle)] space-y-3">

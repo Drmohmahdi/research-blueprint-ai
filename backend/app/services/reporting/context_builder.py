@@ -69,11 +69,117 @@ class ReportContextBuilder:
             return ReportContextBuilder._build_peer_review(source_id, manifest, context, db, audience)
         elif report_type == ReportType.ACADEMIC_PROFILE:
             return ReportContextBuilder._build_academic_profile(source_id, manifest, context, db, audience)
+        elif report_type == ReportType.THESIS_PROGRESS:
+            return ReportContextBuilder._build_thesis_progress(source_id, manifest, context, db, audience)
+        elif report_type == ReportType.THESIS_EXAMINER_REPORT:
+            return ReportContextBuilder._build_thesis_examiner_report(source_id, manifest, context, db, audience)
+        elif report_type == ReportType.THESIS_MEETING:
+            return ReportContextBuilder._build_thesis_meeting(source_id, manifest, context, db)
+        elif report_type == ReportType.THESIS_MILESTONE:
+            return ReportContextBuilder._build_thesis_milestones(source_id, manifest, context, db, audience)
+        elif report_type == ReportType.THESIS_DEFENSE_READINESS:
+            return ReportContextBuilder._build_thesis_progress(source_id, manifest, context, db, audience)
+        elif report_type == ReportType.THESIS_CORRECTIONS:
+            return ReportContextBuilder._build_thesis_corrections(source_id, manifest, context, db, audience)
+        elif report_type == ReportType.THESIS_COMPLETION:
+            return ReportContextBuilder._build_thesis_completion(source_id, manifest, context, db, audience)
+        elif report_type == ReportType.THESIS_GRADUATE_PORTFOLIO:
+            return ReportContextBuilder._build_thesis_graduate_portfolio(source_id, manifest, context, db)
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Unsupported report type: {report_type}"
             )
+
+    @staticmethod
+    def _build_thesis_progress(thesis_id, manifest, context, db, audience):
+        thesis = db.query(models.ThesisRecord).filter(models.ThesisRecord.id == thesis_id, models.ThesisRecord.organization_id == context.organization.id).first()
+        if not thesis: raise HTTPException(status_code=404, detail="Thesis not found")
+        assigned = db.query(models.ThesisSupervisionAssignment).filter(models.ThesisSupervisionAssignment.thesis_id == thesis.id, models.ThesisSupervisionAssignment.user_id == context.user.id, models.ThesisSupervisionAssignment.status == "ACTIVE").first()
+        is_admin = context.is_global_admin or (context.role or "").upper() in {"OWNER", "ORGANIZATION_ADMIN"}
+        if thesis.student_user_id != context.user.id and not assigned and not is_admin: raise HTTPException(status_code=404, detail="Thesis not found")
+        if audience in {ReportAudience.COMMITTEE, ReportAudience.DEAN_OFFICE, ReportAudience.EXTERNAL_AUDITOR} and not assigned and not is_admin: raise HTTPException(status_code=403, detail="Audience privilege escalation")
+        from ..thesis_workflow import defense_readiness
+        ready = defense_readiness(db, thesis)
+        chapters = db.query(models.ThesisChapter).filter(models.ThesisChapter.thesis_id == thesis.id).order_by(models.ThesisChapter.sort_order).all()
+        milestones = db.query(models.ThesisMilestone).filter(models.ThesisMilestone.thesis_id == thesis.id).all()
+        return CanonicalReportContext(manifest=manifest, title_ar=f"تقرير تقدم الرسالة: {thesis.title_ar}", title_en=f"Thesis Progress Report: {thesis.title_en}", summary_ar="تقرير تشغيلي لحالة الرسالة دون ملاحظات إشراف خاصة أو تقارير مناقش سرية.", summary_en="Operational thesis status report excluding private supervision notes and confidential examiner reports.", metadata={"degree_type":thesis.degree_type,"program":thesis.program_name,"stage":thesis.current_stage}, sections=[ReportSection(key="readiness",title_ar="جاهزية المناقشة",title_en="Defense Readiness",paragraphs_ar=[f"حالة متطلبات النظام: {ready['system_status']}"],paragraphs_en=[f"System requirements status: {ready['system_status']}"],key_metrics={"score":ready["score"],"blockers":len(ready["blockers"])},callouts_ar=[b["code"] for b in ready["blockers"]],callouts_en=[b["code"] for b in ready["blockers"]]),ReportSection(key="chapters",title_ar="الفصول",title_en="Chapters",tables=[ReportTable(headers_ar=["الفصل","الحالة","النسخة"],headers_en=["Chapter","Status","Version"],rows=[[c.title,c.status,c.current_version_number] for c in chapters])]),ReportSection(key="milestones",title_ar="المعالم الأكاديمية",title_en="Academic Milestones",tables=[ReportTable(headers_ar=["المعلم","الحالة","الموعد"],headers_en=["Milestone","Status","Due"],rows=[[m.title,m.status,m.due_at or "—"] for m in milestones])])])
+
+    @staticmethod
+    def _build_thesis_examiner_report(report_id, manifest, context, db, audience):
+        report = db.query(models.ThesisExaminerReport).filter(models.ThesisExaminerReport.id == report_id, models.ThesisExaminerReport.organization_id == context.organization.id, models.ThesisExaminerReport.status == "SUBMITTED").first()
+        if not report:
+            raise HTTPException(status_code=404, detail="Thesis not found")
+        thesis = db.query(models.ThesisRecord).filter(models.ThesisRecord.id == report.thesis_id, models.ThesisRecord.organization_id == context.organization.id).first()
+        if not thesis:
+            raise HTTPException(status_code=404, detail="Thesis not found")
+        assigned = db.query(models.ThesisSupervisionAssignment).filter(models.ThesisSupervisionAssignment.thesis_id == thesis.id, models.ThesisSupervisionAssignment.user_id == context.user.id, models.ThesisSupervisionAssignment.status == "ACTIVE").first()
+        committee = db.query(models.ThesisCommitteeMember).filter(models.ThesisCommitteeMember.thesis_id == thesis.id, models.ThesisCommitteeMember.user_id == context.user.id, models.ThesisCommitteeMember.appointment_status != "REPLACED").first()
+        is_admin = context.is_global_admin or (context.role or "").upper() in {"OWNER", "ORGANIZATION_ADMIN"}
+        is_student = thesis.student_user_id == context.user.id
+        # Same-tenant is not enough: a user unrelated to this specific thesis
+        # (not the student, not a supervisor, not a committee member, not an
+        # admin) must not reach any tier of this report, matching the router's
+        # list_examiner_reports authority exactly.
+        if not (is_admin or assigned or committee or is_student):
+            raise HTTPException(status_code=404, detail="Thesis not found")
+        can_confidential = is_admin or bool(assigned and assigned.role == "SUPERVISOR")
+        is_committee_viewer = bool(committee) and not can_confidential
+        allowed = (
+            can_confidential
+            or (is_student and report.confidentiality_level == "STUDENT_VISIBLE")
+            or (assigned and report.confidentiality_level in {"STUDENT_VISIBLE", "SUPERVISOR_VISIBLE"})
+            or (is_committee_viewer and report.confidentiality_level in {"STUDENT_VISIBLE", "SUPERVISOR_VISIBLE", "COMMITTEE_ONLY"})
+        )
+        if not allowed:
+            raise HTTPException(status_code=404, detail="Thesis not found")
+        paragraphs_en = [report.general_assessment or "", f"Recommendation: {report.recommendation}"]
+        if (can_confidential or (is_committee_viewer and report.confidentiality_level == "COMMITTEE_ONLY")) and report.confidential_comments:
+            paragraphs_en.append("Confidential comments are available only to authorized academic officers.")
+        return CanonicalReportContext(manifest=manifest, title_ar="تقرير مناقش", title_en="Examiner report", summary_ar="تقرير مناقشة وفق صلاحية المشاهد.", summary_en="Examination report filtered by viewer authority.", metadata={"fingerprint": report.report_fingerprint, "confidentiality_level": report.confidentiality_level}, sections=[ReportSection(key="assessment", title_ar="التقييم", title_en="Assessment", paragraphs_ar=[report.general_assessment or ""], paragraphs_en=paragraphs_en)])
+
+    @staticmethod
+    def _authorized_thesis(thesis_id, context, db, admin_only=False):
+        thesis = db.query(models.ThesisRecord).filter(models.ThesisRecord.id == thesis_id, models.ThesisRecord.organization_id == context.organization.id).first()
+        if not thesis: raise HTTPException(status_code=404, detail="Thesis not found")
+        is_admin = context.is_global_admin or (context.role or "").upper() in {"OWNER", "ORGANIZATION_ADMIN"}
+        if admin_only and not is_admin: raise HTTPException(status_code=404, detail="Thesis not found")
+        assigned = db.query(models.ThesisSupervisionAssignment).filter(models.ThesisSupervisionAssignment.thesis_id == thesis.id, models.ThesisSupervisionAssignment.user_id == context.user.id, models.ThesisSupervisionAssignment.status == "ACTIVE").first()
+        if thesis.student_user_id != context.user.id and not assigned and not is_admin: raise HTTPException(status_code=404, detail="Thesis not found")
+        return thesis, is_admin, assigned
+
+    @staticmethod
+    def _build_thesis_meeting(meeting_id, manifest, context, db):
+        meeting = db.query(models.ThesisMeeting).filter(models.ThesisMeeting.id == meeting_id, models.ThesisMeeting.organization_id == context.organization.id).first()
+        if not meeting: raise HTTPException(status_code=404, detail="Thesis not found")
+        ReportContextBuilder._authorized_thesis(meeting.thesis_id, context, db)
+        return CanonicalReportContext(manifest=manifest, title_ar="تقرير اجتماع إشراف", title_en="Supervision meeting report", summary_ar="محضر اجتماع دون الملاحظات الخاصة للمشرف.", summary_en="Meeting minutes excluding private supervisor notes.", metadata={"meeting_id": meeting.id}, sections=[ReportSection(key="meeting", title_ar="الاجتماع", title_en="Meeting", paragraphs_ar=[meeting.status, meeting.scheduled_at], paragraphs_en=[meeting.status, meeting.scheduled_at], tables=[ReportTable(headers_ar=["البند"], headers_en=["Item"], rows=[[item] for item in (meeting.agenda_json or [])])])])
+
+    @staticmethod
+    def _build_thesis_milestones(thesis_id, manifest, context, db, audience):
+        thesis, _, _ = ReportContextBuilder._authorized_thesis(thesis_id, context, db)
+        milestones = db.query(models.ThesisMilestone).filter(models.ThesisMilestone.thesis_id == thesis.id).all()
+        return CanonicalReportContext(manifest=manifest, title_ar="تقرير المعالم", title_en="Milestone status report", summary_ar="حالة المعالم الأكاديمية المطلوبة.", summary_en="Required academic milestone status.", metadata={"stage": thesis.current_stage}, sections=[ReportSection(key="milestones", title_ar="المعالم", title_en="Milestones", tables=[ReportTable(headers_ar=["المعلم","الحالة"], headers_en=["Milestone","Status"], rows=[[m.title, m.status] for m in milestones])])])
+
+    @staticmethod
+    def _build_thesis_corrections(thesis_id, manifest, context, db, audience):
+        thesis, _, _ = ReportContextBuilder._authorized_thesis(thesis_id, context, db)
+        rows = db.query(models.ThesisCorrection).filter(models.ThesisCorrection.thesis_id == thesis.id).all()
+        return CanonicalReportContext(manifest=manifest, title_ar="تقرير التصحيحات", title_en="Corrections status report", summary_ar="حالة التصحيحات دون محتوى تقارير المناقش السرية.", summary_en="Correction status excluding confidential examiner content.", metadata={"open": sum(1 for r in rows if r.status != "VERIFIED")}, sections=[ReportSection(key="corrections", title_ar="التصحيحات", title_en="Corrections", tables=[ReportTable(headers_ar=["النوع","الحالة"], headers_en=["Type","Status"], rows=[[c.correction_type, c.status] for c in rows])])])
+
+    @staticmethod
+    def _build_thesis_completion(thesis_id, manifest, context, db, audience):
+        thesis, _, _ = ReportContextBuilder._authorized_thesis(thesis_id, context, db)
+        approval = db.query(models.ThesisFinalApproval).filter(models.ThesisFinalApproval.thesis_id == thesis.id).first()
+        deposit = db.query(models.ThesisDeposit).filter(models.ThesisDeposit.thesis_id == thesis.id).first()
+        return CanonicalReportContext(manifest=manifest, title_ar="تقرير الإكمال النهائي", title_en="Final completion report", summary_ar="حالة الاعتماد النهائي والإيداع والتخليص.", summary_en="Final approval, deposit, and clearance status.", metadata={"status": thesis.status, "stage": thesis.current_stage}, sections=[ReportSection(key="completion", title_ar="الإكمال", title_en="Completion", paragraphs_en=[f"Approval: {'yes' if approval else 'no'}", f"Deposit: {deposit.status if deposit else 'none'}", f"Thesis status: {thesis.status}"], paragraphs_ar=[thesis.status])])
+
+    @staticmethod
+    def _build_thesis_graduate_portfolio(source_id, manifest, context, db):
+        is_admin = context.is_global_admin or (context.role or "").upper() in {"OWNER", "ORGANIZATION_ADMIN"}
+        if not is_admin: raise HTTPException(status_code=404, detail="Thesis not found")
+        rows = db.query(models.ThesisRecord).filter(models.ThesisRecord.organization_id == context.organization.id).all()
+        return CanonicalReportContext(manifest=manifest, title_ar="محفظة الدراسات العليا", title_en="Graduate Studies portfolio report", summary_ar="تجميع تشغيلي بلا ملاحظات سرية أو فصول غير منشورة.", summary_en="Operational aggregate without confidential notes or unpublished chapters.", metadata={"count": len(rows)}, sections=[ReportSection(key="portfolio", title_ar="المحفظة", title_en="Portfolio", tables=[ReportTable(headers_ar=["الدرجة","المرحلة","الحالة"], headers_en=["Degree","Stage","Status"], rows=[[t.degree_type, t.current_stage, t.status] for t in rows])])])
 
     @staticmethod
     def _build_research_project(

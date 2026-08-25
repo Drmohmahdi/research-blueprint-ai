@@ -156,6 +156,15 @@
   font-feature-settings: "tnum";
 }
 
+/* Native fields without an explicit Tailwind ring still get a visible focus cue. */
+:is(
+  select,
+  textarea,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]):not([type="file"]):not([type="color"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"])
+):not([class*="ring"]):focus-visible {
+  box-shadow: 0 0 0 2px var(--ds-primary-soft);
+}
+
 .font-arabic-plex {
   font-family: "IBM Plex Sans Arabic", system-ui, sans-serif;
 }

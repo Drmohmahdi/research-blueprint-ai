@@ -69,7 +69,7 @@ export const Input: React.FC<InputProps> = ({
 
         {(suffixIcon || loading) && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-[var(--ds-text-muted)]">
-            {loading ? <Loader2 className="animate-spin text-[var(--ds-primary)]" size={16} /> : suffixIcon}
+            {loading ? <Loader2 className="motion-safe:animate-spin text-[var(--ds-primary)]" size={16} /> : suffixIcon}
           </div>
         )}
       </div>

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { PathPanel } from '../design-system/components/Navigation';
+import { EmptyState } from '../design-system/components/Feedback';
 import { useProject } from '../context/ProjectContext';
 import {
   apiListScholarlyAssets,
@@ -254,7 +256,7 @@ export const ScholarlyAssetsList: React.FC = () => {
 
   const getLifecycleStatusColor = (status: string) => {
     switch (status) {
-      case 'PUBLISHED': return 'bg-action/10 text-success border-success/20';
+      case 'PUBLISHED': return 'bg-[var(--ds-success-soft)] text-success border-success/20';
       case 'ACCEPTED': return 'bg-info/10 text-info border-info/20';
       case 'UNDER_REVIEW': return 'bg-warning/10 text-warning border-warning/20';
       case 'ARCHIVED': return 'bg-muted/10 text-muted border-muted/20';
@@ -323,14 +325,14 @@ export const ScholarlyAssetsList: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-6 space-y-6 dir-auto" style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}>
       
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] p-6 rounded-2xl shadow-sm">
+      <PathPanel accent="var(--ds-path-identity)">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Layers className="w-7 h-7 text-ai" />
+          <h2 className="text-2xl font-bold flex items-center gap-2 m-0 text-ink">
+            <Layers className="w-7 h-7 text-path-identity" />
             <span>{t.title}</span>
           </h2>
-          <p className="text-xs text-[var(--ds-text-secondary)] mt-1">{t.desc}</p>
+          <p className="text-xs text-secondary mt-1">{t.desc}</p>
         </div>
         
         <button
@@ -340,7 +342,8 @@ export const ScholarlyAssetsList: React.FC = () => {
           <Plus className="w-4 h-4" />
           <span>{t.addAsset}</span>
         </button>
-      </div>
+        </div>
+      </PathPanel>
 
       {/* Filters and search bar */}
       <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
@@ -384,7 +387,7 @@ export const ScholarlyAssetsList: React.FC = () => {
             placeholder={t.searchPlaceholder}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:ring-1 focus:ring-ai focus:outline-none"
+            className="w-full pl-9 pr-4 py-2 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:ring-2 focus:ring-[var(--ds-primary-soft)] focus:outline-none"
           />
         </div>
       </div>
@@ -392,34 +395,37 @@ export const ScholarlyAssetsList: React.FC = () => {
       {/* Assets Grid List */}
       {loading ? (
         <div className="flex flex-col items-center justify-center min-h-[40vh] gap-4">
-          <div className="w-12 h-12 rounded-full border-4 border-ai border-t-transparent animate-spin"></div>
+          <div className="w-12 h-12 rounded-full border-4 border-[var(--ds-primary)] border-t-transparent motion-safe:animate-spin"></div>
           <p className="text-[var(--ds-text-secondary)] text-sm font-semibold">
             {language === 'ar' ? 'جاري تحميل الأصول العلمية...' : 'Loading Scholarly Assets...'}
           </p>
         </div>
       ) : filteredAssets.length === 0 ? (
-        <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] p-12 text-center rounded-2xl shadow-sm text-sm text-[var(--ds-text-secondary)]">
-          <BookOpen className="w-12 h-12 text-ai/40 mx-auto mb-4" />
-          <p className="font-semibold">{t.noAssets}</p>
-          <button
-            onClick={openAddModal}
-            className="mt-4 px-4 py-2 bg-action hover:bg-action-hover text-on-action rounded-lg text-xs font-bold ds-transition inline-flex items-center gap-1.5 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>{t.addAsset}</span>
-          </button>
-        </div>
+        <EmptyState
+          illustration={<BookOpen size={40} />}
+          title={t.noAssets}
+          description={language === 'ar' ? 'سجّل أول أصل علمي لربطه بالنشر والترقيات والهوية الأكاديمية.' : 'Register the first scholarly asset to connect publishing, promotion, and academic identity.'}
+          actionButton={
+            <button
+              onClick={openAddModal}
+              className="px-4 py-2 bg-action hover:bg-action-hover text-on-action rounded-lg text-xs font-bold ds-transition inline-flex items-center gap-1.5 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>{t.addAsset}</span>
+            </button>
+          }
+        />
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {filteredAssets.map((asset) => (
             <div 
               key={asset.id} 
-              className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] p-5 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between gap-4 hover:border-ai/40 transition-all"
+              className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] p-5 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between gap-4 hover:border-[var(--ds-primary)]/30 transition-all"
             >
               <div className="space-y-2 flex-1">
                 {/* Header indicators */}
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-ai/10 text-ai border border-ai/20">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[var(--ds-information-soft)] text-[var(--ds-information)] border border-info/20">
                     {getAssetTypeBadgeLabel(asset.asset_type)}
                   </span>
 
@@ -458,7 +464,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                 {/* Secondary Meta details */}
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-[var(--ds-text-secondary)] pt-1">
                   {asset.journal_name && (
-                    <span className="flex items-center gap-1 font-semibold text-ai/90">
+                    <span className="flex items-center gap-1 font-semibold text-ink">
                       <BookOpen className="w-3.5 h-3.5" />
                       <span>{asset.journal_name}</span>
                     </span>
@@ -510,7 +516,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                   <>
                     <button
                       onClick={() => openEditModal(asset)}
-                      className="p-2 text-ai hover:bg-ai/10 rounded-xl transition-all cursor-pointer"
+                      className="p-2 text-action hover:bg-[var(--ds-primary-soft)] rounded-xl transition-all cursor-pointer"
                       title={t.edit}
                     >
                       <Pencil className="w-4 h-4" />
@@ -537,7 +543,7 @@ export const ScholarlyAssetsList: React.FC = () => {
             
             <div className="flex justify-between items-center border-b border-[var(--ds-border-subtle)] pb-3">
               <h3 className="text-base font-black flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-ai" />
+                <Sparkles className="w-5 h-5 text-path-identity" />
                 <span>{editingAssetId ? t.modalTitleEdit : t.modalTitleAdd}</span>
               </h3>
               <button
@@ -557,7 +563,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                   <select
                     value={newAsset.asset_type}
                     onChange={(e) => setNewAsset({ ...newAsset, asset_type: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none"
+                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                   >
                     <option value="JOURNAL_PAPER">{t.journalPaper}</option>
                     <option value="RESEARCH_PROJECT">{t.researchProject}</option>
@@ -573,7 +579,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                   <select
                     value={newAsset.lifecycle_status}
                     onChange={(e) => setNewAsset({ ...newAsset, lifecycle_status: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none"
+                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                   >
                     {LIFECYCLE_STATUSES.map(status => (
                       <option key={status} value={status}>{getLifecycleStatusLabel(status)}</option>
@@ -589,7 +595,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                     placeholder="مثال: هندسة البرمجيات"
                     value={newAsset.primary_discipline}
                     onChange={(e) => setNewAsset({ ...newAsset, primary_discipline: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none"
+                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                   />
                 </div>
               </div>
@@ -603,7 +609,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                     required
                     value={newAsset.title_ar}
                     onChange={(e) => setNewAsset({ ...newAsset, title_ar: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none"
+                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                   />
                 </div>
                 <div>
@@ -613,7 +619,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                     required
                     value={newAsset.title_en}
                     onChange={(e) => setNewAsset({ ...newAsset, title_en: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none"
+                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                   />
                 </div>
               </div>
@@ -626,7 +632,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                     rows={3}
                     value={newAsset.abstract_ar}
                     onChange={(e) => setNewAsset({ ...newAsset, abstract_ar: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none"
+                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                   />
                 </div>
                 <div>
@@ -635,7 +641,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                     rows={3}
                     value={newAsset.abstract_en}
                     onChange={(e) => setNewAsset({ ...newAsset, abstract_en: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none"
+                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                   />
                 </div>
               </div>
@@ -648,7 +654,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                     type="text"
                     value={newAsset.journal_name}
                     onChange={(e) => setNewAsset({ ...newAsset, journal_name: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none"
+                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                   />
                 </div>
                 <div>
@@ -657,7 +663,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                     type="text"
                     value={newAsset.publisher}
                     onChange={(e) => setNewAsset({ ...newAsset, publisher: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none"
+                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                   />
                 </div>
                 <div>
@@ -666,7 +672,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                     type="date"
                     value={newAsset.publication_date}
                     onChange={(e) => setNewAsset({ ...newAsset, publication_date: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none"
+                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                   />
                 </div>
               </div>
@@ -680,7 +686,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                     placeholder="10.1016/j.datak.2026.102"
                     value={newAsset.doi}
                     onChange={(e) => setNewAsset({ ...newAsset, doi: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none"
+                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                   />
                 </div>
                 <div>
@@ -690,7 +696,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                     placeholder="1234-5678"
                     value={newAsset.issn}
                     onChange={(e) => setNewAsset({ ...newAsset, issn: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none"
+                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                   />
                 </div>
                 <div>
@@ -700,19 +706,19 @@ export const ScholarlyAssetsList: React.FC = () => {
                     placeholder="978-3-16-148410-0"
                     value={newAsset.isbn}
                     onChange={(e) => setNewAsset({ ...newAsset, isbn: e.target.value })}
-                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none"
+                    className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                   />
                 </div>
               </div>
 
               {/* CRediT contributors form section */}
               <div className="space-y-3 pt-3 border-t border-[var(--ds-border-subtle)]">
-                <h4 className="text-xs font-bold text-ai">{t.contributors}</h4>
+                <h4 className="text-xs font-bold text-ink">{t.contributors}</h4>
                 
                 {/* List of currently added contributors */}
                 <div className="flex flex-wrap gap-2">
                   {newAsset.contributors.map((c: any, idx: number) => (
-                    <span key={idx} className="bg-ai/10 border border-ai/20 text-ai px-2.5 py-1 rounded-xl text-[10px] font-bold flex items-center gap-1.5">
+                    <span key={idx} className="bg-[var(--ds-primary-soft)] border border-[var(--ds-primary)]/20 text-ink px-2.5 py-1 rounded-xl text-[10px] font-bold flex items-center gap-1.5">
                       <span>{c.external_name} ({c.contribution_percentage}%)</span>
                       <button 
                         type="button" 
@@ -734,7 +740,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                         type="text"
                         value={contributorForm.external_name}
                         onChange={(e) => setContributorForm({ ...contributorForm, external_name: e.target.value })}
-                        className="w-full px-2.5 py-1.5 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs"
+                        className="w-full px-2.5 py-1.5 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                       />
                     </div>
                     <div>
@@ -743,7 +749,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                         type="text"
                         value={contributorForm.orcid}
                         onChange={(e) => setContributorForm({ ...contributorForm, orcid: e.target.value })}
-                        className="w-full px-2.5 py-1.5 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs"
+                        className="w-full px-2.5 py-1.5 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                       />
                     </div>
                   </div>
@@ -767,7 +773,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                                 }
                                 setContributorForm({ ...contributorForm, contribution_roles_json: updated });
                               }}
-                              className="rounded border-[var(--ds-border-subtle)] text-ai focus:ring-ai w-3.5 h-3.5 cursor-pointer"
+                              className="rounded border-[var(--ds-border-subtle)] text-[var(--ds-primary)] focus:ring-[var(--ds-primary-soft)] w-3.5 h-3.5 cursor-pointer"
                             />
                             <label htmlFor={`role-${role.value}`} className="text-[10px] text-[var(--ds-text-secondary)] cursor-pointer select-none">
                               {language === 'ar' ? role.labelAr : role.labelEn}
@@ -786,7 +792,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                           max="100"
                           value={contributorForm.contribution_percentage}
                           onChange={(e) => setContributorForm({ ...contributorForm, contribution_percentage: parseInt(e.target.value) || 0 })}
-                          className="w-full px-2.5 py-1.5 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs"
+                          className="w-full px-2.5 py-1.5 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                         />
                       </div>
 
@@ -796,7 +802,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                           id="is-corresponding"
                           checked={contributorForm.is_corresponding_author}
                           onChange={(e) => setContributorForm({ ...contributorForm, is_corresponding_author: e.target.checked })}
-                          className="rounded border-[var(--ds-border-subtle)] text-ai focus:ring-ai w-4 h-4 cursor-pointer"
+                          className="rounded border-[var(--ds-border-subtle)] text-[var(--ds-primary)] focus:ring-[var(--ds-primary-soft)] w-4 h-4 cursor-pointer"
                         />
                         <label htmlFor="is-corresponding" className="text-[10px] font-bold text-[var(--ds-text-secondary)] cursor-pointer select-none">
                           {t.corresponding}

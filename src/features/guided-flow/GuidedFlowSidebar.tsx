@@ -46,7 +46,7 @@ export const GuidedFlowSidebar: React.FC = () => {
     <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl p-4 shadow-sm space-y-4">
       {/* Path title */}
       <div className="pb-3 border-b border-[var(--ds-border-subtle)]">
-        <h4 className="text-xs font-black text-ai m-0 uppercase tracking-wider">
+        <h4 className="text-xs font-black text-path-research m-0 uppercase tracking-wider">
           {language === 'ar' ? 'المسار البحثي' : 'Research Path'}
         </h4>
         <p className="text-sm font-bold text-[var(--ds-text-primary)] m-0 mt-1">
@@ -67,9 +67,9 @@ export const GuidedFlowSidebar: React.FC = () => {
               onClick={() => navigate(VIEW_TO_PATH[stepId] ?? '/')}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                 isCurrent
-                  ? 'bg-action/10 text-ai border border-ai/20'
+                  ? 'bg-[var(--ds-primary-soft)] text-ink border border-[var(--ds-primary)]/20'
                   : isCompleted
-                  ? 'text-success hover:bg-action/5'
+                  ? 'text-success hover:bg-[var(--ds-success-soft)]'
                   : 'text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-secondary)]'
               }`}
             >
@@ -79,7 +79,7 @@ export const GuidedFlowSidebar: React.FC = () => {
                   <CheckCircle2 size={14} className="text-success" />
                 ) : (
                   <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${
-                    isCurrent ? 'border-ai bg-ai' : 'border-muted'
+                    isCurrent ? 'border-[var(--ds-primary)] bg-[var(--ds-primary)]' : 'border-muted'
                   }`}>
                     {isCurrent && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
                   </div>
@@ -128,7 +128,7 @@ export const GuidedFlowSidebar: React.FC = () => {
       <div className="space-y-1">
         <div className="flex justify-between text-[9px] font-bold text-[var(--ds-text-muted)]">
           <span>{language === 'ar' ? 'التقدم' : 'Progress'}</span>
-          <span>{Math.round((completedSteps.filter(s => activePath.orderedSteps.includes(s)).length / activePath.orderedSteps.length) * 100)}%</span>
+          <span className="ds-numeric">{Math.round((completedSteps.filter(s => activePath.orderedSteps.includes(s)).length / activePath.orderedSteps.length) * 100)}%</span>
         </div>
         <div className="h-1.5 rounded-full bg-[var(--ds-surface-secondary)] overflow-hidden">
           <div

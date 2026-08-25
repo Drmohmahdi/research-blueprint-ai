@@ -163,6 +163,17 @@ class RecipientResolver:
                         role="AUTHOR"
                     ))
 
+        # Thesis recipients are resolved from the thesis and active supervision
+        # relationships. Examiner email delivery remains tied to the separately
+        # scoped magic-link invitation and never receives confidential payloads.
+        elif aggregate_type == AggregateType.THESIS.value:
+            thesis = db.query(models.ThesisRecord).filter(models.ThesisRecord.id == aggregate_id, models.ThesisRecord.organization_id == organization_id).first()
+            if not thesis: return []
+            ids = {thesis.student_user_id}
+            ids.update(a.user_id for a in db.query(models.ThesisSupervisionAssignment).filter(models.ThesisSupervisionAssignment.thesis_id == thesis.id, models.ThesisSupervisionAssignment.status == "ACTIVE").all())
+            for user in db.query(models.User).filter(models.User.id.in_(ids)).all():
+                if user.id != actor_user_id: recipients.append(ResolvedRecipient(user.id, user.email, "THESIS_PARTICIPANT"))
+
         # -------------------------------------------------------------
         # 3. RESEARCH WORKFLOW / PROJECT EVENTS
         # -------------------------------------------------------------

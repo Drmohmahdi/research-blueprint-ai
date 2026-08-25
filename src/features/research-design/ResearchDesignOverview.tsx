@@ -37,7 +37,7 @@ export const ResearchDesignOverview: React.FC<ResearchDesignOverviewProps> = ({
       titleAr: 'اكتمال التصميم',
       titleEn: 'Design Completeness',
       value: `${designProgress}%`,
-      color: 'text-ai',
+      color: 'text-ink',
       explanationAr: 'نسبة إنجاز الـ 18 خطوة المنهجية المحددة بالمسار.',
       explanationEn: 'Overall progress percentage across all 18 methodological steps.'
     },
@@ -61,7 +61,7 @@ export const ResearchDesignOverview: React.FC<ResearchDesignOverviewProps> = ({
       titleAr: 'جودة الأدلة',
       titleEn: 'Evidence Quality',
       value: isAr ? 'متوسطة' : 'Medium',
-      color: 'text-ai',
+      color: 'text-ink',
       explanationAr: 'درجة الاستناد إلى أدبيات ودراسات سابقة قوية ذات معاملات حقيقية.',
       explanationEn: 'Strength and citation count of referenced academic literature.'
     },
@@ -85,7 +85,7 @@ export const ResearchDesignOverview: React.FC<ResearchDesignOverviewProps> = ({
       titleAr: 'جودة التنبؤ',
       titleEn: 'Prediction Quality',
       value: project.preRegistrationHash ? '95%' : '60%',
-      color: 'text-ai',
+      color: 'text-ink',
       explanationAr: 'مستوى الثقة في النموذج التنبؤي (استكشافي، دراسات سابقة، استطلاعي).',
       explanationEn: 'Bayesian prediction quality based on prior literature and pilot data.'
     },
@@ -112,7 +112,7 @@ export const ResearchDesignOverview: React.FC<ResearchDesignOverviewProps> = ({
       {/* Project Card Header */}
       <div className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl p-5 shadow-sm space-y-4">
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-ai/10 text-ai">
+          <div className="p-3 rounded-xl bg-[var(--ds-primary-soft)] text-[var(--ds-primary)]">
             <BookOpen size={24} />
           </div>
           <div>

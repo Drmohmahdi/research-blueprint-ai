@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card } from '../../../design-system/components/Card';
 import { Button } from '../../../design-system/components/Button';
+import { EmptyState } from '../../../design-system/components/Feedback';
 import { MessageSquare } from 'lucide-react';
 import type { useWorkspaceState } from '../useWorkspaceState';
 
@@ -23,9 +24,9 @@ export const WorkspaceCommentsPanel: React.FC<WorkspaceCommentsPanelProps> = ({ 
   } = engine;
 
   return (
-    <Card className="p-5 border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] rounded-3xl space-y-4 shadow-sm text-xs font-bold">
+    <Card className="p-5 border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] rounded-2xl space-y-4 shadow-sm text-xs font-bold">
       <h5 className="text-xs font-black text-[var(--ds-text-muted)] uppercase tracking-widest flex items-center gap-1.5 border-b border-[var(--ds-border-subtle)] pb-2 m-0">
-        <MessageSquare size={15} className="text-ai" />
+        <MessageSquare size={15} className="text-path-review" />
         <span>{language === 'ar' ? 'ملاحظات المشرف للخطوة' : 'Step Supervisor Notes'}</span>
       </h5>
       
@@ -37,13 +38,13 @@ export const WorkspaceCommentsPanel: React.FC<WorkspaceCommentsPanelProps> = ({ 
           required
           value={newCommentText}
           onChange={(e) => setNewCommentText(e.target.value)}
-          className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-[10px]"
+          className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-[10px] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
         />
         <div className="flex justify-between items-center gap-2">
           <select
             value={commentPriority}
             onChange={(e) => setCommentPriority(e.target.value)}
-            className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg px-2 py-1 text-[9px] text-[var(--ds-text-secondary)] focus:outline-none"
+            className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg px-2 py-1 text-[9px] text-[var(--ds-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
           >
             <option value="NORMAL">NORMAL</option>
             <option value="HIGH">HIGH</option>
@@ -80,9 +81,12 @@ export const WorkspaceCommentsPanel: React.FC<WorkspaceCommentsPanelProps> = ({ 
           </div>
         ))}
         {comments.length === 0 && (
-          <div className="text-[10px] text-[var(--ds-text-muted)] italic font-semibold py-1">
-            {language === 'ar' ? 'لا توجد ملاحظات حالية للخطوة.' : 'No notes posted for this step.'}
-          </div>
+          <EmptyState
+            bare
+            className="py-2"
+            title={language === 'ar' ? 'لا توجد ملاحظات لهذه الخطوة' : 'No notes for this step'}
+            description={language === 'ar' ? 'أضف ملاحظة للمشرف على هذه الخطوة.' : 'Post a supervisor note for this step.'}
+          />
         )}
       </div>
     </Card>

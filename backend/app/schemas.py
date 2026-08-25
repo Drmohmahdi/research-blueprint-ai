@@ -1152,7 +1152,7 @@ class ExternalReviewerPortalResponse(BaseModel):
 # --- Phase 05: Academic Reporting & Export Schemas ---
 
 class ReportExportRequest(BaseModel):
-    report_type: str = Field(..., description="RESEARCH_PROJECT, LITERATURE_SYNTHESIS, PRISMA_FLOW, PROMOTION_READINESS, PEER_REVIEW, ACADEMIC_PROFILE")
+    report_type: str = Field(..., description="RESEARCH_PROJECT, LITERATURE_SYNTHESIS, PRISMA_FLOW, PROMOTION_READINESS, PEER_REVIEW, ACADEMIC_PROFILE, THESIS_PROGRESS")
     source_id: str = Field(..., description="ID of the underlying domain entity")
     format: str = Field("PDF", description="PDF, DOCX, JSON")
     language: str = Field("ar", description="ar, en, bilingual")
@@ -1279,6 +1279,5 @@ class AIResponse(BaseModel):
     human_authority: bool = True
     ai_generated: bool = True
     usage: Optional[AIUsageSummary] = None
-
 
 

@@ -5,6 +5,7 @@ import { apiGetMyProfile, apiListScholarlyAssets } from '../utils/api';
 import { ROUTES } from '../router/routes';
 import { ACADEMIC_CHANNELS, getChannelLabel } from '../config/academicChannels';
 import { Card } from '../design-system/components/Card';
+import { EmptyState } from '../design-system/components/Feedback';
 import { PathPanel } from '../design-system/components/Navigation';
 import {
   FileBarChart,
@@ -62,7 +63,7 @@ export const AcademicVisibilityReports: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center gap-2 py-24 text-[var(--ds-text-muted)]">
-        <Loader2 size={18} className="animate-spin" />
+        <Loader2 size={18} className="motion-safe:animate-spin" />
         <span className="text-sm font-bold">{isAr ? 'جارِ إعداد التقرير...' : 'Preparing report...'}</span>
       </div>
     );
@@ -70,12 +71,11 @@ export const AcademicVisibilityReports: React.FC = () => {
 
   if (!profile) {
     return (
-      <div className="max-w-md mx-auto text-center py-24 space-y-2">
-        <ShieldAlert className="mx-auto text-danger" size={28} />
-        <p className="text-sm font-bold text-[var(--ds-text-secondary)]">
-          {isAr ? 'تعذّر تحميل بيانات التقرير. تأكد من تسجيل الدخول وحاول مجددًا.' : 'Could not load report data. Make sure you are signed in and try again.'}
-        </p>
-      </div>
+      <EmptyState
+        illustration={<ShieldAlert size={32} />}
+        title={isAr ? 'تعذّر تحميل بيانات التقرير' : 'Could not load report data'}
+        description={isAr ? 'تأكد من تسجيل الدخول وحاول مجددًا.' : 'Make sure you are signed in and try again.'}
+      />
     );
   }
 
@@ -187,19 +187,19 @@ export const AcademicVisibilityReports: React.FC = () => {
       {/* Summary stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="p-4 text-center">
-          <span className="text-2xl font-black text-path-identity block">{completenessScore}%</span>
+          <span className="text-2xl font-black text-ink ds-numeric block">{completenessScore}%</span>
           <span className="text-[10px] text-[var(--ds-text-muted)] font-bold uppercase">{isAr ? 'اكتمال الملف' : 'Profile Completeness'}</span>
         </Card>
         <Card className="p-4 text-center">
-          <span className="text-2xl font-black text-path-identity block">{linkedChannels.length}/{CHANNEL_TYPES.length}</span>
+          <span className="text-2xl font-black text-ink ds-numeric block">{linkedChannels.length}/{CHANNEL_TYPES.length}</span>
           <span className="text-[10px] text-[var(--ds-text-muted)] font-bold uppercase">{isAr ? 'قنوات مرتبطة' : 'Linked Channels'}</span>
         </Card>
         <Card className="p-4 text-center">
-          <span className="text-2xl font-black text-path-identity block">{assets.length}</span>
+          <span className="text-2xl font-black text-ink ds-numeric block">{assets.length}</span>
           <span className="text-[10px] text-[var(--ds-text-muted)] font-bold uppercase">{isAr ? 'أصول علمية' : 'Scholarly Assets'}</span>
         </Card>
         <Card className="p-4 text-center">
-          <span className="text-2xl font-black text-path-identity block">{withDoi}</span>
+          <span className="text-2xl font-black text-ink ds-numeric block">{withDoi}</span>
           <span className="text-[10px] text-[var(--ds-text-muted)] font-bold uppercase">{isAr ? 'تحمل DOI' : 'With DOI'}</span>
         </Card>
       </div>
@@ -231,7 +231,7 @@ export const AcademicVisibilityReports: React.FC = () => {
                     <span className="font-bold text-[var(--ds-text-secondary)]">{getChannelLabel(type, isAr)}</span>
                     <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${
                       linked
-                        ? 'text-success bg-action/10 border-success/20'
+                        ? 'text-success bg-[var(--ds-success-soft)] border-success/20'
                         : 'text-danger bg-danger/10 border-danger/20'
                     }`}>
                       {linked ? (isAr ? 'مرتبط' : 'Linked') : (isAr ? 'مفقود' : 'Missing')}
@@ -242,7 +242,7 @@ export const AcademicVisibilityReports: React.FC = () => {
             </div>
             <button
               onClick={() => navigate(ROUTES.VISIBILITY)}
-              className="text-[10px] font-black text-path-identity hover:underline cursor-pointer print:hidden"
+              className="text-[10px] font-black text-action hover:underline cursor-pointer print:hidden"
             >
               {isAr ? 'إدارة القنوات في لوحة الانتشار ←' : '← Manage channels in the dashboard'}
             </button>
@@ -253,7 +253,12 @@ export const AcademicVisibilityReports: React.FC = () => {
               {isAr ? 'الأصول حسب النوع' : 'Assets by Type'}
             </h3>
             {Object.keys(byType).length === 0 ? (
-              <p className="text-xs text-[var(--ds-text-muted)] m-0">{isAr ? 'لا توجد أصول علمية مسجّلة بعد.' : 'No scholarly assets registered yet.'}</p>
+              <EmptyState
+                bare
+                className="py-3"
+                title={isAr ? 'لا توجد أصول علمية' : 'No scholarly assets'}
+                description={isAr ? 'سجّل ورقة أو مشروعًا لتظهر هنا حسب النوع.' : 'Register a paper or project to see it grouped by type.'}
+              />
             ) : (
               <div className="space-y-1.5">
                 {Object.entries(byType).map(([type, count]) => (
@@ -261,14 +266,14 @@ export const AcademicVisibilityReports: React.FC = () => {
                     <span className="font-bold text-[var(--ds-text-secondary)]">
                       {ASSET_TYPE_LABELS[type] ? (isAr ? ASSET_TYPE_LABELS[type].ar : ASSET_TYPE_LABELS[type].en) : type}
                     </span>
-                    <span className="font-black text-[var(--ds-text-primary)]">{count}</span>
+                    <span className="font-black text-ink ds-numeric">{count}</span>
                   </div>
                 ))}
               </div>
             )}
             <button
               onClick={() => navigate(ROUTES.ASSETS)}
-              className="text-[10px] font-black text-path-identity hover:underline cursor-pointer print:hidden"
+              className="text-[10px] font-black text-action hover:underline cursor-pointer print:hidden"
             >
               {isAr ? 'إدارة الأصول العلمية ←' : '← Manage scholarly assets'}
             </button>
@@ -279,7 +284,12 @@ export const AcademicVisibilityReports: React.FC = () => {
               {isAr ? 'الأصول حسب حالة النشر' : 'Assets by Publication Status'}
             </h3>
             {Object.keys(byStatus).length === 0 ? (
-              <p className="text-xs text-[var(--ds-text-muted)] m-0">{isAr ? 'لا توجد أصول علمية مسجّلة بعد.' : 'No scholarly assets registered yet.'}</p>
+              <EmptyState
+                bare
+                className="py-3"
+                title={isAr ? 'لا توجد أصول علمية' : 'No scholarly assets'}
+                description={isAr ? 'سجّل ورقة أو مشروعًا لتظهر هنا حسب حالة النشر.' : 'Register a paper or project to see it grouped by publication status.'}
+              />
             ) : (
               <div className="space-y-1.5">
                 {Object.entries(byStatus).map(([status, count]) => (
@@ -287,7 +297,7 @@ export const AcademicVisibilityReports: React.FC = () => {
                     <span className="font-bold text-[var(--ds-text-secondary)]">
                       {LIFECYCLE_STATUS_LABELS[status] ? (isAr ? LIFECYCLE_STATUS_LABELS[status].ar : LIFECYCLE_STATUS_LABELS[status].en) : status}
                     </span>
-                    <span className="font-black text-[var(--ds-text-primary)]">{count}</span>
+                    <span className="font-black text-ink ds-numeric">{count}</span>
                   </div>
                 ))}
               </div>
@@ -300,7 +310,12 @@ export const AcademicVisibilityReports: React.FC = () => {
               <span>{isAr ? 'الانتماءات الأكاديمية' : 'Academic Affiliations'}</span>
             </h3>
             {affiliations.length === 0 ? (
-              <p className="text-xs text-[var(--ds-text-muted)] m-0">{isAr ? 'لا توجد انتماءات مسجّلة بعد.' : 'No affiliations recorded yet.'}</p>
+              <EmptyState
+                bare
+                className="py-3"
+                title={isAr ? 'لا توجد انتماءات' : 'No affiliations'}
+                description={isAr ? 'أضف انتماءك الأكاديمي من محرر الملف الشخصي.' : 'Add your academic affiliation from the profile editor.'}
+              />
             ) : (
               <div className="space-y-1.5">
                 {affiliations.map((aff: any, idx: number) => (
@@ -309,7 +324,7 @@ export const AcademicVisibilityReports: React.FC = () => {
                       {aff.organization_name}{aff.position_title ? ` — ${aff.position_title}` : ''}
                     </span>
                     {aff.is_current && (
-                      <span className="text-[8px] font-bold text-success bg-action/10 border border-success/20 px-1.5 py-0.5 rounded shrink-0">
+                      <span className="text-[8px] font-bold text-success bg-[var(--ds-success-soft)] border border-success/20 px-1.5 py-0.5 rounded shrink-0">
                         {isAr ? 'حالي' : 'Current'}
                       </span>
                     )}
@@ -319,7 +334,7 @@ export const AcademicVisibilityReports: React.FC = () => {
             )}
             <button
               onClick={() => navigate(ROUTES.PROFILE_AFFILIATIONS)}
-              className="text-[10px] font-black text-path-identity hover:underline cursor-pointer print:hidden"
+              className="text-[10px] font-black text-action hover:underline cursor-pointer print:hidden"
             >
               {isAr ? 'إدارة الانتماءات ←' : '← Manage affiliations'}
             </button>
@@ -334,9 +349,12 @@ export const AcademicVisibilityReports: React.FC = () => {
               <span>{isAr ? 'الجدول الزمني للمنشورات' : 'Publication Timeline'}</span>
             </h3>
             {timeline.length === 0 ? (
-              <p className="text-xs text-[var(--ds-text-muted)] m-0 py-4 text-center">
-                {isAr ? 'لا توجد أصول علمية بتاريخ نشر مسجّل بعد.' : 'No scholarly assets with a recorded publication date yet.'}
-              </p>
+              <EmptyState
+                bare
+                className="py-4"
+                title={isAr ? 'لا يوجد جدول زمني بعد' : 'No publication timeline yet'}
+                description={isAr ? 'سجّل ورقة بتاريخ نشر لتظهر هنا.' : 'Register an asset with a publication date to populate this timeline.'}
+              />
             ) : (
               <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
                 {timeline.map((a) => (

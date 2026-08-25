@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Card } from '../../design-system/components/Card';
 import { Button } from '../../design-system/components/Button';
+import { EmptyState } from '../../design-system/components/Feedback';
 import { PathPanel } from '../../design-system/components/Navigation';
 
 export const ThesisDefenseWorkspace: React.FC = () => {
@@ -30,9 +31,11 @@ export const ThesisDefenseWorkspace: React.FC = () => {
 
   if (!activeProject) {
     return (
-      <div className="p-12 text-center text-xs text-[var(--ds-text-muted)] italic font-semibold">
-        {language === 'ar' ? 'الرجاء اختيار مشروع نشط أولاً...' : 'Please select an active project first...'}
-      </div>
+      <EmptyState
+        illustration={<Unlock size={40} />}
+        title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No active project'}
+        description={language === 'ar' ? 'اختر مشروعًا نشطًا لفتح مسار إعداد المناقشة.' : 'Select an active project to open the thesis defense path.'}
+      />
     );
   }
 
@@ -79,7 +82,7 @@ export const ThesisDefenseWorkspace: React.FC = () => {
 
           <div className="flex flex-wrap items-center gap-4 shrink-0">
             <div className="text-center lg:text-end space-y-1">
-              <div className="text-xs font-black text-[var(--ds-primary)]">{progressPct}% {language === 'ar' ? 'مكتمل' : 'Completed'}</div>
+              <div className="text-xs font-black text-ink ds-numeric">{progressPct}% {language === 'ar' ? 'مكتمل' : 'Completed'}</div>
               <div className="h-2 w-32 bg-[var(--ds-surface-tertiary)] rounded-full overflow-hidden">
                 <div className="h-full bg-[var(--ds-primary)] ds-transition" style={{ width: `${progressPct}%` }} />
               </div>
@@ -111,7 +114,7 @@ export const ThesisDefenseWorkspace: React.FC = () => {
               >
                 <div className="flex items-center gap-2">
                   <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
-                    isActive ? 'bg-action text-on-action' : isCompleted ? 'bg-success text-white' : 'bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] border border-[var(--ds-border-subtle)]'
+                    isActive ? 'bg-[var(--ds-primary-soft)] text-ink' : isCompleted ? 'bg-[var(--ds-success-soft)] text-success' : 'bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] border border-[var(--ds-border-subtle)]'
                   }`}>
                     {isCompleted ? <Check size={10} /> : idx + 1}
                   </div>

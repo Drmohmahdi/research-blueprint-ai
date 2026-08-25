@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { login } from './helpers';
+import { expectAuthenticatedShell, login } from './helpers';
 
 const themeRoutes = ['/app', '/app/research/data-analysis', '/app/peer-review', '/app/publishing'];
 const widthRoutes = [
@@ -47,11 +47,13 @@ test('@a11y login has no serious axe violations', async ({ page }) => {
 test('@critical risk-based widths do not overflow critical workspaces', async ({ page }) => {
   test.setTimeout(6 * 60_000);
   await login(page);
-  for (const width of widths) {
-    await page.setViewportSize({ width, height: width >= 1440 ? 900 : 844 });
-    for (const route of widthRoutes) {
-      await page.goto(route.path, { waitUntil: 'domcontentloaded' });
-      await expect(page.locator('main'), `${width} ${route.name}`).toHaveCount(1);
+  for (const route of widthRoutes) {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(route.path, { waitUntil: 'domcontentloaded' });
+    await expectAuthenticatedShell(page, route.name);
+    for (const width of widths) {
+      await page.setViewportSize({ width, height: width >= 1440 ? 900 : 844 });
+      await expectAuthenticatedShell(page, `${width} ${route.name}`);
       await expect.poll(async () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth).catch(() => false), {
         message: `${width}px ${route.name} must not create page-level horizontal overflow`,
       }).toBe(true);
@@ -81,7 +83,7 @@ test('@critical External Reviewer stays outside the app shell at compact and wid
 test('@critical mixed statistical strings stay LTR inside Arabic UI', async ({ page }) => {
   await login(page);
   await page.goto('/app/research');
-  await expect(page.locator('main')).toBeVisible();
+  await expectAuthenticatedShell(page, '/app/research');
   const sample = await page.evaluate(() => {
     const probe = document.createElement('p');
     probe.className = 'ds-numeric';
@@ -98,7 +100,7 @@ test('@critical mixed statistical strings stay LTR inside Arabic UI', async ({ p
 test('@critical chart series remain distinct under vision deficiency', async ({ page }) => {
   await login(page);
   await page.goto('/app/research');
-  await expect(page.locator('main')).toBeVisible();
+  await expectAuthenticatedShell(page, '/app/research');
   const cdp = await page.context().newCDPSession(page);
   for (const type of ['protanopia', 'deuteranopia', 'tritanopia'] as const) {
     await cdp.send('Emulation.setEmulatedVisionDeficiency', { type });
@@ -113,7 +115,7 @@ test('@reduced-motion critical routes still render with reduced motion', async (
   await login(page);
   for (const route of themeRoutes) {
     await page.goto(route);
-    await expect(page.locator('main')).toHaveCount(1);
+    await expectAuthenticatedShell(page, route);
     const duration = await page.evaluate(() => {
       const probe = document.createElement('div');
       probe.className = 'ds-transition';

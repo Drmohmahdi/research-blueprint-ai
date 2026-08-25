@@ -5,6 +5,7 @@ import { apiGetMyProfile, apiUpsertProfile, apiGetDownloadUrl } from '../utils/a
 import { ROUTES } from '../router/routes';
 import { ACADEMIC_CHANNELS } from '../config/academicChannels';
 import { Card } from '../design-system/components/Card';
+import { EmptyState } from '../design-system/components/Feedback';
 import { PathPanel } from '../design-system/components/Navigation';
 import {
   Sparkles,
@@ -170,7 +171,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center gap-2 py-24 text-[var(--ds-text-muted)]">
-        <Loader2 size={18} className="animate-spin" />
+        <Loader2 size={18} className="motion-safe:animate-spin" />
         <span className="text-sm font-bold">{isAr ? 'جارِ تحميل ملفك الأكاديمي...' : 'Loading your academic profile...'}</span>
       </div>
     );
@@ -178,12 +179,11 @@ export const AcademicVisibilityDashboard: React.FC = () => {
 
   if (loadError || !profile) {
     return (
-      <div className="max-w-md mx-auto text-center py-24 space-y-2">
-        <ShieldAlert className="mx-auto text-danger" size={28} />
-        <p className="text-sm font-bold text-[var(--ds-text-secondary)]">
-          {isAr ? 'تعذّر تحميل الملف الأكاديمي. تأكد من تسجيل الدخول وحاول مجددًا.' : 'Could not load your academic profile. Make sure you are signed in and try again.'}
-        </p>
-      </div>
+      <EmptyState
+        illustration={<ShieldAlert size={32} />}
+        title={isAr ? 'تعذّر تحميل الملف الأكاديمي' : 'Could not load academic profile'}
+        description={isAr ? 'تأكد من تسجيل الدخول وحاول مجددًا.' : 'Make sure you are signed in and try again.'}
+      />
     );
   }
 
@@ -307,7 +307,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
             profile.visibility_status === 'PUBLIC' ? (
               <button
                 onClick={() => copyToClipboard(`${window.location.origin}/researcher/${user.username}`, 'public-link')}
-                className="inline-flex items-center gap-1.5 text-[11px] font-black text-path-identity hover:underline cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-[11px] font-black text-action hover:underline cursor-pointer"
               >
                 <ExternalLink size={12} />
                 <span>{copiedKey === 'public-link' ? (isAr ? 'تم نسخ الرابط!' : 'Link copied!') : (isAr ? 'نسخ رابط ملفك العام' : 'Copy your public profile link')}</span>
@@ -329,7 +329,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
         <div className="p-4 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl flex items-center gap-3 shrink-0">
           <div className="text-right">
             <span className="text-[9px] text-[var(--ds-text-muted)] font-black block uppercase">{isAr ? 'مؤشر اكتمال الملف' : 'Profile Completeness'}</span>
-            <span className="text-2xl font-black text-path-identity block">{visibilityScore}%</span>
+            <span className="text-2xl font-black text-ink ds-numeric block">{visibilityScore}%</span>
           </div>
           <div className="h-10 w-[1px] bg-[var(--ds-border-subtle)]" />
           <Activity size={24} className="text-path-identity" />
@@ -353,7 +353,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
               {!editingName && (
                 <button
                   onClick={() => setEditingName(true)}
-                  className="text-[10px] font-black text-path-identity hover:underline cursor-pointer"
+                  className="text-[10px] font-black text-action hover:underline cursor-pointer"
                 >
                   {isAr ? 'تعديل' : 'Edit'}
                 </button>
@@ -369,7 +369,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                       type="text"
                       value={nameDraft.ar}
                       onChange={e => setNameDraft(d => ({ ...d, ar: e.target.value }))}
-                      className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none"
+                      className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                     />
                   </div>
                   <div className="flex flex-col space-y-1">
@@ -378,7 +378,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                       type="text"
                       value={nameDraft.en}
                       onChange={e => setNameDraft(d => ({ ...d, en: e.target.value }))}
-                      className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none"
+                      className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                     />
                   </div>
                   <div className="flex flex-col space-y-1 sm:col-span-2">
@@ -389,7 +389,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                       type="text"
                       value={nameDraft.variants}
                       onChange={e => setNameDraft(d => ({ ...d, variants: e.target.value }))}
-                      className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none"
+                      className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                     />
                   </div>
                 </div>
@@ -399,7 +399,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                     disabled={saving}
                     className="flex items-center gap-1.5 text-[10px] font-black text-on-action bg-action hover:bg-action-hover disabled:opacity-60 px-3 py-1.5 rounded-lg cursor-pointer"
                   >
-                    {saving ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+                    {saving ? <Loader2 size={12} className="motion-safe:animate-spin" /> : <Check size={12} />}
                     <span>{isAr ? 'حفظ' : 'Save'}</span>
                   </button>
                   <button
@@ -455,16 +455,19 @@ export const AcademicVisibilityDashboard: React.FC = () => {
               </h3>
               <button
                 onClick={() => navigate(ROUTES.PROFILE_AFFILIATIONS)}
-                className="text-[10px] font-black text-path-identity hover:underline cursor-pointer"
+                className="text-[10px] font-black text-action hover:underline cursor-pointer"
               >
                 {isAr ? 'إدارة الانتماءات' : 'Manage affiliations'}
               </button>
             </div>
 
             {!hasInstitutionInfo && affiliations.length === 0 ? (
-              <p className="text-xs font-bold text-[var(--ds-text-muted)] m-0 text-center py-4">
-                {isAr ? 'لم تُضِف بيانات مؤسسية بعد. أضفها من الملف الكامل ليظهر انتماؤك بوضوح لزوار ملفك.' : 'No institutional details yet. Add them in the full profile so your affiliation is clear to visitors.'}
-              </p>
+              <EmptyState
+                bare
+                className="py-4"
+                title={isAr ? 'لا توجد بيانات مؤسسية' : 'No institutional details'}
+                description={isAr ? 'أضفها من الملف الكامل ليظهر انتماؤك بوضوح لزوار ملفك.' : 'Add them in the full profile so your affiliation is clear to visitors.'}
+              />
             ) : (
               <div className="space-y-3">
                 {hasInstitutionInfo && (
@@ -496,7 +499,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                           {aff.organization_name}{aff.position_title ? ` — ${aff.position_title}` : ''}
                         </span>
                         {aff.is_current && (
-                          <span className="text-[8px] font-bold text-success bg-action/10 border border-success/20 px-1.5 py-0.5 rounded shrink-0">
+                          <span className="text-[8px] font-bold text-success bg-[var(--ds-success-soft)] border border-success/20 px-1.5 py-0.5 rounded shrink-0">
                             {isAr ? 'حالي' : 'Current'}
                           </span>
                         )}
@@ -522,18 +525,19 @@ export const AcademicVisibilityDashboard: React.FC = () => {
               </h3>
               <button
                 onClick={() => navigate(ROUTES.PROFILE)}
-                className="text-[10px] font-black text-path-identity hover:underline cursor-pointer"
+                className="text-[10px] font-black text-action hover:underline cursor-pointer"
               >
                 {isAr ? 'تعديل في الملف الكامل' : 'Edit in full profile'}
               </button>
             </div>
 
             {!hasShortBio && !hasFullBio && !hasKeywords ? (
-              <div className="text-center py-6 space-y-2">
-                <p className="text-xs font-bold text-[var(--ds-text-muted)] m-0">
-                  {isAr ? 'لم تكتب بعد سيرة أو كلمات مفتاحية. أضفها من صفحة الملف الأكاديمي لتظهر هنا جاهزة للنسخ.' : 'You haven’t written a bio or keywords yet. Add them from your academic profile to see them here, ready to copy.'}
-                </p>
-              </div>
+              <EmptyState
+                bare
+                className="py-4"
+                title={isAr ? 'لا توجد سيرة بعد' : 'No bio yet'}
+                description={isAr ? 'أضف سيرة وكلمات مفتاحية من صفحة الملف الأكاديمي لتظهر هنا جاهزة للنسخ.' : 'Add a bio and keywords from your academic profile to copy them here.'}
+              />
             ) : (
               <div className="space-y-4">
                 {hasShortBio && (
@@ -614,7 +618,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-black text-[var(--ds-text-primary)]">{chan.label}</span>
                       {chan.linked ? (
-                        <span className="text-[8px] font-bold text-success bg-action/10 border border-success/20 px-1.5 py-0.5 rounded">
+                        <span className="text-[8px] font-bold text-success bg-[var(--ds-success-soft)] border border-success/20 px-1.5 py-0.5 rounded">
                           {isAr ? 'مرتبط' : 'Linked'}
                         </span>
                       ) : (
@@ -634,7 +638,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                             href={chan.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-[9px] font-black text-path-identity hover:underline flex items-center gap-0.5"
+                            className="text-[9px] font-black text-action hover:underline flex items-center gap-0.5"
                           >
                             <span>{isAr ? 'زيارة' : 'Visit'}</span>
                             <ExternalLink size={10} />
@@ -642,7 +646,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                         )}
                         <button
                           onClick={() => startEditChannel(chan.type, chan.value, chan.url)}
-                          className="text-[9px] font-black text-[var(--ds-text-muted)] hover:text-path-identity cursor-pointer"
+                          className="text-[9px] font-black text-[var(--ds-text-muted)] hover:text-action cursor-pointer"
                         >
                           {isAr ? 'تعديل' : 'Edit'}
                         </button>
@@ -650,7 +654,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                     ) : (
                       <button
                         onClick={() => startEditChannel(chan.type)}
-                        className="text-[9px] font-black text-path-identity hover:underline flex items-center gap-0.5 cursor-pointer"
+                        className="text-[9px] font-black text-action hover:underline flex items-center gap-0.5 cursor-pointer"
                       >
                         <Plus size={11} />
                         <span>{isAr ? 'إضافة' : 'Add'}</span>
@@ -665,14 +669,14 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                         placeholder={isAr ? 'المعرّف أو اسم المستخدم' : 'Identifier or username'}
                         value={channelDraft.value}
                         onChange={e => setChannelDraft(d => ({ ...d, value: e.target.value }))}
-                        className="w-full bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg px-2.5 py-1.5 text-[11px] text-[var(--ds-text-primary)] focus:outline-none"
+                        className="w-full bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg px-2.5 py-1.5 text-[11px] text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                       />
                       <input
                         type="text"
                         placeholder={isAr ? 'رابط الملف الشخصي (اختياري)' : 'Profile URL (optional)'}
                         value={channelDraft.url}
                         onChange={e => setChannelDraft(d => ({ ...d, url: e.target.value }))}
-                        className="w-full bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg px-2.5 py-1.5 text-[11px] text-[var(--ds-text-primary)] focus:outline-none"
+                        className="w-full bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg px-2.5 py-1.5 text-[11px] text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                       />
                       <div className="flex items-center gap-2">
                         <button
@@ -680,7 +684,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                           disabled={saving || !channelDraft.value.trim()}
                           className="flex items-center gap-1 text-[9px] font-black text-on-action bg-action hover:bg-action-hover disabled:opacity-50 px-2.5 py-1 rounded-lg cursor-pointer"
                         >
-                          {saving ? <Loader2 size={11} className="animate-spin" /> : <Check size={11} />}
+                          {saving ? <Loader2 size={11} className="motion-safe:animate-spin" /> : <Check size={11} />}
                           <span>{isAr ? 'حفظ' : 'Save'}</span>
                         </button>
                         <button
@@ -708,13 +712,13 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-black text-[var(--ds-text-primary)]">{chan.identifier_type}</span>
-                      <span className="text-[8px] font-bold text-success bg-action/10 border border-success/20 px-1.5 py-0.5 rounded">
+                      <span className="text-[8px] font-bold text-success bg-[var(--ds-success-soft)] border border-success/20 px-1.5 py-0.5 rounded">
                         {isAr ? 'مرتبط' : 'Linked'}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       {chan.profile_url && (
-                        <a href={chan.profile_url} target="_blank" rel="noreferrer" className="text-[9px] font-black text-path-identity hover:underline flex items-center gap-0.5">
+                        <a href={chan.profile_url} target="_blank" rel="noreferrer" className="text-[9px] font-black text-action hover:underline flex items-center gap-0.5">
                           <span>{isAr ? 'زيارة' : 'Visit'}</span>
                           <ExternalLink size={10} />
                         </a>
@@ -740,21 +744,21 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                   placeholder={isAr ? 'اسم المنصة (مثال: Academia.edu)' : 'Platform name (e.g. Academia.edu)'}
                   value={customChannelDraft.type}
                   onChange={e => setCustomChannelDraft(d => ({ ...d, type: e.target.value }))}
-                  className="w-full bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg px-2.5 py-1.5 text-[11px] text-[var(--ds-text-primary)] focus:outline-none"
+                  className="w-full bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg px-2.5 py-1.5 text-[11px] text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                 />
                 <input
                   type="text"
                   placeholder={isAr ? 'المعرّف أو اسم المستخدم' : 'Identifier or username'}
                   value={customChannelDraft.value}
                   onChange={e => setCustomChannelDraft(d => ({ ...d, value: e.target.value }))}
-                  className="w-full bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg px-2.5 py-1.5 text-[11px] text-[var(--ds-text-primary)] focus:outline-none"
+                  className="w-full bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg px-2.5 py-1.5 text-[11px] text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                 />
                 <input
                   type="text"
                   placeholder={isAr ? 'رابط الملف الشخصي (اختياري)' : 'Profile URL (optional)'}
                   value={customChannelDraft.url}
                   onChange={e => setCustomChannelDraft(d => ({ ...d, url: e.target.value }))}
-                  className="w-full bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg px-2.5 py-1.5 text-[11px] text-[var(--ds-text-primary)] focus:outline-none"
+                  className="w-full bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg px-2.5 py-1.5 text-[11px] text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                 />
                 <div className="flex items-center gap-2">
                   <button
@@ -762,7 +766,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                     disabled={saving || !customChannelDraft.type.trim() || !customChannelDraft.value.trim()}
                     className="flex items-center gap-1 text-[9px] font-black text-on-action bg-action hover:bg-action-hover disabled:opacity-50 px-2.5 py-1 rounded-lg cursor-pointer"
                   >
-                    {saving ? <Loader2 size={11} className="animate-spin" /> : <Check size={11} />}
+                    {saving ? <Loader2 size={11} className="motion-safe:animate-spin" /> : <Check size={11} />}
                     <span>{isAr ? 'حفظ' : 'Save'}</span>
                   </button>
                   <button
@@ -777,7 +781,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
             ) : (
               <button
                 onClick={() => setAddingCustomChannel(true)}
-                className="w-full flex items-center justify-center gap-1.5 text-[10px] font-black text-path-identity border border-dashed border-[var(--ds-path-identity)]/30 hover:bg-info/10 py-2 rounded-xl cursor-pointer"
+                className="w-full flex items-center justify-center gap-1.5 text-[10px] font-black text-action border border-dashed border-[var(--ds-primary)]/30 hover:bg-[var(--ds-primary-soft)] py-2 rounded-xl cursor-pointer"
               >
                 <Plus size={12} />
                 <span>{isAr ? 'إضافة قناة أخرى (مثل Academia.edu أو موقعك الشخصي)' : 'Add another channel (e.g. Academia.edu or personal site)'}</span>
@@ -812,7 +816,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                       type="checkbox"
                       checked={task.done}
                       readOnly
-                      className="mt-0.5 shrink-0 accent-indigo-500 rounded"
+                      className="mt-0.5 h-4 w-4 shrink-0 rounded border-[var(--ds-border-default)] text-[var(--ds-primary)] focus:ring-[var(--ds-primary)] cursor-pointer"
                     />
                     <div className="flex-1 space-y-1">
                       <p className="text-xs font-bold leading-normal m-0">

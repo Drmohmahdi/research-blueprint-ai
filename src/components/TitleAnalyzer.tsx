@@ -10,7 +10,8 @@ import {
   HelpCircle, 
   AlertTriangle, 
   Save, 
-  CheckCircle2
+  CheckCircle2,
+  Loader2
 } from 'lucide-react';
 
 const TITLE_PRESETS = [
@@ -145,7 +146,7 @@ export const TitleAnalyzer: React.FC = () => {
     <div className="space-y-6 max-w-4xl mx-auto pb-16">
       {/* Success Notification Banner */}
       {successMessage && (
-        <div className="bg-action/10 border border-success/20 text-success dark:text-success rounded-lg p-4 flex items-center gap-3 animate-pulse">
+        <div className="bg-[var(--ds-success-soft)] border border-success/20 text-success rounded-lg p-4 flex items-center gap-3">
           <CheckCircle2 size={18} className="text-success shrink-0" />
           <span className="text-xs font-bold">{successMessage}</span>
         </div>
@@ -176,7 +177,7 @@ export const TitleAnalyzer: React.FC = () => {
               value={titleInput}
               onChange={(e) => setTitleInput(e.target.value)}
               placeholder={language === 'ar' ? 'مثال: أثر استخدام الواقع المعزز في التحصيل الدراسي لدى طلاب المرحلة الابتدائية' : 'e.g. The effect of augmented reality on achievement...'}
-              className="flex-1 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg px-4 py-3 text-xs shadow-sm focus:outline-none focus:ring-2 focus:ring-ai/50 text-ink font-bold"
+              className="flex-1 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg px-4 py-3 text-xs shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)] text-ink font-bold"
             />
             <Button
               onClick={handleAnalyze}
@@ -184,7 +185,7 @@ export const TitleAnalyzer: React.FC = () => {
               variant="primary"
               className="flex items-center justify-center gap-1.5 px-6 py-3 font-bold rounded-lg shrink-0 cursor-pointer text-xs"
             >
-              <Sparkles size={14} className={loading ? 'animate-spin' : ''} />
+              {loading ? <Loader2 size={14} className="motion-safe:animate-spin" /> : <Sparkles size={14} />}
               <span>{loading ? getTranslation(language, 'analyzing') : getTranslation(language, 'analyzeBtn')}</span>
             </Button>
           </div>
@@ -199,7 +200,7 @@ export const TitleAnalyzer: React.FC = () => {
                 <button
                   key={idx}
                   onClick={() => handlePresetClick(language === 'ar' ? preset.ar : preset.en)}
-                  className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] border border-[var(--ds-border-subtle)] hover:bg-ai/5 hover:border-ai/30 transition-all cursor-pointer text-right max-w-full truncate"
+                  className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] border border-[var(--ds-border-subtle)] hover:bg-[var(--ds-primary-soft)] hover:border-[var(--ds-primary)]/30 transition-all cursor-pointer text-right max-w-full truncate"
                 >
                   {language === 'ar' ? preset.ar : preset.en}
                 </button>
@@ -219,7 +220,7 @@ export const TitleAnalyzer: React.FC = () => {
               <h4 className="text-sm font-black text-[var(--ds-text-primary)] m-0">
                 {getTranslation(language, 'analysisResult')}
               </h4>
-              <span className="text-xs text-ai font-black">
+              <span className="text-xs text-ink font-black ds-numeric" dir="ltr">
                 {getTranslation(language, 'confidenceScore')}: {(result.confidence * 100).toFixed(0)}%
               </span>
             </div>
@@ -237,8 +238,8 @@ export const TitleAnalyzer: React.FC = () => {
 
             <div className="space-y-4">
               {/* Methodology */}
-              <div className="p-3.5 bg-ai/5 border border-ai/10 rounded-lg space-y-1.5">
-                <span className="text-[10px] font-black text-ai uppercase tracking-wider block">
+              <div className="p-3.5 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg space-y-1.5">
+                <span className="text-[10px] font-black text-path-research uppercase tracking-wider block">
                   {getTranslation(language, 'suggestedMethodology')}
                 </span>
                 <span className="text-xs font-black text-[var(--ds-text-primary)]">
@@ -256,7 +257,7 @@ export const TitleAnalyzer: React.FC = () => {
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {result.independentVariables.map((v, i) => (
-                      <span key={i} className="text-[10px] font-bold bg-[var(--ds-surface-primary)] text-ai border border-ai/20 px-2 py-1 rounded-md">
+                      <span key={i} className="text-[10px] font-bold bg-[var(--ds-surface-primary)] text-ink border border-[var(--ds-border-subtle)] px-2 py-1 rounded-md">
                         {v}
                       </span>
                     ))}
@@ -338,7 +339,7 @@ export const TitleAnalyzer: React.FC = () => {
             {/* Follow-up Questions */}
             {result.followUpQuestions.length > 0 && (
               <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-3">
-                <h4 className="text-xs font-black text-ai flex items-center gap-1.5 m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
+                <h4 className="text-xs font-black text-ink flex items-center gap-1.5 m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
                   <HelpCircle size={14} />
                   <span>{getTranslation(language, 'followupQ')}</span>
                 </h4>
