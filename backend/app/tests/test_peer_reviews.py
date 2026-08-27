@@ -174,10 +174,15 @@ def test_create_peer_review_case(test_tenants):
     assert round_1["rubric_snapshot_json"] is not None
 
 
-def test_system_admin_without_org_role_can_issue_editorial_decision(test_tenants):
-    """A platform SystemAdmin (User.role) must pass verify_editorial_admin even with
-    only a RESEARCHER membership — regression for the ADMIN/ORGANIZATION_ADMIN
-    naming mismatch that made this global override unreachable (F13-005)."""
+def test_platform_admin_without_case_editor_role_is_blocked_from_editorial_decision(test_tenants):
+    """Platform Administration != Academic Review Content Access (mandatory
+    invariant): a platform SystemAdmin (User.role) with only a RESEARCHER
+    organization membership, and who is not the case's assigned editor, must
+    be BLOCKED from recording an editorial decision. This supersedes the
+    prior F13-005 regression fix, which made SystemAdmin an implicit global
+    override for verify_editorial_admin — that override is exactly the
+    "platform.admin DOES NOT IMPLY peer_review.decision.record" boundary this
+    domain must now enforce, so it has been removed rather than preserved."""
     h_author = test_tenants["headers_author_a"]
     org_a_id = test_tenants["org_a"].id
     suffix = secrets.token_hex(4)
@@ -193,7 +198,7 @@ def test_system_admin_without_org_role_can_issue_editorial_decision(test_tenants
         headers=h_author,
         json={
             "title_ar": "دراسة تجريبية لصلاحيات المسؤول العام",
-            "title_en": "Global admin authorization regression case"
+            "title_en": "Platform admin authorization boundary case"
         }
     )
     assert res_case.status_code == 201
@@ -204,7 +209,7 @@ def test_system_admin_without_org_role_can_issue_editorial_decision(test_tenants
         headers=headers_sysadmin,
         json={"decision": "ACCEPTED", "decision_notes": "قرار صادر من مسؤول عام للمنصة"}
     )
-    assert res_decision.status_code == 200
+    assert res_decision.status_code == 403
 
 
 def test_cross_tenant_case_isolation(test_tenants):
@@ -268,6 +273,53 @@ def test_internal_reviewer_assignment_and_author_conflict(test_tenants):
     assignment = res_assign.json()
     assert assignment["status"] == "INVITED"
     assert assignment["reviewer_user_id"] == test_tenants["reviewer_a"].id
+
+
+def test_revoked_reviewer_assignment_loses_case_access(test_tenants):
+    """Cross-domain IAM consolidation policy decision: revocation removes
+    access immediately and totally, including to the reviewer's own prior
+    assignment — matching the same status filter already applied to this
+    exact relationship in search/providers.py and storage.py, now also
+    applied to the case-detail and case-list endpoints. No live "revoke
+    reviewer" endpoint exists yet in this domain, so REVOKED is set directly
+    (the model's own documented status vocabulary already includes it, and
+    the write-blocking checks throughout this router already defend against
+    it — only the read-side case view/list had not caught up)."""
+    h_editor = test_tenants["headers_editor_a"]
+    h_author = test_tenants["headers_author_a"]
+    h_reviewer = test_tenants["headers_reviewer_a"]
+
+    res_case = client.post(
+        "/api/peer-reviews/cases",
+        headers=h_author,
+        json={"title_ar": "دراسة إلغاء صلاحية المحكّم", "title_en": "Reviewer Revocation Study"}
+    )
+    case_id = res_case.json()["id"]
+    round_id = res_case.json()["rounds"][0]["id"]
+
+    res_assign = client.post(
+        f"/api/peer-reviews/rounds/{round_id}/assignments",
+        headers=h_editor,
+        json={"reviewer_type": "INTERNAL_REVIEWER", "reviewer_user_id": test_tenants["reviewer_a"].id}
+    )
+    assignment_id = res_assign.json()["id"]
+
+    # Reviewer legitimately has access before revocation.
+    before = client.get(f"/api/peer-reviews/cases/{case_id}", headers=h_reviewer)
+    assert before.status_code == 200
+    before_list = client.get("/api/peer-reviews/cases", headers=h_reviewer)
+    assert any(c["id"] == case_id for c in before_list.json())
+
+    db = SessionLocal()
+    assignment = db.query(models.ReviewerAssignment).filter(models.ReviewerAssignment.id == assignment_id).first()
+    assignment.status = "REVOKED"
+    db.commit()
+    db.close()
+
+    after = client.get(f"/api/peer-reviews/cases/{case_id}", headers=h_reviewer)
+    assert after.status_code == 403
+    after_list = client.get("/api/peer-reviews/cases", headers=h_reviewer)
+    assert not any(c["id"] == case_id for c in after_list.json())
 
 
 def test_internal_reviewer_flow_accept_draft_submit(test_tenants):
@@ -886,3 +938,284 @@ def test_audit_log_never_leaks_raw_token(test_tenants):
             assert len(t.token_hash) == 64 # Standard SHA-256 hex length
     finally:
         db.close()
+
+
+def test_organization_admin_without_case_editor_role_is_blocked(test_tenants):
+    """Organization Admin does not automatically imply editorial authority
+    over a specific case (organization.admin DOES NOT IMPLY
+    peer_review.decision.record / peer_review.review.view_confidential).
+    An org admin who is neither the case author, its assigned editor, nor an
+    assigned reviewer cannot view the case or record a decision."""
+    h_author = test_tenants["headers_author_a"]
+    org_a_id = test_tenants["org_a"].id
+    suffix = secrets.token_hex(4)
+
+    db = SessionLocal()
+    admin_username = f"pr_orgadmin_{suffix}"
+    create_test_tenant(db, admin_username, org_a_id, role="ORGANIZATION_ADMIN")
+    db.close()
+    headers_admin = get_auth_headers(admin_username, org_a_id)
+
+    res_case = client.post(
+        "/api/peer-reviews/cases",
+        headers=h_author,
+        json={"title_ar": "بحث لفحص حدود صلاحية مسؤول المؤسسة", "title_en": "Org Admin Boundary Case"}
+    )
+    assert res_case.status_code == 201
+    case_id = res_case.json()["id"]
+
+    res_view = client.get(f"/api/peer-reviews/cases/{case_id}", headers=headers_admin)
+    assert res_view.status_code == 403
+
+    res_decision = client.post(
+        f"/api/peer-reviews/cases/{case_id}/decision",
+        headers=headers_admin,
+        json={"decision": "ACCEPTED", "decision_notes": "قرار من مسؤول مؤسسة غير محرر"}
+    )
+    assert res_decision.status_code == 403
+
+
+def test_editor_assignment_delegates_scoped_authority(test_tenants):
+    """Owner-delegated editor can act on the case (assign reviewers, record
+    decisions) even without OWNER/ORGANIZATION_ADMIN role; a different,
+    non-assigned researcher still cannot."""
+    h_owner = test_tenants["headers_editor_a"]  # OWNER
+    h_author = test_tenants["headers_author_a"]
+    org_a_id = test_tenants["org_a"].id
+    suffix = secrets.token_hex(4)
+
+    db = SessionLocal()
+    editor_username = f"pr_delegate_{suffix}"
+    delegate_user, _ = create_test_tenant(db, editor_username, org_a_id, role="RESEARCHER")
+    delegate_user_id = delegate_user.id
+    db.close()
+    headers_delegate = get_auth_headers(editor_username, org_a_id)
+
+    res_case = client.post(
+        "/api/peer-reviews/cases",
+        headers=h_author,
+        json={"title_ar": "بحث لفحص تفويض صلاحية التحرير", "title_en": "Editor Delegation Case"}
+    )
+    case_id = res_case.json()["id"]
+    round_id = res_case.json()["rounds"][0]["id"]
+
+    # Before delegation: the researcher cannot act as editor.
+    res_denied = client.post(
+        f"/api/peer-reviews/rounds/{round_id}/assignments",
+        headers=headers_delegate,
+        json={"reviewer_type": "INTERNAL_REVIEWER", "reviewer_user_id": test_tenants["reviewer_a"].id}
+    )
+    assert res_denied.status_code == 403
+
+    # Only OWNER may assign the editor.
+    res_denied_self = client.put(f"/api/peer-reviews/cases/{case_id}/editor", headers=headers_delegate, json={"editor_user_id": delegate_user_id})
+    assert res_denied_self.status_code == 403
+
+    res_assign_editor = client.put(f"/api/peer-reviews/cases/{case_id}/editor", headers=h_owner, json={"editor_user_id": delegate_user_id})
+    assert res_assign_editor.status_code == 200
+    assert res_assign_editor.json()["editor_user_id"] == delegate_user_id
+
+    # After delegation: the researcher can now act as this case's editor.
+    res_allowed = client.post(
+        f"/api/peer-reviews/rounds/{round_id}/assignments",
+        headers=headers_delegate,
+        json={"reviewer_type": "INTERNAL_REVIEWER", "reviewer_user_id": test_tenants["reviewer_a"].id}
+    )
+    assert res_allowed.status_code == 201
+
+    res_decision = client.post(
+        f"/api/peer-reviews/cases/{case_id}/decision",
+        headers=headers_delegate,
+        json={"decision": "ACCEPTED", "decision_notes": "قرار صادر من المحرر المفوَّض"}
+    )
+    assert res_decision.status_code == 200
+
+
+def test_delegated_editor_sees_case_in_own_list(test_tenants):
+    """A researcher who is case.editor_user_id but neither owner nor an
+    assigned reviewer must still see the case in GET /peer-reviews/cases —
+    the list filter must recognize the same delegation is_case_editor already
+    grants at the detail/action level, not just owner-or-reviewer."""
+    h_owner = test_tenants["headers_editor_a"]  # OWNER
+    h_author = test_tenants["headers_author_a"]
+    org_a_id = test_tenants["org_a"].id
+    suffix = secrets.token_hex(4)
+
+    db = SessionLocal()
+    editor_username = f"pr_list_delegate_{suffix}"
+    delegate_user, _ = create_test_tenant(db, editor_username, org_a_id, role="RESEARCHER")
+    delegate_user_id = delegate_user.id
+    db.close()
+    headers_delegate = get_auth_headers(editor_username, org_a_id)
+
+    res_case = client.post(
+        "/api/peer-reviews/cases",
+        headers=h_author,
+        json={"title_ar": "بحث لفحص ظهور المحرر المفوَّض في القائمة", "title_en": "Delegate List Visibility Case"}
+    )
+    case_id = res_case.json()["id"]
+
+    # Before delegation: not owner, not reviewer — case absent from the list.
+    list_before = client.get("/api/peer-reviews/cases", headers=headers_delegate)
+    assert case_id not in [c["id"] for c in list_before.json()]
+
+    client.put(f"/api/peer-reviews/cases/{case_id}/editor", headers=h_owner, json={"editor_user_id": delegate_user_id})
+
+    # After delegation: the case appears, correctly marked is_editor: true.
+    list_after = client.get("/api/peer-reviews/cases", headers=headers_delegate)
+    entry = next((c for c in list_after.json() if c["id"] == case_id), None)
+    assert entry is not None
+    assert entry["is_editor"] is True
+
+
+def test_publication_manuscript_version_binding_and_coauthor_conflict(test_tenants):
+    """A case bound to an exact PublicationManuscriptVersion carries a
+    server-derived fingerprint (never client-supplied), and a listed
+    co-author on that version cannot be assigned as a reviewer."""
+    h_editor = test_tenants["headers_editor_a"]
+    h_author = test_tenants["headers_author_a"]
+    org = test_tenants["org_a"]
+    author = test_tenants["author_a"]
+    coauthor = test_tenants["reviewer_a"]
+    suffix = secrets.token_hex(4)
+
+    db = SessionLocal()
+    stamp = "2026-08-26T00:00:00Z"
+    asset = models.ScholarlyAsset(
+        id=f"asset-{suffix}", organization_id=org.id, owner_user_id=author.id,
+        title_ar="مخطوطة الربط", title_en="Binding Manuscript", asset_type="ARTICLE",
+        lifecycle_status="DRAFT", language="ar", created_at=stamp,
+    )
+    db.add(asset); db.flush()
+    version = models.PublicationManuscriptVersion(
+        id=f"pmv-{suffix}", organization_id=org.id, asset_id=asset.id, version_number=1,
+        article_type="ORIGINAL_RESEARCH", fingerprint=f"fp-{suffix}",
+        source_dependencies_json=[], created_by=author.id, created_at=stamp,
+    )
+    db.add(version); db.flush()
+    db.add(models.PublicationManuscriptAuthorship(
+        id=f"pma-{suffix}", organization_id=org.id, manuscript_version_id=version.id,
+        user_id=coauthor.id, author_order=2, is_corresponding_author=False,
+        credit_roles=[], source="MANUAL", created_at=stamp, updated_at=stamp,
+    ))
+    db.commit()
+    db.close()
+
+    res_case = client.post(
+        "/api/peer-reviews/cases",
+        headers=h_author,
+        json={"title_ar": "بحث مرتبط بنسخة منشورة", "title_en": "Version-Bound Case", "manuscript_version_id": f"pmv-{suffix}"}
+    )
+    assert res_case.status_code == 201
+    case_data = res_case.json()
+    assert case_data["manuscript_version_id"] == f"pmv-{suffix}"
+    assert case_data["manuscript_fingerprint"] == f"fp-{suffix}"
+
+    round_id = case_data["rounds"][0]["id"]
+    res_coi = client.post(
+        f"/api/peer-reviews/rounds/{round_id}/assignments",
+        headers=h_editor,
+        json={"reviewer_type": "INTERNAL_REVIEWER", "reviewer_user_id": coauthor.id}
+    )
+    assert res_coi.status_code == 400
+
+
+def test_duplicate_reviewer_invitation_rejected(test_tenants):
+    """A second invitation for the same reviewer in the same round is
+    rejected as a conflict, not silently duplicated."""
+    h_editor = test_tenants["headers_editor_a"]
+    h_author = test_tenants["headers_author_a"]
+
+    res_case = client.post(
+        "/api/peer-reviews/cases",
+        headers=h_author,
+        json={"title_ar": "بحث لفحص ازدواجية الدعوة", "title_en": "Duplicate Invitation Case"}
+    )
+    round_id = res_case.json()["rounds"][0]["id"]
+
+    payload = {"reviewer_type": "INTERNAL_REVIEWER", "reviewer_user_id": test_tenants["reviewer_a"].id}
+    res_first = client.post(f"/api/peer-reviews/rounds/{round_id}/assignments", headers=h_editor, json=payload)
+    assert res_first.status_code == 201
+    res_second = client.post(f"/api/peer-reviews/rounds/{round_id}/assignments", headers=h_editor, json=payload)
+    assert res_second.status_code == 409
+
+
+def test_institutional_operations_dashboard_is_aggregate_only(test_tenants):
+    """Owner sees only counts/statuses (never manuscript content, reviewer
+    identity, or comments); a plain researcher without org admin authority
+    is blocked entirely."""
+    h_owner = test_tenants["headers_editor_a"]
+    h_author = test_tenants["headers_author_a"]
+
+    res_case = client.post(
+        "/api/peer-reviews/cases",
+        headers=h_author,
+        json={"title_ar": "بحث سري للفحص التجميعي", "title_en": "Confidential Aggregate Probe"}
+    )
+    assert res_case.status_code == 201
+
+    res_ops = client.get("/api/peer-reviews/organization/operations", headers=h_owner)
+    assert res_ops.status_code == 200
+    data = res_ops.json()
+    assert data["aggregate_only"] is True and data["raw_content_excluded"] is True
+    assert "counts" in data and "cases_by_status" in data
+    serialized = str(data)
+    assert "بحث سري للفحص التجميعي" not in serialized
+
+    res_denied = client.get("/api/peer-reviews/organization/operations", headers=h_author)
+    assert res_denied.status_code == 403
+
+
+def test_repeated_editorial_decision_on_same_round_rejected(test_tenants):
+    """A round's decision is final once recorded — a second decision call on
+    the same round must be rejected, not silently overwrite the first."""
+    h_owner = test_tenants["headers_editor_a"]
+    h_author = test_tenants["headers_author_a"]
+
+    res_case = client.post(
+        "/api/peer-reviews/cases",
+        headers=h_author,
+        json={"title_ar": "بحث لفحص نهائية القرار", "title_en": "Decision Finality Case"}
+    )
+    case_id = res_case.json()["id"]
+
+    res_first = client.post(f"/api/peer-reviews/cases/{case_id}/decision", headers=h_owner, json={"decision": "ACCEPTED", "decision_notes": "القرار الأول"})
+    assert res_first.status_code == 200
+
+    res_second = client.post(f"/api/peer-reviews/cases/{case_id}/decision", headers=h_owner, json={"decision": "REJECTED", "decision_notes": "محاولة قرار ثانٍ"})
+    assert res_second.status_code == 409
+
+
+def test_is_editor_field_lets_frontend_align_controls_to_real_authority(test_tenants):
+    """is_editor is server-computed and correct in both the list summary and
+    the case detail response, for both an editor and a non-editor viewer —
+    this is what the frontend uses instead of a role-based guess."""
+    h_owner = test_tenants["headers_editor_a"]  # OWNER == editor-of-record
+    h_author = test_tenants["headers_author_a"]
+    org_a_id = test_tenants["org_a"].id
+    suffix = secrets.token_hex(4)
+
+    db = SessionLocal()
+    admin_username = f"pr_isedit_admin_{suffix}"
+    create_test_tenant(db, admin_username, org_a_id, role="ORGANIZATION_ADMIN")
+    db.close()
+    headers_admin = get_auth_headers(admin_username, org_a_id)
+
+    res_case = client.post(
+        "/api/peer-reviews/cases", headers=h_author,
+        json={"title_ar": "بحث لفحص حقل is_editor", "title_en": "is_editor Field Case"}
+    )
+    case_id = res_case.json()["id"]
+
+    # Owner (editor-of-record via bootstrap authority) sees is_editor: true.
+    detail_owner = client.get(f"/api/peer-reviews/cases/{case_id}", headers=h_owner)
+    assert detail_owner.json()["is_editor"] is True
+    list_owner = client.get("/api/peer-reviews/cases", headers=h_owner)
+    assert next(c for c in list_owner.json() if c["id"] == case_id)["is_editor"] is True
+
+    # Org admin (not assigned editor) — case detail is 403, but the org-wide
+    # list (which org admins can see for oversight) must not mark them editor.
+    detail_admin = client.get(f"/api/peer-reviews/cases/{case_id}", headers=headers_admin)
+    assert detail_admin.status_code == 403
+    list_admin = client.get("/api/peer-reviews/cases", headers=headers_admin)
+    assert next(c for c in list_admin.json() if c["id"] == case_id)["is_editor"] is False

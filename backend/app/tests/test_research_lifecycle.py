@@ -170,7 +170,7 @@ def test_cross_tenant_and_same_tenant_horizontal_mutation_are_blocked(lifecycle_
     d.db.add(colleague); d.db.commit()
     colleague_context = SimpleNamespace(user=colleague, organization=d.org, role="RESEARCHER", is_global_admin=False)
     with pytest.raises(HTTPException) as forbidden:
-        require_project_write(d.project, colleague_context)
+        require_project_write(d.project, colleague_context, d.db)
     assert forbidden.value.status_code == 403
 
 
@@ -188,6 +188,41 @@ def test_timeline_never_exposes_reviewer_or_confidential_content(lifecycle_domai
     assert "reviewer_user_id" not in serialized
     assert "confidential" not in serialized.casefold()
     assert all("payload" not in event for event in result["events"])
+
+
+# ── Cross-domain IAM consolidation Finding 1 regression (extended to this router) ──
+# Generic ORGANIZATION_ADMIN/SUPERVISOR organization-role membership must not
+# substitute for a resource-scoped ResearchProjectMember relationship — this
+# router previously diverged from research_design.py's own established
+# can_edit_section()/project_access() precedent for this exact resource.
+
+def test_organization_admin_without_project_relationship_cannot_write_lifecycle_records(lifecycle_domain):
+    d = lifecycle_domain
+    admin_context = SimpleNamespace(user=d.other, organization=d.org, role="ORGANIZATION_ADMIN", is_global_admin=False)
+    with pytest.raises(HTTPException) as error:
+        require_project_write(d.project, admin_context, d.db)
+    assert error.value.status_code == 403
+
+
+def test_supervisor_without_project_relationship_cannot_write_lifecycle_records(lifecycle_domain):
+    d = lifecycle_domain
+    supervisor_context = SimpleNamespace(user=d.other, organization=d.org, role="SUPERVISOR", is_global_admin=False)
+    with pytest.raises(HTTPException) as error:
+        require_project_write(d.project, supervisor_context, d.db)
+    assert error.value.status_code == 403
+
+
+def test_project_member_with_edit_capable_relationship_can_write_lifecycle_records(lifecycle_domain):
+    d = lifecycle_domain
+    colleague = models.User(id=f"life-pi-{d.suffix}", username=f"life-pi-{d.suffix}", email=f"life-pi-{d.suffix}@example.invalid", hashed_password="unused", role="Researcher", created_at=stamp())
+    d.db.add(colleague); d.db.commit()
+    d.db.add(models.ResearchProjectMember(
+        id=f"life-member-{d.suffix}", organization_id=d.org.id, project_id=d.project.id,
+        user_id=colleague.id, relationship="PI", status="ACTIVE", created_at=stamp(),
+    ))
+    d.db.commit()
+    pi_context = SimpleNamespace(user=colleague, organization=d.org, role="RESEARCHER", is_global_admin=False)
+    require_project_write(d.project, pi_context, d.db)  # must not raise
 
 
 def test_promotion_handoff_remains_candidate_and_requires_human_selection(lifecycle_domain):

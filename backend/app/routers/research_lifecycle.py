@@ -12,7 +12,12 @@ from ..services.tenant_context import TenantContext, get_tenant_context
 
 
 router = APIRouter(prefix="/research-lifecycle", tags=["research-lifecycle"])
-WRITE_ROLES = {"OWNER", "ORGANIZATION_ADMIN", "SUPERVISOR", "RESEARCHER"}
+# Edit-capable relationships on ResearchProjectMember, matching
+# research_design.py's own established can_edit_section() precedent for
+# this exact resource — never a generic organization role. RESEARCH_ASSISTANT
+# is intentionally excluded here (its authority is section-scoped, and no
+# lifecycle-record action here is section-scoped).
+EDIT_CAPABLE_RELATIONSHIPS = {"PI", "CO_RESEARCHER", "DATA_ANALYST"}
 
 
 class VariableMappingRequest(BaseModel):
@@ -37,12 +42,24 @@ def project_or_404(db: Session, project_id: str, context: TenantContext) -> mode
     return project
 
 
-def require_project_write(project: models.ResearchProject, context: TenantContext) -> None:
-    role = (context.role or "").upper()
-    if role not in WRITE_ROLES and not context.is_global_admin:
-        raise HTTPException(403, "Lifecycle modification is not permitted")
-    if project.userId != context.user.id and role not in {"OWNER", "ORGANIZATION_ADMIN", "SUPERVISOR"} and not context.is_global_admin:
-        raise HTTPException(403, "Only the project owner or an authorized academic supervisor may create cross-path handoffs")
+def require_project_write(project: models.ResearchProject, context: TenantContext, db: Session) -> None:
+    # Cross-domain IAM consolidation Finding 1 (extended to this router):
+    # generic ORGANIZATION_ADMIN/SUPERVISOR organization-role membership does
+    # not imply lifecycle-record authority over a project the caller has no
+    # relationship to — a resource-scoped ResearchProjectMember relationship
+    # (or genuine ownership, or platform admin) is required, matching
+    # research_design.py's own can_edit_section()/project_access() for this
+    # exact resource, which this router previously diverged from.
+    if context.is_global_admin or project.userId == context.user.id:
+        return
+    member = db.query(models.ResearchProjectMember).filter(
+        models.ResearchProjectMember.project_id == project.id,
+        models.ResearchProjectMember.user_id == context.user.id,
+        models.ResearchProjectMember.status == "ACTIVE",
+        models.ResearchProjectMember.relationship.in_(EDIT_CAPABLE_RELATIONSHIPS),
+    ).first()
+    if not member:
+        raise HTTPException(403, "Only the project owner or an authorized team member may create cross-path handoffs")
 
 
 def serialize_handoff(item: models.AcademicHandoff) -> dict[str, Any]:
@@ -86,7 +103,7 @@ def list_handoffs(project_id: str, db: Session = Depends(get_db), context: Tenan
 @router.post("/projects/{project_id}/handoffs", status_code=201)
 def create_project_handoff(project_id: str, payload: HandoffRequest, db: Session = Depends(get_db), context: TenantContext = Depends(get_tenant_context)):
     project = project_or_404(db, project_id, context)
-    require_project_write(project, context)
+    require_project_write(project, context, db)
     item = create_handoff(db, project, payload.handoff_type, payload.source_id, payload.target_id, context.user.id)
     db.add(models.AuditLog(
         id=f"aud-{item.id}", userId=context.user.id, organizationId=context.organization.id,
@@ -101,7 +118,7 @@ def create_project_handoff(project_id: str, payload: HandoffRequest, db: Session
 @router.post("/projects/{project_id}/handoffs/{handoff_id}/accept")
 def accept_project_handoff(project_id: str, handoff_id: str, db: Session = Depends(get_db), context: TenantContext = Depends(get_tenant_context)):
     project = project_or_404(db, project_id, context)
-    require_project_write(project, context)
+    require_project_write(project, context, db)
     item = db.query(models.AcademicHandoff).filter(
         models.AcademicHandoff.id == handoff_id,
         models.AcademicHandoff.project_id == project.id,
@@ -117,7 +134,7 @@ def accept_project_handoff(project_id: str, handoff_id: str, db: Session = Depen
 @router.post("/projects/{project_id}/variable-mappings", status_code=201)
 def create_variable_mapping(project_id: str, payload: VariableMappingRequest, db: Session = Depends(get_db), context: TenantContext = Depends(get_tenant_context)):
     project = project_or_404(db, project_id, context)
-    require_project_write(project, context)
+    require_project_write(project, context, db)
     item = mapping_create(db, project, payload.research_variable_id, payload.dataset_variable_id, payload.mapping_role, context.user.id)
     db.commit()
     return {
@@ -131,7 +148,7 @@ def create_variable_mapping(project_id: str, payload: VariableMappingRequest, db
 @router.post("/projects/{project_id}/analyses/{analysis_id}/approve")
 def approve_analysis_result(project_id: str, analysis_id: str, db: Session = Depends(get_db), context: TenantContext = Depends(get_tenant_context)):
     project = project_or_404(db, project_id, context)
-    require_project_write(project, context)
+    require_project_write(project, context, db)
     analysis = db.query(models.ResearchAnalysis).filter(
         models.ResearchAnalysis.id == analysis_id,
         models.ResearchAnalysis.project_id == project.id,

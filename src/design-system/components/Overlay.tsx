@@ -22,6 +22,14 @@ export const Modal: React.FC<ModalProps> = ({
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const openerRef = useRef<HTMLElement | null>(null);
+  // Consumers typically pass an inline `onClose` arrow function, which gets a
+  // new identity on every render. Reading it through a ref (updated every
+  // render, but not a dependency) keeps the keydown effect below scoped to
+  // isOpen alone — otherwise its cleanup (which restores focus to the opener)
+  // would re-fire on every keystroke/interaction inside the dialog, yanking
+  // focus back out to the trigger while the dialog is still open.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     if (isOpen) {
@@ -44,7 +52,7 @@ export const Modal: React.FC<ModalProps> = ({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (event.key !== 'Tab' || !dialogRef.current) return;
@@ -65,7 +73,7 @@ export const Modal: React.FC<ModalProps> = ({
       document.removeEventListener('keydown', handleKeyDown);
       openerRef.current?.focus();
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -137,6 +145,11 @@ export const Drawer: React.FC<DrawerProps> = ({
   const drawerRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const openerRef = useRef<HTMLElement | null>(null);
+  // See the equivalent comment in Modal above: keep this effect scoped to
+  // isOpen alone so an unstable inline onClose doesn't cause its cleanup
+  // (focus-restore-to-opener) to fire on every interaction inside the drawer.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     if (isOpen) {
@@ -156,7 +169,7 @@ export const Drawer: React.FC<DrawerProps> = ({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (event.key !== 'Tab' || !drawerRef.current) return;
@@ -177,7 +190,7 @@ export const Drawer: React.FC<DrawerProps> = ({
       document.removeEventListener('keydown', handleKeyDown);
       openerRef.current?.focus();
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

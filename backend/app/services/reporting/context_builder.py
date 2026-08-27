@@ -120,21 +120,30 @@ class ReportContextBuilder:
         # Same-tenant is not enough: a user unrelated to this specific thesis
         # (not the student, not a supervisor, not a committee member, not an
         # admin) must not reach any tier of this report, matching the router's
-        # list_examiner_reports authority exactly.
+        # list_examiner_reports authority exactly. Admin oversight itself is
+        # still enough to know a report exists (Graduate Studies aggregate
+        # visibility), but — per the same cross-domain IAM consolidation
+        # Finding 1/3 fix applied to the router — no longer bypasses into
+        # SUPERVISOR_VISIBLE/COMMITTEE_ONLY confidential content, which still
+        # requires the genuine resource-scoped relationship; admin's own
+        # confidential access is scoped to exactly its own
+        # GRADUATE_STUDIES_ONLY tier.
         if not (is_admin or assigned or committee or is_student):
             raise HTTPException(status_code=404, detail="Thesis not found")
-        can_confidential = is_admin or bool(assigned and assigned.role == "SUPERVISOR")
+        can_confidential = bool(assigned and assigned.role == "SUPERVISOR")
         is_committee_viewer = bool(committee) and not can_confidential
+        is_graduate_studies = is_admin
         allowed = (
             can_confidential
             or (is_student and report.confidentiality_level == "STUDENT_VISIBLE")
             or (assigned and report.confidentiality_level in {"STUDENT_VISIBLE", "SUPERVISOR_VISIBLE"})
             or (is_committee_viewer and report.confidentiality_level in {"STUDENT_VISIBLE", "SUPERVISOR_VISIBLE", "COMMITTEE_ONLY"})
+            or (is_graduate_studies and report.confidentiality_level == "GRADUATE_STUDIES_ONLY")
         )
         if not allowed:
             raise HTTPException(status_code=404, detail="Thesis not found")
         paragraphs_en = [report.general_assessment or "", f"Recommendation: {report.recommendation}"]
-        if (can_confidential or (is_committee_viewer and report.confidentiality_level == "COMMITTEE_ONLY")) and report.confidential_comments:
+        if (can_confidential or (is_committee_viewer and report.confidentiality_level == "COMMITTEE_ONLY") or (is_graduate_studies and report.confidentiality_level == "GRADUATE_STUDIES_ONLY")) and report.confidential_comments:
             paragraphs_en.append("Confidential comments are available only to authorized academic officers.")
         return CanonicalReportContext(manifest=manifest, title_ar="تقرير مناقش", title_en="Examiner report", summary_ar="تقرير مناقشة وفق صلاحية المشاهد.", summary_en="Examination report filtered by viewer authority.", metadata={"fingerprint": report.report_fingerprint, "confidentiality_level": report.confidentiality_level}, sections=[ReportSection(key="assessment", title_ar="التقييم", title_en="Assessment", paragraphs_ar=[report.general_assessment or ""], paragraphs_en=paragraphs_en)])
 

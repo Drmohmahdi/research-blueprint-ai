@@ -445,8 +445,9 @@ export const UnifiedProfileEditor: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.prefNameAr}</label>
+                    <label htmlFor="profile-pref-name-ar" className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.prefNameAr}</label>
                     <input
+                      id="profile-pref-name-ar"
                       type="text"
                       value={profile.preferred_name_ar || ''}
                       onChange={(e) => setProfile({ ...profile, preferred_name_ar: e.target.value })}
@@ -454,8 +455,9 @@ export const UnifiedProfileEditor: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.prefNameEn}</label>
+                    <label htmlFor="profile-pref-name-en" className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.prefNameEn}</label>
                     <input
+                      id="profile-pref-name-en"
                       type="text"
                       value={profile.preferred_name_en || ''}
                       onChange={(e) => setProfile({ ...profile, preferred_name_en: e.target.value })}
@@ -466,8 +468,9 @@ export const UnifiedProfileEditor: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.rank}</label>
+                    <label htmlFor="profile-current-rank" className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.rank}</label>
                     <input
+                      id="profile-current-rank"
                       type="text"
                       placeholder={language === 'ar' ? 'أستاذ مشارك، أستاذ مساعد، إلخ' : 'Assistant Professor, Associate Professor'}
                       value={profile.current_rank || ''}
@@ -476,8 +479,9 @@ export const UnifiedProfileEditor: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.targetRank}</label>
+                    <label htmlFor="profile-target-rank" className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.targetRank}</label>
                     <input
+                      id="profile-target-rank"
                       type="text"
                       placeholder={language === 'ar' ? 'أستاذ بروفيسور، أستاذ مشارك، إلخ' : 'Professor, Associate Professor'}
                       value={profile.target_rank || ''}
@@ -489,8 +493,9 @@ export const UnifiedProfileEditor: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.discipline}</label>
+                    <label htmlFor="profile-discipline" className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.discipline}</label>
                     <input
+                      id="profile-discipline"
                       type="text"
                       value={profile.discipline || ''}
                       onChange={(e) => setProfile({ ...profile, discipline: e.target.value })}
@@ -498,8 +503,9 @@ export const UnifiedProfileEditor: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.generalSpec}</label>
+                    <label htmlFor="profile-general-spec" className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.generalSpec}</label>
                     <input
+                      id="profile-general-spec"
                       type="text"
                       value={profile.general_specialization || ''}
                       onChange={(e) => setProfile({ ...profile, general_specialization: e.target.value })}
@@ -507,8 +513,9 @@ export const UnifiedProfileEditor: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.specificSpec}</label>
+                    <label htmlFor="profile-specific-spec" className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.specificSpec}</label>
                     <input
+                      id="profile-specific-spec"
                       type="text"
                       value={profile.specific_specialization || ''}
                       onChange={(e) => setProfile({ ...profile, specific_specialization: e.target.value })}
@@ -519,8 +526,9 @@ export const UnifiedProfileEditor: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.instEmail}</label>
+                    <label htmlFor="profile-institutional-email" className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.instEmail}</label>
                     <input
+                      id="profile-institutional-email"
                       type="email"
                       value={profile.institutional_email || ''}
                       onChange={(e) => setProfile({ ...profile, institutional_email: e.target.value })}
@@ -528,8 +536,9 @@ export const UnifiedProfileEditor: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.pubEmail}</label>
+                    <label htmlFor="profile-public-email" className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.pubEmail}</label>
                     <input
+                      id="profile-public-email"
                       type="email"
                       value={profile.public_email || ''}
                       onChange={(e) => setProfile({ ...profile, public_email: e.target.value })}
@@ -537,8 +546,9 @@ export const UnifiedProfileEditor: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.phone}</label>
+                    <label htmlFor="profile-phone" className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.phone}</label>
                     <input
+                      id="profile-phone"
                       type="text"
                       value={profile.phone || ''}
                       onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
@@ -549,8 +559,9 @@ export const UnifiedProfileEditor: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.shortBioAr}</label>
+                    <label htmlFor="profile-short-bio-ar" className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.shortBioAr}</label>
                     <textarea
+                      id="profile-short-bio-ar"
                       rows={3}
                       value={profile.short_bio_ar || ''}
                       onChange={(e) => setProfile({ ...profile, short_bio_ar: e.target.value })}
@@ -558,8 +569,9 @@ export const UnifiedProfileEditor: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.shortBioEn}</label>
+                    <label htmlFor="profile-short-bio-en" className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.shortBioEn}</label>
                     <textarea
+                      id="profile-short-bio-en"
                       rows={3}
                       value={profile.short_bio_en || ''}
                       onChange={(e) => setProfile({ ...profile, short_bio_en: e.target.value })}
@@ -569,8 +581,9 @@ export const UnifiedProfileEditor: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.visibility}</label>
+                  <label htmlFor="profile-visibility-status" className="block text-xs font-bold text-[var(--ds-text-secondary)] mb-1">{t.visibility}</label>
                   <select
+                    id="profile-visibility-status"
                     value={profile.visibility_status || 'PUBLIC'}
                     onChange={(e) => setProfile({ ...profile, visibility_status: e.target.value })}
                     className="w-full px-3 py-2 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
@@ -624,10 +637,11 @@ export const UnifiedProfileEditor: React.FC = () => {
                     profile.identifiers.map((ident: any, idx: number) => (
                       <div key={idx} className="p-4 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl flex flex-col md:flex-row gap-3 items-start md:items-center">
                         <div className="w-full md:w-1/4 space-y-1.5">
-                          <label className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
+                          <label htmlFor={`identifier-type-${idx}`} className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
                             {language === 'ar' ? 'نوع المنصة / المعرف' : 'Channel / Platform Type'}
                           </label>
                           <select
+                            id={`identifier-type-${idx}`}
                             value={ACADEMIC_CHANNELS.some(c => c.type === ident.identifier_type) ? ident.identifier_type : OTHER_CHANNEL_TYPE}
                             onChange={(e) => updateIdentifier(idx, 'identifier_type', e.target.value === OTHER_CHANNEL_TYPE ? '' : e.target.value)}
                             className="w-full px-2.5 py-1.5 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] text-[var(--ds-text-primary)] rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
@@ -649,10 +663,11 @@ export const UnifiedProfileEditor: React.FC = () => {
                         </div>
 
                         <div className="w-full md:w-1/4">
-                          <label className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
+                          <label htmlFor={`identifier-value-${idx}`} className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
                             {language === 'ar' ? 'قيمة المعرف الرقمي' : 'Identifier ID / Value'}
                           </label>
                           <input
+                            id={`identifier-value-${idx}`}
                             type="text"
                             placeholder="0000-0002-1825-0097"
                             value={ident.identifier_value}
@@ -662,10 +677,11 @@ export const UnifiedProfileEditor: React.FC = () => {
                         </div>
 
                         <div className="w-full md:w-1/3">
-                          <label className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
+                          <label htmlFor={`identifier-url-${idx}`} className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
                             {language === 'ar' ? 'رابط الملف الأكاديمي' : 'Profile Page URL'}
                           </label>
                           <input
+                            id={`identifier-url-${idx}`}
                             type="url"
                             placeholder="https://orcid.org/..."
                             value={ident.profile_url}
@@ -690,6 +706,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => removeIdentifier(idx)}
+                            aria-label={language === 'ar' ? 'حذف هذا المعرف' : 'Remove this identifier'}
                             className="p-1.5 text-danger hover:bg-danger/10 rounded-lg transition-all mt-3 cursor-pointer"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -736,6 +753,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => removeAffiliation(idx)}
+                            aria-label={language === 'ar' ? 'حذف هذا الانتماء' : 'Remove this affiliation'}
                             className="p-1 text-danger hover:bg-danger/10 rounded transition-all cursor-pointer"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -744,10 +762,11 @@ export const UnifiedProfileEditor: React.FC = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
+                            <label htmlFor={`aff-org-name-${idx}`} className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
                               {language === 'ar' ? 'الجامعة / المؤسسة' : 'University / Institution'}
                             </label>
                             <input
+                              id={`aff-org-name-${idx}`}
                               type="text"
                               required
                               placeholder={language === 'ar' ? 'مثال: جامعة الملك سعود' : 'e.g. King Saud University'}
@@ -758,10 +777,11 @@ export const UnifiedProfileEditor: React.FC = () => {
                           </div>
 
                           <div>
-                            <label className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
+                            <label htmlFor={`aff-college-${idx}`} className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
                               {language === 'ar' ? 'الكلية' : 'College'}
                             </label>
                             <input
+                              id={`aff-college-${idx}`}
                               type="text"
                               placeholder={language === 'ar' ? 'مثال: كلية علوم الحاسب والمعلومات' : 'e.g. College of Computer Science'}
                               value={aff.college || ''}
@@ -773,10 +793,11 @@ export const UnifiedProfileEditor: React.FC = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                           <div>
-                            <label className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
+                            <label htmlFor={`aff-department-${idx}`} className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
                               {language === 'ar' ? 'القسم الأكاديمي' : 'Department'}
                             </label>
                             <input
+                              id={`aff-department-${idx}`}
                               type="text"
                               placeholder={language === 'ar' ? 'قسم تقنية المعلومات' : 'e.g. IT Department'}
                               value={aff.department || ''}
@@ -786,10 +807,11 @@ export const UnifiedProfileEditor: React.FC = () => {
                           </div>
 
                           <div>
-                            <label className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
+                            <label htmlFor={`aff-position-${idx}`} className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
                               {language === 'ar' ? 'المسمى الوظيفي' : 'Position Title'}
                             </label>
                             <input
+                              id={`aff-position-${idx}`}
                               type="text"
                               placeholder={language === 'ar' ? 'أستاذ مشارك' : 'Associate Professor'}
                               value={aff.position_title || ''}
@@ -799,10 +821,11 @@ export const UnifiedProfileEditor: React.FC = () => {
                           </div>
 
                           <div>
-                            <label className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
+                            <label htmlFor={`aff-rank-${idx}`} className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
                               {language === 'ar' ? 'الرتبة الأكاديمية' : 'Academic Rank'}
                             </label>
                             <input
+                              id={`aff-rank-${idx}`}
                               type="text"
                               value={aff.academic_rank || ''}
                               onChange={(e) => updateAffiliation(idx, 'academic_rank', e.target.value)}
@@ -813,10 +836,11 @@ export const UnifiedProfileEditor: React.FC = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                           <div>
-                            <label className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
+                            <label htmlFor={`aff-start-date-${idx}`} className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
                               {language === 'ar' ? 'تاريخ البدء' : 'Start Date'}
                             </label>
                             <input
+                              id={`aff-start-date-${idx}`}
                               type="date"
                               value={aff.start_date || ''}
                               onChange={(e) => updateAffiliation(idx, 'start_date', e.target.value)}
@@ -825,10 +849,11 @@ export const UnifiedProfileEditor: React.FC = () => {
                           </div>
 
                           <div>
-                            <label className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
+                            <label htmlFor={`aff-end-date-${idx}`} className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
                               {language === 'ar' ? 'تاريخ الانتهاء' : 'End Date'}
                             </label>
                             <input
+                              id={`aff-end-date-${idx}`}
                               type="date"
                               disabled={aff.is_current}
                               value={aff.is_current ? '' : (aff.end_date || '')}

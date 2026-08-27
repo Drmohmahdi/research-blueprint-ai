@@ -10,14 +10,14 @@ from ..db import get_db
 from ..models import (
     UnifiedAcademicProfile, AcademicIdentifier, AcademicAffiliation,
     ScholarlyAsset, ScholarlyAssetContributor, ScholarlyAssetFile,
-    UploadedFile, User
+    UploadedFile, User, PublicationSubmission
 )
 from ..schemas import (
     UnifiedAcademicProfileResponse, UnifiedAcademicProfileUpsert,
     ScholarlyAssetResponse, ScholarlyAssetCreate,
     IdentifierSchema, AffiliationSchema,
     ScholarlyAssetContributorSchema, ScholarlyAssetFileSchema,
-    PublicProfileResponse
+    PublicProfileResponse, PublicScholarlyAssetResponse
 )
 from ..services.tenant_context import get_tenant_context, TenantContext
 from ..services.storage import get_storage_provider, StorageProvider
@@ -65,6 +65,31 @@ def calculate_profile_completeness(body: UnifiedAcademicProfileUpsert) -> int:
     return score
 
 
+def compute_publication_provenance(db: Session, asset_ids: List[str]) -> dict:
+    """{asset_id: True} for every id with at least one real PublicationSubmission.
+
+    Computed live rather than stored: a persisted flag would need active
+    synchronization if a submission is later withdrawn/cancelled, and this
+    query is cheap at this table's scale. No migration, no backfill, no
+    staleness window.
+    """
+    if not asset_ids:
+        return {}
+    rows = db.query(PublicationSubmission.asset_id).filter(
+        PublicationSubmission.asset_id.in_(asset_ids)
+    ).distinct().all()
+    return {row[0]: True for row in rows}
+
+
+def publication_provenance_label(lifecycle_status: str, has_real_submission: bool) -> Optional[str]:
+    """Truthful publication provenance — never client-settable (no input
+    schema field exists for it anywhere). None before PUBLISHED: there is no
+    publication claim yet to attribute provenance to."""
+    if lifecycle_status != "PUBLISHED":
+        return None
+    return "BASEERAH_PIPELINE_VERIFIED" if has_real_submission else "SELF_DECLARED"
+
+
 @router.get("/public/{username}", response_model=PublicProfileResponse)
 def get_public_profile(username: str, db: Session = Depends(get_db)):
     """Unauthenticated, read-only profile view for sharing outside the platform."""
@@ -79,10 +104,24 @@ def get_public_profile(username: str, db: Session = Depends(get_db)):
     if not profile or profile.visibility_status != "PUBLIC":
         raise HTTPException(status_code=404, detail="Profile not found")
 
+    # PUBLISHED-only rule: ACCEPTED (or DRAFT/UNDER_REVIEW/ARCHIVED) must never
+    # surface on the public profile just because visibility defaults to PUBLIC —
+    # only an asset the owner (self-declared) or the real submission pipeline
+    # (Baseerah-native manuscripts) has actually marked PUBLISHED may appear.
     assets = db.query(ScholarlyAsset).filter(
         ScholarlyAsset.owner_user_id == user.id,
-        ScholarlyAsset.visibility == "PUBLIC"
+        ScholarlyAsset.visibility == "PUBLIC",
+        ScholarlyAsset.lifecycle_status == "PUBLISHED"
     ).order_by(ScholarlyAsset.publication_date.desc()).all()
+
+    submitted = compute_publication_provenance(db, [a.id for a in assets])
+    public_assets = []
+    for a in assets:
+        item = PublicScholarlyAssetResponse.model_validate(a)
+        item.publication_verification_status = publication_provenance_label(
+            a.lifecycle_status, a.id in submitted
+        )
+        public_assets.append(item)
 
     return PublicProfileResponse(
         has_photo=bool(profile.profile_photo_file_id),
@@ -108,7 +147,7 @@ def get_public_profile(username: str, db: Session = Depends(get_db)):
         completeness_score=profile.completeness_score,
         identifiers=list(profile.identifiers),
         affiliations=list(profile.affiliations),
-        scholarly_assets=list(assets),
+        scholarly_assets=public_assets,
     )
 
 
@@ -249,7 +288,12 @@ def upsert_profile(
     profile.completeness_score = calculate_profile_completeness(body)
     profile.updated_at = now_str
 
-    # Update Identifiers
+    # Update Identifiers. No real verification authority exists yet (no ORCID
+    # OAuth or equivalent live provider — see AcademicVisibilityReports.tsx's
+    # own "not available" disclaimer). A self-declared value must never be
+    # accepted as VERIFIED just because the client's payload claims it is:
+    # status/verification_method/verified_at/last_checked_at are therefore
+    # always server-forced here, ignoring whatever the client sent for them.
     db.query(AcademicIdentifier).filter(AcademicIdentifier.profile_id == profile.id).delete()
     for ident in body.identifiers:
         db.add(AcademicIdentifier(
@@ -258,14 +302,14 @@ def upsert_profile(
             identifier_type=ident.identifier_type,
             identifier_value=ident.identifier_value,
             profile_url=ident.profile_url,
-            status=ident.status or "UNVERIFIED",
-            verification_method=ident.verification_method or "MANUAL",
-            verified_at=ident.verified_at,
-            last_checked_at=ident.last_checked_at,
+            status="UNVERIFIED",
+            verification_method="SELF_DECLARED",
+            verified_at=None,
+            last_checked_at=None,
             metadata_json=ident.metadata_json
         ))
 
-    # Update Affiliations
+    # Update Affiliations — same self-declared-only rule as identifiers above.
     db.query(AcademicAffiliation).filter(AcademicAffiliation.profile_id == profile.id).delete()
     for aff in body.affiliations:
         db.add(AcademicAffiliation(
@@ -282,7 +326,7 @@ def upsert_profile(
             is_current=aff.is_current or False,
             country=aff.country,
             evidence_file_id=aff.evidence_file_id,
-            verification_status=aff.verification_status or "UNVERIFIED"
+            verification_status="UNVERIFIED"
         ))
 
     db.commit()
@@ -305,7 +349,16 @@ def list_scholarly_assets(
     else:
         query = query.filter(ScholarlyAsset.owner_user_id == context.user.id)
 
-    return query.order_by(ScholarlyAsset.created_at.desc()).all()
+    assets = query.order_by(ScholarlyAsset.created_at.desc()).all()
+    submitted = compute_publication_provenance(db, [a.id for a in assets])
+    results = []
+    for a in assets:
+        item = ScholarlyAssetResponse.model_validate(a)
+        item.publication_verification_status = publication_provenance_label(
+            a.lifecycle_status, a.id in submitted
+        )
+        results.append(item)
+    return results
 
 
 @router.post("/scholarly-assets", response_model=ScholarlyAssetResponse)
@@ -363,7 +416,7 @@ def create_scholarly_asset(
             contribution_roles_json=cont.contribution_roles_json or [],
             affiliation_text=cont.affiliation_text,
             contribution_percentage=cont.contribution_percentage,
-            verified_status=cont.verified_status or "UNVERIFIED"
+            verified_status="UNVERIFIED"
         ))
 
     # Add Files
@@ -381,7 +434,11 @@ def create_scholarly_asset(
 
     db.commit()
     db.refresh(asset)
-    return asset
+    # A brand-new asset cannot yet have a PublicationSubmission (its id was
+    # only just generated), so provenance is always self-declared-or-none.
+    result = ScholarlyAssetResponse.model_validate(asset)
+    result.publication_verification_status = publication_provenance_label(asset.lifecycle_status, False)
+    return result
 
 
 @router.put("/scholarly-assets/{asset_id}", response_model=ScholarlyAssetResponse)
@@ -400,12 +457,24 @@ def update_scholarly_asset(
 
     now_str = datetime.datetime.now(datetime.UTC).isoformat()
 
+    # Once an asset has entered the real editorial pipeline (a
+    # PublicationSubmission exists for it), its lifecycle_status is
+    # Publication's source of truth, not a self-service claim — the owner
+    # editing their profile portfolio must not be able to hand-set
+    # ACCEPTED/PUBLISHED and bypass peer review. For an asset never
+    # submitted through that pipeline, the field is a self-declaration
+    # (e.g. an externally-published paper), same as any CV entry.
+    has_real_submission = db.query(PublicationSubmission.id).filter(
+        PublicationSubmission.asset_id == asset.id
+    ).first() is not None
+    if not has_real_submission:
+        asset.lifecycle_status = body.lifecycle_status or "DRAFT"
+
     asset.title_ar = body.title_ar
     asset.title_en = body.title_en
     asset.abstract_ar = body.abstract_ar
     asset.abstract_en = body.abstract_en
     asset.asset_type = body.asset_type
-    asset.lifecycle_status = body.lifecycle_status or "DRAFT"
     asset.primary_discipline = body.primary_discipline
     asset.secondary_disciplines_json = body.secondary_disciplines_json or []
     asset.keywords_json = body.keywords_json or []
@@ -437,12 +506,14 @@ def update_scholarly_asset(
             contribution_roles_json=cont.contribution_roles_json or [],
             affiliation_text=cont.affiliation_text,
             contribution_percentage=cont.contribution_percentage,
-            verified_status=cont.verified_status or "UNVERIFIED"
+            verified_status="UNVERIFIED"
         ))
 
     db.commit()
     db.refresh(asset)
-    return asset
+    result = ScholarlyAssetResponse.model_validate(asset)
+    result.publication_verification_status = publication_provenance_label(asset.lifecycle_status, has_real_submission)
+    return result
 
 
 @router.get("/scholarly-assets/{asset_id}", response_model=ScholarlyAssetResponse)
@@ -461,7 +532,12 @@ def get_scholarly_asset(
     elif not context.organization and asset.owner_user_id != context.user.id:
         raise HTTPException(status_code=403, detail="Unauthorized access to this asset")
 
-    return asset
+    has_real_submission = db.query(PublicationSubmission.id).filter(
+        PublicationSubmission.asset_id == asset.id
+    ).first() is not None
+    result = ScholarlyAssetResponse.model_validate(asset)
+    result.publication_verification_status = publication_provenance_label(asset.lifecycle_status, has_real_submission)
+    return result
 
 
 @router.delete("/scholarly-assets/{asset_id}")

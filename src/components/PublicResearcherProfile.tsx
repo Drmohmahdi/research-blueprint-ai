@@ -203,7 +203,13 @@ export const PublicResearcherProfile: React.FC = () => {
                     </p>
                   </div>
                   {a.doi && (
-                    <a href={`https://doi.org/${a.doi}`} target="_blank" rel="noreferrer" className="shrink-0 text-info hover:text-info">
+                    <a
+                      href={`https://doi.org/${a.doi}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={isAr ? 'فتح رابط DOI في نافذة جديدة' : 'Open DOI link in a new tab'}
+                      className="shrink-0 text-info hover:text-info"
+                    >
                       <LinkIcon size={13} />
                     </a>
                   )}

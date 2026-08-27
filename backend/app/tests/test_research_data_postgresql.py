@@ -8,7 +8,8 @@ from sqlalchemy.exc import IntegrityError
 
 from app import models
 from app.db import SessionLocal, engine
-from app.routers.research_data import AnalysisRequest, CleaningRequest, VariableUpdate, clean_dataset, create_analysis, export_dataset, get_analysis, get_dataset, list_versions, require_dataset_write, update_variable
+from app.routers.research_data import AnalysisRequest, CleaningRequest, VariableUpdate, clean_dataset, create_analysis, export_dataset, get_analysis, get_dataset, list_versions, update_variable
+from app.services.data_authz import resolve_capabilities
 from app.services.research_data import fingerprint
 
 pytestmark = pytest.mark.skipif(engine.dialect.name != "postgresql", reason="PostgreSQL-only research-data closure gate")
@@ -47,8 +48,17 @@ def test_postgresql_dataset_persistence_dictionary_and_sensitive_preview(domain)
         user=db.get(models.User,domain["user_id"]); org=db.get(models.Organization,domain["org_id"])
         result=get_dataset(domain["dataset_id"],db,context(user,org))
         assert result["rows"]==2 and len(result["dictionary"])==4
-        assert all("participant" not in row for row in result["preview"])
-        assert "SECRET_PARTICIPANT_VALUE" not in str(result)
+        # Owner has VIEW_SENSITIVE; sensitive preview permitted (policy documented).
+        assert any("participant" in row for row in result["preview"])
+        # A project member without a sensitive grant must NOT see the identifier.
+        member=models.User(id=f"{PREFIX}-member",username=f"{PREFIX}-member",email=f"{PREFIX}-member@example.invalid",hashed_password="unused",role="Researcher",created_at=stamp())
+        db.add(member)
+        db.add(models.ResearchProjectMember(id=f"{PREFIX}-pmem",organization_id=domain["org_id"],project_id=domain["project_id"],user_id=member.id,relationship="CO_RESEARCHER",status="ACTIVE",assigned_sections=[],created_at=stamp()))
+        db.commit()
+        member_result=get_dataset(domain["dataset_id"],db,context(member,org))
+        assert all("participant" not in row for row in member_result["preview"])
+        assert "SECRET_PARTICIPANT_VALUE" not in str(member_result)
+        db.delete(member);db.commit()
 
 def test_postgresql_dataset_version_fk_integrity(domain):
     with SessionLocal() as db:
@@ -81,8 +91,14 @@ def test_postgresql_cross_tenant_dataset_and_analysis_idor_are_blocked(domain):
 def test_same_tenant_viewer_cannot_modify_dataset(domain):
     with SessionLocal() as db:
         user=db.get(models.User,domain["user_id"]);org=db.get(models.Organization,domain["org_id"])
-        with pytest.raises(HTTPException) as error: require_dataset_write(context(user,org,"VIEWER"))
+        # A researcher with no project relationship and no grant is metadata-only
+        viewer=models.User(id=f"{PREFIX}-viewer",username=f"{PREFIX}-viewer",email=f"{PREFIX}-viewer@example.invalid",hashed_password="unused",role="Researcher",created_at=stamp())
+        db.add(viewer);db.commit()
+        caps=resolve_capabilities(db,db.get(models.ResearchDataset,domain["dataset_id"]),context(viewer,org))
+        assert "CLEAN" not in caps and "RUN_ANALYSIS" not in caps and "VIEW_SENSITIVE" not in caps
+        with pytest.raises(HTTPException) as error: update_variable(domain["dataset_id"],f"{PREFIX}-var-2",VariableUpdate(role="DEPENDENT"),db,context(viewer,org))
         assert error.value.status_code==403
+        db.delete(viewer);db.commit()
 
 def test_postgresql_concurrent_cleaning_allocates_successive_versions_and_preserves_raw(domain):
     barrier=threading.Barrier(2); results=[]; errors=[]

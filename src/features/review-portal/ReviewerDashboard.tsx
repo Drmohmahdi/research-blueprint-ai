@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useProject } from '../../context/ProjectContext';
 import { Card } from '../../design-system/components/Card';
 import { Button } from '../../design-system/components/Button';
 import { PathPanel } from '../../design-system/components/Navigation';
 import { EmptyState } from '../../design-system/components/Feedback';
+import { Modal } from '../../design-system/components/Overlay';
 import { 
   CheckCircle2, 
   Send, 
@@ -31,6 +32,7 @@ import {
   apiRecordEditorialDecision,
   type ReviewerAssignmentData,
   type PeerReviewCaseData,
+  type PeerReviewCaseSummaryData,
   type PeerReviewCriterion
 } from '../../utils/api';
 
@@ -59,18 +61,22 @@ export const ReviewerDashboard: React.FC = () => {
   const [submittingReview, setSubmittingReview] = useState(false);
 
   // ── State for Editorial Cases ──────────────────────────────────────────────
-  const [editorialCases, setEditorialCases] = useState<any[]>([]);
+  const [editorialCases, setEditorialCases] = useState<PeerReviewCaseSummaryData[]>([]);
   const [loadingCases, setLoadingCases] = useState(false);
   const [showNewCaseModal, setShowNewCaseModal] = useState(false);
   const [newCaseTitleAr, setNewCaseTitleAr] = useState('');
   const [newCaseTitleEn, setNewCaseTitleEn] = useState('');
   const [newCaseAbstractAr, setNewCaseAbstractAr] = useState('');
   const [newCaseBlindType, setNewCaseBlindType] = useState('DOUBLE_BLIND');
+  const [newCaseTitleError, setNewCaseTitleError] = useState<string | null>(null);
+  const newCaseTitleRef = useRef<HTMLInputElement>(null);
 
   // Editorial Decision Modal
   const [decisionCaseId, setDecisionCaseId] = useState<string | null>(null);
   const [editorialDecision, setEditorialDecision] = useState<'ACCEPTED' | 'REVISION_REQUIRED' | 'REJECTED'>('ACCEPTED');
   const [editorialNotes, setEditorialNotes] = useState('');
+  const [editorialNotesError, setEditorialNotesError] = useState<string | null>(null);
+  const editorialNotesRef = useRef<HTMLTextAreaElement>(null);
 
   // ── Load My Review Assignments ─────────────────────────────────────────────
   const loadMyAssignments = useCallback(async () => {
@@ -252,7 +258,11 @@ export const ReviewerDashboard: React.FC = () => {
   };
 
   const handleCreateNewCase = async () => {
-    if (!newCaseTitleAr) return;
+    if (!newCaseTitleAr) {
+      setNewCaseTitleError(isAr ? 'عنوان البحث حقل إلزامي.' : 'Title is required.');
+      newCaseTitleRef.current?.focus();
+      return;
+    }
     try {
       const res = await apiCreatePeerReviewCase({
         title_ar: newCaseTitleAr,
@@ -266,6 +276,7 @@ export const ReviewerDashboard: React.FC = () => {
         setNewCaseTitleAr('');
         setNewCaseTitleEn('');
         setNewCaseAbstractAr('');
+        setNewCaseTitleError(null);
         await loadEditorialCases();
         setActionMessage({ type: 'success', text: isAr ? 'تم إنشاء ملف التحكيم وبدء الجولة الأولى بنجاح.' : 'Review case created.' });
       }
@@ -276,12 +287,18 @@ export const ReviewerDashboard: React.FC = () => {
   };
 
   const handleRecordEditorialDecision = async () => {
-    if (!decisionCaseId || !editorialNotes) return;
+    if (!decisionCaseId) return;
+    if (!editorialNotes) {
+      setEditorialNotesError(isAr ? 'حيثيات ومبررات القرار حقل إلزامي.' : 'Decision rationale is required.');
+      editorialNotesRef.current?.focus();
+      return;
+    }
     try {
       const res = await apiRecordEditorialDecision(decisionCaseId, editorialDecision, editorialNotes);
       if (res) {
         setDecisionCaseId(null);
         setEditorialNotes('');
+        setEditorialNotesError(null);
         await loadEditorialCases();
         setActionMessage({ type: 'success', text: isAr ? 'تم تسجيل القرار الأكاديمي النهائي بنجاح.' : 'Editorial decision recorded.' });
       }
@@ -342,7 +359,10 @@ export const ReviewerDashboard: React.FC = () => {
       </PathPanel>
 
       {actionMessage && (
-        <div className={`p-4 rounded-xl text-sm flex items-center gap-3 border ${
+        <div
+          role={actionMessage.type === 'success' ? 'status' : 'alert'}
+          aria-live="polite"
+          className={`p-4 rounded-xl text-sm flex items-center gap-3 border ${
           actionMessage.type === 'success'
             ? 'bg-[var(--ds-success-soft)] text-success border-success/20'
             : 'bg-danger/10 text-danger border-danger/20'
@@ -656,7 +676,7 @@ export const ReviewerDashboard: React.FC = () => {
               </p>
             </div>
             <Button
-              onClick={() => setShowNewCaseModal(true)}
+              onClick={() => { setNewCaseTitleError(null); setShowNewCaseModal(true); }}
               className="flex items-center gap-2 text-xs"
             >
               <Plus className="w-4 h-4" />
@@ -698,16 +718,26 @@ export const ReviewerDashboard: React.FC = () => {
                     <span>{isAr ? `المراجعات المكتملة: ${c.completed_reviews_count}` : `Completed: ${c.completed_reviews_count}`}</span>
                   </div>
 
-                  <div className="flex gap-2 pt-2 border-t border-[var(--ds-border-subtle)]">
-                    <Button
-                      onClick={() => setDecisionCaseId(c.id)}
-                      variant="secondary"
-                      className="w-full text-xs flex items-center justify-center gap-1.5 border-success/30 text-success hover:bg-[var(--ds-success-soft)]"
-                    >
-                      <Award className="w-3.5 h-3.5" />
-                      <span>{isAr ? 'تسجيل قرار هيئة التحرير' : 'Record Final Decision'}</span>
-                    </Button>
-                  </div>
+                  {/* Editorial actions require actual authority over THIS case
+                      (is_editor, server-computed) — not just organization
+                      role. An org member who is not this case's assigned
+                      editor never sees a control the backend would reject. */}
+                  {c.is_editor ? (
+                    <div className="flex gap-2 pt-2 border-t border-[var(--ds-border-subtle)]">
+                      <Button
+                        onClick={() => { setEditorialNotesError(null); setDecisionCaseId(c.id); }}
+                        variant="secondary"
+                        className="w-full text-xs flex items-center justify-center gap-1.5 border-success/30 text-success hover:bg-[var(--ds-success-soft)]"
+                      >
+                        <Award className="w-3.5 h-3.5" />
+                        <span>{isAr ? 'تسجيل قرار هيئة التحرير' : 'Record Final Decision'}</span>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="pt-2 border-t border-[var(--ds-border-subtle)] text-xs text-[var(--ds-text-muted)]">
+                      {isAr ? 'ملف تحكيم — للاطلاع فقط (بدون صلاحية تحريرية على هذا الملف)' : 'Review case — view only (no editorial authority on this case)'}
+                    </div>
+                  )}
                 </Card>
               ))}
             </div>
@@ -716,123 +746,145 @@ export const ReviewerDashboard: React.FC = () => {
       )}
 
       {/* ── NEW CASE MODAL ────────────────────────────────────────────────────── */}
-      {showNewCaseModal && (
-        <div className="fixed inset-0 bg-[var(--ds-surface-overlay)] z-50 flex items-center justify-center p-4">
-          <Card className="max-w-lg w-full p-6 space-y-4 bg-[var(--ds-surface-card)]">
-            <h3 className="text-lg font-bold text-[var(--ds-text-primary)]">
-              {isAr ? 'إنشاء ملف تحكيم علمي جديد' : 'Create New Peer Review Case'}
-            </h3>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-semibold text-[var(--ds-text-secondary)] mb-1">
-                  {isAr ? 'عنوان البحث / المخطوطة (بالعربية):' : 'Title (Arabic):'}
-                </label>
-                <input
-                  type="text"
-                  value={newCaseTitleAr}
-                  onChange={e => setNewCaseTitleAr(e.target.value)}
-                  placeholder={isAr ? 'مثال: أثر الذكاء الاصطناعي على مهارات البحث...' : 'Title in Arabic...'}
-                  className="w-full p-3 rounded-xl bg-[var(--ds-surface-sunken)] border border-[var(--ds-border-subtle)] text-sm text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-[var(--ds-text-secondary)] mb-1">
-                  {isAr ? 'نوع التعمية والخصوصية:' : 'Blind Review Mode:'}
-                </label>
-                <select
-                  value={newCaseBlindType}
-                  onChange={e => setNewCaseBlindType(e.target.value)}
-                  className="w-full p-3 rounded-xl bg-[var(--ds-surface-sunken)] border border-[var(--ds-border-subtle)] text-sm text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
-                >
-                  <option value="DOUBLE_BLIND">{isAr ? 'تحكيم مزدوج التعمية (Double-Blind) — موصى به' : 'Double-Blind'}</option>
-                  <option value="SINGLE_BLIND">{isAr ? 'تحكيم أحادي التعمية (Single-Blind)' : 'Single-Blind'}</option>
-                  <option value="OPEN">{isAr ? 'تحكيم مفتوح (Open Review)' : 'Open Review'}</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-[var(--ds-text-secondary)] mb-1">
-                  {isAr ? 'المستخلص الأكاديمي (اختياري):' : 'Abstract (Optional):'}
-                </label>
-                <textarea
-                  value={newCaseAbstractAr}
-                  onChange={e => setNewCaseAbstractAr(e.target.value)}
-                  placeholder={isAr ? 'المستخلص البحثي...' : 'Abstract...'}
-                  className="w-full p-3 rounded-xl bg-[var(--ds-surface-sunken)] border border-[var(--ds-border-subtle)] text-sm text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
-                  rows={3}
-                />
-              </div>
-            </div>
-            <div className="flex justify-end gap-3 pt-4 border-t border-[var(--ds-border-subtle)]">
-              <Button onClick={() => setShowNewCaseModal(false)} variant="secondary">
-                {isAr ? 'إلغاء' : 'Cancel'}
-              </Button>
-              <Button onClick={handleCreateNewCase}>
-                {isAr ? 'إنشاء وبدء الجولة 1' : 'Create Case'}
-              </Button>
-            </div>
-          </Card>
+      <Modal
+        isOpen={showNewCaseModal}
+        onClose={() => setShowNewCaseModal(false)}
+        title={isAr ? 'إنشاء ملف تحكيم علمي جديد' : 'Create New Peer Review Case'}
+        footerActions={
+          <>
+            <Button onClick={() => setShowNewCaseModal(false)} variant="secondary">
+              {isAr ? 'إلغاء' : 'Cancel'}
+            </Button>
+            <Button onClick={handleCreateNewCase}>
+              {isAr ? 'إنشاء وبدء الجولة 1' : 'Create Case'}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-3 text-start">
+          <div>
+            <label htmlFor="new-case-title-ar" className="block text-xs font-semibold text-[var(--ds-text-secondary)] mb-1">
+              {isAr ? 'عنوان البحث / المخطوطة (بالعربية):' : 'Title (Arabic):'}
+            </label>
+            <input
+              id="new-case-title-ar"
+              ref={newCaseTitleRef}
+              type="text"
+              value={newCaseTitleAr}
+              onChange={e => { setNewCaseTitleAr(e.target.value); if (newCaseTitleError) setNewCaseTitleError(null); }}
+              placeholder={isAr ? 'مثال: أثر الذكاء الاصطناعي على مهارات البحث...' : 'Title in Arabic...'}
+              aria-required="true"
+              aria-invalid={!!newCaseTitleError}
+              aria-describedby={newCaseTitleError ? 'new-case-title-error' : undefined}
+              className="w-full p-3 rounded-xl bg-[var(--ds-surface-sunken)] border border-[var(--ds-border-subtle)] text-sm text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
+            />
+            {newCaseTitleError && (
+              <p id="new-case-title-error" role="alert" className="text-xs text-danger mt-1">
+                {newCaseTitleError}
+              </p>
+            )}
+          </div>
+          <div>
+            <label htmlFor="new-case-blind-type" className="block text-xs font-semibold text-[var(--ds-text-secondary)] mb-1">
+              {isAr ? 'نوع التعمية والخصوصية:' : 'Blind Review Mode:'}
+            </label>
+            <select
+              id="new-case-blind-type"
+              value={newCaseBlindType}
+              onChange={e => setNewCaseBlindType(e.target.value)}
+              className="w-full p-3 rounded-xl bg-[var(--ds-surface-sunken)] border border-[var(--ds-border-subtle)] text-sm text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
+            >
+              <option value="DOUBLE_BLIND">{isAr ? 'تحكيم مزدوج التعمية (Double-Blind) — موصى به' : 'Double-Blind'}</option>
+              <option value="SINGLE_BLIND">{isAr ? 'تحكيم أحادي التعمية (Single-Blind)' : 'Single-Blind'}</option>
+              <option value="OPEN">{isAr ? 'تحكيم مفتوح (Open Review)' : 'Open Review'}</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="new-case-abstract-ar" className="block text-xs font-semibold text-[var(--ds-text-secondary)] mb-1">
+              {isAr ? 'المستخلص الأكاديمي (اختياري):' : 'Abstract (Optional):'}
+            </label>
+            <textarea
+              id="new-case-abstract-ar"
+              value={newCaseAbstractAr}
+              onChange={e => setNewCaseAbstractAr(e.target.value)}
+              placeholder={isAr ? 'المستخلص البحثي...' : 'Abstract...'}
+              className="w-full p-3 rounded-xl bg-[var(--ds-surface-sunken)] border border-[var(--ds-border-subtle)] text-sm text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
+              rows={3}
+            />
+          </div>
         </div>
-      )}
+      </Modal>
 
       {/* ── EDITORIAL DECISION MODAL ─────────────────────────────────────────── */}
-      {decisionCaseId && (
-        <div className="fixed inset-0 bg-[var(--ds-surface-overlay)] z-50 flex items-center justify-center p-4">
-          <Card className="max-w-lg w-full p-6 space-y-4 bg-[var(--ds-surface-card)]">
-            <h3 className="text-lg font-bold text-[var(--ds-text-primary)] flex items-center gap-2">
-              <Award className="w-5 h-5 text-success" />
-              <span>{isAr ? 'تسجيل قرار هيئة التحرير / اللجنة الأكاديمية' : 'Record Editorial Decision'}</span>
-            </h3>
-            <p className="text-xs text-[var(--ds-text-muted)]">
-              {isAr ? 'وفقاً لمبدأ الحوكمة الأكاديمية (Human-in-the-Loop)، هذا القرار يصدر حصرياً من قبل عضو اللجنة البشري.' : 'Human-in-the-loop editorial decision.'}
-            </p>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-semibold text-[var(--ds-text-secondary)] mb-1">
-                  {isAr ? 'القرار النهائي:' : 'Final Decision:'}
-                </label>
-                <div className="grid grid-cols-1 min-[380px]:grid-cols-3 gap-2">
-                  {[
-                    { id: 'ACCEPTED', label: isAr ? 'قبول للنشر' : 'Accepted', color: 'border-success text-success bg-[var(--ds-success-soft)]' },
-                    { id: 'REVISION_REQUIRED', label: isAr ? 'طلب تعديل' : 'Revision Req.', color: 'border-warning text-warning bg-warning/10' },
-                    { id: 'REJECTED', label: isAr ? 'رفض' : 'Rejected', color: 'border-danger text-danger bg-danger/10' }
-                  ].map(d => (
-                    <button
-                      key={d.id}
-                      type="button"
-                      onClick={() => setEditorialDecision(d.id as any)}
-                      className={`p-3 rounded-xl border text-xs font-bold transition-all text-center ${
-                        editorialDecision === d.id ? `${d.color} ring-2 ring-action` : 'border-[var(--ds-border-subtle)] bg-[var(--ds-surface-sunken)] text-[var(--ds-text-muted)]'
-                      }`}
-                    >
-                      {d.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-[var(--ds-text-secondary)] mb-1">
-                  {isAr ? 'حيثيات ومبررات القرار الأكاديمي:' : 'Decision Rationale / Notes:'}
-                </label>
-                <textarea
-                  value={editorialNotes}
-                  onChange={e => setEditorialNotes(e.target.value)}
-                  placeholder={isAr ? 'بيان أسباب القرار وملاحظات اللجنة للباحث...' : 'Detailed rationale...'}
-                  className="w-full p-3 rounded-xl bg-[var(--ds-surface-sunken)] border border-[var(--ds-border-subtle)] text-sm text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
-                  rows={4}
-                />
-              </div>
+      <Modal
+        isOpen={!!decisionCaseId}
+        onClose={() => setDecisionCaseId(null)}
+        title={isAr ? 'تسجيل قرار هيئة التحرير / اللجنة الأكاديمية' : 'Record Editorial Decision'}
+        footerActions={
+          <>
+            <Button onClick={() => setDecisionCaseId(null)} variant="secondary">
+              {isAr ? 'إلغاء' : 'Cancel'}
+            </Button>
+            <Button onClick={handleRecordEditorialDecision}>
+              {isAr ? 'اعتماد وتسجيل القرار' : 'Confirm Decision'}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-3 text-start">
+          <p className="text-xs text-[var(--ds-text-muted)] flex items-center gap-2">
+            <Award className="w-4 h-4 text-success flex-shrink-0" />
+            <span>{isAr ? 'وفقاً لمبدأ الحوكمة الأكاديمية (Human-in-the-Loop)، هذا القرار يصدر حصرياً من قبل عضو اللجنة البشري.' : 'Human-in-the-loop editorial decision.'}</span>
+          </p>
+          <div>
+            <span className="block text-xs font-semibold text-[var(--ds-text-secondary)] mb-1">
+              {isAr ? 'القرار النهائي:' : 'Final Decision:'}
+            </span>
+            <div className="grid grid-cols-1 min-[380px]:grid-cols-3 gap-2" role="radiogroup" aria-label={isAr ? 'القرار النهائي' : 'Final Decision'}>
+              {[
+                { id: 'ACCEPTED', label: isAr ? 'قبول للنشر' : 'Accepted', color: 'border-success text-success bg-[var(--ds-success-soft)]' },
+                { id: 'REVISION_REQUIRED', label: isAr ? 'طلب تعديل' : 'Revision Req.', color: 'border-warning text-warning bg-warning/10' },
+                { id: 'REJECTED', label: isAr ? 'رفض' : 'Rejected', color: 'border-danger text-danger bg-danger/10' }
+              ].map(d => (
+                <button
+                  key={d.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={editorialDecision === d.id}
+                  onClick={() => setEditorialDecision(d.id as any)}
+                  className={`p-3 rounded-xl border text-xs font-bold transition-all text-center ${
+                    editorialDecision === d.id ? `${d.color} ring-2 ring-action` : 'border-[var(--ds-border-subtle)] bg-[var(--ds-surface-sunken)] text-[var(--ds-text-muted)]'
+                  }`}
+                >
+                  {d.label}
+                </button>
+              ))}
             </div>
-            <div className="flex justify-end gap-3 pt-4 border-t border-[var(--ds-border-subtle)]">
-              <Button onClick={() => setDecisionCaseId(null)} variant="secondary">
-                {isAr ? 'إلغاء' : 'Cancel'}
-              </Button>
-              <Button onClick={handleRecordEditorialDecision}>
-                {isAr ? 'اعتماد وتسجيل القرار' : 'Confirm Decision'}
-              </Button>
-            </div>
-          </Card>
+          </div>
+          <div>
+            <label htmlFor="editorial-notes" className="block text-xs font-semibold text-[var(--ds-text-secondary)] mb-1">
+              {isAr ? 'حيثيات ومبررات القرار الأكاديمي:' : 'Decision Rationale / Notes:'}
+            </label>
+            <textarea
+              id="editorial-notes"
+              ref={editorialNotesRef}
+              value={editorialNotes}
+              onChange={e => { setEditorialNotes(e.target.value); if (editorialNotesError) setEditorialNotesError(null); }}
+              placeholder={isAr ? 'بيان أسباب القرار وملاحظات اللجنة للباحث...' : 'Detailed rationale...'}
+              aria-required="true"
+              aria-invalid={!!editorialNotesError}
+              aria-describedby={editorialNotesError ? 'editorial-notes-error' : undefined}
+              className="w-full p-3 rounded-xl bg-[var(--ds-surface-sunken)] border border-[var(--ds-border-subtle)] text-sm text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
+              rows={4}
+            />
+            {editorialNotesError && (
+              <p id="editorial-notes-error" role="alert" className="text-xs text-danger mt-1">
+                {editorialNotesError}
+              </p>
+            )}
+          </div>
         </div>
-      )}
+      </Modal>
 
     </div>
   );

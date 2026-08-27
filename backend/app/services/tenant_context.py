@@ -1,7 +1,8 @@
 import datetime
 import json
 import uuid
-from fastapi import Header, Depends, HTTPException, status
+from typing import Optional
+from fastapi import Header, Depends, HTTPException, status, Cookie
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from ..db import get_db
@@ -57,9 +58,18 @@ class TenantContext:
         return self.plan.features_json or {}
 
 
-def get_current_user_from_header(authorization: str = Header(None), db: Session = Depends(get_db)) -> User:
+def get_current_user_from_header(
+    authorization: str = Header(None),
+    session_token: Optional[str] = Cookie(None),
+    db: Session = Depends(get_db)
+) -> User:
+    """Resolve the current user from the Authorization header when present
+    (API clients), falling back to the HttpOnly session cookie set by
+    auth.login for browser sessions."""
     from ..routers.auth import get_current_user
-    return get_current_user(authorization=authorization, db=db)
+    if authorization and authorization.startswith("Bearer "):
+        return get_current_user(authorization=authorization, session_token=None, db=db)
+    return get_current_user(authorization=None, session_token=session_token, db=db)
 
 
 def get_tenant_context(

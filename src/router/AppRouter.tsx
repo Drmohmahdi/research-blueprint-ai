@@ -71,6 +71,8 @@ const OrganizationSwitcher      = lazy(() => import('../features/saas/Organizati
 const BillingDashboard          = lazy(() => import('../features/saas/BillingDashboard').then(m => ({ default: m.BillingDashboard })));
 const SuperAdminDashboard        = lazy(() => import('../features/saas/SuperAdminDashboard').then(m => ({ default: m.SuperAdminDashboard })));
 const NewStudyDesignWorkspace   = lazy(() => import('../features/saas/NewStudyDesignWorkspace').then(m => ({ default: m.NewStudyDesignWorkspace })));
+const ResearchDesignCommandCenter = lazy(() => import('../features/research-design/ResearchDesignCommandCenter').then(m => ({ default: m.ResearchDesignCommandCenter })));
+const ResearchOfficeOperations    = lazy(() => import('../features/research-design/ResearchOfficeOperations').then(m => ({ default: m.ResearchOfficeOperations })));
 const SeminarProposalWorkspace  = lazy(() => import('../features/saas/SeminarProposalWorkspace').then(m => ({ default: m.SeminarProposalWorkspace })));
 const ThesisDefenseWorkspace    = lazy(() => import('../features/saas/ThesisDefenseWorkspace').then(m => ({ default: m.ThesisDefenseWorkspace })));
 const AdminCenter                = lazy(() => import('../components/AdminCenter').then(m => ({ default: m.AdminCenter })));
@@ -201,6 +203,8 @@ export const AppRouter: React.FC = () => {
       {/* Study Design Path Routes */}
       <Route path={ROUTES.NEW_STUDY_DESIGN} element={<SafeRoute><NewStudyDesignWorkspace /></SafeRoute>} />
       <Route path={ROUTES.NEW_STUDY_DESIGN_STEP} element={<SafeRoute><NewStudyDesignWorkspace /></SafeRoute>} />
+      <Route path={ROUTES.RESEARCH_COMMAND_CENTER} element={<SafeRoute><ResearchDesignCommandCenter /></SafeRoute>} />
+      <Route path={ROUTES.RESEARCH_OFFICE} element={<SafeRoute><ResearchOfficeOperations /></SafeRoute>} />
 
       {/* Seminar Proposal Path Routes */}
       <Route path={ROUTES.SEMINAR_PROPOSAL} element={<SafeRoute><SeminarProposalWorkspace /></SafeRoute>} />

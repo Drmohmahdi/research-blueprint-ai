@@ -3,6 +3,7 @@ import secrets
 import uuid
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..db import get_db
@@ -34,13 +35,59 @@ def verify_policy_admin(context: TenantContext):
         )
 
 
-def verify_committee_reviewer(context: TenantContext):
-    """Ensures caller has committee reviewer privileges to review dossiers."""
-    role = (context.membership.role or "RESEARCHER").upper()
-    if role not in ["OWNER", "ORGANIZATION_ADMIN", "SUPERVISOR"] and not context.is_global_admin:
+def is_committee_member(application: "models.PromotionApplication", context: TenantContext, db: Session) -> bool:
+    """Academic committee authority (view/evaluate/review/decide) over ONE
+    specific application is granted ONLY through an ACTIVE
+    PromotionCommitteeAssignment row for that exact application — never
+    through organization role (OWNER/ORGANIZATION_ADMIN/SUPERVISOR) and never
+    through platform-wide admin status (context.is_global_admin). This is a
+    deliberate, stricter boundary than the org-role-based bootstrap authority
+    used elsewhere in Baseerah (e.g. Peer Review's OWNER bootstrap): academic
+    promotion committee integrity requires that decision authority come from
+    an explicit, auditable, per-application academic assignment, not from
+    generic administrative or platform privilege."""
+    return db.query(models.PromotionCommitteeAssignment).filter(
+        models.PromotionCommitteeAssignment.application_id == application.id,
+        models.PromotionCommitteeAssignment.user_id == context.user.id,
+        models.PromotionCommitteeAssignment.status == "ACTIVE"
+    ).first() is not None
+
+
+def require_committee_member(application: "models.PromotionApplication", context: TenantContext, db: Session) -> None:
+    if not is_committee_member(application, context, db):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Academic Committee privileges required to review promotion applications"
+            detail="Academic committee membership on this specific application is required for this action"
+        )
+
+
+def has_org_oversight_access(context: TenantContext) -> bool:
+    """Read-only institutional oversight (GET only) for an organization's own
+    OWNER/ORGANIZATION_ADMIN — a legitimate administrative transparency need,
+    distinct from academic committee decision authority. Deliberately does
+    NOT consider context.is_global_admin: platform-wide administration must
+    never imply access to private academic promotion content (see §18/§99 of
+    the closure gate this enforces) — a platform SystemAdmin gets no
+    automatic access at all and must be explicitly committee-assigned like
+    anyone else."""
+    role = (context.membership.role or "RESEARCHER").upper()
+    return role in ["OWNER", "ORGANIZATION_ADMIN"]
+
+
+def verify_committee_admin(context: TenantContext):
+    """Authority to CONFIGURE who serves on a committee (assign/revoke) —
+    distinct from BEING a committee member. Unlike verify_policy_admin
+    (bylaws configuration, a platform-level administrative capability),
+    deciding who sits on a specific applicant's promotion committee is
+    institutional academic governance, not platform operations — so this
+    deliberately does NOT accept context.is_global_admin. Only a real
+    org-level OWNER/ORGANIZATION_ADMIN may assign or revoke committee
+    members; a platform SystemAdmin gets nothing here either."""
+    role = (context.membership.role or "RESEARCHER").upper()
+    if role not in ["OWNER", "ORGANIZATION_ADMIN"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Institutional Admin or Owner privileges required to manage committee assignments"
         )
 
 
@@ -440,7 +487,7 @@ def create_promotion_application(
     return schemas.PromotionApplicationResponse.model_validate(app)
 
 
-@router.get("/applications/{application_id}", response_model=schemas.PromotionApplicationResponse)
+@router.get("/applications/{application_id}")
 def get_promotion_application(
     application_id: str,
     db: Session = Depends(get_db),
@@ -454,11 +501,33 @@ def get_promotion_application(
     if not app:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Promotion application not found")
 
-    # Access check: owner or admin/reviewer
+    # Access check: the applicant, an explicitly assigned committee member for
+    # THIS application, or an org-level OWNER/ORGANIZATION_ADMIN's read-only
+    # institutional oversight. Platform-wide admin status grants nothing here.
     is_owner = app.user_id == context.user.id
-    role = (context.membership.role or "").upper()
-    if not is_owner and role not in ["OWNER", "ORGANIZATION_ADMIN", "SUPERVISOR"]:
+    member = is_committee_member(app, context, db)
+    oversight_only = not is_owner and not member and has_org_oversight_access(context)
+    if not is_owner and not member and not oversight_only:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied to this promotion application")
+
+    # Oversight-only viewers (org admin/owner not on the committee) get a
+    # server-side-projected administrative-metadata response — never the
+    # private academic dossier (evidence, evaluation detail, readiness/points,
+    # committee notes, decision rationale). This is enforced by constructing
+    # a fully separate response object here, not by hiding fields client-side.
+    if oversight_only:
+        committee_count = db.query(models.PromotionCommitteeAssignment).filter(
+            models.PromotionCommitteeAssignment.application_id == app.id,
+            models.PromotionCommitteeAssignment.status == "ACTIVE"
+        ).count()
+        return schemas.PromotionApplicationAdminMetadataResponse(
+            id=app.id, organization_id=app.organization_id, user_id=app.user_id,
+            policy_id=app.policy_id, policy_version=app.policy_version,
+            current_rank=app.current_rank, target_rank=app.target_rank, status=app.status,
+            committee_assignment_count=committee_count, has_committee_assigned=committee_count > 0,
+            decision_status=app.human_review_decision, decision_recorded_at=app.reviewed_at,
+            submitted_at=app.submitted_at, created_at=app.created_at, updated_at=app.updated_at
+        )
 
     # Stale check
     if app.evaluation_summary_json and app.evaluation_fingerprint:
@@ -472,7 +541,122 @@ def get_promotion_application(
         if current_fingerprint != app.evaluation_fingerprint:
             app.evaluation_summary_json["is_stale"] = True
 
-    return schemas.PromotionApplicationResponse.model_validate(app)
+    resp = schemas.PromotionApplicationResponse.model_validate(app)
+    resp.is_committee_member = member
+    return resp
+
+
+# ── Committee Assignment Endpoints ──────────────────────────────────────────
+# Assigning/revoking WHO serves on a committee is an administrative
+# configuration action (verify_committee_admin); it is deliberately separate
+# from BEING a committee member (is_committee_member) — granting this
+# authority does not itself confer review/decision authority.
+
+@router.post("/applications/{application_id}/committee", response_model=schemas.PromotionCommitteeAssignmentResponse, status_code=status.HTTP_201_CREATED)
+def assign_committee_member(
+    application_id: str,
+    payload: schemas.PromotionCommitteeAssignRequest,
+    db: Session = Depends(get_db),
+    context: TenantContext = Depends(get_tenant_context)
+):
+    verify_committee_admin(context)
+
+    app = db.query(models.PromotionApplication).filter(
+        models.PromotionApplication.id == application_id,
+        models.PromotionApplication.organization_id == context.organization.id
+    ).with_for_update().first()
+    if not app:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Promotion application not found")
+
+    if payload.user_id == app.user_id:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="The applicant cannot be assigned to review their own promotion application")
+
+    target_membership = db.query(models.OrganizationMembership).filter(
+        models.OrganizationMembership.organization_id == context.organization.id,
+        models.OrganizationMembership.user_id == payload.user_id
+    ).first()
+    if not target_membership:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Target user is not a member of this organization")
+
+    existing = db.query(models.PromotionCommitteeAssignment).filter(
+        models.PromotionCommitteeAssignment.application_id == application_id,
+        models.PromotionCommitteeAssignment.user_id == payload.user_id,
+        models.PromotionCommitteeAssignment.status == "ACTIVE"
+    ).first()
+    if existing:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This user is already an active committee member for this application")
+
+    now = datetime.datetime.now(datetime.UTC).isoformat()
+    assignment = models.PromotionCommitteeAssignment(
+        id=f"pca-{secrets.token_hex(6)}",
+        organization_id=context.organization.id,
+        application_id=application_id,
+        user_id=payload.user_id,
+        assigned_by=context.user.id,
+        status="ACTIVE",
+        assigned_at=now
+    )
+    db.add(assignment)
+
+    audit = models.AuditLog(
+        id=secrets.token_hex(8),
+        userId=context.user.id,
+        organizationId=context.organization.id,
+        action="PROMOTION_COMMITTEE_ASSIGNED",
+        details=f"Assigned user {payload.user_id} to the review committee for promotion application {application_id}",
+        timestamp=now
+    )
+    db.add(audit)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This user is already an active committee member for this application")
+    db.refresh(assignment)
+    return assignment
+
+
+@router.delete("/applications/{application_id}/committee/{user_id}", response_model=schemas.PromotionCommitteeAssignmentResponse)
+def revoke_committee_member(
+    application_id: str,
+    user_id: str,
+    db: Session = Depends(get_db),
+    context: TenantContext = Depends(get_tenant_context)
+):
+    verify_committee_admin(context)
+
+    app = db.query(models.PromotionApplication).filter(
+        models.PromotionApplication.id == application_id,
+        models.PromotionApplication.organization_id == context.organization.id
+    ).first()
+    if not app:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Promotion application not found")
+
+    assignment = db.query(models.PromotionCommitteeAssignment).filter(
+        models.PromotionCommitteeAssignment.application_id == application_id,
+        models.PromotionCommitteeAssignment.user_id == user_id,
+        models.PromotionCommitteeAssignment.status == "ACTIVE"
+    ).with_for_update().first()
+    if not assignment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Active committee assignment not found")
+
+    now = datetime.datetime.now(datetime.UTC).isoformat()
+    assignment.status = "REVOKED"
+    assignment.revoked_at = now
+    assignment.revoked_by = context.user.id
+
+    audit = models.AuditLog(
+        id=secrets.token_hex(8),
+        userId=context.user.id,
+        organizationId=context.organization.id,
+        action="PROMOTION_COMMITTEE_REVOKED",
+        details=f"Revoked user {user_id} from the review committee for promotion application {application_id}",
+        timestamp=now
+    )
+    db.add(audit)
+    db.commit()
+    db.refresh(assignment)
+    return assignment
 
 
 # ── Evidence Mapping Endpoints ──────────────────────────────────────────────
@@ -487,7 +671,7 @@ def map_evidence_to_application(
     app = db.query(models.PromotionApplication).filter(
         models.PromotionApplication.id == application_id,
         models.PromotionApplication.organization_id == context.organization.id
-    ).first()
+    ).with_for_update().first()
 
     if not app:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Promotion application not found")
@@ -583,7 +767,11 @@ def map_evidence_to_application(
         timestamp=now
     )
     db.add(audit)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This evidence is already attached to the application")
     db.refresh(app)
     return schemas.PromotionApplicationResponse.model_validate(app)
 
@@ -654,10 +842,13 @@ def evaluate_application(
     if not app:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Promotion application not found")
 
-    # Access check: owner or admin/reviewer
+    # Evaluation is either the applicant's own self-service readiness check or
+    # part of a committee member's review of an application they are
+    # explicitly assigned to — never generic org-level or platform admin
+    # access (evaluate is treated as sensitive, on par with review/decide,
+    # not as passive institutional oversight).
     is_owner = app.user_id == context.user.id
-    role = (context.membership.role or "").upper()
-    if not is_owner and role not in ["OWNER", "ORGANIZATION_ADMIN", "SUPERVISOR"]:
+    if not is_owner and not is_committee_member(app, context, db):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied to evaluate this promotion application")
 
     # Load locked policy version
@@ -729,7 +920,7 @@ def submit_promotion_application(
     app = db.query(models.PromotionApplication).filter(
         models.PromotionApplication.id == application_id,
         models.PromotionApplication.organization_id == context.organization.id
-    ).first()
+    ).with_for_update().first()
 
     if not app:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Promotion application not found")
@@ -791,17 +982,30 @@ def review_promotion_application(
     db: Session = Depends(get_db),
     context: TenantContext = Depends(get_tenant_context)
 ):
-    verify_committee_reviewer(context)
-
     app = db.query(models.PromotionApplication).filter(
         models.PromotionApplication.id == application_id,
         models.PromotionApplication.organization_id == context.organization.id
-    ).first()
+    ).with_for_update().first()
 
     if not app:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Promotion application not found")
 
-    # State machine check: Must be SUBMITTED or UNDER_REVIEW
+    # Committee decision authority is resource-scoped to this exact
+    # application (see is_committee_member) — never granted by organization
+    # role or platform-admin status alone.
+    require_committee_member(app, context, db)
+
+    # Defense in depth: even if an application's own owner were ever
+    # mistakenly assigned to its committee, they may never decide their own
+    # promotion.
+    if app.user_id == context.user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Applicants cannot review or decide their own promotion application")
+
+    # State machine check: Must be SUBMITTED or UNDER_REVIEW. The row lock
+    # above ensures two concurrent committee decisions on the same dossier
+    # cannot both pass this check — the second request blocks until the
+    # first commits, then correctly sees the now-terminal status and is
+    # rejected rather than silently overwriting the first decision.
     if app.status not in ["SUBMITTED", "UNDER_REVIEW"]:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,

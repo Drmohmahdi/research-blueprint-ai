@@ -553,12 +553,13 @@ export const PromotionDashboard: React.FC = () => {
               
               <form onSubmit={handleAddEvidence} className="space-y-3">
                 <div className="flex flex-col space-y-1">
-                  <label className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">
+                  <label htmlFor="promotion-evidence-select" className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">
                     {isAr ? 'اختر الورقة العلمية من رصيدك الأكاديمي:' : 'Choose Paper from Verified Profile:'}
                   </label>
-                  
+
                   {availableAssets.length > 0 ? (
                     <select
+                      id="promotion-evidence-select"
                       value={selectedAssetId}
                       onChange={e => setSelectedAssetId(e.target.value)}
                       className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl p-2 text-xs font-bold text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"

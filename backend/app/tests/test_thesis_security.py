@@ -30,8 +30,8 @@ def db():
     session.close(); engine.dispose()
 
 
-def _ctx(user, org="org-a", role="MEMBER"):
-    return SimpleNamespace(user=SimpleNamespace(id=user, role="MEMBER"), organization=SimpleNamespace(id=org), role=role, is_global_admin=False)
+def _ctx(user, org="org-a", role="MEMBER", is_global_admin=False):
+    return SimpleNamespace(user=SimpleNamespace(id=user, role="MEMBER"), organization=SimpleNamespace(id=org), role=role, is_global_admin=is_global_admin)
 
 
 def _manifest(report_id="report", org="org-a", user="viewer"):
@@ -150,3 +150,79 @@ def test_report_engine_allows_student_to_read_own_student_visible_report(db):
     from app.services.reporting.context_builder import ReportContextBuilder
     result = ReportContextBuilder._build_thesis_examiner_report("student-report", _manifest(), _ctx("student"), db, None)
     assert result.metadata["confidentiality_level"] == "STUDENT_VISIBLE"
+
+
+# ── Cross-domain IAM consolidation Finding 1 / Finding 3 regression ──────────
+# Generic ORGANIZATION_ADMIN role membership (and platform is_global_admin) no
+# longer substitutes for a resource-scoped ThesisSupervisionAssignment: it
+# must not see SUPERVISOR_VISIBLE/COMMITTEE_ONLY confidential examiner
+# comments, and require_supervisor must reject it outright for supervisor-
+# equivalent write/decision actions. "Graduate Studies" oversight is instead
+# scoped to exactly its own, previously-unreachable GRADUATE_STUDIES_ONLY tier.
+
+def test_organization_admin_without_assignment_cannot_see_supervisor_or_committee_tier_reports(db):
+    # Not just redacted confidential_comments — an admin with no resource-scoped
+    # relationship cannot see SUPERVISOR_VISIBLE/COMMITTEE_ONLY reports exist
+    # at all through this endpoint, matching a plain unrelated user's view.
+    reports = list_examiner_reports("thesis-a", db, _ctx("org-admin-user", role="ORGANIZATION_ADMIN"))
+    ids = {item["id"] for item in reports}
+    assert "supervisor-report" not in ids
+    assert "committee-report" not in ids
+
+
+def test_platform_admin_without_assignment_cannot_see_supervisor_or_committee_tier_reports(db):
+    reports = list_examiner_reports("thesis-a", db, _ctx("platform-user", role="MEMBER", is_global_admin=True))
+    ids = {item["id"] for item in reports}
+    assert "supervisor-report" not in ids
+    assert "committee-report" not in ids
+
+
+def test_organization_admin_can_see_graduate_studies_only_tier(db):
+    # Finding 3: this tier was previously unreachable through this endpoint by
+    # anyone, admin included — now correctly scoped to Graduate Studies (admin).
+    reports = list_examiner_reports("thesis-a", db, _ctx("org-admin-user", role="ORGANIZATION_ADMIN"))
+    by_id = {item["id"]: item for item in reports}
+    assert "grad-studies-report" in by_id
+    assert by_id["grad-studies-report"]["confidential_comments"] == "secret"
+
+
+def test_report_engine_organization_admin_cannot_read_supervisor_visible_report(db):
+    # Not merely redacted — an admin with no resource-scoped relationship
+    # cannot generate a report for a SUPERVISOR_VISIBLE tier item at all.
+    from app.services.reporting.context_builder import ReportContextBuilder
+    with pytest.raises(HTTPException) as error:
+        ReportContextBuilder._build_thesis_examiner_report(
+            "supervisor-report", _manifest(), _ctx("org-admin-user", role="ORGANIZATION_ADMIN"), db, None
+        )
+    assert error.value.status_code == 404
+
+
+def test_report_engine_organization_admin_can_read_graduate_studies_only_confidential_comments(db):
+    from app.services.reporting.context_builder import ReportContextBuilder
+    result = ReportContextBuilder._build_thesis_examiner_report(
+        "grad-studies-report", _manifest(), _ctx("org-admin-user", role="ORGANIZATION_ADMIN"), db, None
+    )
+    assert "Confidential comments are available only to authorized academic officers." in result.sections[0].paragraphs_en
+
+
+def test_require_supervisor_rejects_organization_admin_without_assignment(db):
+    from app.routers.thesis_workflow import require_supervisor
+    thesis = db.get(models.ThesisRecord, "thesis-a")
+    with pytest.raises(HTTPException) as error:
+        require_supervisor(db, thesis, _ctx("org-admin-user", role="ORGANIZATION_ADMIN"))
+    assert error.value.status_code == 403
+
+
+def test_require_supervisor_rejects_platform_admin_without_assignment(db):
+    from app.routers.thesis_workflow import require_supervisor
+    thesis = db.get(models.ThesisRecord, "thesis-a")
+    with pytest.raises(HTTPException) as error:
+        require_supervisor(db, thesis, _ctx("platform-user", role="MEMBER", is_global_admin=True))
+    assert error.value.status_code == 403
+
+
+def test_require_supervisor_still_accepts_the_genuinely_assigned_supervisor(db):
+    from app.routers.thesis_workflow import require_supervisor
+    thesis = db.get(models.ThesisRecord, "thesis-a")
+    item = require_supervisor(db, thesis, _ctx("supervisor"), final=True)
+    assert item is not None and item.role == "SUPERVISOR"

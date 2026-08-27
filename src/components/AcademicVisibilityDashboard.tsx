@@ -816,6 +816,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                       type="checkbox"
                       checked={task.done}
                       readOnly
+                      aria-label={`${isAr ? task.textAr : task.textEn} — ${task.done ? (isAr ? 'مكتملة' : 'Completed') : (isAr ? 'غير مكتملة' : 'Not completed')}`}
                       className="mt-0.5 h-4 w-4 shrink-0 rounded border-[var(--ds-border-default)] text-[var(--ds-primary)] focus:ring-[var(--ds-primary)] cursor-pointer"
                     />
                     <div className="flex-1 space-y-1">

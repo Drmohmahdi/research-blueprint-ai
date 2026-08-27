@@ -9,6 +9,22 @@ from ..db import get_db
 from .. import models, schemas
 from ..services.tenant_context import get_tenant_context, TenantContext
 from ..services.sanitization import sanitize_text
+from ..services.research_design import project_access, member_relationship
+
+# Edit-capable relationships on ResearchProjectMember for a full-project
+# overwrite — matches research_lifecycle.py's own EDIT_CAPABLE_RELATIONSHIPS,
+# itself matching research_design.py's can_edit_section() precedent.
+# RESEARCH_ASSISTANT is excluded: its authority is section-scoped, and these
+# endpoints replace the whole project, not one section.
+_EDIT_CAPABLE_RELATIONSHIPS = {"PI", "CO_RESEARCHER", "DATA_ANALYST"}
+
+
+def _require_project_edit(db: Session, project: models.ResearchProject, context: TenantContext) -> None:
+    if context.is_global_admin or project.userId == context.user.id:
+        return
+    if member_relationship(db, project, context.user.id) in _EDIT_CAPABLE_RELATIONSHIPS:
+        return
+    raise HTTPException(status_code=403, detail="Only the project owner or an authorized team member may modify this project")
 
 def sanitize_project_data(project: schemas.ProjectCreate) -> schemas.ProjectCreate:
     project.titleAr = sanitize_text(project.titleAr)
@@ -244,9 +260,25 @@ def list_projects(
     db: Session = Depends(get_db),
     context: TenantContext = Depends(get_tenant_context)
 ):
-    projects = db.query(models.ResearchProject).filter(
-        models.ResearchProject.organizationId == context.organization.id
-    ).all()
+    # Same-tenant horizontal boundary: this returns the full project record
+    # (identical shape to get_project below), so it must not be org-wide —
+    # scoped to ownership, an active ResearchProjectMember relationship, or
+    # platform admin, matching research_design.py's project_access() for the
+    # same resource.
+    if context.is_global_admin:
+        projects = db.query(models.ResearchProject).filter(
+            models.ResearchProject.organizationId == context.organization.id
+        ).all()
+    else:
+        member_project_ids = db.query(models.ResearchProjectMember.project_id).filter(
+            models.ResearchProjectMember.user_id == context.user.id,
+            models.ResearchProjectMember.status == "ACTIVE",
+        )
+        projects = db.query(models.ResearchProject).filter(
+            models.ResearchProject.organizationId == context.organization.id,
+            (models.ResearchProject.userId == context.user.id) |
+            (models.ResearchProject.id.in_(member_project_ids)),
+        ).all()
     return [serialize_project_model(p) for p in projects]
 
 @router.get("/{project_id}", response_model=schemas.ProjectResponse)
@@ -255,10 +287,7 @@ def get_project(
     db: Session = Depends(get_db),
     context: TenantContext = Depends(get_tenant_context)
 ):
-    proj = db.query(models.ResearchProject).filter(
-        models.ResearchProject.id == project_id,
-        models.ResearchProject.organizationId == context.organization.id
-    ).first()
+    proj = project_access(db, project_id, context)
     if not proj:
         raise HTTPException(status_code=404, detail="Project not found or access denied")
     return serialize_project_model(proj)
@@ -271,12 +300,10 @@ def update_project(
     context: TenantContext = Depends(get_tenant_context)
 ):
     project = sanitize_project_data(project)
-    db_project = db.query(models.ResearchProject).filter(
-        models.ResearchProject.id == project_id,
-        models.ResearchProject.organizationId == context.organization.id
-    ).first()
+    db_project = project_access(db, project_id, context)
     if not db_project:
         raise HTTPException(status_code=404, detail="Project not found or access denied")
+    _require_project_edit(db, db_project, context)
 
     # Update base fields
     db_project.titleAr = project.titleAr
@@ -368,13 +395,17 @@ def delete_project(
     db: Session = Depends(get_db),
     context: TenantContext = Depends(get_tenant_context)
 ):
-    proj = db.query(models.ResearchProject).filter(
-        models.ResearchProject.id == project_id,
-        models.ResearchProject.organizationId == context.organization.id
-    ).first()
+    proj = project_access(db, project_id, context)
     if not proj:
         raise HTTPException(status_code=404, detail="Project not found or access denied")
-    
+    # Deletion is irreversible and destroys every sub-resource — deliberately
+    # narrower than the edit-capable set above: only the actual owner (or
+    # platform admin) may delete, never a PI/co-researcher/data-analyst
+    # relationship alone. No existing register or code establishes a broader
+    # authority for this specific action, so none is invented here.
+    if not (context.is_global_admin or proj.userId == context.user.id):
+        raise HTTPException(status_code=403, detail="Only the project owner may delete this project")
+
     # Audit deletion
     db_audit = models.AuditLog(
         id=secrets.token_hex(8),
@@ -402,13 +433,11 @@ def update_project_workflow_profile(
     db: Session = Depends(get_db),
     context: TenantContext = Depends(get_tenant_context)
 ):
-    db_project = db.query(models.ResearchProject).filter(
-        models.ResearchProject.id == project_id,
-        models.ResearchProject.organizationId == context.organization.id
-    ).first()
+    db_project = project_access(db, project_id, context)
     if not db_project:
         raise HTTPException(status_code=404, detail="Project not found or access denied")
-        
+    _require_project_edit(db, db_project, context)
+
     if req.activePathId is not None:
         db_project.activePathId = req.activePathId
     if req.completedSteps is not None:
@@ -427,12 +456,10 @@ def create_manuscript_from_project(
     db: Session = Depends(get_db),
     context: TenantContext = Depends(get_tenant_context)
 ):
-    db_project = db.query(models.ResearchProject).filter(
-        models.ResearchProject.id == project_id,
-        models.ResearchProject.organizationId == context.organization.id
-    ).first()
+    db_project = project_access(db, project_id, context)
     if not db_project:
         raise HTTPException(status_code=404, detail="Project not found or access denied")
+    _require_project_edit(db, db_project, context)
 
     # Get parent asset
     parent_asset_id = db_project.scholarly_asset_id

@@ -3,6 +3,7 @@ import hashlib
 import secrets
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..db import get_db
@@ -24,13 +25,22 @@ def hash_token(raw_token: str) -> str:
     return hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
 
 
-def verify_editorial_admin(context: TenantContext):
-    """Ensures caller has institutional administrative or editorial privileges."""
+def is_case_editor(case: "models.PeerReviewCase", context: TenantContext) -> bool:
+    """Resource-scoped editorial authority: OWNER (bootstrap authority) or the
+    case's assigned editor. Organization admin, supervisor, and platform
+    administration do NOT imply editorial authority over a specific case —
+    editorial content and decisions belong to the assigned editor only."""
     role = (context.membership.role or "RESEARCHER").upper()
-    if role not in ["OWNER", "ORGANIZATION_ADMIN", "SUPERVISOR"] and not context.is_global_admin:
+    if role == "OWNER":
+        return True
+    return bool(case.editor_user_id) and case.editor_user_id == context.user.id
+
+
+def require_case_editor(case: "models.PeerReviewCase", context: TenantContext) -> None:
+    if not is_case_editor(case, context):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Editorial, Supervisor, or Administrative privileges required for this action"
+            detail="Editorial authority over this review case is required for this action"
         )
 
 
@@ -91,7 +101,11 @@ def seed_default_rubric_if_needed(org_id: str, db: Session) -> models.ReviewRubr
 def apply_privacy_and_confidentiality(case_resp: schemas.PeerReviewCaseResponse, current_user_id: str, is_editor: bool):
     """
     Applies privacy masking (Double-Blind / Single-Blind) and strips CONFIDENTIAL_TO_EDITOR comments for non-editors.
+    Also stamps case_resp.is_editor so the frontend can align editor-only
+    controls to actual authority instead of reimplementing the authorization
+    check client-side — the backend remains the single source of truth.
     """
+    case_resp.is_editor = is_editor
     is_author = (case_resp.owner_user_id == current_user_id)
 
     if not is_editor:
@@ -149,6 +163,27 @@ def create_peer_review_case(
     if not rubric:
         rubric = seed_default_rubric_if_needed(org_id, db)
 
+    # 1b. Resolve optional exact-version Publication binding. The fingerprint
+    # and submission reference are always derived server-side from the
+    # referenced version — never accepted from the client — so a caller
+    # cannot assert a fingerprint that does not match the actual manuscript.
+    manuscript_version = None
+    manuscript_fingerprint = None
+    publication_submission_id = None
+    if payload.manuscript_version_id:
+        manuscript_version = db.query(models.PublicationManuscriptVersion).filter(
+            models.PublicationManuscriptVersion.id == payload.manuscript_version_id,
+            models.PublicationManuscriptVersion.organization_id == org_id,
+        ).first()
+        if not manuscript_version:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Referenced manuscript version not found")
+        manuscript_fingerprint = manuscript_version.fingerprint
+        submission = db.query(models.PublicationSubmission).filter(
+            models.PublicationSubmission.manuscript_version_id == manuscript_version.id,
+            models.PublicationSubmission.organization_id == org_id,
+        ).order_by(models.PublicationSubmission.created_at.desc()).first()
+        publication_submission_id = submission.id if submission else None
+
     # 2. Create PeerReviewCase
     case_id = f"prc-{secrets.token_hex(6)}"
     case = models.PeerReviewCase(
@@ -157,6 +192,9 @@ def create_peer_review_case(
         owner_user_id=context.user.id,
         project_id=payload.project_id,
         scholarly_asset_id=payload.scholarly_asset_id,
+        manuscript_version_id=manuscript_version.id if manuscript_version else None,
+        manuscript_fingerprint=manuscript_fingerprint,
+        publication_submission_id=publication_submission_id,
         title_ar=sanitize_text(payload.title_ar),
         title_en=sanitize_text(payload.title_en),
         abstract_ar=sanitize_text(payload.abstract_ar) if payload.abstract_ar else None,
@@ -242,13 +280,17 @@ def list_peer_review_cases(
 
     query = db.query(models.PeerReviewCase).filter(models.PeerReviewCase.organization_id == org_id)
 
-    # Researchers can only list their own cases or cases where they are assigned as reviewers
+    # Researchers can only list cases they own, are explicitly delegated as
+    # editor of (case.editor_user_id — see is_case_editor), or are assigned to
+    # as reviewers.
     if user_role not in ["OWNER", "ORGANIZATION_ADMIN", "SUPERVISOR"]:
         assigned_case_ids = db.query(models.ReviewerAssignment.case_id).filter(
-            models.ReviewerAssignment.reviewer_user_id == context.user.id
+            models.ReviewerAssignment.reviewer_user_id == context.user.id,
+            models.ReviewerAssignment.status.notin_(["REVOKED", "DECLINED"])
         ).subquery()
         query = query.filter(
             (models.PeerReviewCase.owner_user_id == context.user.id) |
+            (models.PeerReviewCase.editor_user_id == context.user.id) |
             (models.PeerReviewCase.id.in_(assigned_case_ids))
         )
 
@@ -274,6 +316,7 @@ def list_peer_review_cases(
             blind_type=c.blind_type,
             status=c.status,
             current_round_number=c.current_round_number,
+            is_editor=is_case_editor(c, context),
             active_assignments_count=active_assignments,
             completed_reviews_count=completed_reviews,
             created_at=c.created_at,
@@ -296,15 +339,19 @@ def get_peer_review_case(
     if not case:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Peer review case not found")
 
-    user_role = (context.membership.role or "RESEARCHER").upper()
-    is_editor = user_role in ["OWNER", "ORGANIZATION_ADMIN", "SUPERVISOR"]
+    is_editor = is_case_editor(case, context)
     is_author = (case.owner_user_id == context.user.id)
 
-    # Check assignment if not author and not editor
+    # Check assignment if not author and not editor. Excludes REVOKED/DECLINED,
+    # matching the same filter already applied to this exact relationship in
+    # search/providers.py and storage.py — revocation removes access to the
+    # case immediately and totally, including to the reviewer's own prior
+    # contribution, per the platform's decided revocation policy.
     if not is_editor and not is_author:
         is_assigned = db.query(models.ReviewerAssignment).filter(
             models.ReviewerAssignment.case_id == case.id,
-            models.ReviewerAssignment.reviewer_user_id == context.user.id
+            models.ReviewerAssignment.reviewer_user_id == context.user.id,
+            models.ReviewerAssignment.status.notin_(["REVOKED", "DECLINED"])
         ).first()
         if not is_assigned:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied to this review case")
@@ -313,20 +360,72 @@ def get_peer_review_case(
     return apply_privacy_and_confidentiality(resp, context.user.id, is_editor=is_editor)
 
 
-@router.post("/cases/{case_id}/rounds", response_model=schemas.PeerReviewRoundResponse, status_code=status.HTTP_201_CREATED)
-def create_next_review_round(
+@router.put("/cases/{case_id}/editor", response_model=schemas.PeerReviewCaseResponse)
+def assign_case_editor(
     case_id: str,
+    payload: schemas.EditorAssignmentRequest,
     db: Session = Depends(get_db),
     context: TenantContext = Depends(get_tenant_context)
 ):
-    verify_editorial_admin(context)
-
+    """Assigns (or reassigns) the editor of record for a review case. Only the
+    organization OWNER may designate an editor — editorial authority is a
+    deliberate delegation, not something an existing editor or organization
+    admin can grant to themselves or others."""
     case = db.query(models.PeerReviewCase).filter(
         models.PeerReviewCase.id == case_id,
         models.PeerReviewCase.organization_id == context.organization.id
     ).first()
     if not case:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Peer review case not found")
+
+    role = (context.membership.role or "RESEARCHER").upper()
+    if role != "OWNER":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only the organization owner may assign a review case editor")
+
+    member = db.query(models.OrganizationMembership).filter(
+        models.OrganizationMembership.organization_id == context.organization.id,
+        models.OrganizationMembership.user_id == payload.editor_user_id
+    ).first()
+    if not member:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Editor candidate is not a member of this organization")
+
+    now = datetime.datetime.now(datetime.UTC).isoformat()
+    previous_editor_user_id = case.editor_user_id
+    case.editor_user_id = payload.editor_user_id
+    case.updated_at = now
+
+    audit = models.AuditLog(
+        id=secrets.token_hex(8),
+        userId=context.user.id,
+        organizationId=context.organization.id,
+        action="PEER_REVIEW_EDITOR_ASSIGNED",
+        details=f"Case {case.id} editor changed from {previous_editor_user_id} to {payload.editor_user_id}",
+        timestamp=now
+    )
+    db.add(audit)
+    db.commit()
+    db.refresh(case)
+
+    resp = schemas.PeerReviewCaseResponse.model_validate(case)
+    return apply_privacy_and_confidentiality(resp, context.user.id, is_editor=True)
+
+
+@router.post("/cases/{case_id}/rounds", response_model=schemas.PeerReviewRoundResponse, status_code=status.HTTP_201_CREATED)
+def create_next_review_round(
+    case_id: str,
+    db: Session = Depends(get_db),
+    context: TenantContext = Depends(get_tenant_context)
+):
+    # Locked for the duration of the transaction: concurrent round-creation
+    # requests for the same case must serialise on round/version numbering
+    # (mirrors the Publication domain's manuscript-version-allocation lock).
+    case = db.query(models.PeerReviewCase).filter(
+        models.PeerReviewCase.id == case_id,
+        models.PeerReviewCase.organization_id == context.organization.id
+    ).with_for_update().first()
+    if not case:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Peer review case not found")
+    require_case_editor(case, context)
 
     # Fetch latest revision if available
     latest_rev = db.query(models.ManuscriptRevision).filter(
@@ -410,8 +509,6 @@ def assign_or_invite_reviewer(
     db: Session = Depends(get_db),
     context: TenantContext = Depends(get_tenant_context)
 ):
-    verify_editorial_admin(context)
-
     rnd = db.query(models.PeerReviewRound).filter(models.PeerReviewRound.id == round_id).first()
     if not rnd:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Review round not found")
@@ -422,6 +519,7 @@ def assign_or_invite_reviewer(
     ).first()
     if not case:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Peer review case not found")
+    require_case_editor(case, context)
 
     now = datetime.datetime.now(datetime.UTC).isoformat()
     assignment_id = f"asg-{secrets.token_hex(6)}"
@@ -442,6 +540,18 @@ def assign_or_invite_reviewer(
         # Prevent assigning the author to review own manuscript
         if payload.reviewer_user_id == case.owner_user_id:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Author cannot be assigned as reviewer for their own manuscript")
+
+        # Conflict-of-interest signal: block a listed co-author on the bound
+        # Publication manuscript version from being assigned as a reviewer.
+        # This is a real, data-derived signal (not a fabricated one) — only
+        # available when the case is bound to an exact manuscript version.
+        if case.manuscript_version_id:
+            is_coauthor = db.query(models.PublicationManuscriptAuthorship).filter(
+                models.PublicationManuscriptAuthorship.manuscript_version_id == case.manuscript_version_id,
+                models.PublicationManuscriptAuthorship.user_id == payload.reviewer_user_id,
+            ).first()
+            if is_coauthor:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Listed co-author cannot be assigned as reviewer for this manuscript (conflict of interest)")
 
         dup = db.query(models.ReviewerAssignment).filter(
             models.ReviewerAssignment.round_id == round_id,
@@ -484,7 +594,11 @@ def assign_or_invite_reviewer(
             scope_key=f"invite:{assignment_id}"
         )
 
-        db.commit()
+        try:
+            db.commit()
+        except IntegrityError:
+            db.rollback()
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Reviewer already assigned to this round")
         db.refresh(assignment)
         return schemas.ReviewerAssignmentResponse.model_validate(assignment)
 
@@ -556,7 +670,11 @@ def assign_or_invite_reviewer(
             timestamp=now
         )
         db.add(audit)
-        db.commit()
+        try:
+            db.commit()
+        except IntegrityError:
+            db.rollback()
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="External reviewer already invited to this round")
         db.refresh(assignment)
 
         resp = schemas.ReviewerAssignmentResponse.model_validate(assignment)
@@ -586,7 +704,7 @@ def accept_reviewer_assignment(
     assignment = db.query(models.ReviewerAssignment).filter(
         models.ReviewerAssignment.id == assignment_id,
         models.ReviewerAssignment.reviewer_user_id == context.user.id
-    ).first()
+    ).with_for_update().first()
     if not assignment:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found or not owned by caller")
 
@@ -638,7 +756,7 @@ def decline_reviewer_assignment(
     assignment = db.query(models.ReviewerAssignment).filter(
         models.ReviewerAssignment.id == assignment_id,
         models.ReviewerAssignment.reviewer_user_id == context.user.id
-    ).first()
+    ).with_for_update().first()
     if not assignment:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found or not owned by caller")
 
@@ -673,7 +791,7 @@ def save_review_draft(
     assignment = db.query(models.ReviewerAssignment).filter(
         models.ReviewerAssignment.id == assignment_id,
         models.ReviewerAssignment.reviewer_user_id == context.user.id
-    ).first()
+    ).with_for_update().first()
     if not assignment:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found or not owned by caller")
 
@@ -774,7 +892,7 @@ def submit_completed_review(
     assignment = db.query(models.ReviewerAssignment).filter(
         models.ReviewerAssignment.id == assignment_id,
         models.ReviewerAssignment.reviewer_user_id == context.user.id
-    ).first()
+    ).with_for_update().first()
     if not assignment:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found or not owned by caller")
 
@@ -936,10 +1054,12 @@ def upload_manuscript_revision(
     db: Session = Depends(get_db),
     context: TenantContext = Depends(get_tenant_context)
 ):
+    # Locked for the duration of the transaction: concurrent revision uploads
+    # for the same case must serialise on version-number allocation.
     case = db.query(models.PeerReviewCase).filter(
         models.PeerReviewCase.id == case_id,
         models.PeerReviewCase.organization_id == context.organization.id
-    ).first()
+    ).with_for_update().first()
     if not case:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Peer review case not found")
 
@@ -1001,7 +1121,11 @@ def upload_manuscript_revision(
         scope_key=f"revision:v{new_version}:{case.id}"
     )
 
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="A revision with this version number was already recorded")
     db.refresh(revision)
     return schemas.ManuscriptRevisionResponse.model_validate(revision)
 
@@ -1013,14 +1137,17 @@ def record_editorial_decision(
     db: Session = Depends(get_db),
     context: TenantContext = Depends(get_tenant_context)
 ):
-    verify_editorial_admin(context)
-
+    # Locked for the duration of the transaction: two concurrent editorial
+    # decisions on the same case (e.g. ACCEPT vs REJECT racing) must not
+    # produce a silent lost update — the second transaction blocks until the
+    # first commits, then observes the already-decided state.
     case = db.query(models.PeerReviewCase).filter(
         models.PeerReviewCase.id == case_id,
         models.PeerReviewCase.organization_id == context.organization.id
-    ).first()
+    ).with_for_update().first()
     if not case:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Peer review case not found")
+    require_case_editor(case, context)
 
     allowed_decisions = ["ACCEPTED", "REVISION_REQUIRED", "REJECTED"]
     if payload.decision not in allowed_decisions:
@@ -1033,6 +1160,13 @@ def record_editorial_decision(
         models.PeerReviewRound.case_id == case.id,
         models.PeerReviewRound.round_number == case.current_round_number
     ).first()
+
+    # A round's decision is final once recorded — reconsidering it requires a
+    # new round, never a second call silently overwriting the first (which
+    # would let two concurrent, contradictory decisions both "win" with no
+    # authoritative outcome).
+    if active_round and active_round.decision != "PENDING":
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This review round already has a recorded decision; open a new round to reconsider it")
 
     if active_round:
         active_round.decision = payload.decision
@@ -1093,3 +1227,55 @@ def record_editorial_decision(
 
     resp = schemas.PeerReviewCaseResponse.model_validate(case)
     return apply_privacy_and_confidentiality(resp, context.user.id, is_editor=True)
+
+
+# ── Institutional Peer Review Operations (aggregate-first) ──────────────────
+
+@router.get("/organization/operations")
+def peer_review_operations(db: Session = Depends(get_db), context: TenantContext = Depends(get_tenant_context)):
+    """Aggregate-only institutional view. Never returns manuscript content,
+    reviewer identities, confidential comments, or COI narratives — only
+    counts and statuses, matching the Publication domain's equivalent."""
+    role = (context.membership.role or "RESEARCHER").upper()
+    if role not in ["OWNER", "ORGANIZATION_ADMIN"]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Peer review operations require an organization administrator role")
+
+    org_id = context.organization.id
+    cases = db.query(models.PeerReviewCase).filter(models.PeerReviewCase.organization_id == org_id).all()
+
+    by_status: dict[str, int] = {}
+    for c in cases:
+        by_status[c.status] = by_status.get(c.status, 0) + 1
+
+    case_ids = [c.id for c in cases]
+    pending_assignments = 0
+    overdue_reviews = 0
+    completed_reviews = 0
+    now_iso = datetime.datetime.now(datetime.UTC).isoformat()
+    if case_ids:
+        assignments = db.query(models.ReviewerAssignment).filter(models.ReviewerAssignment.case_id.in_(case_ids)).all()
+        for a in assignments:
+            if a.status in ("INVITED", "ACCEPTED", "IN_PROGRESS"):
+                pending_assignments += 1
+                if a.due_at and a.due_at < now_iso:
+                    overdue_reviews += 1
+            elif a.status == "SUBMITTED":
+                completed_reviews += 1
+
+    cases_awaiting_editor = sum(1 for c in cases if not c.editor_user_id and c.status not in ("DECIDED", "WITHDRAWN"))
+
+    return {
+        "organization_id": org_id,
+        "scope": "ORGANIZATION",
+        "counts": {
+            "active_cases": sum(1 for c in cases if c.status not in ("DECIDED", "WITHDRAWN")),
+            "cases_awaiting_editor_assignment": cases_awaiting_editor,
+            "pending_reviewer_assignments": pending_assignments,
+            "overdue_reviews": overdue_reviews,
+            "completed_reviews": completed_reviews,
+            "decided_cases": by_status.get("DECIDED", 0),
+        },
+        "cases_by_status": by_status,
+        "aggregate_only": True,
+        "raw_content_excluded": True,
+    }

@@ -5,8 +5,12 @@ from sqlalchemy.orm import sessionmaker
 import app.models
 from app.db import Base, get_db
 from app.main import app
-from app.models import User, Organization, Plan, UnifiedAcademicProfile, ScholarlyAsset
+from app.models import (
+    User, Organization, Plan, UnifiedAcademicProfile, ScholarlyAsset,
+    PublicationSubmission, PublicationJournal, PublicationManuscriptVersion
+)
 import json
+import uuid
 import datetime
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test_academic_foundation_db.db"
@@ -257,4 +261,302 @@ def test_scholarly_assets_tenant_isolation(client):
     # Retrieve KFUPM asset directly using User B (should be forbidden or not found due to tenant mismatch)
     direct_res = client.get(f"/api/academic-foundation/scholarly-assets/{asset_id}", headers=headers_b)
     assert direct_res.status_code == 403 or direct_res.status_code == 404
+
+
+def _register_and_login(client, username):
+    client.post("/api/auth/register", json={
+        "username": username,
+        "email": f"{username}@baseerah.sa",
+        "password": "securepassword123",
+        "role": "Researcher"
+    })
+    token = client.post("/api/auth/login", json={"username": username, "password": "securepassword123"}).json()["token"]
+    headers = {"Authorization": f"Bearer {token}"}
+    org_id = client.get("/api/organizations/active", headers=headers).json()["id"]
+    headers["X-Organization-ID"] = org_id
+    return headers, org_id
+
+
+def test_verification_status_cannot_be_client_declared_verified(client):
+    # No ORCID OAuth or equivalent verification authority exists in this
+    # codebase yet — a client asserting status/verification_status/
+    # verified_status: "VERIFIED" must always be forced back to UNVERIFIED,
+    # server-side, regardless of what the payload claims.
+    headers_a, _ = _register_and_login(client, "spoof_prof")
+
+    upsert_body = {
+        "preferred_name_en": "Spoof Attempt Researcher",
+        "visibility_status": "PUBLIC",
+        "identifiers": [
+            {
+                "identifier_type": "ORCID",
+                "identifier_value": "0000-0001-2345-6789",
+                "status": "VERIFIED",
+                "verification_method": "ORCID_OAUTH",
+                "verified_at": "2026-01-01T00:00:00Z",
+                "last_checked_at": "2026-01-01T00:00:00Z"
+            }
+        ],
+        "affiliations": [
+            {
+                "organization_name": "Self-Declared University",
+                "is_current": True,
+                "verification_status": "VERIFIED"
+            }
+        ]
+    }
+    upsert_res = client.post("/api/academic-foundation/profile/upsert", json=upsert_body, headers=headers_a)
+    assert upsert_res.status_code == 200
+    body = upsert_res.json()
+    assert body["identifiers"][0]["status"] == "UNVERIFIED"
+    assert body["identifiers"][0]["verified_at"] is None
+    assert body["identifiers"][0]["last_checked_at"] is None
+    assert body["affiliations"][0]["verification_status"] == "UNVERIFIED"
+
+    # Same rule for scholarly-asset contributors' verified_status.
+    asset_body = {
+        "title_en": "Spoofed Contributor Verification Attempt",
+        "asset_type": "JOURNAL_PAPER",
+        "lifecycle_status": "DRAFT",
+        "contributors": [
+            {
+                "external_name": "Suspicious Co-Author",
+                "author_order": 1,
+                "verified_status": "VERIFIED"
+            }
+        ]
+    }
+    asset_res = client.post("/api/academic-foundation/scholarly-assets", json=asset_body, headers=headers_a)
+    assert asset_res.status_code == 200
+    assert asset_res.json()["contributors"][0]["verified_status"] == "UNVERIFIED"
+
+
+def test_identifier_profile_url_rejects_unsafe_scheme(client):
+    # An identifier's profile_url is rendered as a raw <a href> on the public,
+    # unauthenticated profile page — a javascript: (or other non-http(s))
+    # scheme there is a stored-XSS vector reachable by any visitor.
+    headers_a, _ = _register_and_login(client, "xssurl_prof")
+
+    res = client.post("/api/academic-foundation/profile/upsert", json={
+        "preferred_name_en": "XSS Attempt Researcher",
+        "visibility_status": "PUBLIC",
+        "identifiers": [
+            {
+                "identifier_type": "ORCID",
+                "identifier_value": "0000-0003-3456-7890",
+                "profile_url": "javascript:alert(document.cookie)"
+            }
+        ]
+    }, headers=headers_a)
+    assert res.status_code == 422
+
+    ok_res = client.post("/api/academic-foundation/profile/upsert", json={
+        "preferred_name_en": "XSS Attempt Researcher",
+        "visibility_status": "PUBLIC",
+        "identifiers": [
+            {
+                "identifier_type": "ORCID",
+                "identifier_value": "0000-0003-3456-7890",
+                "profile_url": "https://orcid.org/0000-0003-3456-7890"
+            }
+        ]
+    }, headers=headers_a)
+    assert ok_res.status_code == 200
+
+
+def test_public_profile_hides_unpublished_assets_even_when_visibility_public(client):
+    # visibility defaults to PUBLIC on creation, but that alone must never be
+    # enough to surface on the public profile — only lifecycle_status ==
+    # PUBLISHED may. DRAFT/UNDER_REVIEW/ACCEPTED must stay hidden even with
+    # visibility left at its PUBLIC default (ACCEPTED != PUBLISHED).
+    headers_a, _ = _register_and_login(client, "pubfilter_prof")
+
+    client.post("/api/academic-foundation/profile/upsert", json={
+        "preferred_name_en": "Public Filter Researcher",
+        "visibility_status": "PUBLIC"
+    }, headers=headers_a)
+
+    draft_asset = client.post("/api/academic-foundation/scholarly-assets", json={
+        "title_en": "Not Yet Published Work",
+        "asset_type": "JOURNAL_PAPER",
+        "lifecycle_status": "ACCEPTED",
+        "visibility": "PUBLIC",
+        "contributors": []
+    }, headers=headers_a)
+    assert draft_asset.status_code == 200
+    asset_id = draft_asset.json()["id"]
+
+    public_res = client.get("/api/academic-foundation/public/pubfilter_prof")
+    assert public_res.status_code == 200
+    titles = [a["title_en"] for a in public_res.json()["scholarly_assets"]]
+    assert "Not Yet Published Work" not in titles
+
+    # Once genuinely marked PUBLISHED (self-declared, no submission pipeline
+    # involved here), it becomes eligible to appear.
+    update_body = {
+        "title_en": "Not Yet Published Work",
+        "asset_type": "JOURNAL_PAPER",
+        "lifecycle_status": "PUBLISHED",
+        "visibility": "PUBLIC",
+        "contributors": []
+    }
+    update_res = client.put(f"/api/academic-foundation/scholarly-assets/{asset_id}", json=update_body, headers=headers_a)
+    assert update_res.status_code == 200
+    assert update_res.json()["lifecycle_status"] == "PUBLISHED"
+
+    public_res_2 = client.get("/api/academic-foundation/public/pubfilter_prof")
+    titles_2 = [a["title_en"] for a in public_res_2.json()["scholarly_assets"]]
+    assert "Not Yet Published Work" in titles_2
+
+
+def test_lifecycle_status_locked_once_real_submission_pipeline_exists(client):
+    # Once an asset has actually entered Publication's own editorial
+    # pipeline (a PublicationSubmission row references it), the owner
+    # editing their Academic Identity portfolio must not be able to
+    # hand-declare it PUBLISHED and bypass peer review.
+    headers_a, org_id = _register_and_login(client, "pipeline_prof")
+    client.post("/api/academic-foundation/profile/upsert", json={
+        "preferred_name_en": "Pipeline Researcher",
+        "visibility_status": "PUBLIC"
+    }, headers=headers_a)
+
+    asset_res = client.post("/api/academic-foundation/scholarly-assets", json={
+        "title_en": "Manuscript Under Real Peer Review",
+        "asset_type": "JOURNAL_PAPER",
+        "lifecycle_status": "UNDER_REVIEW",
+        "visibility": "PUBLIC",
+        "contributors": []
+    }, headers=headers_a)
+    assert asset_res.status_code == 200
+    asset_id = asset_res.json()["id"]
+
+    now = datetime.datetime.now(datetime.UTC).isoformat()
+    db = TestingSessionLocal()
+    journal = PublicationJournal(
+        id=str(uuid.uuid4()), canonical_key=f"jrnl-{uuid.uuid4()}", title="Test Journal",
+        provider_name="MANUAL", retrieved_at=now, stale_after=now
+    )
+    manuscript_version = PublicationManuscriptVersion(
+        id=str(uuid.uuid4()), organization_id=org_id, asset_id=asset_id, version_number=1,
+        article_type="ORIGINAL_RESEARCH", fingerprint="fp-1", created_at=now
+    )
+    db.add(journal)
+    db.add(manuscript_version)
+    db.commit()
+    submission = PublicationSubmission(
+        id=str(uuid.uuid4()), organization_id=org_id, asset_id=asset_id,
+        journal_id=journal.id, manuscript_version_id=manuscript_version.id,
+        status="SUBMITTED", created_at=now, updated_at=now
+    )
+    db.add(submission)
+    db.commit()
+    db.close()
+
+    hijack_res = client.put(f"/api/academic-foundation/scholarly-assets/{asset_id}", json={
+        "title_en": "Manuscript Under Real Peer Review",
+        "asset_type": "JOURNAL_PAPER",
+        "lifecycle_status": "PUBLISHED",
+        "visibility": "PUBLIC",
+        "contributors": []
+    }, headers=headers_a)
+    assert hijack_res.status_code == 200
+    assert hijack_res.json()["lifecycle_status"] == "UNDER_REVIEW"
+
+    public_res = client.get("/api/academic-foundation/public/pipeline_prof")
+    titles = [a["title_en"] for a in public_res.json()["scholarly_assets"]]
+    assert "Manuscript Under Real Peer Review" not in titles
+
+
+def test_publication_provenance_self_declared_vs_pipeline_verified(client):
+    # Two PUBLISHED assets for the same researcher: one self-declared (never
+    # submitted through the real editorial pipeline), one that genuinely went
+    # through Publication Intelligence's PublicationSubmission. Both must be
+    # labeled with the truthful provenance, not a generic "PUBLISHED" that
+    # implies equal trust.
+    headers_a, org_id = _register_and_login(client, "provenance_prof")
+    client.post("/api/academic-foundation/profile/upsert", json={
+        "preferred_name_en": "Provenance Researcher",
+        "visibility_status": "PUBLIC"
+    }, headers=headers_a)
+
+    self_declared = client.post("/api/academic-foundation/scholarly-assets", json={
+        "title_en": "Self-Declared External Paper",
+        "asset_type": "JOURNAL_PAPER",
+        "lifecycle_status": "PUBLISHED",
+        "visibility": "PUBLIC",
+        "contributors": []
+    }, headers=headers_a)
+    assert self_declared.status_code == 200
+    assert self_declared.json()["publication_verification_status"] == "SELF_DECLARED"
+    self_declared_id = self_declared.json()["id"]
+
+    draft_for_pipeline = client.post("/api/academic-foundation/scholarly-assets", json={
+        "title_en": "Genuine Pipeline Manuscript",
+        "asset_type": "JOURNAL_PAPER",
+        "lifecycle_status": "UNDER_REVIEW",
+        "visibility": "PUBLIC",
+        "contributors": []
+    }, headers=headers_a)
+    assert draft_for_pipeline.status_code == 200
+    assert draft_for_pipeline.json()["publication_verification_status"] is None  # not PUBLISHED yet
+    pipeline_asset_id = draft_for_pipeline.json()["id"]
+
+    now = datetime.datetime.now(datetime.UTC).isoformat()
+    db = TestingSessionLocal()
+    journal = PublicationJournal(
+        id=str(uuid.uuid4()), canonical_key=f"jrnl-{uuid.uuid4()}", title="Provenance Test Journal",
+        provider_name="MANUAL", retrieved_at=now, stale_after=now
+    )
+    manuscript_version = PublicationManuscriptVersion(
+        id=str(uuid.uuid4()), organization_id=org_id, asset_id=pipeline_asset_id, version_number=1,
+        article_type="ORIGINAL_RESEARCH", fingerprint="fp-provenance", created_at=now
+    )
+    db.add(journal)
+    db.add(manuscript_version)
+    db.commit()
+    db.add(PublicationSubmission(
+        id=str(uuid.uuid4()), organization_id=org_id, asset_id=pipeline_asset_id,
+        journal_id=journal.id, manuscript_version_id=manuscript_version.id,
+        status="PUBLISHED", created_at=now, updated_at=now
+    ))
+    # Directly set lifecycle_status PUBLISHED as Publication Intelligence's
+    # own pipeline would (not via the Academic Identity self-service PUT,
+    # which is correctly locked out once a submission exists — see
+    # test_lifecycle_status_locked_once_real_submission_pipeline_exists).
+    asset_row = db.get(ScholarlyAsset, pipeline_asset_id)
+    asset_row.lifecycle_status = "PUBLISHED"
+    db.commit()
+    db.close()
+
+    get_res = client.get(f"/api/academic-foundation/scholarly-assets/{pipeline_asset_id}", headers=headers_a)
+    assert get_res.status_code == 200
+    assert get_res.json()["publication_verification_status"] == "BASEERAH_PIPELINE_VERIFIED"
+
+    list_res = client.get("/api/academic-foundation/scholarly-assets", headers=headers_a)
+    by_id = {a["id"]: a for a in list_res.json()}
+    assert by_id[self_declared_id]["publication_verification_status"] == "SELF_DECLARED"
+    assert by_id[pipeline_asset_id]["publication_verification_status"] == "BASEERAH_PIPELINE_VERIFIED"
+
+    public_res = client.get("/api/academic-foundation/public/provenance_prof")
+    public_by_title = {a["title_en"]: a for a in public_res.json()["scholarly_assets"]}
+    assert public_by_title["Self-Declared External Paper"]["publication_verification_status"] == "SELF_DECLARED"
+    assert public_by_title["Genuine Pipeline Manuscript"]["publication_verification_status"] == "BASEERAH_PIPELINE_VERIFIED"
+
+
+def test_publication_provenance_cannot_be_client_spoofed(client):
+    # The field does not exist on ScholarlyAssetCreate at all, so a client
+    # attempting to send it must have no effect whatsoever — the server's
+    # own computed value (SELF_DECLARED, since no submission exists) must
+    # win regardless of what the payload claims.
+    headers_a, _ = _register_and_login(client, "spoofprov_prof")
+    res = client.post("/api/academic-foundation/scholarly-assets", json={
+        "title_en": "Spoofed Provenance Attempt",
+        "asset_type": "JOURNAL_PAPER",
+        "lifecycle_status": "PUBLISHED",
+        "visibility": "PUBLIC",
+        "publication_verification_status": "BASEERAH_PIPELINE_VERIFIED",
+        "contributors": []
+    }, headers=headers_a)
+    assert res.status_code == 200
+    assert res.json()["publication_verification_status"] == "SELF_DECLARED"
 

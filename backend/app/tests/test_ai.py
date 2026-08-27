@@ -366,6 +366,26 @@ def test_peer_review_ai_wrong_user_denied(db_session: Session):
     assert resp.status_code in (400, 403)
 
 
+def test_peer_review_ai_org_admin_without_editor_role_denied(db_session: Session):
+    """organization.admin does not imply peer_review.review.view_confidential:
+    an org admin who is neither the case author nor its assigned editor
+    cannot summarize the review via AI, even within the same organization."""
+    _seed_plans(db_session)
+    t_a = create_test_tenant(db_session, "rvadmin", "pln-enterprise")
+    case = _seed_peer_review(db_session, t_a)
+    membership = db_session.query(models.OrganizationMembership).filter(
+        models.OrganizationMembership.organization_id == t_a["org"].id,
+        models.OrganizationMembership.user_id == t_a["colleague"].id,
+    ).first()
+    membership.role = "ORGANIZATION_ADMIN"
+    db_session.commit()
+    headers_admin = get_auth_headers(t_a["colleague"].username, t_a["org"].id)
+    resp = client.post("/api/ai/assist", json={
+        "use_case": "REVIEW_SUMMARY", "case_id": case.id,
+    }, headers=headers_admin)
+    assert resp.status_code in (400, 403)
+
+
 def test_promotion_ai_no_autonomous_decision(db_session: Session):
     """AI never issues a final promotion decision; returns decision-support framing."""
     _seed_plans(db_session)

@@ -294,6 +294,99 @@ export async function apiUpdateThesisDepositClearance(thesisId: string, payload:
   return res.json();
 }
 
+// ── Research Design Intelligence ─────────────────────────────────────────────
+
+export async function apiResearchDesignCommandCenter(projectId: string): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/research-design/projects/${encodeURIComponent(projectId)}/command-center`, { headers: getHeaders() });
+  if (!res.ok) throw new Error(`Research design command center failed (${res.status})`);
+  return res.json();
+}
+
+export async function apiResearchDesignCoherence(projectId: string): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/research-design/projects/${encodeURIComponent(projectId)}/coherence`, { headers: getHeaders() });
+  if (!res.ok) throw new Error(`Coherence failed (${res.status})`);
+  return res.json();
+}
+
+export async function apiResearchDesignReadiness(projectId: string): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/research-design/projects/${encodeURIComponent(projectId)}/readiness`, { headers: getHeaders() });
+  if (!res.ok) throw new Error(`Readiness failed (${res.status})`);
+  return res.json();
+}
+
+export async function apiResearchDesignNextAction(projectId: string): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/research-design/projects/${encodeURIComponent(projectId)}/next-action`, { headers: getHeaders() });
+  if (!res.ok) throw new Error(`Next action failed (${res.status})`);
+  return res.json();
+}
+
+export async function apiResearchDesignDesignMap(projectId: string): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/research-design/projects/${encodeURIComponent(projectId)}/design-map`, { headers: getHeaders() });
+  if (!res.ok) throw new Error(`Design map failed (${res.status})`);
+  return res.json();
+}
+
+export async function apiResearchDesignSection(projectId: string, section: string): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/research-design/projects/${encodeURIComponent(projectId)}/sections/${encodeURIComponent(section)}`, { headers: getHeaders() });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Section fetch failed (${res.status})`);
+  return res.json();
+}
+
+export async function apiResearchDesignSaveSection(projectId: string, section: string, data: Record<string, unknown>): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/research-design/projects/${encodeURIComponent(projectId)}/sections/${encodeURIComponent(section)}`, {
+    method: 'PUT', headers: getHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ data })
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function apiResearchDesignCreateProtocol(projectId: string): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/research-design/projects/${encodeURIComponent(projectId)}/protocols`, { method: 'POST', headers: getHeaders() });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function apiResearchDesignProtocols(projectId: string): Promise<any[]> {
+  const res = await fetch(`${API_BASE_URL}/research-design/projects/${encodeURIComponent(projectId)}/protocols`, { headers: getHeaders() });
+  if (!res.ok) throw new Error(`Protocols failed (${res.status})`);
+  return res.json();
+}
+
+export async function apiResearchDesignTeam(projectId: string): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/research-design/projects/${encodeURIComponent(projectId)}/team`, { headers: getHeaders() });
+  if (!res.ok) throw new Error(`Team failed (${res.status})`);
+  return res.json();
+}
+
+export async function apiResearchDesignAddMember(projectId: string, user_id: string, relationship: string, assigned_sections?: string[]): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/research-design/projects/${encodeURIComponent(projectId)}/team`, {
+    method: 'POST', headers: getHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ user_id, relationship, assigned_sections: assigned_sections ?? [] })
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function apiResearchDesignReviews(projectId: string): Promise<any[]> {
+  const res = await fetch(`${API_BASE_URL}/research-design/projects/${encodeURIComponent(projectId)}/reviews`, { headers: getHeaders() });
+  if (!res.ok) throw new Error(`Reviews failed (${res.status})`);
+  return res.json();
+}
+
+export async function apiResearchOfficeOperations(): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/research-design/organization/operations`, { headers: getHeaders() });
+  if (res.status === 403) return null;
+  if (!res.ok) throw new Error(`Research office operations failed (${res.status})`);
+  return res.json();
+}
+
+export async function apiResearchDesignMethodology(projectId: string): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/research-design/projects/${encodeURIComponent(projectId)}/methodology-recommendation`, { headers: getHeaders() });
+  if (!res.ok) throw new Error(`Methodology recommendation failed (${res.status})`);
+  return res.json();
+}
+
 export type LifecycleStage = {
   key: string;
   status: 'NOT_STARTED' | 'AVAILABLE' | 'IN_PROGRESS' | 'BLOCKED' | 'READY_FOR_HANDOFF' | 'HANDED_OFF' | 'COMPLETED' | 'STALE' | 'NOT_REQUIRED' | 'DEFERRED_CAPABILITY';
@@ -1452,8 +1545,16 @@ export interface PeerReviewCaseData {
   organization_id: string;
   owner_user_id?: string;
   author_name?: string;
+  editor_user_id?: string;
+  /** Server-computed: does the CURRENT caller hold editorial authority over
+   * this case? Always use this to gate editor-only controls — never infer
+   * it from organization role, which does not imply editorial authority. */
+  is_editor: boolean;
   project_id?: string;
   scholarly_asset_id?: string;
+  manuscript_version_id?: string;
+  manuscript_fingerprint?: string;
+  publication_submission_id?: string;
   title_ar: string;
   title_en: string;
   abstract_ar?: string;
@@ -1467,6 +1568,23 @@ export interface PeerReviewCaseData {
   updated_at: string;
   rounds: PeerReviewRoundData[];
   revisions: any[];
+}
+
+export interface PeerReviewCaseSummaryData {
+  id: string;
+  organization_id: string;
+  title_ar: string;
+  title_en: string;
+  case_type: string;
+  blind_type: 'SINGLE_BLIND' | 'DOUBLE_BLIND' | 'OPEN';
+  status: 'DRAFT' | 'IN_REVIEW' | 'REVISION_REQUESTED' | 'DECIDED' | 'WITHDRAWN';
+  current_round_number: number;
+  /** Server-computed — see PeerReviewCaseData.is_editor. */
+  is_editor: boolean;
+  active_assignments_count: number;
+  completed_reviews_count: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ExternalReviewerPortalData {
@@ -1489,7 +1607,7 @@ export interface ExternalReviewerPortalData {
 
 // ── Internal Peer Review API Calls ──────────────────────────────────────────
 
-export async function apiListPeerReviewCases(): Promise<any[] | null> {
+export async function apiListPeerReviewCases(): Promise<PeerReviewCaseSummaryData[] | null> {
   try {
     const res = await fetch(`${API_BASE_URL}/peer-reviews/cases`, { headers: getHeaders() });
     if (res.ok) return await res.json();

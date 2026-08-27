@@ -14,8 +14,8 @@ Each domain provider implements:
 import math
 from typing import Any, Dict, List, Optional
 from fastapi import HTTPException, status
-from sqlalchemy import case, func, or_, select
-from sqlalchemy.orm import Session
+from sqlalchemy import and_, case, func, or_, select
+from sqlalchemy.orm import Session, joinedload
 
 from ... import models, schemas
 from ...services.tenant_context import TenantContext
@@ -228,10 +228,26 @@ class AssetProvider(BaseProvider):
     domain = "ASSET"
 
     def build_base(self, db, ctx):
+        # General Unified Search is not the internal workflow resource
+        # discovery used by Publication Intelligence or Promotion's evidence
+        # picker (neither references this provider at all — both query
+        # ScholarlyAsset directly through their own dedicated endpoints).
+        # For that reason this filter is intentionally narrower than
+        # list_scholarly_assets in academic_foundation.py: a searcher may
+        # always find their OWN assets regardless of status, but another
+        # same-org member's asset is only discoverable once it is genuinely
+        # PUBLISHED and PUBLIC — the same PUBLISHED-only rule already
+        # enforced on the public profile projection. Cross-tenant assets
+        # remain excluded entirely (organization_id gate on the "other
+        # user" branch), consistent with every other Search provider.
         return db.query(models.ScholarlyAsset).filter(
             or_(
-                models.ScholarlyAsset.organization_id == ctx.organization.id,
                 models.ScholarlyAsset.owner_user_id == ctx.user.id,
+                and_(
+                    models.ScholarlyAsset.organization_id == ctx.organization.id,
+                    models.ScholarlyAsset.lifecycle_status == "PUBLISHED",
+                    models.ScholarlyAsset.visibility == "PUBLIC",
+                ),
             ),
             models.ScholarlyAsset.deleted_at.is_(None),
         )
@@ -305,7 +321,11 @@ class ProfileProvider(BaseProvider):
     domain = "PROFILE"
 
     def build_base(self, db, ctx):
-        return db.query(models.UnifiedAcademicProfile).filter(
+        # joinedload avoids an N+1 lazy-load of .user in project() (needed
+        # there to build the public-profile navigation target — see below).
+        return db.query(models.UnifiedAcademicProfile).options(
+            joinedload(models.UnifiedAcademicProfile.user)
+        ).filter(
             models.UnifiedAcademicProfile.organization_id == ctx.organization.id,
             or_(
                 models.UnifiedAcademicProfile.user_id == ctx.user.id,
@@ -358,11 +378,21 @@ class ProfileProvider(BaseProvider):
         title = row.preferred_name_ar or row.preferred_name_en or ""
         subtitle = row.academic_title or row.current_rank or ""
         snippet = (row.general_specialization or "")[:160]
+        # A row here for a DIFFERENT user only ever reaches project() when
+        # build_base()'s own filter already proved visibility_status ==
+        # "PUBLIC" — so linking to their public profile route cannot leak
+        # anything the public endpoint itself wouldn't already serve. Only
+        # the caller's own row (any visibility) targets the private editor.
+        if row.user_id == ctx.user.id:
+            target = "/app/profile"
+        else:
+            username = row.user.username if row.user else None
+            target = f"/researcher/{username}" if username else "/app/profile"
         return schemas.SearchResultItem(
             domain=self.domain, entity_id=row.id, title=title,
             subtitle=subtitle, snippet=snippet, status=row.visibility_status,
             updated_at=row.updated_at or row.created_at,
-            target="/app/profile",
+            target=target,
             metadata={"rank": row.current_rank, "department": row.department, "university": row.university}
         )
 
@@ -378,14 +408,26 @@ class PromotionProvider(BaseProvider):
     required_feature_key = FeatureKey.PROMOTION_ENGINE.value
 
     def build_base(self, db, ctx):
+        # Matches promotions.py's has_org_oversight_access exactly: only a
+        # real org-level OWNER/ORGANIZATION_ADMIN retains read-only
+        # institutional visibility. SUPERVISOR and platform-wide admin status
+        # grant nothing here — academic committee authority (and the search
+        # visibility that mirrors it) is resource-scoped to an explicit
+        # PromotionCommitteeAssignment, not a generic role.
         role = (ctx.membership.role or "").upper()
-        if role in ["OWNER", "ORGANIZATION_ADMIN", "SUPERVISOR"]:
+        if role in ["OWNER", "ORGANIZATION_ADMIN"]:
             return db.query(models.PromotionApplication).filter(
                 models.PromotionApplication.organization_id == ctx.organization.id
             )
+        committee_application_ids = db.query(models.PromotionCommitteeAssignment.application_id).filter(
+            models.PromotionCommitteeAssignment.organization_id == ctx.organization.id,
+            models.PromotionCommitteeAssignment.user_id == ctx.user.id,
+            models.PromotionCommitteeAssignment.status == "ACTIVE",
+        )
         return db.query(models.PromotionApplication).filter(
             models.PromotionApplication.organization_id == ctx.organization.id,
-            models.PromotionApplication.user_id == ctx.user.id,
+            (models.PromotionApplication.user_id == ctx.user.id) |
+            (models.PromotionApplication.id.in_(committee_application_ids)),
         )
 
     def apply_q(self, query, ctx, q, q_norm, filters):
@@ -425,14 +467,33 @@ class PromotionProvider(BaseProvider):
         return query.order_by(models.PromotionApplication.id.asc())
 
     def project(self, row, ctx):
+        # Readiness/points are private academic-dossier content, not
+        # administrative metadata. For non-oversight roles, build_base()
+        # already only returns rows the searcher owns or is committee-assigned
+        # to, so every row reaching here is one they have full legitimate
+        # access to. Oversight-role searchers (OWNER/ORGANIZATION_ADMIN) see
+        # ALL org rows in build_base(), so only their own application gets
+        # full detail in the search listing here — a row they are personally
+        # committee-assigned to (but don't own) still gets the administrative
+        # projection for simplicity; full detail remains available via the
+        # dedicated GET /applications/{id} endpoint, which checks committee
+        # membership directly.
+        role = (ctx.membership.role or "").upper()
+        is_oversight_role = role in ["OWNER", "ORGANIZATION_ADMIN"]
+        has_full_access = (not is_oversight_role) or (row.user_id == ctx.user.id)
         title = f"{row.target_rank} ({row.status})"
-        subtitle = f"Current: {row.current_rank} | Readiness: {row.readiness_percentage}%"
+        metadata = {"targetRank": row.target_rank, "currentRank": row.current_rank}
+        if has_full_access:
+            subtitle = f"Current: {row.current_rank} | Readiness: {row.readiness_percentage}%"
+            metadata["readiness"] = row.readiness_percentage
+        else:
+            subtitle = f"Current: {row.current_rank} | Status: {row.status}"
         return schemas.SearchResultItem(
             domain=self.domain, entity_id=row.id, title=title,
             subtitle=subtitle, snippet=None, status=row.status,
             updated_at=row.updated_at or row.created_at,
             target="/app/promotion",
-            metadata={"targetRank": row.target_rank, "currentRank": row.current_rank, "readiness": row.readiness_percentage}
+            metadata=metadata
         )
 
     def filters_whitelist(self):

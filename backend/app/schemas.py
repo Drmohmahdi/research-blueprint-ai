@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator, field_validator
 from typing import List, Optional, Dict, Any
 
 class SampleSettingsSchema(BaseModel):
@@ -376,6 +376,13 @@ class IdentifierSchema(BaseModel):
     metadata_json: Optional[Dict[str, Any]] = None
     model_config = ConfigDict(from_attributes=True)
 
+    @field_validator("profile_url")
+    @classmethod
+    def reject_unsafe_url_scheme(cls, v: Optional[str]) -> Optional[str]:
+        if v and not v.strip().lower().startswith(("http://", "https://")):
+            raise ValueError("profile_url must be an http(s) URL")
+        return v
+
 
 class AffiliationSchema(BaseModel):
     id: Optional[str] = None
@@ -520,6 +527,13 @@ class ScholarlyAssetResponse(BaseModel):
     updated_at: Optional[str] = None
     contributors: List[ScholarlyAssetContributorSchema] = []
     files: List[ScholarlyAssetFileSchema] = []
+    # Output-only: never accepted on ScholarlyAssetCreate, so a client
+    # cannot set or spoof it — always computed server-side from whether a
+    # real PublicationSubmission exists for this asset (see
+    # compute_publication_provenance in routers/academic_foundation.py).
+    # None until lifecycle_status == PUBLISHED (no publication claim to
+    # attribute provenance to before then).
+    publication_verification_status: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -536,6 +550,11 @@ class PublicScholarlyAssetResponse(BaseModel):
     conference_name: Optional[str] = None
     doi: Optional[str] = None
     language: str
+    # Same output-only, server-computed provenance as ScholarlyAssetResponse
+    # — never internal verification machinery (no submission IDs, reviewer
+    # data, etc.), just the truthful BASEERAH_PIPELINE_VERIFIED /
+    # SELF_DECLARED label itself.
+    publication_verification_status: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -831,6 +850,18 @@ class PromotionEvaluationResult(BaseModel):
     disclaimer_en: str = "This readiness evaluation is a decision-support advisory tool and does not constitute a final promotion decision. Final determination is strictly reserved for the institutional academic committee."
 
 
+class PromotionCommitteeAssignmentResponse(BaseModel):
+    id: str
+    application_id: str
+    user_id: str
+    assigned_by: Optional[str] = None
+    status: str
+    assigned_at: str
+    revoked_at: Optional[str] = None
+    revoked_by: Optional[str] = None
+    model_config = ConfigDict(from_attributes=True)
+
+
 class PromotionApplicationCreate(BaseModel):
     policy_id: Optional[str] = None
     target_rank: str
@@ -858,13 +889,44 @@ class PromotionApplicationResponse(BaseModel):
     created_at: str
     updated_at: str
     evidence_selections: List[PromotionEvidenceItemResponse] = []
+    committee_assignments: List[PromotionCommitteeAssignmentResponse] = []
+    is_committee_member: bool = False
     policy: Optional[PromotionPolicyResponse] = None
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PromotionApplicationAdminMetadataResponse(BaseModel):
+    """Administrative workflow-oversight view for an org OWNER/ORGANIZATION_ADMIN
+    who is NOT an assigned committee member — deliberately excludes every field
+    classified as private academic-dossier content (evidence, evaluation detail,
+    readiness/points, committee notes, decision rationale). Distinguishable from
+    PromotionApplicationResponse by callers via the is_admin_metadata_only flag."""
+    id: str
+    organization_id: str
+    user_id: str
+    policy_id: str
+    policy_version: int
+    current_rank: Optional[str] = None
+    target_rank: str
+    status: str
+    committee_assignment_count: int
+    has_committee_assigned: bool
+    decision_status: Optional[str] = None
+    decision_recorded_at: Optional[str] = None
+    submitted_at: Optional[str] = None
+    created_at: str
+    updated_at: str
+    is_admin_metadata_only: bool = True
     model_config = ConfigDict(from_attributes=True)
 
 
 class HumanReviewDecisionRequest(BaseModel):
     decision: str # ELIGIBLE_RECOMMENDED, INELIGIBLE_DEFICIENT, REQUIRES_FURTHER_DOCS
     notes: str
+
+
+class PromotionCommitteeAssignRequest(BaseModel):
+    user_id: str
 
 
 # ── Peer Review Workflow Schemas ───────────────────────────────────────────────
@@ -926,6 +988,12 @@ class PeerReviewCaseCreate(BaseModel):
     project_id: Optional[str] = None
     scholarly_asset_id: Optional[str] = None
     rubric_id: Optional[str] = None
+    # Optional exact-version binding to Publication Intelligence. Only the ID
+    # is client-supplied; the fingerprint is always re-derived server-side
+    # from the referenced PublicationManuscriptVersion, never trusted from
+    # the client, to prevent a caller from asserting a fingerprint that does
+    # not match the actual manuscript content.
+    manuscript_version_id: Optional[str] = None
 
 
 class ReviewCommentResponse(BaseModel):
@@ -1092,8 +1160,13 @@ class PeerReviewCaseResponse(BaseModel):
     organization_id: str
     owner_user_id: Optional[str] = None # Masked in double-blind for reviewers
     author_name: Optional[str] = None # Masked in double-blind for reviewers
+    editor_user_id: Optional[str] = None
+    is_editor: bool = False  # server-computed: does the CALLER hold editorial authority over this case
     project_id: Optional[str] = None
     scholarly_asset_id: Optional[str] = None
+    manuscript_version_id: Optional[str] = None
+    manuscript_fingerprint: Optional[str] = None
+    publication_submission_id: Optional[str] = None
     title_ar: str
     title_en: str
     abstract_ar: Optional[str] = None
@@ -1119,6 +1192,7 @@ class PeerReviewCaseSummaryResponse(BaseModel):
     blind_type: str
     status: str
     current_round_number: int
+    is_editor: bool = False  # server-computed: does the CALLER hold editorial authority over this case
     active_assignments_count: int = 0
     completed_reviews_count: int = 0
     created_at: str
@@ -1129,6 +1203,10 @@ class PeerReviewCaseSummaryResponse(BaseModel):
 class EditorialDecisionRequest(BaseModel):
     decision: str # ACCEPTED, REVISION_REQUIRED, REJECTED
     decision_notes: str
+
+
+class EditorAssignmentRequest(BaseModel):
+    editor_user_id: str
 
 
 class ExternalReviewerPortalResponse(BaseModel):

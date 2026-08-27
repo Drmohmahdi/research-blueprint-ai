@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card } from '../../design-system/components/Card';
 import { Button } from '../../design-system/components/Button';
@@ -46,6 +46,11 @@ export const ExternalReviewerPortal: React.FC = () => {
   const [savingDraft, setSavingDraft] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  // Disabling the just-clicked button mid-request blurs focus to <body> in
+  // Chromium (a UA-level behavior, not a React bug) — ids let us restore
+  // focus once the button re-enables so keyboard users aren't dropped. (The
+  // shared Button component isn't ref-forwarding, so ids are used instead.)
+  const statusRegionRef = useRef<HTMLDivElement>(null);
 
   const loadPortal = useCallback(async () => {
     if (!token) {
@@ -153,6 +158,7 @@ export const ExternalReviewerPortal: React.FC = () => {
       setError('فشل حفظ المسودة.');
     } finally {
       setSavingDraft(false);
+      requestAnimationFrame(() => document.getElementById('save-draft-button')?.focus());
     }
   };
 
@@ -191,6 +197,13 @@ export const ExternalReviewerPortal: React.FC = () => {
       setError('تعذر تسليم التقرير. يرجى التأكد من استكمال كافة المعايير الإلزامية.');
     } finally {
       setSubmitting(false);
+      // On success the submit button unmounts (isSubmitted becomes true), so
+      // fall back to the status region rather than dropping focus to <body>.
+      requestAnimationFrame(() => {
+        const submitButton = document.getElementById('submit-review-button');
+        if (submitButton) submitButton.focus();
+        else statusRegionRef.current?.focus();
+      });
     }
   };
 
@@ -249,7 +262,7 @@ export const ExternalReviewerPortal: React.FC = () => {
         </PathPanel>
 
         {actionSuccess && (
-          <div className="p-4 rounded-xl bg-success/10 border border-success text-success text-sm flex items-center gap-3">
+          <div ref={statusRegionRef} tabIndex={-1} role="status" aria-live="polite" className="p-4 rounded-xl bg-success/10 border border-success text-success text-sm flex items-center gap-3 focus:outline-none">
             <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
             <span>{actionSuccess}</span>
           </div>
@@ -483,6 +496,7 @@ export const ExternalReviewerPortal: React.FC = () => {
               {!isSubmitted && (
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-subtle">
                   <Button
+                    id="save-draft-button"
                     onClick={handleSaveDraft}
                     disabled={savingDraft || submitting}
                     variant="secondary"
@@ -493,6 +507,7 @@ export const ExternalReviewerPortal: React.FC = () => {
                   </Button>
 
                   <Button
+                    id="submit-review-button"
                     onClick={handleSubmitReview}
                     disabled={submitting || savingDraft}
                     className="w-full sm:w-auto font-bold px-8 flex items-center justify-center gap-2"

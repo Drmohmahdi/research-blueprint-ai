@@ -663,6 +663,7 @@ def test_promotion_application_submit_and_review_events_integration():
     admin = add_tenant_member(db, org.id, "usr_pevt_adm", "ORGANIZATION_ADMIN")
     username_user = user.username
     username_admin = admin.username
+    admin_id = admin.id
     org_id = org.id
 
     pol_id = f"pol-prom-{secrets.token_hex(4)}"
@@ -712,6 +713,13 @@ def test_promotion_application_submit_and_review_events_integration():
     res_admin_notifs = client.get("/api/notifications", headers=headers_admin)
     assert res_admin_notifs.status_code == 200
     assert any(n["category"] == "PROMOTION" for n in res_admin_notifs.json()["items"])
+
+    # Committee decision authority is resource-scoped: the org admin must be
+    # explicitly assigned to this application's committee before reviewing it.
+    res_assign = client.post(f"/api/promotions/applications/{app_id}/committee", json={
+        "user_id": admin_id
+    }, headers=headers_admin)
+    assert res_assign.status_code == 201
 
     # 2. Record committee review
     res_rev = client.post(f"/api/promotions/applications/{app_id}/review", json={

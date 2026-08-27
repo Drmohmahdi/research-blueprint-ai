@@ -1013,6 +1013,103 @@ def test_runtime_scenario_xss_rendered_safely(db_session: Session):
         blob = json.dumps(item).lower()
         assert "<script" not in blob
     assert data["total"] == 0
+def _make_asset(t, asset_id, title, lifecycle_status, visibility="PUBLIC", owner=None):
+    now = datetime.datetime.now(datetime.UTC).isoformat()
+    return models.ScholarlyAsset(
+        id=asset_id,
+        organization_id=t["org"].id,
+        owner_user_id=(owner or t["researcher"]).id,
+        created_by=(owner or t["researcher"]).id,
+        title_ar=title,
+        title_en=title,
+        asset_type="JOURNAL_ARTICLE",
+        lifecycle_status=lifecycle_status,
+        visibility=visibility,
+        language="ar",
+        created_at=now,
+        updated_at=now,
+    )
+
+
+def test_search_asset_hides_other_users_unpublished_work_same_tenant(db_session: Session):
+    """General Unified Search must not let a same-org colleague discover
+    another researcher's DRAFT/UNDER_REVIEW/ACCEPTED work — only genuinely
+    PUBLISHED+PUBLIC assets are discoverable across users within an org."""
+    _seed_plans(db_session)
+    t = create_test_tenant(db_session, "assetpriv", "pln-enterprise")
+    db_session.add_all([
+        _make_asset(t, "asset-priv-draft", "AssetPrivacyDraftTitle", "DRAFT"),
+        _make_asset(t, "asset-priv-review", "AssetPrivacyReviewTitle", "UNDER_REVIEW"),
+        _make_asset(t, "asset-priv-accepted", "AssetPrivacyAcceptedTitle", "ACCEPTED"),
+        _make_asset(t, "asset-priv-published", "AssetPrivacyPublishedTitle", "PUBLISHED"),
+    ])
+    db_session.commit()
+
+    colleague_headers = get_auth_headers(t["colleague"].username, t["org"].id)
+    for title in ["AssetPrivacyDraftTitle", "AssetPrivacyReviewTitle", "AssetPrivacyAcceptedTitle"]:
+        resp = client.get("/api/search", params={"q": title, "domains": "ASSET"}, headers=colleague_headers)
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["total"] == 0, f"{title} leaked to a same-tenant colleague via Search"
+        assert data["domain_counts"].get("ASSET", 0) == 0, f"{title} leaked via Search domain_counts"
+        assert data["results"] == [], f"{title} leaked into search results"
+
+    published_resp = client.get(
+        "/api/search", params={"q": "AssetPrivacyPublishedTitle", "domains": "ASSET"}, headers=colleague_headers
+    )
+    assert published_resp.status_code == 200
+    assert published_resp.json()["total"] == 1
+    assert published_resp.json()["results"][0]["entity_id"] == "asset-priv-published"
+
+
+def test_search_asset_owner_can_still_find_own_unpublished_work(db_session: Session):
+    """The privacy fix must not regress the owner's own ability to find their
+    own DRAFT work via Search."""
+    _seed_plans(db_session)
+    t = create_test_tenant(db_session, "assetself", "pln-enterprise")
+    db_session.add(_make_asset(t, "asset-self-draft", "AssetSelfDraftTitle", "DRAFT"))
+    db_session.commit()
+
+    owner_headers = get_auth_headers(t["researcher"].username, t["org"].id)
+    resp = client.get("/api/search", params={"q": "AssetSelfDraftTitle", "domains": "ASSET"}, headers=owner_headers)
+    assert resp.status_code == 200
+    assert resp.json()["total"] == 1
+    assert resp.json()["results"][0]["entity_id"] == "asset-self-draft"
+
+
+def test_search_profile_navigation_targets_public_profile_for_other_user(db_session: Session):
+    """A search result for ANOTHER user's public profile must navigate to
+    that user's public profile route, not the current user's own private
+    editor. A result for the caller's OWN profile still targets the editor."""
+    _seed_plans(db_session)
+    t = create_test_tenant(db_session, "navtarget", "pln-enterprise")
+    now = datetime.datetime.now(datetime.UTC).isoformat()
+    db_session.add(models.UnifiedAcademicProfile(
+        id="profile-nav-owner", user_id=t["researcher"].id, organization_id=t["org"].id,
+        preferred_name_en="NavTargetOwnerProfile", visibility_status="PUBLIC",
+        completeness_score=50, search_text="navtargetownerprofile",
+        created_at=now, updated_at=now,
+    ))
+    db_session.commit()
+
+    colleague_headers = get_auth_headers(t["colleague"].username, t["org"].id)
+    resp = client.get(
+        "/api/search", params={"q": "NavTargetOwnerProfile", "domains": "PROFILE"}, headers=colleague_headers
+    )
+    assert resp.status_code == 200
+    assert resp.json()["total"] == 1
+    result = resp.json()["results"][0]
+    assert result["target"] == f"/researcher/{t['researcher'].username}"
+    assert result["target"] != "/app/profile"
+
+    owner_headers = get_auth_headers(t["researcher"].username, t["org"].id)
+    own_resp = client.get(
+        "/api/search", params={"q": "NavTargetOwnerProfile", "domains": "PROFILE"}, headers=owner_headers
+    )
+    assert own_resp.status_code == 200
+    assert own_resp.json()["results"][0]["target"] == "/app/profile"
+
+
 def test_search_backfill_quotes_postgresql_mixed_case_identifiers():
     from app.services.search.backfill import backfill_all_search_text
 

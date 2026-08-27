@@ -20,6 +20,21 @@ class AIUseCase(str, Enum):
     REVISION_CHECKLIST = "REVISION_CHECKLIST"
     PROMOTION_EVIDENCE_SUMMARY = "PROMOTION_EVIDENCE_SUMMARY"
     ACADEMIC_WRITING_ASSIST = "ACADEMIC_WRITING_ASSIST"
+    # Research Design Intelligence use cases (advisory only; never authority)
+    PROBLEM_REFINEMENT = "PROBLEM_REFINEMENT"
+    GAP_EXPLANATION = "GAP_EXPLANATION"
+    QUESTION_REFINEMENT = "QUESTION_REFINEMENT"
+    HYPOTHESIS_REFINEMENT = "HYPOTHESIS_REFINEMENT"
+    COHERENCE_FINDING_EXPLANATION = "COHERENCE_FINDING_EXPLANATION"
+    NEXT_RESEARCH_ACTION_EXPLANATION = "NEXT_RESEARCH_ACTION_EXPLANATION"
+    PROTOCOL_DRAFT_ASSISTANCE = "PROTOCOL_DRAFT_ASSISTANCE"
+    # Research Data & Analysis use cases (advisory; never numeric authority)
+    DATA_QUALITY_EXPLANATION = "DATA_QUALITY_EXPLANATION"
+    ANALYSIS_PLAN_EXPLANATION = "ANALYSIS_PLAN_EXPLANATION"
+    STATISTICAL_RESULT_EXPLANATION = "STATISTICAL_RESULT_EXPLANATION"
+    ASSUMPTION_EXPLANATION = "ASSUMPTION_EXPLANATION"
+    DATA_CLEANING_SUGGESTION = "DATA_CLEANING_SUGGESTION"
+    RESULT_INTERPRETATION_ASSISTANCE = "RESULT_INTERPRETATION_ASSISTANCE"
 
 
 @dataclass(frozen=True)
@@ -233,6 +248,274 @@ _SYSTEM_PROMPTS: Dict[str, PromptTemplate] = {
         max_output_tokens=3072,
         temperature=0.4,
         ground_on_sources=False,
+    ),
+    # ── Research Design Intelligence advisory use cases ───────────────────────
+    AIUseCase.PROBLEM_REFINEMENT.value: PromptTemplate(
+        key=AIUseCase.PROBLEM_REFINEMENT.value,
+        version=1,
+        system_prompt=(
+            _SAFETY_PREAMBLE + "\n\n"
+            "You help researchers refine a research problem statement for "
+            "clarity, scope, specificity and researchability, based only on the "
+            "authorized project context. You propose improved wording; you never "
+            "approve a final problem statement. Mark invented claims as needing "
+            "verification."
+        ),
+        allowed_context_types=["project", "design_intelligence"],
+        output_schema={
+            "suggested_problem": {"type": "string"},
+            "notes": {"type": "array", "items": {"type": "string"}},
+            "requires_verification": {"type": "boolean"},
+        },
+        max_input_chars=20000,
+        max_output_tokens=2048,
+        temperature=0.4,
+        ground_on_sources=True,
+    ),
+    AIUseCase.GAP_EXPLANATION.value: PromptTemplate(
+        key=AIUseCase.GAP_EXPLANATION.value,
+        version=1,
+        system_prompt=(
+            _SAFETY_PREAMBLE + "\n\n"
+            "You explain and help structure a research gap using ONLY the "
+            "authorized gap evidence map and literature studies in context. "
+            "Never claim a gap exists without its recorded evidence strength. "
+            "You never certify a gap as proven."
+        ),
+        allowed_context_types=["project", "design_intelligence"],
+        output_schema={
+            "explanation": {"type": "string"},
+            "suggested_gap_elements": {"type": "array", "items": {"type": "string"}},
+            "uncertain": {"type": "array", "items": {"type": "string"}},
+        },
+        max_input_chars=20000,
+        max_output_tokens=2048,
+        temperature=0.3,
+        ground_on_sources=True,
+    ),
+    AIUseCase.QUESTION_REFINEMENT.value: PromptTemplate(
+        key=AIUseCase.QUESTION_REFINEMENT.value,
+        version=1,
+        system_prompt=(
+            _SAFETY_PREAMBLE + "\n\n"
+            "You help refine research questions for answerability and "
+            "specificity based on the authorized project context and variables. "
+            "You propose question drafts; you never approve questions or "
+            "classify them as definitive."
+        ),
+        allowed_context_types=["project", "design_intelligence"],
+        output_schema={
+            "suggestions": {"type": "array", "items": {"type": "string"}},
+            "rationale": {"type": "string"},
+            "requires_verification": {"type": "boolean"},
+        },
+        max_input_chars=20000,
+        max_output_tokens=2048,
+        temperature=0.4,
+        ground_on_sources=True,
+    ),
+    AIUseCase.HYPOTHESIS_REFINEMENT.value: PromptTemplate(
+        key=AIUseCase.HYPOTHESIS_REFINEMENT.value,
+        version=1,
+        system_prompt=(
+            _SAFETY_PREAMBLE + "\n\n"
+            "You help refine testable hypotheses from the authorized question "
+            "and variables. You draft null and alternative wording; you never "
+            "decide the direction or accept/reject a hypothesis. Qualitative "
+            "studies are never forced to add hypotheses."
+        ),
+        allowed_context_types=["project", "design_intelligence"],
+        output_schema={
+            "suggested_null": {"type": "string"},
+            "suggested_alternative": {"type": "string"},
+            "notes": {"type": "array", "items": {"type": "string"}},
+        },
+        max_input_chars=20000,
+        max_output_tokens=2048,
+        temperature=0.3,
+        ground_on_sources=True,
+    ),
+    AIUseCase.COHERENCE_FINDING_EXPLANATION.value: PromptTemplate(
+        key=AIUseCase.COHERENCE_FINDING_EXPLANATION.value,
+        version=1,
+        system_prompt=(
+            _SAFETY_PREAMBLE + "\n\n"
+            "You explain deterministic coherence findings supplied by the "
+            "backend. You never change the finding, its severity, or its "
+            "deterministic status. You help the researcher understand the "
+            "rationale and possible fixes."
+        ),
+        allowed_context_types=["project", "design_intelligence"],
+        output_schema={
+            "explanation": {"type": "string"},
+            "suggestions": {"type": "array", "items": {"type": "string"}},
+        },
+        max_input_chars=20000,
+        max_output_tokens=2048,
+        temperature=0.3,
+        ground_on_sources=True,
+    ),
+    AIUseCase.NEXT_RESEARCH_ACTION_EXPLANATION.value: PromptTemplate(
+        key=AIUseCase.NEXT_RESEARCH_ACTION_EXPLANATION.value,
+        version=1,
+        system_prompt=(
+            _SAFETY_PREAMBLE + "\n\n"
+            "You explain the deterministic next-best research action computed "
+            "by the backend, never reordering its priority. You help the "
+            "researcher understand why this action was selected."
+        ),
+        allowed_context_types=["project", "design_intelligence"],
+        output_schema={
+            "explanation": {"type": "string"},
+            "steps": {"type": "array", "items": {"type": "string"}},
+        },
+        max_input_chars=20000,
+        max_output_tokens=2048,
+        temperature=0.3,
+        ground_on_sources=True,
+    ),
+    AIUseCase.PROTOCOL_DRAFT_ASSISTANCE.value: PromptTemplate(
+        key=AIUseCase.PROTOCOL_DRAFT_ASSISTANCE.value,
+        version=1,
+        system_prompt=(
+            _SAFETY_PREAMBLE + "\n\n"
+            "You assist drafting research protocol narrative sections from the "
+            "authorized design intelligence context. Drafts are advisory; you "
+            "never approve or submit a protocol, and you never fabricate "
+            "citations, statistics, or ethical approvals."
+        ),
+        allowed_context_types=["project", "design_intelligence"],
+        output_schema={
+            "draft": {"type": "string"},
+            "sections": {"type": "array", "items": {"type": "string"}},
+            "requires_verification": {"type": "boolean"},
+        },
+        max_input_chars=30000,
+        max_output_tokens=4096,
+        temperature=0.4,
+        ground_on_sources=True,
+    ),
+    # ── Research Data & Analysis advisory use cases ───────────────────────────
+    AIUseCase.DATA_QUALITY_EXPLANATION.value: PromptTemplate(
+        key=AIUseCase.DATA_QUALITY_EXPLANATION.value,
+        version=1,
+        system_prompt=(
+            _SAFETY_PREAMBLE + "\n\n"
+            "You explain structured data-quality findings supplied by the "
+            "backend. You never compute statistics yourself and you never "
+            "claim a dataset is scientifically valid based on quality checks. "
+            "Only the provided deterministic quality summary may be referenced."
+        ),
+        allowed_context_types=["data_intelligence"],
+        output_schema={
+            "explanation": {"type": "string"},
+            "suggestions": {"type": "array", "items": {"type": "string"}},
+        },
+        max_input_chars=15000,
+        max_output_tokens=2048,
+        temperature=0.3,
+        ground_on_sources=True,
+    ),
+    AIUseCase.ANALYSIS_PLAN_EXPLANATION.value: PromptTemplate(
+        key=AIUseCase.ANALYSIS_PLAN_EXPLANATION.value,
+        version=1,
+        system_prompt=(
+            _SAFETY_PREAMBLE + "\n\n"
+            "You explain deterministic analysis-plan recommendations from the "
+            "backend decision engine. You never choose the final test yourself "
+            "and never claim a method is executable in Baseerah unless the "
+            "provided context marks it supported."
+        ),
+        allowed_context_types=["data_intelligence"],
+        output_schema={
+            "explanation": {"type": "string"},
+            "suggestions": {"type": "array", "items": {"type": "string"}},
+        },
+        max_input_chars=15000,
+        max_output_tokens=2048,
+        temperature=0.3,
+        ground_on_sources=True,
+    ),
+    AIUseCase.STATISTICAL_RESULT_EXPLANATION.value: PromptTemplate(
+        key=AIUseCase.STATISTICAL_RESULT_EXPLANATION.value,
+        version=1,
+        system_prompt=(
+            _SAFETY_PREAMBLE + "\n\n"
+            "You explain a structured statistical result object supplied by "
+            "the backend. You must not recompute, round, or alter any number. "
+            "Interpretations must match the numbers exactly: for example a "
+            "p-value of 0.08 must never be described as statistically "
+            "significant. You never approve analyses."
+        ),
+        allowed_context_types=["data_intelligence"],
+        output_schema={
+            "explanation": {"type": "string"},
+            "caveats": {"type": "array", "items": {"type": "string"}},
+        },
+        max_input_chars=15000,
+        max_output_tokens=2048,
+        temperature=0.2,
+        ground_on_sources=True,
+    ),
+    AIUseCase.ASSUMPTION_EXPLANATION.value: PromptTemplate(
+        key=AIUseCase.ASSUMPTION_EXPLANATION.value,
+        version=1,
+        system_prompt=(
+            _SAFETY_PREAMBLE + "\n\n"
+            "You explain statistical assumptions for the deterministic method "
+            "chosen by the backend. You only report assumption checks that the "
+            "provided data marks as CHECKED, WARNING, NOT_CHECKED, or "
+            "NOT_APPLICABLE. You never invent assumption results."
+        ),
+        allowed_context_types=["data_intelligence"],
+        output_schema={
+            "explanation": {"type": "string"},
+            "assumptions": {"type": "array", "items": {"type": "string"}},
+        },
+        max_input_chars=15000,
+        max_output_tokens=2048,
+        temperature=0.3,
+        ground_on_sources=True,
+    ),
+    AIUseCase.DATA_CLEANING_SUGGESTION.value: PromptTemplate(
+        key=AIUseCase.DATA_CLEANING_SUGGESTION.value,
+        version=1,
+        system_prompt=(
+            _SAFETY_PREAMBLE + "\n\n"
+            "You suggest non-destructive cleaning operations based on the "
+            "provided quality findings and schema. Suggestions are advisory; "
+            "you never execute cleaning and never claim a transformation has "
+            "been applied."
+        ),
+        allowed_context_types=["data_intelligence"],
+        output_schema={
+            "suggestions": {"type": "array", "items": {"type": "string"}},
+            "requires_verification": {"type": "boolean"},
+        },
+        max_input_chars=15000,
+        max_output_tokens=2048,
+        temperature=0.3,
+        ground_on_sources=True,
+    ),
+    AIUseCase.RESULT_INTERPRETATION_ASSISTANCE.value: PromptTemplate(
+        key=AIUseCase.RESULT_INTERPRETATION_ASSISTANCE.value,
+        version=1,
+        system_prompt=(
+            _SAFETY_PREAMBLE + "\n\n"
+            "You help interpret a structured, approved statistical result "
+            "within the researcher's design context. You must not invent "
+            "effect claims beyond the provided numbers, and you never present "
+            "interpretation as institutional approval."
+        ),
+        allowed_context_types=["data_intelligence"],
+        output_schema={
+            "interpretation": {"type": "string"},
+            "limits": {"type": "array", "items": {"type": "string"}},
+        },
+        max_input_chars=15000,
+        max_output_tokens=2048,
+        temperature=0.3,
+        ground_on_sources=True,
     ),
 }
 

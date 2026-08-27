@@ -13,8 +13,8 @@ from app import models  # noqa: F401
 from app.tests.test_thesis_postgres import _resolve_url
 
 
-PREVIOUS_HEAD = "3c4d5e6f7a8b"
-CURRENT_HEAD = "4d5e6f7a8b9c"
+PREVIOUS_HEAD = "b2c3d4e5f607"
+CURRENT_HEAD = "208eef3f1888"
 BACKEND_DIR = Path(__file__).resolve().parents[2]
 
 

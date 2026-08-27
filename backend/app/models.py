@@ -1,5 +1,6 @@
 from sqlalchemy import Column, String, Integer, Float, ForeignKey, JSON, Boolean, UniqueConstraint, Index, text
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship as orm_relationship
 from .db import Base
 
 class User(Base):
@@ -86,6 +87,9 @@ class ResearchProject(Base):
     hypotheses = relationship("Hypothesis", back_populates="project", cascade="all, delete-orphan")
     literature_studies = relationship("LiteratureStudy", back_populates="project", cascade="all, delete-orphan")
     prisma_flow = relationship("PrismaFlow", back_populates="project", uselist=False, cascade="all, delete-orphan")
+    members = relationship("ResearchProjectMember", back_populates="project", cascade="all, delete-orphan")
+    design_state = relationship("ResearchDesignState", back_populates="project", uselist=False, cascade="all, delete-orphan")
+    protocols = relationship("ResearchProtocol", back_populates="project", cascade="all, delete-orphan")
 
 
 class ResearchDataset(Base):
@@ -162,6 +166,37 @@ class DatasetQualityIssue(Base):
     details = Column(JSON, nullable=True)
     resolution = Column(String, nullable=True)
     created_at = Column(String, nullable=False)
+
+
+class DatasetAccessGrant(Base):
+    """
+    Minimal resource-scoped access grant for a dataset.
+
+    This is NOT a global IAM role. A grant grants one specific capability on
+    one dataset to one user, optionally scoped to a project, with expiry and
+    an auditable reason. Authorization for dataset operations is derived from
+    (tenant, project relationship, dataset grant, sensitivity, capability).
+    """
+    __tablename__ = "dataset_access_grants"
+    __table_args__ = (
+        UniqueConstraint("dataset_id", "user_id", "capability", name="uq_dataset_access_grant"),
+        Index("ix_dataset_grant_org_dataset", "organization_id", "dataset_id"),
+    )
+
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    dataset_id = Column(String, ForeignKey("research_datasets.id", ondelete="CASCADE"), nullable=False)
+    project_id = Column(String, ForeignKey("research_projects.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    # Capabilities: VIEW_SENSITIVE, DOWNLOAD_RAW, EXPORT_SENSITIVE, CLEAN,
+    # RUN_ANALYSIS, REVIEW_ANALYSIS, APPROVE_ANALYSIS, CLASSIFY
+    capability = Column(String, nullable=False)
+    granted_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    reason = Column(String, nullable=True)
+    status = Column(String, nullable=False, default="ACTIVE")  # ACTIVE, REVOKED, EXPIRED
+    expires_at = Column(String, nullable=True)
+    created_at = Column(String, nullable=False)
+    revoked_at = Column(String, nullable=True)
 
 
 class ResearchAnalysis(Base):
@@ -286,6 +321,123 @@ class ResearchLineageEdge(Base):
     target_version = Column(String, nullable=True)
     created_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     created_at = Column(String, nullable=False)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RESEARCH DESIGN INTELLIGENCE — collaboration, protocol & methodology review
+# Project-scoped relationships only; never a global role system.
+# ─────────────────────────────────────────────────────────────────────────────
+
+class ResearchProjectMember(Base):
+    __tablename__ = "research_project_members"
+    __table_args__ = (
+        UniqueConstraint("project_id", "user_id", "relationship", name="uq_project_member_relationship"),
+        Index("ix_project_member_org_project", "organization_id", "project_id"),
+    )
+
+    id = Column(String, primary_key=True, index=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    project_id = Column(String, ForeignKey("research_projects.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    relationship = Column(String, nullable=False)  # PI, CO_RESEARCHER, RESEARCH_ASSISTANT, METHODOLOGY_REVIEWER, DATA_ANALYST
+    status = Column(String, nullable=False, default="ACTIVE")  # INVITED, ACTIVE, REMOVED
+    assigned_sections = Column(JSON, nullable=True)  # e.g. ["PROBLEM_AND_GAP", "MEASUREMENT_INSTRUMENTS"]
+    invited_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+    ended_at = Column(String, nullable=True)
+
+    project = orm_relationship("ResearchProject", back_populates="members")
+    member_user = orm_relationship("User", foreign_keys=[user_id])
+    inviter = orm_relationship("User", foreign_keys=[invited_by])
+
+
+class ResearchProtocol(Base):
+    __tablename__ = "research_protocols"
+    __table_args__ = (
+        UniqueConstraint("project_id", "version_number", name="uq_research_protocol_version"),
+        Index("ix_protocol_org_project", "organization_id", "project_id"),
+    )
+
+    id = Column(String, primary_key=True, index=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    project_id = Column(String, ForeignKey("research_projects.id", ondelete="CASCADE"), nullable=False)
+    version_number = Column(Integer, nullable=False)
+    fingerprint = Column(String, nullable=False)
+    snapshot_json = Column(JSON, nullable=False)
+    status = Column(String, nullable=False, default="DRAFT")  # DRAFT, SUBMITTED, APPROVED, STALE
+    created_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+    submitted_at = Column(String, nullable=True)
+    approved_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    approved_at = Column(String, nullable=True)
+
+    project = relationship("ResearchProject", back_populates="protocols")
+    reviews = relationship("MethodologyReview", back_populates="protocol", cascade="all, delete-orphan")
+
+
+class MethodologyReview(Base):
+    __tablename__ = "methodology_reviews"
+    __table_args__ = (
+        UniqueConstraint("protocol_id", "reviewer_id", name="uq_methodology_review_reviewer"),
+        Index("ix_review_org_project", "organization_id", "project_id"),
+    )
+
+    id = Column(String, primary_key=True, index=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    project_id = Column(String, ForeignKey("research_projects.id", ondelete="CASCADE"), nullable=False)
+    protocol_id = Column(String, ForeignKey("research_protocols.id", ondelete="CASCADE"), nullable=False)
+    protocol_version = Column(Integer, nullable=False)
+    reviewer_id = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    status = Column(String, nullable=False, default="DRAFT")  # DRAFT, SUBMITTED
+    findings_json = Column(JSON, nullable=False, default=list)
+    recommendation = Column(String, nullable=True)  # READY, REVISIONS_REQUIRED, MAJOR_CONCERNS
+    visibility = Column(String, nullable=False, default="CONFIDENTIAL_TO_RESEARCHER")  # CONFIDENTIAL_TO_RESEARCHER, TEAM_VISIBLE
+    submitted_at = Column(String, nullable=True)
+    created_at = Column(String, nullable=False)
+    updated_at = Column(String, nullable=False)
+
+    protocol = relationship("ResearchProtocol", back_populates="reviews")
+    reviewer = relationship("User", foreign_keys=[reviewer_id])
+
+
+class ResearchDesignState(Base):
+    """
+    Researcher-authored structured research design intelligence sections.
+    Deterministic engines (coherence/readiness/next action) are computed on
+    demand from this state plus the authoritative ResearchProject domain.
+    """
+    __tablename__ = "research_design_states"
+    __table_args__ = (
+        UniqueConstraint("project_id", name="uq_research_design_state_project"),
+        Index("ix_design_state_org_project", "organization_id", "project_id"),
+    )
+
+    id = Column(String, primary_key=True, index=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    project_id = Column(String, ForeignKey("research_projects.id", ondelete="CASCADE"), nullable=False)
+
+    idea_json = Column(JSON, nullable=True)
+    problem_json = Column(JSON, nullable=True)
+    gap_json = Column(JSON, nullable=True)
+    objectives_json = Column(JSON, nullable=True)
+    question_ext_json = Column(JSON, nullable=True)
+    hypothesis_ext_json = Column(JSON, nullable=True)
+    variable_registry_json = Column(JSON, nullable=True)
+    conceptual_framework_json = Column(JSON, nullable=True)
+    theoretical_framework_json = Column(JSON, nullable=True)
+    methodology_json = Column(JSON, nullable=True)
+    sampling_json = Column(JSON, nullable=True)
+    measurement_json = Column(JSON, nullable=True)
+    procedure_json = Column(JSON, nullable=True)
+    analysis_json = Column(JSON, nullable=True)
+
+    protocol_status = Column(String, nullable=False, default="NO_PROTOCOL")  # NO_PROTOCOL, DRAFT, SUBMITTED, APPROVED
+    current_protocol_id = Column(String, nullable=True)
+    protocol_review_due = Column(Boolean, nullable=False, default=False)
+    updated_by = Column(String, nullable=True)
+    updated_at = Column(String, nullable=False)
+
+    project = relationship("ResearchProject", back_populates="design_state")
 
 
 
@@ -1009,8 +1161,118 @@ class PublicationJournalShortlist(Base):
     created_at = Column(String, nullable=False)
 
 
+class PublicationManuscriptAuthorship(Base):
+    """Authorship snapshot for a specific manuscript version, including
+    author order, corresponding-author designation, and confirmation status."""
+    __tablename__ = "publication_manuscript_authorships"
+    __table_args__ = (UniqueConstraint("manuscript_version_id", "user_id", name="uq_manuscript_authorship_user"),)
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    manuscript_version_id = Column(String, ForeignKey("publication_manuscript_versions.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    display_name = Column(String, nullable=True)
+    affiliation = Column(String, nullable=True)
+    orcid = Column(String, nullable=True)
+    author_order = Column(Integer, nullable=False)
+    is_corresponding_author = Column(Boolean, default=False)
+    credit_roles = Column(JSON, default=list, nullable=False)  # CRediT taxonomy
+    confirmed_at = Column(String, nullable=True)
+    source = Column(String, default="MANUAL")  # MANUAL, ORCID, BACKFILL
+    created_at = Column(String, nullable=False)
+    updated_at = Column(String, nullable=False)
+
+
+class PublicationReportingGuideline(Base):
+    """Versioned reporting guideline checklist, e.g. CONSORT, STROBE, PRISMA."""
+    __tablename__ = "publication_reporting_guidelines"
+    id = Column(String, primary_key=True)
+    name = Column(String, nullable=False, unique=True)
+    version = Column(String, nullable=False, default="1.0")
+    short_name = Column(String, nullable=True, index=True)
+    description = Column(String, nullable=True)
+    url = Column(String, nullable=True)
+    created_at = Column(String, nullable=False)
+
+
+class PublicationReportingGuidelineItem(Base):
+    __tablename__ = "publication_reporting_guideline_items"
+    __table_args__ = (UniqueConstraint("guideline_id", "item_number", name="uq_guideline_item_number"),)
+    id = Column(String, primary_key=True)
+    guideline_id = Column(String, ForeignKey("publication_reporting_guidelines.id", ondelete="CASCADE"), nullable=False)
+    item_number = Column(String, nullable=False)
+    description = Column(String, nullable=False)
+    section = Column(String, nullable=True)
+
+
+class PublicationManuscriptGuidelineCheck(Base):
+    """Checklist application: a guideline + version applied to a manuscript version."""
+    __tablename__ = "publication_manuscript_guideline_checks"
+    __table_args__ = (UniqueConstraint("manuscript_version_id", "guideline_id", name="uq_manuscript_guideline_check"),)
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    manuscript_version_id = Column(String, ForeignKey("publication_manuscript_versions.id", ondelete="CASCADE"), nullable=False)
+    guideline_id = Column(String, ForeignKey("publication_reporting_guidelines.id", ondelete="CASCADE"), nullable=False)
+    guideline_version = Column(String, nullable=False)
+    status = Column(String, default="IN_PROGRESS")  # IN_PROGRESS, COMPLETED, STALE
+    applied_at = Column(String, nullable=False)
+    applied_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+
+
+class PublicationManuscriptGuidelineItemStatus(Base):
+    __tablename__ = "publication_manuscript_guideline_item_statuses"
+    __table_args__ = (UniqueConstraint("check_id", "item_id", name="uq_guideline_item_status"),)
+    id = Column(String, primary_key=True)
+    check_id = Column(String, ForeignKey("publication_manuscript_guideline_checks.id", ondelete="CASCADE"), nullable=False)
+    item_id = Column(String, ForeignKey("publication_reporting_guideline_items.id", ondelete="CASCADE"), nullable=False)
+    status = Column(String, default="NOT_STARTED")  # NOT_STARTED, PRESENT, PARTIAL, MISSING, NOT_APPLICABLE, NEEDS_REVIEW
+    notes = Column(String, nullable=True)
+
+
+class PublicationReference(Base):
+    """Reference integrity: a reference parsed from or linked to a manuscript version."""
+    __tablename__ = "publication_references"
+    __table_args__ = (UniqueConstraint("manuscript_version_id", "doi", name="uq_manuscript_reference_doi"),)
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    manuscript_version_id = Column(String, ForeignKey("publication_manuscript_versions.id", ondelete="CASCADE"), nullable=False)
+    citation_key = Column(String, nullable=True)
+    author = Column(String, nullable=True)
+    title = Column(String, nullable=True)
+    journal = Column(String, nullable=True)
+    year = Column(String, nullable=True)
+    doi = Column(String, nullable=True, index=True)
+    doi_canonical = Column(String, nullable=True, index=True)
+    volume = Column(String, nullable=True)
+    issue = Column(String, nullable=True)
+    pages = Column(String, nullable=True)
+    publisher = Column(String, nullable=True)
+    reference_type = Column(String, default="JOURNAL_ARTICLE")
+    verification_status = Column(String, default="UNVERIFIED")  # UNVERIFIED, VERIFIED, NOT_FOUND, RETRACTED
+    verified_provider = Column(String, nullable=True)
+    verified_at = Column(String, nullable=True)
+    duplicate_of = Column(String, ForeignKey("publication_references.id", ondelete="SET NULL"), nullable=True)
+    created_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+
+
+class PublicationAcceptance(Base):
+    """Formal acceptance evidence linked to a specific submission and manuscript version."""
+    __tablename__ = "publication_acceptances"
+    __table_args__ = (UniqueConstraint("submission_id", name="uq_acceptance_submission"),)
+    id = Column(String, primary_key=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False)
+    asset_id = Column(String, ForeignKey("core_scholarly_assets.id", ondelete="CASCADE"), nullable=False)
+    submission_id = Column(String, ForeignKey("publication_submissions.id", ondelete="CASCADE"), nullable=False)
+    manuscript_version_id = Column(String, ForeignKey("publication_manuscript_versions.id", ondelete="CASCADE"), nullable=False)
+    accepted_at = Column(String, nullable=False)
+    evidence = Column(String, nullable=True)  # file ID or external reference
+    recorded_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(String, nullable=False)
+
+
 class PublicationSubmission(Base):
     __tablename__ = "publication_submissions"
+    __table_args__ = (UniqueConstraint("asset_id", "journal_id", "manuscript_version_id", name="uq_publication_submission_target"),)
     id = Column(String, primary_key=True)
     organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
     asset_id = Column(String, ForeignKey("core_scholarly_assets.id", ondelete="CASCADE"), nullable=False, index=True)
@@ -1425,10 +1687,14 @@ class PromotionApplication(Base):
     reviewer = relationship("User", foreign_keys=[reviewer_user_id])
     evidence_selections = relationship("PromotionAssetSelection", back_populates="application", cascade="all, delete-orphan")
     snapshots = relationship("PromotionEvaluationSnapshot", back_populates="application", cascade="all, delete-orphan")
+    committee_assignments = relationship("PromotionCommitteeAssignment", back_populates="application", cascade="all, delete-orphan")
 
 
 class PromotionAssetSelection(Base):
     __tablename__ = "core_promotion_asset_selections"
+    __table_args__ = (
+        UniqueConstraint("promotion_application_id", "scholarly_asset_id", name="uq_promotion_evidence_selection"),
+    )
 
     id = Column(String, primary_key=True, index=True)
     promotion_application_id = Column(String, ForeignKey("promotion_applications.id", ondelete="CASCADE"), nullable=False, index=True)
@@ -1466,6 +1732,30 @@ class PromotionEvaluationSnapshot(Base):
     policy = relationship("PromotionPolicy")
     evaluator = relationship("User")
 
+
+class PromotionCommitteeAssignment(Base):
+    """Resource-scoped academic committee authority over one specific
+    PromotionApplication. Committee review/evaluate/decision authority is
+    granted ONLY through an ACTIVE row here — never through organization role
+    or platform-wide admin status alone (see promotions.py: is_committee_member)."""
+    __tablename__ = "promotion_committee_assignments"
+    __table_args__ = (
+        UniqueConstraint("application_id", "user_id", name="uq_promotion_committee_assignment"),
+    )
+
+    id = Column(String, primary_key=True, index=True)
+    organization_id = Column(String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False, index=True)
+    application_id = Column(String, ForeignKey("promotion_applications.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    assigned_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    status = Column(String, default="ACTIVE", nullable=False)  # ACTIVE, REVOKED
+    assigned_at = Column(String, nullable=False)
+    revoked_at = Column(String, nullable=True)
+    revoked_by = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+
+    organization = relationship("Organization")
+    application = relationship("PromotionApplication", back_populates="committee_assignments")
+    member = relationship("User", foreign_keys=[user_id])
 
 
 class DataProvenance(Base):
@@ -1542,6 +1832,17 @@ class PeerReviewCase(Base):
     owner_user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     project_id = Column(String, ForeignKey("research_projects.id", ondelete="SET NULL"), nullable=True, index=True)
     scholarly_asset_id = Column(String, ForeignKey("core_scholarly_assets.id", ondelete="SET NULL"), nullable=True, index=True)
+    # Resource-scoped editorial authority: the assigned editor for THIS case.
+    # Organization admin/supervisor roles do not imply editorial authority —
+    # only the OWNER (bootstrap authority) or the assigned editor may act.
+    editor_user_id = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    # Optional exact-version binding to Publication Intelligence (source of
+    # truth for manuscript content). When set, this case is bound to the
+    # immutable, fingerprinted PublicationManuscriptVersion rather than the
+    # loose scholarly_asset_id + locally-authored title/abstract snapshot.
+    manuscript_version_id = Column(String, ForeignKey("publication_manuscript_versions.id", ondelete="SET NULL"), nullable=True, index=True)
+    manuscript_fingerprint = Column(String, nullable=True)
+    publication_submission_id = Column(String, ForeignKey("publication_submissions.id", ondelete="SET NULL"), nullable=True)
     title_ar = Column(String, nullable=False)
     title_en = Column(String, nullable=False)
     abstract_ar = Column(String, nullable=True)
@@ -1557,8 +1858,11 @@ class PeerReviewCase(Base):
 
     organization = relationship("Organization")
     owner = relationship("User", foreign_keys=[owner_user_id])
+    editor = relationship("User", foreign_keys=[editor_user_id])
     project = relationship("ResearchProject")
     scholarly_asset = relationship("ScholarlyAsset")
+    manuscript_version = relationship("PublicationManuscriptVersion")
+    publication_submission = relationship("PublicationSubmission")
     rounds = relationship("PeerReviewRound", back_populates="case", cascade="all, delete-orphan")
     revisions = relationship("ManuscriptRevision", back_populates="case", cascade="all, delete-orphan")
 
@@ -1625,6 +1929,10 @@ class ReviewCriterion(Base):
 
 class ReviewerAssignment(Base):
     __tablename__ = "reviewer_assignments"
+    __table_args__ = (
+        UniqueConstraint("round_id", "reviewer_user_id", name="uq_reviewer_assignment_internal"),
+        UniqueConstraint("round_id", "external_email", name="uq_reviewer_assignment_external"),
+    )
 
     id = Column(String, primary_key=True, index=True)
     case_id = Column(String, ForeignKey("peer_review_cases.id", ondelete="CASCADE"), nullable=False, index=True)
@@ -1722,6 +2030,7 @@ class ReviewComment(Base):
 
 class ManuscriptRevision(Base):
     __tablename__ = "manuscript_revisions"
+    __table_args__ = (UniqueConstraint("case_id", "version_number", name="uq_manuscript_revision_version"),)
 
     id = Column(String, primary_key=True, index=True)
     case_id = Column(String, ForeignKey("peer_review_cases.id", ondelete="CASCADE"), nullable=False, index=True)

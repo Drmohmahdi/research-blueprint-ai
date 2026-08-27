@@ -70,6 +70,8 @@ export const ROUTES = {
   // New Study Design Routes
   NEW_STUDY_DESIGN:      '/app/research/projects/:projectId/design',
   NEW_STUDY_DESIGN_STEP: '/app/research/projects/:projectId/design/:stepId',
+  RESEARCH_COMMAND_CENTER: '/app/research/projects/:projectId/command-center',
+  RESEARCH_OFFICE:        '/app/research/research-office',
 
 
   // Dynamic Workspace Routes

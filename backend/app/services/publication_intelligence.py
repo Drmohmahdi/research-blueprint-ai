@@ -57,9 +57,14 @@ def create_version(db: Session, asset: models.ScholarlyAsset, article_type: str,
             continue
         analysis = db.query(models.ResearchAnalysis).filter(models.ResearchAnalysis.id == dep.get("id"), models.ResearchAnalysis.organization_id == asset.organization_id).first()
         dataset = db.query(models.ResearchDataset).filter(models.ResearchDataset.id == analysis.dataset_id, models.ResearchDataset.organization_id == asset.organization_id).first() if analysis else None
-        if not analysis or analysis.status != "COMPLETED" or not analysis.approved_at or not dataset or dataset.current_version_id != analysis.dataset_version_id:
+        # Gate: COMPLETED or human-APPROVED + current + non-stale
+        if not analysis or analysis.status not in {"COMPLETED", "APPROVED"} or not analysis.approved_at or not dataset or dataset.current_version_id != analysis.dataset_version_id:
             raise HTTPException(409, "Only current, completed, human-approved analyses may be used")
         dep.update({"version": analysis.created_at, "dataset_version_id": analysis.dataset_version_id, "approved_at": analysis.approved_at})
+    # Lock the asset row first so concurrent version-creation requests for the
+    # same manuscript serialise instead of racing on the next version number
+    # (mirrors the Data domain's dataset lock in routers/research_data.clean_dataset).
+    db.query(models.ScholarlyAsset).filter(models.ScholarlyAsset.id == asset.id).with_for_update().first()
     latest = db.query(models.PublicationManuscriptVersion).filter(models.PublicationManuscriptVersion.asset_id == asset.id).order_by(models.PublicationManuscriptVersion.version_number.desc()).first()
     number = (latest.version_number + 1) if latest else 1
     created = now()
@@ -124,3 +129,111 @@ def transition_submission(item: models.PublicationSubmission, target: str) -> No
     item.updated_at = now()
     if target == "SUBMITTED" and not item.submitted_at:
         item.submitted_at = item.updated_at
+
+
+# ── Reporting guideline determinism ──────────────────────────────────────────
+
+GUIDELINE_APPLICABILITY = {
+    "CONSORT": {"ORIGINAL_RESEARCH": ["experimental", "randomized", "clinical_trial", "intervention"]},
+    "STROBE": {"ORIGINAL_RESEARCH": ["observational", "cohort", "case_control", "cross_sectional", "correlational", "survey"]},
+    "PRISMA": {"SYSTEMATIC_REVIEW": ["systematic_review", "meta_analysis"]},
+    "COREQ": {"ORIGINAL_RESEARCH": ["qualitative"]},
+    "CARE": {"CASE_REPORT": ["case_report"]},
+}
+
+
+def select_reporting_guidelines(article_type: str, study_design: str | None = None) -> list[str]:
+    """Deterministic guideline selection based on article type + study design."""
+    design = (study_design or "").casefold()
+    matched = []
+    for guideline, mapping in GUIDELINE_APPLICABILITY.items():
+        for atype, designs in mapping.items():
+            if article_type == atype and (not designs or any(d in design for d in designs)):
+                matched.append(guideline)
+    return matched
+
+
+# ── Reference integrity ──────────────────────────────────────────────────────
+
+def canonical_doi(value: str | None) -> str | None:
+    """Normalize https://doi.org/…, doi:…, 10… into the bare DOI."""
+    if not value:
+        return None
+    v = value.strip()
+    if v.lower().startswith("https://doi.org/"):
+        v = v[len("https://doi.org/"):]
+    elif v.lower().startswith("http://doi.org/"):
+        v = v[len("http://doi.org/"):]
+    elif v.lower().startswith("doi:"):
+        v = v[len("doi:"):]
+    v = v.strip().rstrip(".")
+    return v if v.startswith("10.") else None
+
+
+def reference_integrity(db: Session, version: models.PublicationManuscriptVersion) -> dict[str, Any]:
+    """Deterministic reference-integrity scan for a manuscript version."""
+    refs = db.query(models.PublicationReference).filter(
+        models.PublicationReference.manuscript_version_id == version.id,
+        models.PublicationReference.organization_id == version.organization_id,
+    ).all()
+    findings = []
+    seen_dois: dict[str, str] = {}
+    duplicates = 0
+    for ref in refs:
+        issues = []
+        if not ref.author:
+            issues.append("MISSING_AUTHOR")
+        if not ref.year:
+            issues.append("MISSING_YEAR")
+        if not ref.title:
+            issues.append("MISSING_TITLE")
+        if ref.doi and not ref.doi_canonical:
+            issues.append("MALFORMED_DOI")
+        if ref.doi_canonical:
+            if ref.doi_canonical in seen_dois:
+                duplicates += 1
+                ref.duplicate_of = seen_dois[ref.doi_canonical]
+                issues.append("DUPLICATE_DOI")
+            else:
+                seen_dois[ref.doi_canonical] = ref.id
+        if issues:
+            findings.append({"reference_id": ref.id, "doi": ref.doi, "issues": issues})
+    db.flush()
+    return {
+        "total_references": len(refs),
+        "duplicates": duplicates,
+        "findings": findings,
+        "score": round(100 * (1 - len(findings) / max(1, len(refs)))) if refs else 100,
+    }
+
+
+# ── Authorship helpers ───────────────────────────────────────────────────────
+
+CREDIT_TAXONOMY = [
+    "Conceptualization", "Methodology", "Software", "Validation", "Formal Analysis",
+    "Investigation", "Resources", "Data Curation", "Writing – Original Draft",
+    "Writing – Review & Editing", "Visualization", "Supervision",
+    "Project Administration", "Funding Acquisition",
+]
+
+
+def authorship_snapshot(db: Session, version: models.PublicationManuscriptVersion) -> list[dict[str, Any]]:
+    rows = db.query(models.PublicationManuscriptAuthorship).filter(
+        models.PublicationManuscriptAuthorship.manuscript_version_id == version.id,
+        models.PublicationManuscriptAuthorship.organization_id == version.organization_id,
+    ).order_by(models.PublicationManuscriptAuthorship.author_order.asc()).all()
+    return [
+        {"id": r.id, "user_id": r.user_id, "display_name": r.display_name, "affiliation": r.affiliation,
+         "orcid": r.orcid, "author_order": r.author_order, "is_corresponding_author": r.is_corresponding_author,
+         "credit_roles": r.credit_roles, "confirmed_at": r.confirmed_at, "source": r.source}
+        for r in rows
+    ]
+
+
+def authorship_complete(db: Session, version: models.PublicationManuscriptVersion) -> bool:
+    rows = db.query(models.PublicationManuscriptAuthorship).filter(
+        models.PublicationManuscriptAuthorship.manuscript_version_id == version.id,
+    ).all()
+    if not rows:
+        return False
+    return bool(any(r.is_corresponding_author for r in rows)) and bool(all(r.confirmed_at for r in rows))

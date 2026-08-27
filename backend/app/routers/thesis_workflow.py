@@ -193,7 +193,15 @@ def thesis_or_404(db: Session, thesis_id: str, ctx: TenantContext) -> models.The
 
 
 def require_supervisor(db: Session, thesis: models.ThesisRecord, ctx: TenantContext, final: bool = False) -> models.ThesisSupervisionAssignment | None:
-    if admin(ctx): return None
+    # Cross-domain IAM consolidation Finding 1: supervisor-equivalent academic
+    # authority (chapter approval, milestone completion, examination scheduling
+    # and decisions, committee/examiner assignment, corrections) requires an
+    # explicit ThesisSupervisionAssignment — generic OWNER/ORGANIZATION_ADMIN
+    # role membership, and platform admin, no longer substitute for it, matching
+    # the resource-scoped-relationship rule already enforced in Peer Review,
+    # Promotion, Academic Identity and Research Data. The assignment authority
+    # itself (who may assign a supervisor) remains admin-gated in
+    # assign_supervisor — this function only governs acting AS the supervisor.
     item = db.query(models.ThesisSupervisionAssignment).filter(models.ThesisSupervisionAssignment.thesis_id == thesis.id, models.ThesisSupervisionAssignment.user_id == ctx.user.id, models.ThesisSupervisionAssignment.status == "ACTIVE").first()
     if not item or (final and not item.can_final_recommend): raise HTTPException(403, "Supervisor relationship does not permit this operation")
     return item
@@ -465,11 +473,19 @@ def list_examiner_reports(thesis_id:str,db:Session=Depends(get_db),ctx:TenantCon
     assigned=db.query(models.ThesisSupervisionAssignment).filter(models.ThesisSupervisionAssignment.thesis_id==thesis.id,models.ThesisSupervisionAssignment.user_id==ctx.user.id,models.ThesisSupervisionAssignment.status=="ACTIVE").first()
     committee=committee_member_of(db,thesis.id,ctx.user.id)
     is_student=thesis.student_user_id==ctx.user.id
-    if not (admin(ctx) or assigned or committee or is_student): raise HTTPException(404,"Thesis not found")
-    can_confidential=admin(ctx) or bool(assigned and assigned.role=="SUPERVISOR"); is_committee_viewer=bool(committee) and not can_confidential
+    is_graduate_studies=admin(ctx)
+    if not (is_graduate_studies or assigned or committee or is_student): raise HTTPException(404,"Thesis not found")
+    # Cross-domain IAM consolidation Finding 1 + Finding 3: generic org-admin/
+    # platform-admin no longer bypasses into SUPERVISOR_VISIBLE/COMMITTEE_ONLY
+    # confidential content (that still requires the genuine supervisor/committee
+    # relationship). "Graduate Studies" oversight is instead scoped to exactly
+    # its own GRADUATE_STUDIES_ONLY tier, which was previously unreachable by
+    # anyone through this endpoint — this makes it reachable for its intended
+    # audience without reintroducing a blanket bypass on every other tier.
+    can_confidential=bool(assigned and assigned.role=="SUPERVISOR"); is_committee_viewer=bool(committee) and not can_confidential
     reports=db.query(models.ThesisExaminerReport).filter(models.ThesisExaminerReport.thesis_id==thesis.id,models.ThesisExaminerReport.status=="SUBMITTED").all()
-    visible=[r for r in reports if can_confidential or (is_student and r.confidentiality_level=="STUDENT_VISIBLE") or (assigned and r.confidentiality_level in {"STUDENT_VISIBLE","SUPERVISOR_VISIBLE"}) or (is_committee_viewer and r.confidentiality_level in {"STUDENT_VISIBLE","SUPERVISOR_VISIBLE","COMMITTEE_ONLY"})]
-    return [{"id":r.id,"assignment_id":r.assignment_id,"recommendation":r.recommendation,"general_assessment":r.general_assessment,"confidential_comments":r.confidential_comments if (can_confidential or (is_committee_viewer and r.confidentiality_level=="COMMITTEE_ONLY")) else None,"confidentiality_level":r.confidentiality_level,"submitted_at":r.submitted_at,"fingerprint":r.report_fingerprint} for r in visible]
+    visible=[r for r in reports if can_confidential or (is_student and r.confidentiality_level=="STUDENT_VISIBLE") or (assigned and r.confidentiality_level in {"STUDENT_VISIBLE","SUPERVISOR_VISIBLE"}) or (is_committee_viewer and r.confidentiality_level in {"STUDENT_VISIBLE","SUPERVISOR_VISIBLE","COMMITTEE_ONLY"}) or (is_graduate_studies and r.confidentiality_level=="GRADUATE_STUDIES_ONLY")]
+    return [{"id":r.id,"assignment_id":r.assignment_id,"recommendation":r.recommendation,"general_assessment":r.general_assessment,"confidential_comments":r.confidential_comments if (can_confidential or (is_committee_viewer and r.confidentiality_level=="COMMITTEE_ONLY") or (is_graduate_studies and r.confidentiality_level=="GRADUATE_STUDIES_ONLY")) else None,"confidentiality_level":r.confidentiality_level,"submitted_at":r.submitted_at,"fingerprint":r.report_fingerprint} for r in visible]
 
 
 @router.post("/{thesis_id}/examinations/{round_id}/defense-session",status_code=201)
