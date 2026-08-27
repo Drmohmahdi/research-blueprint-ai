@@ -12,12 +12,13 @@ depends_on = None
 
 
 def upgrade():
-    op.create_unique_constraint(
-        "uq_promotion_evidence_selection",
-        "core_promotion_asset_selections",
-        ["promotion_application_id", "scholarly_asset_id"],
-    )
+    with op.batch_alter_table("core_promotion_asset_selections") as batch_op:
+        batch_op.create_unique_constraint(
+            "uq_promotion_evidence_selection",
+            ["promotion_application_id", "scholarly_asset_id"],
+        )
 
 
 def downgrade():
-    op.drop_constraint("uq_promotion_evidence_selection", "core_promotion_asset_selections", type_="unique")
+    with op.batch_alter_table("core_promotion_asset_selections") as batch_op:
+        batch_op.drop_constraint("uq_promotion_evidence_selection", type_="unique")
