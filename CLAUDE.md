@@ -43,6 +43,6 @@
 
 ## فخاخ معروفة (لا تُعِد اكتشافها)
 
-- ثغرة أمنية معروفة في تبعية `react-router` بالواجهة (GHSA-qwww-vcr4-c8h2) — غير قابلة للاستغلال فعليًا هنا (التطبيق يستخدم `<BrowserRouter>` عادي، ليس وضع RSC المتأثر)، ولا يوجد إصلاح منشور بعد على npm. راقب دوريًا فقط.
+- كانت هناك ثغرة معروفة سابقًا في تبعية `react-router` (GHSA-qwww-vcr4-c8h2) — تأكدت في 2026-08-28 عبر `npm audit` أنها لم تعد تظهر إطلاقًا (0 ثغرات)، على الأرجح لتحديث تلقائي لنسخة `react-router` تجاوز النطاق المتأثر. لا حاجة لأي إجراء إضافي.
 - إن أُعيد إنشاء `venv` على الخادم مستقبلاً: تذكّر تثبيت `python3.12-venv` و`python3-pip` أولًا (Ubuntu يفصلهما عن حزمة Python الأساسية).
 - `backend/app/config.py: Settings.validate_production()` يرفض الإقلاع في `ENVIRONMENT=production` إن كانت `APP_URL` بدون `https://` أو `TRUSTED_HOSTS` غير مضبوطة (تنكمش تلقائيًا إلى `localhost,127.0.0.1` إن غابت، فيرفض FastAPI's `TrustedHostMiddleware` أي طلب حقيقي عبر Traefik حتى لو نجح الإقلاع). ملف `.env` الفعلي على الخادم (`/var/www/research-blueprint-ai/backend/.env`) يجب أن يحتوي دائمًا: `APP_URL=https://research.ehaastore.com` و `TRUSTED_HOSTS=research.ehaastore.com` — راجع `.env.production.example` كمرجع كامل. إن أُعيد إنشاء هذا الملف من نسخة احتياطية قديمة أو من الصفر، تحقق من وجود هذين المتغيرين تحديدًا قبل إعادة التشغيل، وإلا ستدخل `research-backend` في حلقة إعادة تشغيل (`pm2 list` يُظهر `↺` مرتفعًا و`uptime: 0s`).

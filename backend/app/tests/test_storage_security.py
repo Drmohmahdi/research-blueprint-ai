@@ -273,11 +273,34 @@ def test_cross_tenant_file_download_blocked(db_session: Session):
 
 
 def test_same_tenant_horizontal_file_access(db_session: Session):
-    """Verifies that Researcher B in the same tenant cannot access Researcher A's private file, but Org Admin can."""
+    """Same-tenant horizontal isolation: neither an unrelated colleague nor the
+    organization OWNER role can read another member's private file with no
+    explicit relationship to it — only a genuine platform-wide admin (or the
+    uploader) can. Organization role is not a substitute for a per-resource
+    relationship (see storage.py FileAccessPolicy)."""
     t = create_test_tenant(db_session, "same_tenant", "pln-enterprise")
     headers_res_a = get_auth_headers(t["researcher"].username, t["org"].id)
     headers_res_b = get_auth_headers(t["colleague"].username, t["org"].id)
     headers_owner = get_auth_headers(t["owner"].username, t["org"].id)
+
+    platform_admin = models.User(
+        id="usr-platform-admin-same-tenant",
+        email="platform_admin_same_tenant@test.com",
+        username="platform_admin_same_tenant",
+        hashed_password=hash_password("Password123!"),
+        role="ADMIN",
+        created_at="2026-08-23T00:00:00Z"
+    )
+    db_session.add(platform_admin)
+    db_session.add(models.OrganizationMembership(
+        id="mem-platform-admin-same-tenant",
+        organization_id=t["org"].id,
+        user_id=platform_admin.id,
+        role="RESEARCHER",
+        created_at="2026-08-23T00:00:00Z"
+    ))
+    db_session.commit()
+    headers_platform_admin = get_auth_headers(platform_admin.username, t["org"].id)
 
     # Researcher A uploads private file
     pdf_content = b"%PDF-1.4\n% Private research draft\n%%EOF"
@@ -294,11 +317,16 @@ def test_same_tenant_horizontal_file_access(db_session: Session):
     res_b = client.get(f"/api/storage/files/{file_id}/download", headers=headers_res_b)
     assert res_b.status_code == 403
 
-    # Owner / Admin downloads -> 200 OK with nosniff header
+    # Organization OWNER role alone, with no relationship to this file, is
+    # ALSO denied — org role is not a blanket file-access grant.
     res_owner = client.get(f"/api/storage/files/{file_id}/download", headers=headers_owner)
-    assert res_owner.status_code == 200
-    assert res_owner.headers.get("X-Content-Type-Options") == "nosniff"
-    assert "attachment" in res_owner.headers.get("Content-Disposition", "")
+    assert res_owner.status_code == 403
+
+    # A genuine platform-wide admin retains override access, with headers intact.
+    res_admin = client.get(f"/api/storage/files/{file_id}/download", headers=headers_platform_admin)
+    assert res_admin.status_code == 200
+    assert res_admin.headers.get("X-Content-Type-Options") == "nosniff"
+    assert "attachment" in res_admin.headers.get("Content-Disposition", "")
 
 
 # ─────────────────────────────────────────────────────────────────────────────

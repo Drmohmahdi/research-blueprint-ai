@@ -1,7 +1,7 @@
 import datetime
 import secrets
 import math
-from fastapi import APIRouter, UploadFile, File, Depends, BackgroundTasks, HTTPException, status
+from fastapi import APIRouter, UploadFile, File, Depends, BackgroundTasks, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from typing import List, Dict, Any
 from ..db import get_db, SessionLocal
@@ -11,14 +11,30 @@ from .auth import get_current_user
 
 router = APIRouter(prefix="/stats", tags=["stats"])
 
+# Nested-loop Monte Carlo cost is O(iterations x sampleSize); both are bounded
+# at the API boundary (iterations via SimulationParamsSchema) to keep worst-
+# case compute/memory bounded rather than fully attacker-controlled.
+MAX_SAMPLE_SIZE = 5000
+MAX_CSV_BYTES = 50 * 1024 * 1024  # 50 MB, matches storage.py's upload cap
+
+
 @router.post("/simulate-scores", response_model=schemas.SimulationResponse)
-def simulate_scores_endpoint(params: schemas.SimulationParamsSchema, sampleSize: int, current_user: models.User = Depends(get_current_user)):
+def simulate_scores_endpoint(
+    params: schemas.SimulationParamsSchema,
+    sampleSize: int = Query(..., ge=1, le=MAX_SAMPLE_SIZE),
+    current_user: models.User = Depends(get_current_user),
+):
     result = run_python_monte_carlo(sampleSize, params)
     return result
 
 @router.post("/inspect-data", response_model=schemas.DataInspectionResponse)
 async def inspect_data_endpoint(file: UploadFile = File(...), lang: str = "ar", current_user: models.User = Depends(get_current_user)):
-    contents = await file.read()
+    contents = await file.read(MAX_CSV_BYTES + 1)
+    if len(contents) > MAX_CSV_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File exceeds maximum size of {MAX_CSV_BYTES // (1024 * 1024)}MB"
+        )
     csv_text = contents.decode("utf-8")
     result = inspect_uploaded_csv(csv_text, is_arabic=(lang == "ar"))
     return result
@@ -182,8 +198,8 @@ def run_simulation_job_task(job_id: str):
 @router.post("/jobs", response_model=schemas.SimulationJobResponse)
 def schedule_simulation_job(
     params: schemas.SimulationParamsSchema,
-    sampleSize: int,
     background_tasks: BackgroundTasks,
+    sampleSize: int = Query(..., ge=1, le=MAX_SAMPLE_SIZE),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):

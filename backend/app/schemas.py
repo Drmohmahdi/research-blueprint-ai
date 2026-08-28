@@ -143,7 +143,7 @@ class ProjectResponse(BaseModel):
 
 
 class TitleAnalysisRequest(BaseModel):
-    title: str
+    title: str = Field(..., min_length=1, max_length=500)
 
 
 class TitleAnalysisResponse(BaseModel):
@@ -174,7 +174,7 @@ class SimulationParamsSchema(BaseModel):
     attritionRate: float = 0.15
     maxScore: float = 100.0
     seed: int = 42
-    iterations: int = 1000
+    iterations: int = Field(default=1000, ge=1, le=10000)
 
 
 class SimulatedStudentRow(BaseModel):

@@ -142,7 +142,6 @@ export const AppRouter: React.FC = () => {
       <Route path={ROUTES.PROGRESS}         element={<SafeRoute><ResearchProgressDashboard /></SafeRoute>} />
       <Route path={ROUTES.ASSISTANT}        element={<SafeRoute><MethodologyChat /></SafeRoute>} />
       {/* Publishing Module Routes */}
-      <Route path={ROUTES.PUBLISHING}       element={<SafeRoute><PublicationReadinessReviewer /></SafeRoute>} />
       <Route path={ROUTES.PUBLISHING}       element={<SafeRoute><PublicationCommandCenter /></SafeRoute>} />
       <Route path={ROUTES.REVIEW_SIM}       element={<SafeRoute><PublicationReadinessReviewer /></SafeRoute>} />
       <Route path={ROUTES.EXPORT}           element={<SafeRoute><ExportPanel /></SafeRoute>} />

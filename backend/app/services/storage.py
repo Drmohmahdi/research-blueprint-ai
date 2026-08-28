@@ -10,6 +10,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import update as sa_update, case, func as sa_func
 from sqlalchemy.orm import Session
 from .. import models
+from .tenant_context import GLOBAL_ADMIN_ROLES
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -563,7 +564,13 @@ class FileAccessPolicy:
             return False
 
         # 2. Superadmin or Org Admin / Owner
-        if getattr(user, "is_superadmin", False) or role in ["ORGANIZATION_ADMIN", "OWNER"]:
+        # Platform-wide admin only — organization-role admin/owner does NOT
+        # imply blanket file access (matches this platform's established
+        # resource-scoped authority invariant: org role is not a substitute
+        # for an explicit per-resource relationship). An org admin needing
+        # a specific sensitive file (e.g. raw dataset bytes) must hold the
+        # same explicit grant/relationship any other member would need.
+        if (user.role or "").upper() in GLOBAL_ADMIN_ROLES:
             return True
 
         # 3. File Uploader Ownership
@@ -586,8 +593,8 @@ class FileAccessPolicy:
                     return True
                 # If comments or shared collaborator
                 collab = db.query(models.ProjectComment).filter(
-                    models.ProjectComment.project_id == file.project_id,
-                    models.ProjectComment.user_id == user.id
+                    models.ProjectComment.projectId == file.project_id,
+                    models.ProjectComment.authorId == user.id
                 ).first()
                 if collab:
                     return True
@@ -665,7 +672,13 @@ class FileAccessPolicy:
             return False, "لا يمكن حذف ملف وثيقة رسمية معتمدة أكاديميًا / Cannot delete verified academic evidence file"
 
         # 3. Ownership / Role authorization
-        if getattr(user, "is_superadmin", False) or role in ["ORGANIZATION_ADMIN", "OWNER"]:
+        # Platform-wide admin only — organization-role admin/owner does NOT
+        # imply blanket file access (matches this platform's established
+        # resource-scoped authority invariant: org role is not a substitute
+        # for an explicit per-resource relationship). An org admin needing
+        # a specific sensitive file (e.g. raw dataset bytes) must hold the
+        # same explicit grant/relationship any other member would need.
+        if (user.role or "").upper() in GLOBAL_ADMIN_ROLES:
             return True, "Authorized by Admin role"
 
         if file.uploaded_by == user.id:

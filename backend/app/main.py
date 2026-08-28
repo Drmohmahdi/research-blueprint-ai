@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from sqlalchemy import text
@@ -48,6 +49,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.TRUSTED_HOSTS)
+
+# Without this, Limiter's default_limits (the platform-wide "200/minute" floor)
+# is never evaluated — only routes with an explicit @limiter.limit(...)
+# decorator were actually throttled.
+app.add_middleware(SlowAPIMiddleware)
 
 # Paths reachable without the temporary development site gate, regardless of
 # whether SITE_GATE_PASSWORD is set. Keep this minimal — anything else is
@@ -129,7 +135,6 @@ app.include_router(organizations.router, prefix="/api")
 app.include_router(storage.router, prefix="/api")
 app.include_router(analytics.router, prefix="/api")
 app.include_router(notifications.router)
-app.include_router(notifications.ws_router)
 app.include_router(academic_foundation.router)
 app.include_router(billing.router)
 app.include_router(search.router, prefix="/api")

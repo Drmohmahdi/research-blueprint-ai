@@ -8,6 +8,7 @@ from typing import List, Optional, Dict, Any
 from app.db import get_db
 from app.models import ResearchProject, User, PredictionRun, PredictionResult, PredictionScenario, HypothesisForecast, PredictionModel, PredictionModelVersion, PredictedObservedComparison, PredictionRecommendation
 from app.services.tenant_context import get_tenant_context, TenantContext
+from app.services.research_design import project_access
 from app.services.prediction_service import (
     run_literature_forecast,
     run_pilot_forecast,
@@ -83,7 +84,7 @@ def validate_readiness(
     db: Session = Depends(get_db),
     context: TenantContext = Depends(get_tenant_context)
 ):
-    project = db.query(ResearchProject).filter(ResearchProject.id == id, ResearchProject.organizationId == context.organization.id).first()
+    project = project_access(db, id, context)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
         
@@ -115,11 +116,11 @@ def literature_forecast(
     db: Session = Depends(get_db),
     context: TenantContext = Depends(get_tenant_context)
 ):
-    project = db.query(ResearchProject).filter(ResearchProject.id == id, ResearchProject.organizationId == context.organization.id).first()
+    project = project_access(db, id, context)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
         
-    sample_size = project.sampleSettings.get("populationSize", 60) if project.sampleSettings else 60
+    sample_size = (project.sampleSettings.get("populationSize") or 60) if project.sampleSettings else 60
     studies_dicts = [s.model_dump() for s in req.studies]
     
     result = run_literature_forecast(studies_dicts, sample_size, req.alpha)
@@ -132,7 +133,7 @@ def pilot_forecast(
     db: Session = Depends(get_db),
     context: TenantContext = Depends(get_tenant_context)
 ):
-    project = db.query(ResearchProject).filter(ResearchProject.id == id, ResearchProject.organizationId == context.organization.id).first()
+    project = project_access(db, id, context)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
         
@@ -152,11 +153,11 @@ def dynamic_forecast(
     db: Session = Depends(get_db),
     context: TenantContext = Depends(get_tenant_context)
 ):
-    project = db.query(ResearchProject).filter(ResearchProject.id == id, ResearchProject.organizationId == context.organization.id).first()
+    project = project_access(db, id, context)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
         
-    sample_size = project.sampleSettings.get("populationSize", 60) if project.sampleSettings else 60
+    sample_size = (project.sampleSettings.get("populationSize") or 60) if project.sampleSettings else 60
     cohort_dicts = [c.model_dump() for c in req.cohort]
     
     result = run_dynamic_forecast(cohort_dicts, sample_size)
@@ -226,7 +227,7 @@ def run_prediction(
     db: Session = Depends(get_db),
     context: TenantContext = Depends(get_tenant_context)
 ):
-    project = db.query(ResearchProject).filter(ResearchProject.id == id, ResearchProject.organizationId == context.organization.id).first()
+    project = project_access(db, id, context)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
         
@@ -234,7 +235,7 @@ def run_prediction(
     
     # 1. Compute predictions based on selected mode
     if req.forecastMode == "LITERATURE_BASED_FORECAST":
-        sample_size = project.sampleSettings.get("populationSize", 60) if project.sampleSettings else 60
+        sample_size = (project.sampleSettings.get("populationSize") or 60) if project.sampleSettings else 60
         studies_dicts = [s.model_dump() for s in req.studies] if req.studies else []
         res = run_literature_forecast(studies_dicts, sample_size)
         point_est = res["point_estimate"]
@@ -260,7 +261,7 @@ def run_prediction(
         prob_hyp = res["prob_supported"]
     elif req.forecastMode == "IN_STUDY_DYNAMIC_FORECAST":
         cohort_dicts = [c.model_dump() for c in req.cohortData] if req.cohortData else []
-        sample_size = project.sampleSettings.get("populationSize", 60) if project.sampleSettings else 60
+        sample_size = (project.sampleSettings.get("populationSize") or 60) if project.sampleSettings else 60
         res = run_dynamic_forecast(cohort_dicts, sample_size)
         point_est = res["expected_gain"] / 100.0 # Convert gain to standardized effect proxy
         lower = point_est - 0.2
@@ -286,7 +287,7 @@ def run_prediction(
             {"sampleSize": 70, "expectedPower": 0.8, "expectedEffectSize": 0.45, "expectedAttritionRate": 0.15, "observedEffectSize": 0.42, "name": "study5", "isSynthetic": False}
         ]
         features = {
-            "sampleSize": project.sampleSettings.get("populationSize", 60) if project.sampleSettings else 60,
+            "sampleSize": (project.sampleSettings.get("populationSize") or 60) if project.sampleSettings else 60,
             "expectedPower": project.sampleSettings.get("expectedPower", 0.8) if project.sampleSettings else 0.8,
             "expectedEffectSize": project.sampleSettings.get("expectedEffectSize", 0.5) if project.sampleSettings else 0.5,
             "expectedAttritionRate": project.sampleSettings.get("expectedAttritionRate", 0.15) if project.sampleSettings else 0.15
@@ -304,7 +305,7 @@ def run_prediction(
         raise HTTPException(status_code=400, detail="Invalid forecastMode")
         
     # Calculate upgraded sub-forecasts
-    sample_size = project.sampleSettings.get("populationSize", 60) if project.sampleSettings else 60
+    sample_size = (project.sampleSettings.get("populationSize") or 60) if project.sampleSettings else 60
     prior_attr = project.sampleSettings.get("expectedAttritionRate", 0.15) if project.sampleSettings else 0.15
     cohort_data_dicts = [c.model_dump() for c in req.cohortData] if req.cohortData else []
 
@@ -430,7 +431,7 @@ def run_prediction(
     db.commit()
     
     # Return run representation
-    return get_prediction_run_details(run_id, db)
+    return get_prediction_run_details(run_id, id, db)
 
 @router.get("/{id}/prediction/runs")
 def list_prediction_runs(
@@ -438,7 +439,7 @@ def list_prediction_runs(
     db: Session = Depends(get_db),
     context: TenantContext = Depends(get_tenant_context)
 ):
-    project = db.query(ResearchProject).filter(ResearchProject.id == id, ResearchProject.organizationId == context.organization.id).first()
+    project = project_access(db, id, context)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
         
@@ -452,14 +453,14 @@ def get_prediction_run_details_endpoint(
     db: Session = Depends(get_db),
     context: TenantContext = Depends(get_tenant_context)
 ):
-    project = db.query(ResearchProject).filter(ResearchProject.id == id, ResearchProject.organizationId == context.organization.id).first()
+    project = project_access(db, id, context)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-        
-    return get_prediction_run_details(runId, db)
 
-def get_prediction_run_details(run_id: str, db: Session):
-    run = db.query(PredictionRun).filter(PredictionRun.id == run_id).first()
+    return get_prediction_run_details(runId, project.id, db)
+
+def get_prediction_run_details(run_id: str, project_id: str, db: Session):
+    run = db.query(PredictionRun).filter(PredictionRun.id == run_id, PredictionRun.projectId == project_id).first()
     if not run:
         raise HTTPException(status_code=404, detail="Prediction run not found")
         
@@ -486,14 +487,14 @@ def compare_observed_outcomes(
     db: Session = Depends(get_db),
     context: TenantContext = Depends(get_tenant_context)
 ):
-    project = db.query(ResearchProject).filter(ResearchProject.id == id, ResearchProject.organizationId == context.organization.id).first()
+    project = project_access(db, id, context)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-        
-    run = db.query(PredictionRun).filter(PredictionRun.id == runId).first()
+
+    run = db.query(PredictionRun).filter(PredictionRun.id == runId, PredictionRun.projectId == project.id).first()
     if not run:
         raise HTTPException(status_code=404, detail="Prediction run not found")
-        
+
     result = db.query(PredictionResult).filter(PredictionResult.runId == runId).first()
     if not result:
         raise HTTPException(status_code=404, detail="Prediction result not found")

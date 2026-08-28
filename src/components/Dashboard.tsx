@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { getTranslation } from '../utils/translations';
 import { checkConsistency } from '../utils/ruleEngine';
 import { VIEW_TO_PATH } from '../router/routes';
-import { apiGetActiveOrganization } from '../utils/api';
+import { apiGetActiveOrganization, apiGetBilling } from '../utils/api';
 import { researchStorage } from '../utils/researchStorage';
-import { Badge, Progress, EmptyState, Alert, Button, PathPanel } from '../design-system';
+import { Progress, EmptyState, Button, PathPanel } from '../design-system';
 import { 
   FolderGit2, 
   Sparkles, 
@@ -36,13 +36,8 @@ export const Dashboard: React.FC = () => {
   const { projects, activeProject, language, user, simulationResults } = useProject();
 
   const [activeOrg, setActiveOrg] = useState<any | null>(null);
+  const [billing, setBilling] = useState<any | null>(null);
   const [dbComments, setDbComments] = useState<any[]>([]);
-  const [toast, setToast] = useState<{ type: 'success' | 'info'; message: string } | null>(null);
-
-  const showToast = useCallback((type: 'success' | 'info', message: string) => {
-    setToast({ type, message });
-    window.setTimeout(() => setToast(null), 3000);
-  }, []);
 
   useEffect(() => {
     const fetchOrg = async () => {
@@ -54,6 +49,18 @@ export const Dashboard: React.FC = () => {
       }
     };
     fetchOrg();
+  }, []);
+
+  useEffect(() => {
+    const fetchBilling = async () => {
+      try {
+        const usage = await apiGetBilling();
+        if (usage) setBilling(usage);
+      } catch (e) {
+        console.error("Failed to load billing/usage for dashboard", e);
+      }
+    };
+    fetchBilling();
   }, []);
 
   useEffect(() => {
@@ -256,57 +263,14 @@ export const Dashboard: React.FC = () => {
   };
 
 
-  // Mock Data for Role-Based Dashboards
-  const supervisedStudents = [
-    { id: 'stud-1', name: language === 'ar' ? 'أحمد القحطاني' : 'Ahmed Al-Qahtani', title: language === 'ar' ? 'أثر استخدام الذكاء الاصطناعي في العلوم' : 'Impact of AI in Science Education', progress: 80, consistency: 95, status: 'safe' },
-    { id: 'stud-2', name: language === 'ar' ? 'سارة الدوسري' : 'Sara Al-Dossary', title: language === 'ar' ? 'أثر الفصول المقلوبة في التحصيل الإملائي' : 'Flipped Classrooms on Spelling Retention', progress: 40, consistency: 65, status: 'warning' },
-    { id: 'stud-3', name: language === 'ar' ? 'خالد العنزي' : 'Khaled Al-Anazi', title: language === 'ar' ? 'فاعلية برنامج محاكاة ثلاثي الأبعاد في الهندسة' : '3D Simulation Program in Geometry', progress: 60, consistency: 82, status: 'safe' },
-    { id: 'stud-4', name: language === 'ar' ? 'فاطمة الشهري' : 'Fatima Al-Shehri', title: language === 'ar' ? 'أثر ألعاب التلعيب في الاستيعاب القرائي' : 'Gamification on Reading Comprehension', progress: 20, consistency: 48, status: 'critical' },
-  ];
-
-  const flaggedStudentsCount = supervisedStudents.filter(s => s.status === 'critical').length;
-  const avgDesignQuality = Math.round(
-    supervisedStudents.reduce((sum, s) => sum + s.consistency, 0) / (supervisedStudents.length || 1)
-  );
-  const studentStatusBadgeVariant = (status: string): 'completed' | 'warning' | 'critical' =>
-    status === 'safe' ? 'completed' : status === 'warning' ? 'warning' : 'critical';
-  const studentStatusLabel = (status: string) =>
-    status === 'safe'
-      ? (language === 'ar' ? 'آمن إحصائياً' : 'Safe')
-      : status === 'warning'
-        ? (language === 'ar' ? 'تحذير اتساق' : 'Warning')
-        : (language === 'ar' ? 'أخطاء حرجة' : 'Critical');
-
-  const adminStats = {
-    planCode: 'RESEARCH_TEAM',
-    planName: language === 'ar' ? 'باقة الكليات والفرق البحثية (Pro)' : 'College Research Team (Pro)',
-    expiresAt: '2027-07-01',
-    membersUsed: 6,
-    membersMax: 10,
-    aiRequestsUsed: 1250,
-    aiRequestsMax: 5000,
-    predictionRunsUsed: 18,
-    predictionRunsMax: 50,
-    storageUsedMb: 45,
-    storageMaxMb: 500,
-    departments: [
-      { id: 'dept-1', name: language === 'ar' ? 'قسم المناهج وطرق التدريس' : 'Dept of Curriculum & Instruction', members: 3, projects: 8 },
-      { id: 'dept-2', name: language === 'ar' ? 'قسم تقنيات التعليم' : 'Dept of Educational Technology', members: 2, projects: 5 },
-      { id: 'dept-3', name: language === 'ar' ? 'قسم الإدارة والتخطيط التربوي' : 'Dept of Educational Administration', members: 1, projects: 2 }
-    ],
-    invoices: [
-      { id: 'INV-2026-07', date: '2026-07-01', amount: '250 SAR', status: 'PAID' },
-      { id: 'INV-2026-06', date: '2026-06-01', amount: '250 SAR', status: 'PAID' },
-    ]
-  };
+  // Real usage/quota data for the ADMIN dashboard, fetched via apiGetBilling()
+  // above. null while loading or if the request failed — every KPI below
+  // must render a safe placeholder rather than a fabricated number.
+  const quota = billing?.quota ?? null;
+  const usage = billing?.usage ?? null;
 
   return (
     <div className="space-y-8">
-      {toast && (
-        <Alert variant={toast.type === 'success' ? 'success' : 'info'} onClose={() => setToast(null)} className="animate-fade-in">
-          {toast.message}
-        </Alert>
-      )}
       {dashboardRole === 'RESEARCHER' && (
         <>
           {/* Top Banner section */}
@@ -663,90 +627,28 @@ export const Dashboard: React.FC = () => {
           </div>
           </PathPanel>
 
-          {/* Supervisor KPIs */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className={kpiTileClass}>
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-semibold text-[var(--ds-text-secondary)] uppercase tracking-wider">{language === 'ar' ? 'الطلاب الخاضعون للإشراف' : 'Supervised Students'}</span>
-                <Users size={20} className="text-[var(--ds-primary)]" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-3xl font-extrabold text-ink ds-numeric m-0">{supervisedStudents.length}</h3>
-                <span className="text-xs text-[var(--ds-text-muted)] font-medium">{language === 'ar' ? 'باحثين مسجلين في مسارك' : 'Active students in your track'}</span>
-              </div>
-            </div>
-            <div className={kpiTileClass}>
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-semibold text-[var(--ds-text-secondary)] uppercase tracking-wider">{language === 'ar' ? 'ملاحظات بانتظار المراجعة' : 'Notes Pending Review'}</span>
-              <MessageSquareCode size={20} className="text-[var(--ds-warning)]" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-3xl font-extrabold text-ink ds-numeric m-0">3</h3>
-                <span className="text-xs text-[var(--ds-text-muted)] font-medium">{language === 'ar' ? 'تعليقات غير محلولة حالياً' : 'Unresolved advisor notes'}</span>
-              </div>
-            </div>
-            <div className={kpiTileClass}>
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-semibold text-[var(--ds-text-secondary)] uppercase tracking-wider">{language === 'ar' ? 'أبحاث بها أخطاء منهجية' : 'Flagged Studies'}</span>
-            <AlertTriangle size={20} className="text-[var(--ds-danger)]" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-3xl font-extrabold text-ink ds-numeric m-0">{flaggedStudentsCount}</h3>
-                <span className="text-xs text-[var(--ds-text-muted)] font-medium">{language === 'ar' ? 'دراسات تتجاوز حدود الأمان' : 'Studies exceeding risk limits'}</span>
-              </div>
-            </div>
-            <div className={kpiTileClass}>
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-semibold text-[var(--ds-text-secondary)] uppercase tracking-wider">{language === 'ar' ? 'متوسط جودة التصميم' : 'Avg Design Quality'}</span>
-            <TrendingUp size={20} className="text-[var(--ds-success)]" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-3xl font-extrabold text-ink ds-numeric m-0">{avgDesignQuality}%</h3>
-                <span className="text-xs text-[var(--ds-text-muted)] font-medium">{language === 'ar' ? 'مؤشر جودة التصاميم الإجمالي' : 'Overall student quality score'}</span>
-              </div>
-            </div>
-          </div>
-
           {/* Supervisor Split Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className={`lg:col-span-2 ${panelCardClass}`}>
               <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)]">
                 {language === 'ar' ? 'متابعة تصاميم أبحاث الطلاب' : 'Student Research Pipeline'}
               </h3>
-              <div className="divide-y divide-[var(--ds-border-subtle)]">
-                {supervisedStudents.map((stud) => (
-                  <div key={stud.id} className="py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-xs text-[var(--ds-text-primary)]">{stud.name}</span>
-                        <Badge variant={studentStatusBadgeVariant(stud.status)}>{studentStatusLabel(stud.status)}</Badge>
-                      </div>
-                      <p className="text-xs text-[var(--ds-text-secondary)] m-0">{stud.title}</p>
-                      <div className="flex items-center gap-2 text-[10px] text-[var(--ds-text-muted)]">
-                        <span>{language === 'ar' ? `مؤشر الاتساق: ${stud.consistency}/100` : `Consistency: ${stud.consistency}/100`}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-4 w-full sm:w-auto shrink-0 justify-between sm:justify-end">
-                      <div className="w-24 text-start">
-                        <div className="flex justify-between text-[9px] font-bold text-[var(--ds-text-muted)] mb-1">
-                          <span>{language === 'ar' ? 'التقدم' : 'Progress'}</span>
-                          <span>{stud.progress}%</span>
-                        </div>
-                        <Progress value={stud.progress} variant="primary" />
-                      </div>
-                      <button
-                        onClick={() => {
-                          showToast('info', language === 'ar' ? `جاري تحميل نموذج الطالب ${stud.name} لمراجعته.` : `Loading research model of ${stud.name} for review.`);
-                        }}
-                        className="px-3.5 py-1.5 bg-action hover:bg-action-hover text-on-action rounded-lg text-[10px] font-black cursor-pointer shadow-sm ds-transition"
-                      >
-                        {language === 'ar' ? 'مراجعة المنهجية' : 'Review Study'}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <EmptyState
+                bare
+                illustration={<Users size={32} />}
+                title={language === 'ar' ? 'لوحة الإشراف الموجزة قيد التطوير' : 'Supervisor summary is not wired up yet'}
+                description={language === 'ar'
+                  ? 'هذه اللوحة لا تعرض بيانات إشراف حية بعد. توجه إلى مركز عمليات الأطروحات لعرض تكليفات الإشراف والتقارير الفعلية.'
+                  : 'This panel does not show live supervision data yet. Go to the Thesis Operations Center for real supervision assignments and reports.'}
+                actionButton={
+                  <button
+                    onClick={() => setCurrentView('thesisOperations')}
+                    className="px-3.5 py-1.5 bg-action hover:bg-action-hover text-on-action rounded-lg text-[10px] font-black cursor-pointer shadow-sm ds-transition"
+                  >
+                    {language === 'ar' ? 'فتح مركز عمليات الأطروحات' : 'Open Thesis Operations Center'}
+                  </button>
+                }
+              />
             </div>
 
             <div className="space-y-6">
@@ -796,7 +698,7 @@ export const Dashboard: React.FC = () => {
           </div>
           </PathPanel>
 
-          {/* Admin KPIs */}
+          {/* Admin KPIs — real usage/quota from apiGetBilling(), null-safe while loading */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div className={kpiTileClass}>
               <div className="flex justify-between items-center">
@@ -804,9 +706,9 @@ export const Dashboard: React.FC = () => {
                 <CreditCard size={20} className="text-[var(--ds-primary)]" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-sm font-black text-[var(--ds-text-primary)] m-0">{adminStats.planName}</h3>
+                <h3 className="text-sm font-black text-[var(--ds-text-primary)] m-0">{quota?.plan_name ?? (language === 'ar' ? '—' : '—')}</h3>
                 <span className="text-[10px] text-[var(--ds-text-muted)] font-medium">
-                  {language === 'ar' ? `تاريخ التجديد: ${adminStats.expiresAt}` : `Renewal Date: ${adminStats.expiresAt}`}
+                  {language === 'ar' ? `تاريخ التجديد: ${quota?.current_period_end ?? '—'}` : `Renewal Date: ${quota?.current_period_end ?? '—'}`}
                 </span>
               </div>
             </div>
@@ -816,8 +718,8 @@ export const Dashboard: React.FC = () => {
             <Users size={20} className="text-[var(--ds-primary)]" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-2xl font-extrabold text-[var(--ds-text-primary)] m-0">{adminStats.membersUsed} / {adminStats.membersMax}</h3>
-                <Progress value={(adminStats.membersUsed / adminStats.membersMax) * 100} variant="primary" className="mt-2" />
+                <h3 className="text-2xl font-extrabold text-[var(--ds-text-primary)] m-0">{usage?.members ?? '—'} / {quota?.max_members ?? '—'}</h3>
+                <Progress value={usage && quota ? (usage.members / quota.max_members) * 100 : 0} variant="primary" className="mt-2" />
               </div>
             </div>
             <div className={kpiTileClass}>
@@ -826,8 +728,8 @@ export const Dashboard: React.FC = () => {
             <Activity size={20} className="text-[var(--ds-success)]" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-2xl font-extrabold text-[var(--ds-text-primary)] m-0">{adminStats.aiRequestsUsed} / {adminStats.aiRequestsMax}</h3>
-                <Progress value={(adminStats.aiRequestsUsed / adminStats.aiRequestsMax) * 100} variant="success" className="mt-2" />
+                <h3 className="text-2xl font-extrabold text-[var(--ds-text-primary)] m-0">{usage?.ai_tokens ?? '—'} / {quota?.ai_tokens_limit ?? '—'}</h3>
+                <Progress value={usage && quota ? (usage.ai_tokens / quota.ai_tokens_limit) * 100 : 0} variant="success" className="mt-2" />
               </div>
             </div>
             <div className={kpiTileClass}>
@@ -836,8 +738,8 @@ export const Dashboard: React.FC = () => {
                 <Sparkles size={20} className="text-[var(--ds-primary)]" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-2xl font-extrabold text-[var(--ds-text-primary)] m-0">{adminStats.predictionRunsUsed} / {adminStats.predictionRunsMax}</h3>
-                <Progress value={(adminStats.predictionRunsUsed / adminStats.predictionRunsMax) * 100} variant="primary" className="mt-2" />
+                <h3 className="text-2xl font-extrabold text-[var(--ds-text-primary)] m-0">{usage?.prediction_runs ?? '—'} / {quota?.prediction_runs_limit ?? '—'}</h3>
+                <Progress value={usage && quota ? (usage.prediction_runs / quota.prediction_runs_limit) * 100 : 0} variant="primary" className="mt-2" />
               </div>
             </div>
             <div className={kpiTileClass}>
@@ -846,71 +748,45 @@ export const Dashboard: React.FC = () => {
             <Layers size={20} className="text-[var(--ds-danger)]" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-2xl font-extrabold text-[var(--ds-text-primary)] m-0">{adminStats.storageUsedMb}MB / {adminStats.storageMaxMb}MB</h3>
-                <Progress value={(adminStats.storageUsedMb / adminStats.storageMaxMb) * 100} variant="danger" className="mt-2" />
+                <h3 className="text-2xl font-extrabold text-[var(--ds-text-primary)] m-0">{usage?.storage_mb ?? '—'}MB / {quota?.max_storage_mb ?? '—'}MB</h3>
+                <Progress value={usage && quota ? (usage.storage_mb / quota.max_storage_mb) * 100 : 0} variant="danger" className="mt-2" />
               </div>
             </div>
           </div>
 
           {/* Admin Split Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Workspace Hierarchy Trees */}
             <div className={`lg:col-span-2 ${panelCardClass}`}>
-              <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)] flex items-center justify-between">
-                <span>{language === 'ar' ? 'الهيكل التنظيمي للمؤسسة ومساحات العمل الفرعية' : 'Workspace Departments & Hierarchical Tree'}</span>
-                <span className="text-[9px] bg-[var(--ds-primary-soft)] text-ink border border-[var(--ds-primary)]/20 px-2 py-0.5 rounded font-black">
-                  {language === 'ar' ? 'توريث باقة الـ SaaS مفعل' : 'Billing Inheritance Active'}
-                </span>
+              <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)]">
+                {language === 'ar' ? 'المؤسسة الحالية' : 'Current Organization'}
               </h3>
-              
-              <div className="space-y-4">
-                <div className="p-3 bg-[var(--ds-surface-secondary)] border border-dashed border-[var(--ds-border-subtle)] rounded-xl flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Building2 size={16} className="text-[var(--ds-primary)]" />
-                    <span className="font-extrabold text-xs text-[var(--ds-text-primary)]">{activeOrg ? activeOrg.name : (language === 'ar' ? 'مساحة العمل الأب (المستودع الرئيسي)' : 'Parent root institution')}</span>
-                  </div>
-                  <span className="text-[10px] text-ink font-bold bg-[var(--ds-primary-soft)] px-2 py-0.5 rounded border border-[var(--ds-primary)]/10">{language === 'ar' ? 'الكيان المالك للفوترة' : 'Billing Parent'}</span>
+              <div className="p-3 bg-[var(--ds-surface-secondary)] border border-dashed border-[var(--ds-border-subtle)] rounded-xl flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Building2 size={16} className="text-[var(--ds-primary)]" />
+                  <span className="font-extrabold text-xs text-[var(--ds-text-primary)]">{activeOrg ? activeOrg.name : '—'}</span>
                 </div>
-                
-                <div className="mr-4 pl-4 border-r border-[var(--ds-border-subtle)] space-y-3">
-                  {adminStats.departments.map((dept) => (
-                    <div key={dept.id} className="p-3.5 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-xl flex items-center justify-between hover:bg-[var(--ds-surface-secondary)] transition-all">
-                      <div className="flex items-center gap-2">
-                        <Layers size={14} className="text-[var(--ds-text-muted)]" />
-                        <span className="font-bold text-xs text-[var(--ds-text-secondary)]">{dept.name}</span>
-                      </div>
-                      <div className="flex items-center gap-4 text-[10px] font-semibold text-[var(--ds-text-muted)]">
-                        <span>{language === 'ar' ? `الأعضاء: ${dept.members}` : `Members: ${dept.members}`}</span>
-                        <span>•</span>
-                        <span>{language === 'ar' ? `الأبحاث: ${dept.projects}` : `Studies: ${dept.projects}`}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <span className="text-[10px] text-ink font-bold bg-[var(--ds-primary-soft)] px-2 py-0.5 rounded border border-[var(--ds-primary)]/10">{quota?.subscription_status ?? '—'}</span>
               </div>
+              <p className="text-xs text-[var(--ds-text-secondary)] m-0 mt-3">
+                {language === 'ar'
+                  ? `${usage?.projects ?? 0} مشروع بحثي عبر هذه المؤسسة.`
+                  : `${usage?.projects ?? 0} research projects across this organization.`}
+              </p>
             </div>
 
-            {/* Invoices & License panel */}
             <div className="space-y-6">
               <div className={panelCardClass}>
                 <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)] flex items-center gap-2">
                   <CreditCard size={16} className="text-[var(--ds-primary)]" />
-                  <span>{language === 'ar' ? 'الفواتير الأخيرة والمدفوعات' : 'Recent Invoices'}</span>
+                  <span>{language === 'ar' ? 'الفواتير والمدفوعات' : 'Billing & Invoices'}</span>
                 </h3>
-                <div className="space-y-3">
-                  {adminStats.invoices.map((inv) => (
-                    <div key={inv.id} className="flex justify-between items-center text-xs p-3 bg-[var(--ds-surface-secondary)] rounded-xl">
-                      <div className="space-y-1">
-                        <span className="font-bold block text-[var(--ds-text-primary)]">{inv.id}</span>
-                        <span className="text-[10px] text-[var(--ds-text-muted)]">{inv.date}</span>
-                      </div>
-                      <div className="text-left space-y-1">
-                        <span className="font-extrabold text-[var(--ds-text-primary)] block">{inv.amount}</span>
-                        <Badge variant={inv.status === 'PAID' ? 'completed' : 'warning'} className="text-[9px]">{inv.status}</Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <EmptyState
+                  bare
+                  title={language === 'ar' ? 'لا يوجد مزود دفع مفعّل بعد' : 'No live payment provider yet'}
+                  description={language === 'ar'
+                    ? 'الاشتراكات المدفوعة معطّلة حتى ربط مزود دفع حقيقي. لا يوجد سجل فواتير حقيقي لعرضه.'
+                    : 'Paid subscriptions are disabled until a live payment provider is connected. There is no real invoice history to show yet.'}
+                />
               </div>
             </div>
           </div>

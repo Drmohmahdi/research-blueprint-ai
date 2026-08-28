@@ -1,8 +1,8 @@
 import datetime
 import logging
 import secrets
-from typing import Dict, List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query, WebSocket, WebSocketDisconnect
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from ..db import get_db
@@ -16,66 +16,10 @@ from ..services.notifications import (
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/notifications", tags=["Academic Notifications & Events"])
-ws_router = APIRouter(prefix="/ws", tags=["notifications-ws"])
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 1. WEBSOCKET REAL-TIME CONNECTION MANAGER (BACKWARDS COMPATIBILITY)
-# ─────────────────────────────────────────────────────────────────────────────
-
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections: Dict[str, List[WebSocket]] = {}
-
-    async def connect(self, websocket: WebSocket, user_id: str):
-        await websocket.accept()
-        if user_id not in self.active_connections:
-            self.active_connections[user_id] = []
-        self.active_connections[user_id].append(websocket)
-        logger.info(f"User {user_id} connected via WebSocket. Active: {len(self.active_connections[user_id])}")
-
-    def disconnect(self, websocket: WebSocket, user_id: str):
-        if user_id in self.active_connections:
-            if websocket in self.active_connections[user_id]:
-                self.active_connections[user_id].remove(websocket)
-            if len(self.active_connections[user_id]) == 0:
-                del self.active_connections[user_id]
-        logger.info(f"User {user_id} disconnected via WebSocket.")
-
-    async def send_personal_message(self, message: dict, user_id: str):
-        if user_id in self.active_connections:
-            for connection in self.active_connections[user_id]:
-                try:
-                    await connection.send_json(message)
-                except Exception as e:
-                    logger.error(f"Failed to send message to {user_id}: {e}")
-
-    async def broadcast(self, message: dict):
-        for user_id, connections in self.active_connections.items():
-            for connection in connections:
-                try:
-                    await connection.send_json(message)
-                except Exception:
-                    pass
-
-
-manager = ConnectionManager()
-
-
-@ws_router.websocket("/notifications/{user_id}")
-async def websocket_endpoint(websocket: WebSocket, user_id: str):
-    await manager.connect(websocket, user_id)
-    try:
-        while True:
-            await websocket.receive_text()
-    except WebSocketDisconnect:
-        manager.disconnect(websocket, user_id)
-    except Exception:
-        manager.disconnect(websocket, user_id)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 2. IN-APP NOTIFICATIONS REST APIS
+# 1. IN-APP NOTIFICATIONS REST APIS
 # ─────────────────────────────────────────────────────────────────────────────
 
 @router.get("", response_model=schemas.NotificationListResponse, summary="List notifications for current user")
@@ -220,7 +164,7 @@ def mark_all_notifications_read(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 3. NOTIFICATION PREFERENCES APIS
+# 2. NOTIFICATION PREFERENCES APIS
 # ─────────────────────────────────────────────────────────────────────────────
 
 ALL_CATEGORIES = [

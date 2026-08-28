@@ -10,6 +10,7 @@ from ..db import get_db
 from .. import models, schemas
 from ..services.tenant_context import get_tenant_context, TenantContext
 from ..services.sanitization import sanitize_text
+from ..services.research_design import project_access
 
 router = APIRouter(prefix="/projects", tags=["Literature & PRISMA Persistence"])
 
@@ -61,10 +62,7 @@ def calculate_meta_analysis_metrics(studies: List[models.LiteratureStudy]) -> di
 
 
 def get_verified_project(project_id: str, db: Session, context: TenantContext) -> models.ResearchProject:
-    project = db.query(models.ResearchProject).filter(
-        models.ResearchProject.id == project_id,
-        models.ResearchProject.organizationId == context.organization.id
-    ).first()
+    project = project_access(db, project_id, context)
     if not project:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

@@ -9,6 +9,9 @@ from ..db import get_db
 from ..models import ProjectComment, ResearchProject
 from ..services.tenant_context import get_tenant_context, TenantContext
 from ..services.sanitization import sanitize_text
+from ..services.research_design import project_access, member_relationship
+
+_EDIT_CAPABLE_RELATIONSHIPS = {"PI", "CO_RESEARCHER", "DATA_ANALYST"}
 
 router = APIRouter(prefix="/api/comments", tags=["comments"])
 
@@ -43,15 +46,6 @@ def _serialize(c: ProjectComment) -> dict:
     }
 
 
-from fastapi import BackgroundTasks
-from .notifications import manager
-
-async def _broadcast_comment_notification(comment_data: dict):
-    await manager.broadcast({
-        "type": "NEW_COMMENT",
-        "data": comment_data
-    })
-
 from ..services.notifications import (
     OutboxService,
     WorkflowEventType,
@@ -62,15 +56,13 @@ from ..services.notifications import (
 @router.post("/")
 def create_comment(
     body: CommentCreate,
-    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     context: TenantContext = Depends(get_tenant_context)
 ):
-    # Verify project exists and belongs to the current tenant
-    proj = db.query(ResearchProject).filter(
-        ResearchProject.id == body.projectId,
-        ResearchProject.organizationId == context.organization.id
-    ).first()
+    # Verify the caller has an active relationship to the project (owner,
+    # global admin, or an ACTIVE ResearchProjectMember) — organization
+    # membership alone does not grant access to another member's project.
+    proj = project_access(db, body.projectId, context)
     if not proj:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -115,13 +107,8 @@ def create_comment(
 
     db.commit()
     db.refresh(comment)
-    
-    serialized_comment = _serialize(comment)
-    
-    # Broadcast notification to all connected clients in the org
-    background_tasks.add_task(_broadcast_comment_notification, serialized_comment)
-    
-    return serialized_comment
+
+    return _serialize(comment)
 
 
 @router.get("/project/{project_id}")
@@ -131,11 +118,7 @@ def list_project_comments(
     db: Session = Depends(get_db),
     context: TenantContext = Depends(get_tenant_context)
 ):
-    # Verify project access
-    proj = db.query(ResearchProject).filter(
-        ResearchProject.id == project_id,
-        ResearchProject.organizationId == context.organization.id
-    ).first()
+    proj = project_access(db, project_id, context)
     if not proj:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -162,9 +145,9 @@ def resolve_comment(
         ProjectComment.id == comment_id,
         ProjectComment.organizationId == context.organization.id
     ).first()
-    if not comment:
+    if not comment or not project_access(db, comment.projectId, context):
         raise HTTPException(status_code=404, detail="Comment not found or access denied")
-        
+
     comment.resolved = body.resolved
     comment.resolvedAt = datetime.now(timezone.utc).isoformat() if body.resolved else None
     db.commit()
@@ -181,9 +164,19 @@ def delete_comment(
         ProjectComment.id == comment_id,
         ProjectComment.organizationId == context.organization.id
     ).first()
-    if not comment:
+    proj = project_access(db, comment.projectId, context) if comment else None
+    if not comment or not proj:
         raise HTTPException(status_code=404, detail="Comment not found or access denied")
-        
+
+    # Deletion is narrower than viewing/resolving: the comment's own author,
+    # an edit-capable project relationship, the project owner, or a global
+    # admin — not just any member with read/comment access to the project.
+    is_author = comment.authorId == context.user.id
+    is_owner_or_admin = context.is_global_admin or proj.userId == context.user.id
+    rel = member_relationship(db, proj, context.user.id)
+    if not (is_author or is_owner_or_admin or rel in _EDIT_CAPABLE_RELATIONSHIPS):
+        raise HTTPException(status_code=403, detail="Not authorized to delete this comment")
+
     db.delete(comment)
     db.commit()
     return {"ok": True}

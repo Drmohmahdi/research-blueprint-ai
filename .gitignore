@@ -27,6 +27,8 @@ dist-ssr
 .env
 *.env
 backend/.env
+.env.*
+!.env.*.example
 
 # Databases
 *.db
