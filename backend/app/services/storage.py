@@ -74,11 +74,15 @@ class FileValidationService:
         # 2. Remove null bytes and CRLF
         clean = clean.replace("\x00", "").replace("\r", "").replace("\n", "").replace('"', "").replace("'", "")
 
-        # 3. Prevent path traversal dots at start
-        clean = clean.lstrip(".")
-
-        # 4. Remove Windows/Unix path separators
+        # 3. Remove Windows/Unix path separators
         clean = clean.replace("/", "").replace("\\", "").replace(":", "")
+
+        # 4. Prevent path traversal dots — leading dots (hidden dotfiles), and
+        # any ".." pairs that separator removal above may have newly exposed
+        # (e.g. "..\..\x" has no ".." until the backslashes are stripped)
+        clean = clean.lstrip(".")
+        while ".." in clean:
+            clean = clean.replace("..", "")
 
         # 5. Clean whitespace
         clean = re.sub(r"\s+", " ", clean).strip()
