@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useProject } from '../../context/ProjectContext';
 import { Card } from '../../design-system/components/Card';
-import { EmptyState } from '../../design-system/components/Feedback';
+import { EmptyActiveProject } from '../../components/EmptyActiveProject';
 import { PathPanel } from '../../design-system/components/Navigation';
 import { FileText, Download, ShieldCheck, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { apiExportAcademicReport, apiVerifyReport, type ReportVerificationResult } from '../../utils/api';
@@ -26,10 +26,10 @@ export const ExportPanel: React.FC = () => {
 
   if (!activeProject) {
     return (
-      <EmptyState
+      <EmptyActiveProject
+        language={language}
         illustration={<FileText size={40} />}
-        title={isAr ? 'لا يوجد مشروع نشط' : 'No active project'}
-        description={isAr ? 'اختر مشروعًا بحثيًا لعرض مصدّر التقارير الأكاديمية.' : 'Select a research project to open the academic report compiler.'}
+        description={isAr ? 'أنشئ مشروعًا من اختيار المسار لعرض مصدّر التقارير الأكاديمية.' : 'Create a project from path selection to open the academic report compiler.'}
       />
     );
   }

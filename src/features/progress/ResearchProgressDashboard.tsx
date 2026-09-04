@@ -11,8 +11,8 @@ import {
   Download
 } from 'lucide-react';
 import { Button } from '../../design-system/components/Button';
-import { EmptyState } from '../../design-system/components/Feedback';
 import { PathPanel } from '../../design-system/components/Navigation';
+import { EmptyActiveProject } from '../../components/EmptyActiveProject';
 import { ROUTES } from '../../router/routes';
 import { calculateProtocolHash } from '../../utils/protocolIntegrity';
 
@@ -25,7 +25,7 @@ interface PhaseInfo {
 }
 
 const PHASES: PhaseInfo[] = [
-  { id: 'planning', nameAr: 'التخطيط', nameEn: 'Planning', steps: ['wizard', 'analyzer'], icon: Target },
+  { id: 'planning', nameAr: 'التخطيط', nameEn: 'Planning', steps: ['ideaExploration', 'titleAnalysis'], icon: Target },
   { id: 'design', nameAr: 'التصميم', nameEn: 'Design', steps: ['modelBuilder', 'sampleCalc', 'consistency'], icon: Layers },
   { id: 'simulation', nameAr: 'المحاكاة', nameEn: 'Simulation', steps: ['simulation', 'outcomePredictor'], icon: TrendingUp },
   { id: 'registration', nameAr: 'التسجيل', nameEn: 'Registration', steps: ['preReg'], icon: Clock },
@@ -59,10 +59,10 @@ export const ResearchProgressDashboard: React.FC = () => {
 
   if (!activeProject) {
     return (
-      <EmptyState
+      <EmptyActiveProject
+        language={language}
         illustration={<TrendingUp size={40} />}
-        title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No active project'}
-        description={language === 'ar' ? 'اختر مشروعًا لعرض لوحة تقدم المسار البحثي.' : 'Select a project to view the research progress dashboard.'}
+        description={language === 'ar' ? 'أنشئ مشروعًا من اختيار المسار لعرض لوحة تقدم البحث.' : 'Create a project from path selection to view the research progress dashboard.'}
       />
     );
   }
@@ -102,7 +102,7 @@ export const ResearchProgressDashboard: React.FC = () => {
     && activeProject.ethicsFeasibilityPlan.privacyPlan.trim().length >= 10
     && activeProject.ethicsFeasibilityPlan.riskMitigationPlan.trim().length >= 10;
   const readinessSections = [
-    { labelAr: 'أساس الدراسة', labelEn: 'Study foundation', completed: [hasTitle, hasProblem, hasVars, hasQuestions, hasHypotheses].filter(Boolean).length, total: 5, route: ROUTES.WIZARD },
+    { labelAr: 'أساس الدراسة', labelEn: 'Study foundation', completed: [hasTitle, hasProblem, hasVars, hasQuestions, hasHypotheses].filter(Boolean).length, total: 5, route: activeProject ? ROUTES.NEW_STUDY_DESIGN.replace(':projectId', activeProject.id) : ROUTES.PATHS },
     { labelAr: 'خطط القياس', labelEn: 'Measurement plans', completed: completeMeasurementPlans, total: dependentVariables.length, route: ROUTES.MEASUREMENT },
     { labelAr: 'خطة التحليل', labelEn: 'Analysis plan', completed: completeAnalysisPlans, total: activeProject.hypotheses.length, route: ROUTES.ANALYSIS_PLAN },
     { labelAr: 'الجدوى والأخلاقيات', labelEn: 'Ethics and feasibility', completed: ethicsPlanComplete ? 1 : 0, total: 1, route: ROUTES.PLANNING },

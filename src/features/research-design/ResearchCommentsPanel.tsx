@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { MessageSquare, Send, CheckCircle } from 'lucide-react';
 import { EmptyState } from '../../design-system/components/Feedback';
 
@@ -23,18 +23,18 @@ export const ResearchCommentsPanel: React.FC<ResearchCommentsPanelProps> = ({
   const [newCommentText, setNewCommentText] = useState('');
   const [priority, setPriority] = useState<'NORMAL' | 'HIGH' | 'CRITICAL'>('NORMAL');
   const [loading, setLoading] = useState(false);
+  const onCountRef = useRef(onCommentsCountChange);
+  onCountRef.current = onCommentsCountChange;
 
   const fetchComments = useCallback(async () => {
     try {
       const data = await apiListProjectComments(projectId, activeStepId);
       setComments(data || []);
-      if (onCommentsCountChange) {
-        onCommentsCountChange(data ? data.filter((c: any) => !c.resolved).length : 0);
-      }
+      onCountRef.current?.(data ? data.filter((c: any) => !c.resolved).length : 0);
     } catch (err) {
       console.error('Failed to load step comments:', err);
     }
-  }, [activeStepId, onCommentsCountChange, projectId]);
+  }, [activeStepId, projectId]);
 
   useEffect(() => {
     if (projectId && activeStepId) {

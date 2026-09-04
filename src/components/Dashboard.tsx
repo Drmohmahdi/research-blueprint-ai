@@ -3,9 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { getTranslation } from '../utils/translations';
 import { checkConsistency } from '../utils/ruleEngine';
-import { VIEW_TO_PATH } from '../router/routes';
-import { apiGetActiveOrganization, apiGetBilling } from '../utils/api';
-import { researchStorage } from '../utils/researchStorage';
+import { VIEW_TO_PATH, ROUTES } from '../router/routes';
+import { apiGetActiveOrganization, apiGetBilling, apiListProjectComments } from '../utils/api';
 import { Progress, EmptyState, Button, PathPanel } from '../design-system';
 import { 
   FolderGit2, 
@@ -32,8 +31,17 @@ import { GroupComparisonChart } from './GroupComparisonChart';
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const setCurrentView = (viewId: string) => navigate(VIEW_TO_PATH[viewId] ?? '/');
   const { projects, activeProject, language, user, simulationResults } = useProject();
+  const designPath = activeProject?.id
+    ? ROUTES.NEW_STUDY_DESIGN.replaceAll(':projectId', activeProject.id)
+    : ROUTES.PATHS;
+  const setCurrentView = (viewId: string) => {
+    let path = VIEW_TO_PATH[viewId] ?? ROUTES.PORTAL;
+    if (path.includes(':projectId') && activeProject?.id) {
+      path = path.replaceAll(':projectId', activeProject.id);
+    }
+    navigate(path.includes(':projectId') ? ROUTES.PATHS : path);
+  };
 
   const [activeOrg, setActiveOrg] = useState<any | null>(null);
   const [billing, setBilling] = useState<any | null>(null);
@@ -68,17 +76,9 @@ export const Dashboard: React.FC = () => {
       setDbComments([]);
       return;
     }
-    const saved = researchStorage.getItem('rb_comments_' + activeProject.id);
-    if (!saved) {
-      setDbComments([]);
-      return;
-    }
-    try {
-      const parsed = JSON.parse(saved);
-      setDbComments(Array.isArray(parsed) ? parsed : []);
-    } catch {
-      setDbComments([]);
-    }
+    void apiListProjectComments(activeProject.id).then((list) => {
+      setDbComments(Array.isArray(list) ? list : []);
+    });
   }, [activeProject]);
 
   const getRoleFromUser = (): 'RESEARCHER' | 'SUPERVISOR' | 'ADMIN' => {
@@ -128,27 +128,27 @@ export const Dashboard: React.FC = () => {
     {
       label: language === 'ar' ? 'تحديد عنوان البحث العلمي' : 'Define Research Title',
       completed: !!(activeProject?.titleAr || activeProject?.titleEn),
-      path: VIEW_TO_PATH.wizard
+      path: designPath
     },
     {
       label: language === 'ar' ? 'صياغة مشكلة الدراسة' : 'Formulate Problem Statement',
       completed: !!(activeProject?.problemStatementAr || activeProject?.problemStatementEn),
-      path: VIEW_TO_PATH.wizard
+      path: designPath
     },
     {
       label: language === 'ar' ? 'تحديد وتوصيف متغيرات الدراسة' : 'Define Study Variables',
       completed: (activeProject?.variables.length || 0) > 0,
-      path: VIEW_TO_PATH.wizard
+      path: designPath
     },
     {
       label: language === 'ar' ? 'صياغة أسئلة البحث العلمي' : 'Formulate Research Questions',
       completed: (activeProject?.questions.length || 0) > 0,
-      path: VIEW_TO_PATH.wizard
+      path: designPath
     },
     {
       label: language === 'ar' ? 'صياغة الفرضيات العلمية' : 'Formulate Hypotheses',
       completed: (activeProject?.hypotheses.length || 0) > 0,
-      path: VIEW_TO_PATH.wizard
+      path: designPath
     }
   ];
 
@@ -200,9 +200,9 @@ export const Dashboard: React.FC = () => {
   ];
 
   const researchStages = [
-    { label: language === 'ar' ? 'الفكرة والعنوان' : 'Idea & Title', done: !!(activeProject?.titleAr || activeProject?.titleEn), path: VIEW_TO_PATH.wizard },
-    { label: language === 'ar' ? 'المشكلة والأسئلة' : 'Problem & Questions', done: !!(activeProject?.problemStatementAr || activeProject?.problemStatementEn) && (activeProject?.questions.length || 0) > 0, path: VIEW_TO_PATH.wizard },
-    { label: language === 'ar' ? 'المتغيرات والنموذج' : 'Variables & Model', done: (activeProject?.variables.length || 0) > 0, path: VIEW_TO_PATH.wizard },
+    { label: language === 'ar' ? 'الفكرة والعنوان' : 'Idea & Title', done: !!(activeProject?.titleAr || activeProject?.titleEn), path: designPath },
+    { label: language === 'ar' ? 'المشكلة والأسئلة' : 'Problem & Questions', done: !!(activeProject?.problemStatementAr || activeProject?.problemStatementEn) && (activeProject?.questions.length || 0) > 0, path: designPath },
+    { label: language === 'ar' ? 'المتغيرات والنموذج' : 'Variables & Model', done: (activeProject?.variables.length || 0) > 0, path: designPath },
     { label: language === 'ar' ? 'العينة والمحاكاة' : 'Sample & Simulation', done: !!simulationResults[activeProject?.id || ''], path: VIEW_TO_PATH.simulation },
     { label: language === 'ar' ? 'المراجعة والنشر' : 'Review & Publication', done: audit.score >= 90 && completeness === 100, path: VIEW_TO_PATH.reviewSim },
   ];
@@ -233,7 +233,7 @@ export const Dashboard: React.FC = () => {
       value: `${researchMaturityScore}%`,
       tone: researchMaturityScore >= 80 ? 'success' : researchMaturityScore >= 50 ? 'warning' : 'primary',
       action: language === 'ar' ? 'فتح معالج البحث' : 'Open Research Wizard',
-      path: VIEW_TO_PATH.wizard,
+      path: designPath,
     },
   ];
 
@@ -288,18 +288,27 @@ export const Dashboard: React.FC = () => {
               </h2>
               <p className="text-[var(--ds-text-secondary)] text-sm max-w-2xl m-0 leading-relaxed">
                 {language === 'ar' 
-                  ? 'صمم نموذج دراستك المنهجي، وافحص اتساقه العلمي، وشغل محاكاة النتائج إحصائياً قبل النزول للميدان.'
-                  : 'Design your methodological study model, check its consistency, and run statistical simulations before field execution.'}
+                  ? 'بيت المشروع هو دورة الحياة. هذه اللوحة ملخص سريع، والأدوات الذرية تُفتح من الخطوة المناسبة.'
+                  : 'The project home is the research lifecycle. This dashboard is a summary; atomic tools open from the matching step.'}
               </p>
             </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
             <button 
-              onClick={() => setCurrentView('analyzer')}
+              onClick={() => setCurrentView('lifecycle')}
               className={primaryActionClass}
             >
-              <Sparkles size={18} />
-              <span>{language === 'ar' ? 'تحليل عنوان الدراسة' : 'Analyze Study Title'}</span>
+              <Activity size={18} />
+              <span>{language === 'ar' ? 'متابعة دورة حياة المشروع' : 'Open project lifecycle'}</span>
               <ArrowRight size={16} className={language === 'ar' ? 'rotate-180' : ''} />
             </button>
+            <button 
+              onClick={() => setCurrentView('analyzer')}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-4 py-3 text-sm font-bold"
+            >
+              <Sparkles size={18} />
+              <span>{language === 'ar' ? 'تحليل العنوان' : 'Analyze title'}</span>
+            </button>
+            </div>
           </div>
           </PathPanel>
 
@@ -484,10 +493,10 @@ export const Dashboard: React.FC = () => {
                   illustration={<FolderGit2 size={40} />}
                   title={language === 'ar' ? 'لا يوجد مشروع نشط حالياً' : 'No active project currently'}
                   description={language === 'ar'
-                    ? 'ابدأ مشروعك البحثي الأول عبر معالج البحث لتظهر هنا مؤشرات التقدم والاتساق.'
-                    : 'Start your first research project via the wizard to see progress and consistency metrics here.'}
+                    ? 'ابدأ مشروعك البحثي الأول من اختيار المسار لتظهر هنا مؤشرات التقدم والاتساق.'
+                    : 'Start your first research project from path selection to see progress and consistency metrics here.'}
                   actionButton={
-                    <Button variant="primary" size="sm" onClick={() => setCurrentView('wizard')} iconAfter={<ArrowRight size={14} className={language === 'ar' ? 'rotate-180' : ''} />}>
+                    <Button variant="primary" size="sm" onClick={() => navigate(ROUTES.PATHS)} iconAfter={<ArrowRight size={14} className={language === 'ar' ? 'rotate-180' : ''} />}>
                       {language === 'ar' ? 'إنشاء مشروع جديد' : 'Create New Project'}
                     </Button>
                   }

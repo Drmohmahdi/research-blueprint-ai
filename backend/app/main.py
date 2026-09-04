@@ -1,6 +1,5 @@
 import logging
 import os
-import sys
 import time
 import uuid
 
@@ -8,27 +7,32 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.middleware import SlowAPIMiddleware
-from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from sqlalchemy import text
 from .db import engine, Base
 from .config import settings
 from .observability import log_event, request_id_context
+from .rate_limit import limiter
 from .services.site_gate import GATE_COOKIE_NAME, get_expected_site_gate_token
-from .routers import projects, analyzer, stats, auth, prediction, comments, organizations, storage, analytics, notifications, academic_foundation, literature, promotions, peer_reviews, external_reviews, reports, billing, search, ai, admin, site_gate, research_data, research_lifecycle, publication_intelligence, thesis_workflow, external_thesis_examiners, research_design
+from .services.notifications.email_adapter import configure_email_adapter
+from .routers import projects, analyzer, stats, auth, prediction, comments, organizations, storage, analytics, notifications, academic_foundation, literature, promotions, peer_reviews, external_reviews, reports, billing, search, ai, admin, site_gate, research_data, research_lifecycle, publication_intelligence, thesis_workflow, external_thesis_examiners, research_design, marketing
 
 
 settings.validate_production()
+configure_email_adapter(
+    host=settings.SMTP_HOST,
+    port=settings.SMTP_PORT,
+    username=settings.SMTP_USERNAME,
+    password=settings.SMTP_PASSWORD,
+    from_addr=settings.SMTP_FROM or settings.SMTP_USERNAME,
+    use_tls=settings.SMTP_USE_TLS,
+)
 
 # Local development convenience; production schema changes are Alembic-only.
 if settings.AUTO_CREATE_TABLES:
     Base.metadata.create_all(bind=engine)
-
-# Rate Limiter (disabled during testing to prevent 429 errors in test runs)
-is_testing = "pytest" in sys.modules or os.getenv("TESTING") == "True"
-limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"], enabled=not is_testing)
 
 app = FastAPI(
     title="Research Blueprint AI API",
@@ -58,7 +62,12 @@ app.add_middleware(SlowAPIMiddleware)
 # Paths reachable without the temporary development site gate, regardless of
 # whether SITE_GATE_PASSWORD is set. Keep this minimal — anything else is
 # denied by default while the gate is enabled.
-SITE_GATE_EXEMPT_PATHS = {"/health", "/ready", "/readiness", "/api/site-gate/status", "/api/site-gate/verify"}
+SITE_GATE_EXEMPT_PATHS = {"/health", "/ready", "/readiness", "/api/site-gate/status", "/api/site-gate/verify", "/api/marketing/leads"}
+SITE_GATE_EXEMPT_PREFIXES = ("/api/billing/webhooks",)
+
+
+def _is_site_gate_exempt(path: str) -> bool:
+    return path in SITE_GATE_EXEMPT_PATHS or path.startswith(SITE_GATE_EXEMPT_PREFIXES)
 
 
 @app.middleware("http")
@@ -77,7 +86,7 @@ async def operational_middleware(request: Request, call_next):
     if (
         gate_token
         and request.method != "OPTIONS"
-        and request.url.path not in SITE_GATE_EXEMPT_PATHS
+        and not _is_site_gate_exempt(request.url.path)
         and request.cookies.get(GATE_COOKIE_NAME) != gate_token
     ):
         response = JSONResponse(status_code=401, content={"detail": "SITE_GATED"})
@@ -147,6 +156,7 @@ app.include_router(publication_intelligence.router, prefix="/api")
 app.include_router(thesis_workflow.router, prefix="/api")
 app.include_router(external_thesis_examiners.router, prefix="/api")
 app.include_router(research_design.router, prefix="/api")
+app.include_router(marketing.router, prefix="/api")
 
 
 
@@ -157,11 +167,13 @@ def read_root(request: Request):
 
 
 @app.get("/health")
+@limiter.exempt
 def health(request: Request):
     return {"status": "ok", "liveness": "alive", "version": "3.0.0"}
 
 
 @app.get("/readiness")
+@limiter.exempt
 def ready(request: Request):
     try:
         with engine.connect() as connection:
@@ -173,6 +185,7 @@ def ready(request: Request):
             "storage": "ready" if storage_ready else "not_ready",
             "ai_live_provider": "configured" if settings.GEMINI_API_KEY else "not_configured",
             "payment_live_provider": "not_configured",
+            "email_live_provider": "configured" if settings.SMTP_HOST else "not_configured",
             "error_monitor": "not_configured",
         }
     except Exception as exc:
@@ -181,6 +194,7 @@ def ready(request: Request):
 
 
 @app.get("/ready", include_in_schema=False)
+@limiter.exempt
 def ready_compat(request: Request):
     result = ready(request)
     if isinstance(result, JSONResponse):

@@ -11,17 +11,15 @@ import sys
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 
 from ..db import get_db
 from .. import models, schemas
 from ..services.tenant_context import get_tenant_context, TenantContext
 from ..services.ai import GovernedAIService, AIServiceError, get_all_use_cases, AuthorizationError, ContextBuildError
 from ..services.billing import EntitlementService, FeatureKey
+from ..rate_limit import limiter
 
 router = APIRouter(prefix="/ai", tags=["Governed Academic AI"])
-limiter = Limiter(key_func=get_remote_address, enabled=not ("pytest" in sys.modules or os.getenv("TESTING") == "True"))
 
 MAX_QUESTION_CHARS = 20000
 

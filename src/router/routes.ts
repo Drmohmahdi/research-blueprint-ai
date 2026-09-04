@@ -1,5 +1,15 @@
 // Route path constants — single source of truth mapped to the Baseerah Academic Suite
 export const ROUTES = {
+  MARKETING_HOME:    '/',
+  MARKETING_FEATURES:'/features',
+  MARKETING_SOLUTIONS:'/solutions',
+  MARKETING_HOW:     '/how-it-works',
+  MARKETING_PRICING: '/pricing',
+  MARKETING_FAQ:     '/faq',
+  MARKETING_ABOUT:   '/about',
+  MARKETING_CONTACT: '/contact',
+  LOGIN:             '/login',
+
   // Portal Gateway
   PORTAL:            '/app',
   DASHBOARD:         '/app/research', // maps to the core research dashboard for backward compatibility
@@ -117,7 +127,12 @@ export const VIEW_TO_PATH: Record<string, string> = {
   assistant:          ROUTES.ASSISTANT,
   peerReview:         ROUTES.PEER_REVIEW,
   export:             ROUTES.EXPORT,
+  publishing:         ROUTES.PUBLISHING,
   promotion:          ROUTES.PROMOTION,
+  promotionRegulations: ROUTES.PROMOTION_REGULATIONS,
+  peerReviewAssignments: ROUTES.PEER_REVIEW_ASSIGNMENTS,
+  researchCommandCenter: ROUTES.RESEARCH_COMMAND_CENTER,
+  researchOffice:     ROUTES.RESEARCH_OFFICE,
   visibility:         ROUTES.VISIBILITY,
   visibilityAudit:    ROUTES.VISIBILITY_AUDIT,
   visibilityPlan:     ROUTES.VISIBILITY_PLAN,
@@ -150,3 +165,19 @@ export const VIEW_TO_PATH: Record<string, string> = {
 export const PATH_TO_VIEW: Record<string, string> = Object.fromEntries(
   Object.entries(VIEW_TO_PATH).map(([k, v]) => [v, k])
 );
+
+/** Resolve the shell view id for exact paths and parameterized academic routes. */
+export function viewFromPathname(pathname: string): string {
+  if (PATH_TO_VIEW[pathname]) return PATH_TO_VIEW[pathname];
+  if (/^\/app\/research\/projects\/[^/]+\/design/.test(pathname)) return 'newStudyDesign';
+  if (/^\/app\/research\/projects\/[^/]+\/command-center/.test(pathname)) return 'researchCommandCenter';
+  if (/^\/app\/assets\/[^/]+/.test(pathname)) return 'assets';
+  if (pathname.includes('/paths/seminar-proposal')) return 'seminarProposal';
+  if (pathname.includes('/paths/thesis-defense')) return 'thesisDefense';
+  if (pathname.startsWith('/app/publishing')) return 'publishing';
+  if (pathname.startsWith('/app/peer-review')) return 'peerReview';
+  if (pathname.startsWith('/app/promotion')) return 'promotion';
+  if (pathname.startsWith('/app/visibility')) return 'visibility';
+  if (pathname.startsWith('/app/research')) return 'dashboard';
+  return 'portal';
+}

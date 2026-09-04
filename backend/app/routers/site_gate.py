@@ -4,22 +4,16 @@ Unrelated to real application authentication (see auth.py) — this only
 unlocks visibility of the platform while it is hidden from the public during
 active development. Auto-disabled whenever SITE_GATE_PASSWORD is unset.
 """
-import os
-import sys
 from fastapi import APIRouter, Request, Response, HTTPException, status
 from pydantic import BaseModel
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 
 from ..config import settings
+from ..rate_limit import limiter
 from ..services.site_gate import (
     GATE_COOKIE_NAME,
     get_expected_site_gate_token,
     verify_site_gate_password,
 )
-
-is_testing = "pytest" in sys.modules or os.getenv("TESTING") == "True"
-limiter = Limiter(key_func=get_remote_address, enabled=not is_testing)
 
 router = APIRouter(prefix="/site-gate", tags=["Site Access Gate"])
 

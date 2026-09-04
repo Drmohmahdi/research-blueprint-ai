@@ -14,7 +14,8 @@ import {
   Save,
   MessageSquare,
   Lock,
-  Download
+  Download,
+  Globe
 } from 'lucide-react';
 import { 
   apiGetExternalReviewPortal, 
@@ -29,6 +30,8 @@ import {
 
 export const ExternalReviewerPortal: React.FC = () => {
   const { token } = useParams<{ token: string }>();
+  const [language, setLanguage] = useState<'ar' | 'en'>(() => (localStorage.getItem('rb_lang') as 'ar' | 'en') || 'ar');
+  const ar = language === 'ar';
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -235,7 +238,7 @@ export const ExternalReviewerPortal: React.FC = () => {
   const isSubmitted = portalData.assignment_status === 'SUBMITTED';
 
   return (
-    <main className="dark min-h-screen bg-canvas text-ink py-10 px-4 sm:px-6 lg:px-8" dir="rtl">
+    <main className="dark min-h-screen bg-canvas text-ink py-10 px-4 sm:px-6 lg:px-8" dir={ar ? 'rtl' : 'ltr'}>
       <div className="max-w-4xl mx-auto space-y-8">
         
         <PathPanel accent="var(--ds-path-review)">
@@ -246,8 +249,13 @@ export const ExternalReviewerPortal: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold text-ink m-0">بوابة التحكيم العلمي الخارجي</h1>
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-[var(--ds-success-soft)] text-success border border-success/30">جلسة مشفرة وآمنة</span>
+                <h1 className="text-xl font-bold text-ink m-0">{ar ? 'بوابة التحكيم العلمي الخارجي' : 'External peer-review portal'}</h1>
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-[var(--ds-success-soft)] text-success border border-success/30">{ar ? 'جلسة مشفرة وآمنة' : 'Encrypted session'}</span>
+                <Button type="button" variant="outline" className="text-xs" iconBefore={<Globe size={14} />} onClick={() => {
+                  const next = language === 'ar' ? 'en' : 'ar';
+                  setLanguage(next);
+                  localStorage.setItem('rb_lang', next);
+                }}>{language === 'ar' ? 'English' : 'العربية'}</Button>
               </div>
               <p className="text-sm text-secondary m-0">مرحباً د. {portalData.reviewer_name || 'المحكم العلمي'} — الجولة رقم {portalData.round_number}</p>
             </div>

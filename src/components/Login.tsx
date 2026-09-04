@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { 
   Brain, 
@@ -11,9 +12,14 @@ import {
   Moon, 
   ArrowRight,
   ArrowLeft,
-  Loader2
+  GraduationCap
 } from 'lucide-react';
 import { Card } from '../design-system/components/Card';
+import { Button } from '../design-system/components/Button';
+import { Input } from '../design-system/components/FormControls';
+import { apiForgotPassword, apiResetPassword, apiVerifyEmail } from '../utils/api';
+import { rememberIntendedPlan } from '../marketing/funnel';
+import { FUNNEL_EVENTS, track } from '../utils/analytics';
 
 export const Login: React.FC = () => {
   const {
@@ -25,18 +31,49 @@ export const Login: React.FC = () => {
     toggleTheme
   } = useProject();
 
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
-  const [selectedRole, setSelectedRole] = useState<'Researcher' | 'Supervisor' | 'SystemAdmin'>('Researcher');
+  const [authMode, setAuthMode] = useState<'login' | 'register' | 'forgot' | 'reset'>('login');
+  const [selectedRole, setSelectedRole] = useState<'Researcher' | 'Student' | 'Supervisor'>('Researcher');
   
   // Inputs
   const [usernameInput, setUsernameInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [emailInput, setEmailInput] = useState('');
+  const [resetToken, setResetToken] = useState('');
+  const [searchParams] = useSearchParams();
   
   // States
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const verify = searchParams.get('verify');
+    if (verify) {
+      void apiVerifyEmail(verify).then((ok) => {
+        setSuccessMsg(ok
+          ? (language === 'ar' ? 'تم تأكيد بريدك. يمكنك تسجيل الدخول.' : 'Email confirmed. You can sign in.')
+          : (language === 'ar' ? 'رابط التأكيد غير صالح أو منتهٍ.' : 'This confirmation link is invalid or expired.'));
+        if (!ok) setErrorMsg(language === 'ar' ? 'تعذر تأكيد البريد.' : 'Could not confirm email.');
+      });
+    }
+    const token = searchParams.get('token');
+    if (token) {
+      setResetToken(token);
+      setAuthMode('reset');
+      return;
+    }
+    if (searchParams.get('mode') === 'register') {
+      setAuthMode('register');
+      track(FUNNEL_EVENTS.beginRegistration, { plan: searchParams.get('plan') || 'FREE' });
+    }
+    rememberIntendedPlan(searchParams.get('plan'));
+  }, [searchParams, language]);
+
+  useEffect(() => {
+    document.title = language === 'ar'
+      ? 'دخول أو إنشاء حساب — بصيرة'
+      : 'Sign in or create an account — Baseerah';
+  }, [language]);
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,6 +91,45 @@ export const Login: React.FC = () => {
               : 'Login failed. Please check your username and password.'
           );
         }
+      } else if (authMode === 'forgot') {
+        const result = await apiForgotPassword(emailInput);
+        if (result?.ok) {
+          if (result.reset_token) {
+            setSuccessMsg(
+              language === 'ar'
+                ? 'إن وُجد الحساب، صُدر رمز إعادة التعيين. استخدم الرمز الظاهر في بيئة التطوير.'
+                : 'If the account exists, a reset token was issued. Use the development token shown below.'
+            );
+            setResetToken(result.reset_token);
+            setAuthMode('reset');
+          } else {
+            setSuccessMsg(
+              language === 'ar'
+                ? 'إن وُجد الحساب، أُرسل رابط إعادة التعيين إلى البريد المسجّل.'
+                : 'If the account exists, a reset link was sent to the registered email.'
+            );
+          }
+        } else {
+          setErrorMsg(language === 'ar' ? 'تعذر إرسال طلب إعادة التعيين.' : 'Could not request a password reset.');
+        }
+      } else if (authMode === 'reset') {
+        if (passwordInput.length < 8 || !/[a-zA-Z]/.test(passwordInput) || !/[0-9]/.test(passwordInput)) {
+          setErrorMsg(
+            language === 'ar'
+              ? 'يجب أن تتكون كلمة المرور من 8 أحرف على الأقل وأن تحتوي على أحرف وأرقام.'
+              : 'Password must be at least 8 characters long and contain both letters and numbers.'
+          );
+          setIsLoading(false);
+          return;
+        }
+        const ok = await apiResetPassword(resetToken, passwordInput);
+        if (ok) {
+          setSuccessMsg(language === 'ar' ? 'تم تعيين كلمة المرور. يمكنك تسجيل الدخول الآن.' : 'Password updated. You can sign in now.');
+          setAuthMode('login');
+          setPasswordInput('');
+        } else {
+          setErrorMsg(language === 'ar' ? 'رمز إعادة التعيين غير صالح أو منتهٍ.' : 'The reset token is invalid or expired.');
+        }
       } else {
         // Validate password strength on client
         if (passwordInput.length < 8 || !/[a-zA-Z]/.test(passwordInput) || !/[0-9]/.test(passwordInput)) {
@@ -69,12 +145,10 @@ export const Login: React.FC = () => {
         const ok = await register(usernameInput, passwordInput, emailInput, selectedRole);
         if (ok) {
           setSuccessMsg(
-            language === 'ar' 
-              ? 'تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.' 
-              : 'Account created successfully! You can now sign in.'
+            language === 'ar'
+              ? 'تم إنشاء الحساب وتسجيل الدخول.'
+              : 'Account created. You are now signed in.'
           );
-          setAuthMode('login');
-          setPasswordInput('');
         } else {
           setErrorMsg(
             language === 'ar' 
@@ -94,6 +168,7 @@ export const Login: React.FC = () => {
     }
   };
 
+  const intendedPlan = searchParams.get('plan');
   const rolesConfig = [
     {
       id: 'Researcher' as const,
@@ -105,11 +180,20 @@ export const Login: React.FC = () => {
       shadow: 'shadow-[var(--ds-shadow-glow)]'
     },
     {
+      id: 'Student' as const,
+      titleAr: 'طالب دراسات عليا',
+      titleEn: 'Graduate student',
+      descAr: 'رسالة أو أطروحة: تصميم المنهجية، البيانات، والتقدم مع المشرف.',
+      descEn: 'Thesis path: method design, data, and progress with a supervisor.',
+      icon: GraduationCap,
+      shadow: 'shadow-[var(--ds-shadow-layered)]'
+    },
+    {
       id: 'Supervisor' as const,
-      titleAr: 'محكّم علمي',
-      titleEn: 'Scientific Reviewer',
-      descAr: 'تحكيم الخطط البحثية، وإضافة تعليقات المراجعة، وتقييم الجاهزية للنشر.',
-      descEn: 'Evaluate study protocols, add supervisor comments, and approve plans.',
+      titleAr: 'مشرف / محكّم',
+      titleEn: 'Supervisor / reviewer',
+      descAr: 'تحكيم الخطط البحثية، وإضافة تعليقات المراجعة، وتقييم الجاهزية.',
+      descEn: 'Evaluate study protocols, add comments, and review readiness.',
       icon: Award,
       shadow: 'shadow-[var(--ds-shadow-layered)]'
     }
@@ -127,14 +211,14 @@ export const Login: React.FC = () => {
       {/* ── Top Floating Toggles ── */}
       <div className="absolute top-6 left-6 right-6 z-20 flex justify-between items-center max-w-6xl mx-auto">
         {/* Brand Name Logo */}
-        <div className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2 no-underline text-inherit">
           <div className="p-2 rounded-xl bg-[var(--ds-primary-soft)] border border-[var(--ds-primary)]/25 text-[var(--ds-primary-bright)]">
             <Brain size={20} />
           </div>
           <span className="text-sm font-black tracking-widest baseerah-gradient-text">
             {language === 'ar' ? 'بصيرة' : 'BASEERAH'}
           </span>
-        </div>
+        </Link>
 
         {/* Toggles */}
         <div className="flex items-center gap-3">
@@ -231,30 +315,46 @@ export const Login: React.FC = () => {
               <h2 className="text-xl md:text-2xl font-black text-ink m-0 tracking-wide">
                 {authMode === 'login' 
                   ? (language === 'ar' ? 'مرحباً بك مجدداً في بصيرة' : 'Welcome Back to Baseerah')
+                  : authMode === 'forgot'
+                  ? (language === 'ar' ? 'استعادة كلمة المرور' : 'Reset your password')
+                  : authMode === 'reset'
+                  ? (language === 'ar' ? 'كلمة مرور جديدة' : 'Choose a new password')
                   : (language === 'ar' ? 'إنشاء حساب جديد بالمنصة' : 'Join Baseerah Platform')}
               </h2>
               <p className="text-xs text-[var(--ds-text-muted)] font-bold leading-normal">
                 {authMode === 'login'
                   ? (language === 'ar' ? 'قم بتسجيل الدخول للبدء بمراجعة أو تعديل أبحاثك.' : 'Sign in to access your research workspace.')
+                  : authMode === 'forgot'
+                  ? (language === 'ar' ? 'أدخل بريد الحساب. إن وُجد سيُصدر رمز إعادة التعيين.' : 'Enter the account email. If it exists, a reset token will be issued.')
+                  : authMode === 'reset'
+                  ? (language === 'ar' ? 'أدخل الرمز وكلمة المرور الجديدة.' : 'Enter the token and a new password.')
                   : (language === 'ar' ? 'اختر نوع حسابك العلمي واملأ البيانات للتسجيل.' : 'Choose your academic account type and enter details.')}
               </p>
             </div>
 
             {/* Error and Success Alerts */}
             {errorMsg && (
-              <div className="p-3.5 border border-danger/20 bg-danger/5 text-danger rounded-xl text-xs font-bold text-center leading-normal animate-shake">
+              <div role="alert" className="p-3.5 border border-danger/20 bg-danger/5 text-danger rounded-xl text-xs font-bold text-center leading-normal animate-shake">
                 {errorMsg}
               </div>
             )}
             
             {successMsg && (
-              <div className="p-3.5 border border-[var(--ds-success)]/20 bg-[var(--ds-success-soft)] text-[var(--ds-success)] rounded-xl text-xs font-bold text-center leading-normal">
+              <div role="status" className="p-3.5 border border-[var(--ds-success)]/20 bg-[var(--ds-success-soft)] text-[var(--ds-success)] rounded-xl text-xs font-bold text-center leading-normal">
                 {successMsg}
               </div>
             )}
 
             {/* ── Registration Account Role Selector ── */}
             {authMode === 'register' && (
+              <>
+            {intendedPlan && (
+              <p className="m-0 text-[11px] font-semibold text-[var(--ds-text-secondary)] rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] p-3">
+                {language === 'ar'
+                  ? `اخترت باقة ${intendedPlan}. بعد الدخول يمكنك طلب الترقية من الفوترة داخل الحساب.`
+                  : `You selected ${intendedPlan}. After sign-in you can request the upgrade from billing.`}
+              </p>
+            )}
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-[var(--ds-text-muted)] uppercase tracking-widest block">
                   {language === 'ar' ? 'حدد نوع حسابك الأكاديمي' : 'Select Academic Account Type'}
@@ -295,100 +395,88 @@ export const Login: React.FC = () => {
                   })}
                 </div>
               </div>
+              </>
             )}
 
             {/* Form */}
             <form onSubmit={handleAuthSubmit} className="space-y-4 text-xs font-bold text-[var(--ds-text-secondary)]">
-              
-              {/* Username field */}
-              <div className="space-y-1">
-                <label className="text-[10px] text-[var(--ds-text-muted)] block">{language === 'ar' ? 'اسم المستخدم' : 'Username'}</label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 right-3.5 flex items-center text-[var(--ds-text-muted)]">
-                    <UserIcon size={14} />
-                  </span>
-                  <input
-                    type="text"
-                    required
-                    value={usernameInput}
-                    onChange={(e) => setUsernameInput(e.target.value)}
-                    placeholder={language === 'ar' ? 'أدخل اسم المستخدم...' : 'Enter username...'}
-                    className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-default)] rounded-xl py-2.5 pr-10 pl-4 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)] text-[var(--ds-text-primary)] placeholder-[var(--ds-text-disabled)]"
-                  />
-                </div>
-              </div>
+              {authMode === 'login' || authMode === 'register' ? (
+              <Input
+                label={language === 'ar' ? 'اسم المستخدم' : 'Username'}
+                type="text"
+                required
+                value={usernameInput}
+                onChange={(e) => setUsernameInput(e.target.value)}
+                placeholder={language === 'ar' ? 'أدخل اسم المستخدم...' : 'Enter username...'}
+                prefixIcon={<UserIcon size={14} />}
+              />
+              ) : null}
 
-              {/* Email field (Register Mode Only) */}
-              {authMode === 'register' && (
-                <div className="space-y-1">
-                  <label className="text-[10px] text-[var(--ds-text-muted)] block">{language === 'ar' ? 'البريد الإلكتروني' : 'Email Address'}</label>
-                  <div className="relative">
-                    <span className="absolute inset-y-0 right-3.5 flex items-center text-[var(--ds-text-muted)]">
-                      <Mail size={14} />
-                    </span>
-                    <input
-                      type="email"
-                      required
-                      value={emailInput}
-                      onChange={(e) => setEmailInput(e.target.value)}
-                      placeholder="name@example.com"
-                      className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-default)] rounded-xl py-2.5 pr-10 pl-4 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)] text-[var(--ds-text-primary)] placeholder-[var(--ds-text-disabled)]"
-                    />
-                  </div>
-                </div>
+              {(authMode === 'register' || authMode === 'forgot') && (
+                <Input
+                  label={language === 'ar' ? 'البريد الإلكتروني' : 'Email Address'}
+                  type="email"
+                  required
+                  value={emailInput}
+                  onChange={(e) => setEmailInput(e.target.value)}
+                  placeholder="name@example.com"
+                  prefixIcon={<Mail size={14} />}
+                />
               )}
 
-              {/* Password field */}
-              <div className="space-y-1">
-                <label className="text-[10px] text-[var(--ds-text-muted)] block">{language === 'ar' ? 'كلمة المرور' : 'Password'}</label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 right-3.5 flex items-center text-[var(--ds-text-muted)]">
-                    <Lock size={14} />
-                  </span>
-                  <input
-                    type="password"
-                    required
-                    value={passwordInput}
-                    onChange={(e) => setPasswordInput(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-default)] rounded-xl py-2.5 pr-10 pl-4 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)] text-[var(--ds-text-primary)] placeholder-[var(--ds-text-disabled)]"
-                  />
-                </div>
-              </div>
+              {authMode === 'reset' && (
+                <Input
+                  label={language === 'ar' ? 'رمز إعادة التعيين' : 'Reset token'}
+                  type="text"
+                  required
+                  value={resetToken}
+                  onChange={(e) => setResetToken(e.target.value)}
+                />
+              )}
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full py-2.5 rounded-xl font-black text-center flex justify-center items-center gap-2 cursor-pointer shadow-[var(--ds-shadow-glow)] bg-action hover:bg-action-hover text-on-action ds-transition disabled:opacity-50 disabled:cursor-not-allowed border-none text-xs"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 size={14} className="motion-safe:animate-spin" />
-                    <span>{language === 'ar' ? 'جاري التحقق...' : 'Authenticating...'}</span>
-                  </>
-                ) : (
-                  <>
-                    <span>{authMode === 'login' ? (language === 'ar' ? 'تسجيل الدخول' : 'Sign In') : (language === 'ar' ? 'تسجيل الحساب' : 'Create Account')}</span>
-                    {language === 'ar' ? <ArrowLeft size={14} /> : <ArrowRight size={14} />}
-                  </>
-                )}
-              </button>
+              {(authMode === 'login' || authMode === 'register' || authMode === 'reset') && (
+                <Input
+                  label={language === 'ar' ? 'كلمة المرور' : 'Password'}
+                  type="password"
+                  required
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  placeholder="••••••••"
+                  prefixIcon={<Lock size={14} />}
+                />
+              )}
+
+              <Button type="submit" loading={isLoading} fullWidth iconAfter={language === 'ar' ? <ArrowLeft size={14} /> : <ArrowRight size={14} />}>
+                {authMode === 'login' ? (language === 'ar' ? 'تسجيل الدخول' : 'Sign In')
+                  : authMode === 'forgot' ? (language === 'ar' ? 'طلب إعادة التعيين' : 'Request reset')
+                  : authMode === 'reset' ? (language === 'ar' ? 'حفظ كلمة المرور' : 'Save password')
+                  : (language === 'ar' ? 'تسجيل الحساب' : 'Create Account')}
+              </Button>
             </form>
 
             {/* Bottom Form Switcher */}
-            <div className="text-center pt-4 border-t border-[var(--ds-border-subtle)]">
+            <div className="text-center pt-4 border-t border-[var(--ds-border-subtle)] space-y-2">
+              {authMode === 'login' && (
+                <button
+                  type="button"
+                  onClick={() => { setAuthMode('forgot'); setErrorMsg(''); setSuccessMsg(''); }}
+                  className="block w-full text-[var(--ds-text-muted)] hover:text-[var(--ds-primary-bright)] text-xs font-bold bg-transparent border-none cursor-pointer"
+                >
+                  {language === 'ar' ? 'نسيت كلمة المرور؟' : 'Forgot password?'}
+                </button>
+              )}
               <button
+                type="button"
                 onClick={() => {
-                  setAuthMode(authMode === 'login' ? 'register' : 'login');
+                  setAuthMode(authMode === 'register' || authMode === 'forgot' || authMode === 'reset' ? 'login' : 'register');
                   setErrorMsg('');
                   setSuccessMsg('');
                 }}
                 className="text-[var(--ds-primary-bright)] hover:text-[var(--ds-accent-gold)] hover:underline text-xs font-black bg-transparent border-none cursor-pointer"
               >
-                {authMode === 'login' 
+                {authMode === 'login'
                   ? (language === 'ar' ? 'لا تملك حساباً؟ أنشئ حساباً أكاديمياً الآن' : 'Do not have an account? Sign up')
-                  : (language === 'ar' ? 'لديك حساب بالفعل؟ سجل دخولك' : 'Already have an account? Sign in')}
+                  : (language === 'ar' ? 'العودة لتسجيل الدخول' : 'Back to sign in')}
               </button>
             </div>
 

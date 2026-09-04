@@ -41,6 +41,12 @@ TEMPLATES: dict[str, list[str]] = {
         "MANUSCRIPT", "SUBMISSION", "PEER_REVIEW", "REVISION", "ACCEPTED",
         "PUBLISHED", "DISSEMINATION", "PROMOTION_EVIDENCE",
     ],
+    "MIXED_METHODS": [
+        "RESEARCH_DESIGN", "QUALITATIVE_DATA", "QUALITATIVE_ANALYSIS",
+        "DATA_COLLECTION", "DATA_PREPARATION", "ANALYSIS",
+        "MANUSCRIPT", "SUBMISSION", "PEER_REVIEW", "REVISION", "ACCEPTED",
+        "PUBLISHED", "DISSEMINATION", "PROMOTION_EVIDENCE",
+    ],
 }
 
 
@@ -50,6 +56,8 @@ def resolve_template(project: models.ResearchProject) -> str:
         return "SYSTEMATIC_REVIEW"
     if any(token in design for token in ("conceptual", "theoretical", "نظري", "مفاهيمي")):
         return "CONCEPTUAL_THEORETICAL"
+    if any(token in design for token in ("mixed", "مختلط")):
+        return "MIXED_METHODS"
     if any(token in design for token in ("qualitative", "نوعي")):
         return "QUALITATIVE"
     return "EMPIRICAL_QUANTITATIVE"
@@ -111,6 +119,15 @@ def build_summary(db: Session, project: models.ResearchProject, user_id: str | N
         models.PrismaFlow.organizationId == project.organizationId,
         models.PrismaFlow.projectId == project.id,
     ).first()
+    design_state = db.query(models.ResearchDesignState).filter(
+        models.ResearchDesignState.project_id == project.id,
+        models.ResearchDesignState.organization_id == project.organizationId,
+    ).first()
+    qualitative = ((design_state.procedure_json or {}) if design_state else {}).get("qualitative_coding") or {}
+    qualitative_transcript = str(qualitative.get("transcript") or "").strip()
+    qualitative_themes = qualitative.get("themes") if isinstance(qualitative.get("themes"), list) else []
+    has_qualitative_data = len(qualitative_transcript) >= 20
+    has_qualitative_analysis = has_qualitative_data and len(qualitative_themes) >= 1
 
     design_parts = [bool(project.titleAr or project.titleEn), bool(project.problemStatementAr or project.problemStatementEn), bool(project.questions), bool(project.variables)]
     design_readiness = round(sum(design_parts) / len(design_parts) * 100)
@@ -144,8 +161,20 @@ def build_summary(db: Session, project: models.ResearchProject, user_id: str | N
         "SCREENING": _stage("COMPLETED" if literature_count else "AVAILABLE", 100 if literature_count else 0, [], [], "استكمال فرز الدراسات"),
         "PRISMA": _stage("COMPLETED" if prisma else "AVAILABLE", 100 if prisma else 0, [], [], "إنشاء مخطط PRISMA"),
         "SYNTHESIS": _stage("COMPLETED" if literature_count else "BLOCKED", 100 if literature_count else 0, [] if literature_count else ["يتطلب دراسات مُضمّنة"], [], "تركيب الأدلة"),
-        "QUALITATIVE_DATA": _stage("DEFERRED_CAPABILITY", 0, [], [], None),
-        "QUALITATIVE_ANALYSIS": _stage("DEFERRED_CAPABILITY", 0, [], [], None),
+        "QUALITATIVE_DATA": _stage(
+            "COMPLETED" if has_qualitative_data else "AVAILABLE",
+            100 if has_qualitative_data else 0,
+            [] if has_qualitative_data else ["أضف تفريغ مقابلة أو ملاحظات ميدانية في المختبر النوعي"],
+            [{"type": "QUALITATIVE_TRANSCRIPT", "id": project.id, "title": "transcript"}] if has_qualitative_data else [],
+            "فتح المختبر النوعي",
+        ),
+        "QUALITATIVE_ANALYSIS": _stage(
+            "COMPLETED" if has_qualitative_analysis else "AVAILABLE" if has_qualitative_data else "BLOCKED",
+            100 if has_qualitative_analysis else 40 if has_qualitative_data else 0,
+            [] if has_qualitative_analysis else (["يتطلب ترميز محاور من التفريغ"] if has_qualitative_data else ["يتطلب بيانات نوعية"]),
+            [{"type": "QUALITATIVE_THEME", "id": str(index), "title": theme.get("codeEn") or theme.get("codeAr") or "theme"} for index, theme in enumerate(qualitative_themes) if isinstance(theme, dict)],
+            "ترميز المحاور النوعية",
+        ),
         "MANUSCRIPT": _stage("COMPLETED" if manuscripts else "AVAILABLE" if design_readiness == 100 else "BLOCKED", 100 if manuscripts else 0,
             [] if design_readiness == 100 else ["أكمل تصميم البحث"], [{"type": "SCHOLARLY_ASSET", "id": a.id, "title": a.title_ar or a.title_en} for a in manuscripts], "إنشاء المخطوطة"),
         "SUBMISSION": _stage("COMPLETED" if reviews else "AVAILABLE" if manuscripts else "BLOCKED", 100 if reviews else 0, [] if manuscripts else ["يتطلب مخطوطة"], [], "بدء ملف التحكيم"),

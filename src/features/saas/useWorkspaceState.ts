@@ -34,39 +34,39 @@ export const useWorkspaceState = (stepId?: string, pathId: string = 'NEW_STUDY_D
   const [commentPriority, setCommentPriority] = useState('NORMAL');
   const [isSidebarOpen] = useState(true);
 
-  // Sync state from project context
-  useEffect(() => {
-    if (activeProject) {
-      setDescriptionAr(activeProject.descriptionAr || '');
-      setDescriptionEn(activeProject.descriptionEn || '');
-      setProblemStatementAr(activeProject.problemStatementAr || '');
-      setProblemStatementEn(activeProject.problemStatementEn || '');
-      setObjectives(activeProject.objectives || '');
-      setTimeline(activeProject.timeline || '');
-      setEthics(activeProject.ethics || '');
-      
-      // Update active path configuration if not set
-      if (activeProject.activePathId !== pathId) {
-        updateProjectWorkflowProfile(activeProject.id, {
-          activePathId: pathId,
-          completedSteps: activeProject.completedSteps || []
-        });
-      }
-    }
-  }, [activeProject, pathId, updateProjectWorkflowProfile]);
+  const projectId = activeProject?.id;
+  const currentPathId = activeProject?.activePathId;
 
-  // Load step comments from backend API
+  useEffect(() => {
+    if (!activeProject) return;
+    setDescriptionAr(activeProject.descriptionAr || '');
+    setDescriptionEn(activeProject.descriptionEn || '');
+    setProblemStatementAr(activeProject.problemStatementAr || '');
+    setProblemStatementEn(activeProject.problemStatementEn || '');
+    setObjectives(activeProject.objectives || '');
+    setTimeline(activeProject.timeline || '');
+    setEthics(activeProject.ethics || '');
+  }, [activeProject]);
+
+  useEffect(() => {
+    if (!projectId || currentPathId === pathId) return;
+    void updateProjectWorkflowProfile(projectId, {
+      activePathId: pathId,
+      completedSteps: activeProject?.completedSteps || []
+    });
+  }, [projectId, currentPathId, pathId, activeProject?.completedSteps, updateProjectWorkflowProfile]);
+
   const loadComments = useCallback(async () => {
-    if (!activeProject || !isSecureMode) return;
+    if (!projectId || !isSecureMode) return;
     try {
-      const data = await apiListProjectComments(activeProject.id, activeStep);
+      const data = await apiListProjectComments(projectId, activeStep);
       if (data) {
         setComments(data);
       }
     } catch (e) {
       console.warn("Failed to load step comments from backend", e);
     }
-  }, [activeProject, activeStep, isSecureMode]);
+  }, [projectId, activeStep, isSecureMode]);
 
   useEffect(() => {
     loadComments();

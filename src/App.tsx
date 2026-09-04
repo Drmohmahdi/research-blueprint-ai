@@ -1,11 +1,11 @@
 import React, { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ProjectProvider, useProject } from './context/ProjectContext';
 import { LayoutV2 } from './components/LayoutV2';
 import { Login } from './components/Login';
 import { AppRouter } from './router/AppRouter';
 import { PublicResearcherProfile } from './components/PublicResearcherProfile';
-import { LandingPage } from './components/LandingPage';
+import { MarketingSite } from './marketing/MarketingSite';
 
 const ExternalReviewerPortal = lazy(() => import('./features/review-portal/ExternalReviewerPortal').then(module => ({ default: module.ExternalReviewerPortal })));
 const ExternalThesisExaminerPortal = lazy(() => import('./features/thesis/ExternalThesisExaminerPortal'));
@@ -23,14 +23,25 @@ const App: React.FC = () => {
 
 // ── Inner app — reads router context, renders public routes, login, or the app shell ─
 const AppContent: React.FC = () => {
-  const { user, language } = useProject();
+  const { user } = useProject();
+  const location = useLocation();
+  const hasPasswordResetToken = new URLSearchParams(location.search).has('token');
+  const home = user ? <Navigate to="/app" replace /> : <MarketingSite />;
 
   return (
     <Routes>
-      {/* Public marketing routes — signed-in users are sent to their dashboard instead */}
-      <Route path="/" element={user ? <Navigate to="/app" replace /> : <LandingPage language={language} onNavigateToLogin={() => { window.location.href = '/login'; }} />} />
-      <Route path="/home" element={user ? <Navigate to="/app" replace /> : <LandingPage language={language} onNavigateToLogin={() => { window.location.href = '/login'; }} />} />
-      <Route path="/login" element={user ? <Navigate to="/app" replace /> : <Login />} />
+      {/* Public marketing — signed-in users hitting home go to the workspace */}
+      <Route path="/" element={home} />
+      <Route path="/home" element={home} />
+      <Route path="/features" element={<MarketingSite />} />
+      <Route path="/solutions" element={<MarketingSite />} />
+      <Route path="/how-it-works" element={<MarketingSite />} />
+      <Route path="/pricing" element={<MarketingSite />} />
+      <Route path="/faq" element={<MarketingSite />} />
+      <Route path="/about" element={<MarketingSite />} />
+      <Route path="/contact" element={<MarketingSite />} />
+      <Route path="/institutional" element={<MarketingSite />} />
+      <Route path="/login" element={user && !hasPasswordResetToken ? <Navigate to="/app" replace /> : <Login />} />
       <Route path="/researcher/:username" element={<PublicResearcherProfile />} />
       <Route
         path="/external-review/:token"

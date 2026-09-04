@@ -11,6 +11,7 @@ from .. import models, schemas
 from ..services.tenant_context import get_tenant_context, TenantContext
 from ..services.sanitization import sanitize_text
 from ..services.research_design import project_access
+from ..services.literature_import import LiteratureImportError, search_records
 
 router = APIRouter(prefix="/projects", tags=["Literature & PRISMA Persistence"])
 
@@ -147,6 +148,106 @@ def add_literature_study(
     db.commit()
     db.refresh(study)
     return schemas.LiteratureStudySchema.model_validate(study)
+
+
+@router.patch("/{project_id}/literature-synthesis/studies/{study_id}", response_model=schemas.LiteratureStudySchema)
+def patch_literature_study(
+    project_id: str,
+    study_id: str,
+    payload: schemas.LiteratureStudyPatch,
+    db: Session = Depends(get_db),
+    context: TenantContext = Depends(get_tenant_context)
+):
+    project = get_verified_project(project_id, db, context)
+    study = db.query(models.LiteratureStudy).filter(
+        models.LiteratureStudy.id == study_id,
+        models.LiteratureStudy.projectId == project.id,
+    ).first()
+    if not study:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Study not found")
+    updates = payload.model_dump(exclude_unset=True)
+    if not updates:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No study fields to update")
+    if "notes" in updates and updates["notes"] is not None:
+        updates["notes"] = sanitize_text(updates["notes"])
+    for key, value in updates.items():
+        setattr(study, key, value)
+    if study.ciLower > study.ciUpper:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Confidence interval lower bound cannot exceed upper bound"
+        )
+    study.updatedAt = datetime.datetime.now(datetime.UTC).isoformat()
+    db.commit()
+    db.refresh(study)
+    return schemas.LiteratureStudySchema.model_validate(study)
+
+
+@router.post("/{project_id}/literature-synthesis/import", response_model=schemas.LiteratureImportResponse)
+def import_literature_studies(
+    project_id: str,
+    payload: schemas.LiteratureImportRequest,
+    db: Session = Depends(get_db),
+    context: TenantContext = Depends(get_tenant_context)
+):
+    project = get_verified_project(project_id, db, context)
+    try:
+        records = search_records(payload.query, payload.source)
+    except LiteratureImportError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
+
+    now = datetime.datetime.now(datetime.UTC).isoformat()
+    existing = db.query(models.LiteratureStudy).filter(models.LiteratureStudy.projectId == project.id).all()
+    seen_dois = {((study.doi or "").strip().casefold()) for study in existing if study.doi}
+    imported = 0
+    skipped = 0
+    created: List[models.LiteratureStudy] = []
+    for record in records:
+        doi_key = (record.doi or "").strip().casefold()
+        if doi_key and doi_key in seen_dois:
+            skipped += 1
+            continue
+        study = models.LiteratureStudy(
+            id=f"study-{str(uuid.uuid4())[:8]}",
+            projectId=project.id,
+            organizationId=context.organization.id,
+            author=sanitize_text(record.author)[:500] or "Unknown",
+            year=record.year,
+            sampleSize=1,
+            effectSize=0.0,
+            ciLower=0.0,
+            ciUpper=0.0,
+            source=record.source,
+            doi=sanitize_text(record.doi) if record.doi else None,
+            notes=sanitize_text(record.notes) if record.notes else None,
+            createdAt=now,
+            updatedAt=now,
+        )
+        db.add(study)
+        created.append(study)
+        imported += 1
+        if doi_key:
+            seen_dois.add(doi_key)
+
+    audit = models.AuditLog(
+        id=secrets.token_hex(8),
+        userId=context.user.id,
+        organizationId=context.organization.id,
+        action="LITERATURE_STUDIES_IMPORTED",
+        details=f"Imported {imported} bibliographic records from {payload.source} for project {project.id} (skipped {skipped})",
+        timestamp=now,
+    )
+    db.add(audit)
+    db.commit()
+    for study in created:
+        db.refresh(study)
+    return schemas.LiteratureImportResponse(
+        query=payload.query.strip(),
+        source=payload.source,
+        imported=imported,
+        skipped=skipped,
+        studies=[schemas.LiteratureStudySchema.model_validate(s) for s in created],
+    )
 
 
 @router.put("/{project_id}/literature-synthesis/sync", response_model=schemas.LiteratureSynthesisResponse)

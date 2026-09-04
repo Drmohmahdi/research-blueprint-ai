@@ -35,6 +35,12 @@ class Settings:
         ).split(",")
         if origin.strip()
     ]
+    SMTP_HOST: str = os.getenv("SMTP_HOST", "").strip()
+    SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587") or "587")
+    SMTP_USERNAME: str = os.getenv("SMTP_USERNAME", "").strip()
+    SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
+    SMTP_FROM: str = os.getenv("SMTP_FROM", "").strip()
+    SMTP_USE_TLS: bool = os.getenv("SMTP_USE_TLS", "true").lower() in ("1", "true", "yes")
 
     def validate_production(self) -> None:
         if self.ENVIRONMENT != "production":

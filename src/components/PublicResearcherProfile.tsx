@@ -220,9 +220,17 @@ export const PublicResearcherProfile: React.FC = () => {
         </div>
       )}
 
-      <p className="text-[10px] text-[var(--ds-text-muted)] text-center pt-6 border-t border-[var(--ds-border-subtle)]">
+      <p className="text-[10px] text-[var(--ds-text-muted)] text-center pt-6 border-t border-[var(--ds-border-subtle)] space-y-2">
         {isAr ? 'مدعوم من منصة بصيرة للبحث العلمي' : 'Powered by Baseerah Research Platform'}
       </p>
+      <div className="text-center space-y-2">
+        <p className="m-0 text-xs font-bold text-[var(--ds-text-secondary)]">
+          {isAr ? 'ابنِ ملفك الأكاديمي الموحّد على بصيرة — مجانًا.' : 'Build your unified academic profile on Baseerah — free.'}
+        </p>
+        <a href="/login?mode=register" className="text-xs font-black text-[var(--ds-primary-bright)]">
+          {isAr ? 'إنشاء حساب' : 'Create an account'}
+        </a>
+      </div>
     </div>
   );
 };

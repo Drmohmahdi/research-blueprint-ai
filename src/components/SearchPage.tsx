@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, X, Loader2, ChevronLeft, ChevronRight, FileText, FolderGit2, BookOpen, User as UserIcon, Award, ClipboardList, Database, Sparkles } from 'lucide-react';
+import { Search, X, Loader2, ChevronLeft, ChevronRight, FileText, FolderGit2, BookOpen, User as UserIcon, Award, ClipboardList, Database, Sparkles, GraduationCap } from 'lucide-react';
 import { PathPanel } from '../design-system/components/Navigation';
 import { EmptyState } from '../design-system/components/Feedback';
 import { useProject } from '../context/ProjectContext';
@@ -22,6 +22,7 @@ const DOMAIN_LABELS: Record<string, { ar: string; en: string }> = {
   PROMOTION: { ar: 'الترقيات', en: 'Promotions' },
   PEER_REVIEW: { ar: 'التحكيم العلمي', en: 'Peer Reviews' },
   FILE: { ar: 'الملفات', en: 'Files' },
+  THESIS: { ar: 'الرسائل العلمية', en: 'Theses' },
 };
 
 const DOMAIN_ICONS: Record<string, React.ReactNode> = {
@@ -32,6 +33,7 @@ const DOMAIN_ICONS: Record<string, React.ReactNode> = {
   PROMOTION: <Award size={14} />,
   PEER_REVIEW: <ClipboardList size={14} />,
   FILE: <Database size={14} />,
+  THESIS: <GraduationCap size={14} />,
 };
 
 const SORT_OPTIONS: { value: SearchSort; ar: string; en: string }[] = [

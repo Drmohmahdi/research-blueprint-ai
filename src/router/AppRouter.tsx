@@ -1,19 +1,18 @@
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams, Link } from 'react-router-dom';
 import { ROUTES } from './routes';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { SkeletonGrid } from '../components/SkeletonCard';
 import { AdminGuard } from '../components/AdminGuard';
+import { PermissionGuard } from '../components/PermissionGuard';
 
 // ── Lazy-loaded components ────────────────────────────────────────────────────
 const PortalGateway             = lazy(() => import('../components/PortalGateway').then(m => ({ default: m.PortalGateway })));
-const Dashboard                 = lazy(() => import('../components/Dashboard').then(m => ({ default: m.Dashboard })));
 const ResearchPathSelector      = lazy(() => import('../components/ResearchPathSelector').then(m => ({ default: m.ResearchPathSelector })));
 const ResearchDecisionCenter    = lazy(() => import('../components/ResearchDecisionCenter').then(m => ({ default: m.ResearchDecisionCenter })));
 const ResearchPlanning          = lazy(() => import('../components/ResearchPlanning').then(m => ({ default: m.ResearchPlanning })));
 const MeasurementInstruments    = lazy(() => import('../components/MeasurementInstruments').then(m => ({ default: m.MeasurementInstruments })));
 const AnalysisPlan               = lazy(() => import('../components/AnalysisPlan').then(m => ({ default: m.AnalysisPlan })));
-const ProjectWizard             = lazy(() => import('../components/ProjectWizard').then(m => ({ default: m.ProjectWizard })));
 const TitleAnalyzer             = lazy(() => import('../components/TitleAnalyzer').then(m => ({ default: m.TitleAnalyzer })));
 const ConsistencyChecker        = lazy(() => import('../components/ConsistencyChecker').then(m => ({ default: m.ConsistencyChecker })));
 const ModelBuilder              = lazy(() => import('../components/ModelBuilder').then(m => ({ default: m.ModelBuilder })));
@@ -30,7 +29,6 @@ const PrismaBuilder             = lazy(() => import('../components/PrismaBuilder
 const QualitativeLab            = lazy(() => import('../components/QualitativeLab').then(m => ({ default: m.QualitativeLab })));
 const PublicationReadinessReviewer = lazy(() => import('../components/PublicationReadinessReviewer').then(m => ({ default: m.PublicationReadinessReviewer })));
 const PublicationCommandCenter = lazy(() => import('../features/publication/PublicationCommandCenter'));
-const ResearchProgressDashboard   = lazy(() => import('../features/progress/ResearchProgressDashboard').then(m => ({ default: m.ResearchProgressDashboard })));
 const MethodologyChat             = lazy(() => import('../features/ai-assistant/MethodologyChat').then(m => ({ default: m.MethodologyChat })));
 const ReviewerDashboard           = lazy(() => import('../features/review-portal/ReviewerDashboard').then(m => ({ default: m.ReviewerDashboard })));
 const ExportPanel                 = lazy(() => import('../features/report-export/ExportPanel').then(m => ({ default: m.ExportPanel })));
@@ -55,9 +53,9 @@ const NotFound: React.FC = () => {
       <p className="m-0 text-sm text-[var(--ds-text-secondary)]">
         {language === 'ar' ? 'قد يكون الرابط قد تغير أو لا يتوفر ضمن مساحة عملك.' : 'The link may have changed or may not be available in your workspace.'}
       </p>
-      <a href={ROUTES.PORTAL} className="rounded-lg bg-action px-4 py-2.5 font-bold text-on-action">
+      <Link to={ROUTES.PORTAL} className="rounded-lg bg-action px-4 py-2.5 font-bold text-on-action">
         {language === 'ar' ? 'العودة إلى البوابة' : 'Return to portal'}
-      </a>
+      </Link>
     </section>
   );
 };
@@ -71,7 +69,6 @@ const OrganizationSwitcher      = lazy(() => import('../features/saas/Organizati
 const BillingDashboard          = lazy(() => import('../features/saas/BillingDashboard').then(m => ({ default: m.BillingDashboard })));
 const SuperAdminDashboard        = lazy(() => import('../features/saas/SuperAdminDashboard').then(m => ({ default: m.SuperAdminDashboard })));
 const NewStudyDesignWorkspace   = lazy(() => import('../features/saas/NewStudyDesignWorkspace').then(m => ({ default: m.NewStudyDesignWorkspace })));
-const ResearchDesignCommandCenter = lazy(() => import('../features/research-design/ResearchDesignCommandCenter').then(m => ({ default: m.ResearchDesignCommandCenter })));
 const ResearchOfficeOperations    = lazy(() => import('../features/research-design/ResearchOfficeOperations').then(m => ({ default: m.ResearchOfficeOperations })));
 const SeminarProposalWorkspace  = lazy(() => import('../features/saas/SeminarProposalWorkspace').then(m => ({ default: m.SeminarProposalWorkspace })));
 const ThesisDefenseWorkspace    = lazy(() => import('../features/saas/ThesisDefenseWorkspace').then(m => ({ default: m.ThesisDefenseWorkspace })));
@@ -107,6 +104,22 @@ const SafeRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 import { useProject } from '../context/ProjectContext';
 
+const WizardToDesign: React.FC = () => {
+  const { activeProject } = useProject();
+  if (activeProject?.id) {
+    return <Navigate to={ROUTES.NEW_STUDY_DESIGN.replace(':projectId', activeProject.id)} replace />;
+  }
+  return <Navigate to={ROUTES.PATHS} replace />;
+};
+
+const ProjectDesignHome: React.FC = () => {
+  const { projectId } = useParams<{ projectId: string }>();
+  const { activeProject } = useProject();
+  const id = projectId || activeProject?.id;
+  if (!id) return <Navigate to={ROUTES.PATHS} replace />;
+  return <Navigate to={ROUTES.NEW_STUDY_DESIGN.replace(':projectId', id)} replace />;
+};
+
 // ── App Router ────────────────────────────────────────────────────────────────
 export const AppRouter: React.FC = () => {
   const { language } = useProject();
@@ -118,18 +131,19 @@ export const AppRouter: React.FC = () => {
       <Route path={ROUTES.PORTAL}           element={<SafeRoute><PortalGateway /></SafeRoute>} />
       
       {/* Research Module Routes */}
-      <Route path={ROUTES.DASHBOARD}        element={<SafeRoute><Dashboard /></SafeRoute>} />
+      <Route path={ROUTES.DASHBOARD}        element={<Navigate to={ROUTES.LIFECYCLE} replace />} />
       <Route path={ROUTES.LIFECYCLE}        element={<SafeRoute><ResearchLifecycleCommandCenter /></SafeRoute>} />
       <Route path={ROUTES.PATHS}            element={<SafeRoute><ResearchPathSelector /></SafeRoute>} />
       <Route path={ROUTES.DECISION_CENTER}  element={<SafeRoute><ResearchDecisionCenter /></SafeRoute>} />
       <Route path={ROUTES.PLANNING}         element={<SafeRoute><ResearchPlanning /></SafeRoute>} />
       <Route path={ROUTES.MEASUREMENT}      element={<SafeRoute><MeasurementInstruments /></SafeRoute>} />
       <Route path={ROUTES.ANALYSIS_PLAN}    element={<SafeRoute><AnalysisPlan /></SafeRoute>} />
-      <Route path={ROUTES.WIZARD}           element={<SafeRoute><ProjectWizard /></SafeRoute>} />
+      <Route path={ROUTES.WIZARD}           element={<SafeRoute><WizardToDesign /></SafeRoute>} />
       <Route path={ROUTES.ANALYZER}         element={<SafeRoute><TitleAnalyzer /></SafeRoute>} />
       <Route path={ROUTES.CONSISTENCY}      element={<SafeRoute><ConsistencyChecker /></SafeRoute>} />
       <Route path={ROUTES.MODEL_BUILDER}    element={<SafeRoute><ModelBuilder /></SafeRoute>} />
       <Route path={ROUTES.SAMPLE_CALC}      element={<SafeRoute><SampleSizeCalc /></SafeRoute>} />
+      <Route path="/app/research/simulation" element={<Navigate to={ROUTES.SIMULATION} replace />} />
       <Route path={ROUTES.SIMULATION}       element={<SafeRoute><SimulationLab /></SafeRoute>} />
       <Route path={ROUTES.PREDICTOR}        element={<SafeRoute><ResearchOutcomePredictor /></SafeRoute>} />
       <Route path={ROUTES.DATA_QUALITY}     element={<SafeRoute><DataInspector /></SafeRoute>} />
@@ -139,7 +153,7 @@ export const AppRouter: React.FC = () => {
       <Route path={ROUTES.LIT_SYNTHESIZER}  element={<SafeRoute><LiteratureSynthesizer /></SafeRoute>} />
       <Route path={ROUTES.PRISMA}           element={<SafeRoute><PrismaBuilder /></SafeRoute>} />
       <Route path={ROUTES.QUALITATIVE}      element={<SafeRoute><QualitativeLab /></SafeRoute>} />
-      <Route path={ROUTES.PROGRESS}         element={<SafeRoute><ResearchProgressDashboard /></SafeRoute>} />
+      <Route path={ROUTES.PROGRESS}         element={<Navigate to={ROUTES.LIFECYCLE} replace />} />
       <Route path={ROUTES.ASSISTANT}        element={<SafeRoute><MethodologyChat /></SafeRoute>} />
       {/* Publishing Module Routes */}
       <Route path={ROUTES.PUBLISHING}       element={<SafeRoute><PublicationCommandCenter /></SafeRoute>} />
@@ -189,8 +203,8 @@ export const AppRouter: React.FC = () => {
 
       {/* SaaS & Administration */}
       <Route path={ROUTES.WORKSPACES}       element={<SafeRoute><OrganizationSwitcher language={language} /></SafeRoute>} />
-      <Route path={ROUTES.BILLING}          element={<SafeRoute><BillingDashboard language={language} /></SafeRoute>} />
-      <Route path={ROUTES.AUDIT_LOGS}       element={<SafeRoute><SuperAdminDashboard language={language} /></SafeRoute>} />
+      <Route path={ROUTES.BILLING}          element={<SafeRoute><PermissionGuard permission="billing.view"><BillingDashboard language={language} /></PermissionGuard></SafeRoute>} />
+      <Route path={ROUTES.AUDIT_LOGS}       element={<SafeRoute><PermissionGuard permission="audit.view"><SuperAdminDashboard language={language} /></PermissionGuard></SafeRoute>} />
       <Route path={ROUTES.ADMIN_CENTER} element={
         <SafeRoute>
           <AdminGuard>
@@ -202,7 +216,7 @@ export const AppRouter: React.FC = () => {
       {/* Study Design Path Routes */}
       <Route path={ROUTES.NEW_STUDY_DESIGN} element={<SafeRoute><NewStudyDesignWorkspace /></SafeRoute>} />
       <Route path={ROUTES.NEW_STUDY_DESIGN_STEP} element={<SafeRoute><NewStudyDesignWorkspace /></SafeRoute>} />
-      <Route path={ROUTES.RESEARCH_COMMAND_CENTER} element={<SafeRoute><ResearchDesignCommandCenter /></SafeRoute>} />
+      <Route path={ROUTES.RESEARCH_COMMAND_CENTER} element={<SafeRoute><ProjectDesignHome /></SafeRoute>} />
       <Route path={ROUTES.RESEARCH_OFFICE} element={<SafeRoute><ResearchOfficeOperations /></SafeRoute>} />
 
       {/* Seminar Proposal Path Routes */}

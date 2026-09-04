@@ -163,6 +163,11 @@ def test_auth_registration_and_login(client):
     assert "httponly" in set_cookie
     assert "samesite=lax" in set_cookie
 
+    me = client.get("/api/auth/me", headers={"Authorization": f"Bearer {token_a}"})
+    assert me.status_code == 200
+    assert me.json()["username"] == "user_a"
+    assert me.json()["email"] == "user_a@example.com"
+
     # 3. Create Project for User A
     project_payload = {
         "titleAr": "مشروع أ",
@@ -207,3 +212,64 @@ def test_auth_registration_and_login(client):
     response_get_unauthorized = client.get(f"/api/projects/{proj_id}", headers=headers_b)
     # Should block and return 404 (Access Denied / Not Found)
     assert response_get_unauthorized.status_code == 404
+
+
+def test_auth_me_requires_session(client):
+    assert client.get("/api/auth/me").status_code == 401
+
+
+def test_password_reset_flow(client):
+    client.post("/api/auth/register", json={
+        "username": "reset_user",
+        "password": "oldpassword1",
+        "email": "reset_user@example.com",
+        "role": "Researcher",
+    })
+    forgot = client.post("/api/auth/forgot-password", json={"email": "reset_user@example.com"})
+    assert forgot.status_code == 200
+    token = forgot.json().get("reset_token")
+    assert token
+    unknown = client.post("/api/auth/forgot-password", json={"email": "missing@example.com"})
+    assert unknown.status_code == 200
+    assert "reset_token" not in unknown.json()
+    reset = client.post("/api/auth/reset-password", json={"token": token, "new_password": "newpassword2"})
+    assert reset.status_code == 200
+    old_login = client.post("/api/auth/login", json={"username": "reset_user", "password": "oldpassword1"})
+    assert old_login.status_code == 401
+    new_login = client.post("/api/auth/login", json={"username": "reset_user", "password": "newpassword2"})
+    assert new_login.status_code == 200
+
+
+def test_forgot_password_sends_reset_link_through_email_adapter(client, monkeypatch):
+    from app.services.notifications.email_adapter import EmailDeliveryResult
+    from app.services.notifications.events import DeliveryStatus
+
+    sent = []
+
+    class FakeAdapter:
+        def send_email(self, message):
+            sent.append(message)
+            return EmailDeliveryResult(
+                status=DeliveryStatus.NOT_CONFIGURED,
+                success=False,
+                failure_code="PROVIDER_NOT_CONFIGURED",
+                message="Email delivery is not configured in current environment.",
+            )
+
+    monkeypatch.setattr("app.routers.auth.get_email_adapter", lambda: FakeAdapter())
+    client.post("/api/auth/register", json={
+        "username": "reset_mail_user",
+        "password": "oldpassword1",
+        "email": "reset_mail_user@example.com",
+        "role": "Researcher",
+    })
+    forgot = client.post("/api/auth/forgot-password", json={"email": "reset_mail_user@example.com"})
+    assert forgot.status_code == 200
+    assert sent
+    # register() also sends a separate email-verification message, so locate
+    # the password-reset message by its template rather than assuming index 0.
+    reset_messages = [m for m in sent if m.template_key == "password_reset"]
+    assert reset_messages
+    assert "/login?token=" in reset_messages[0].body_text
+    assert reset_messages[0].recipient_email == "reset_mail_user@example.com"
+    assert forgot.json().get("reset_token")

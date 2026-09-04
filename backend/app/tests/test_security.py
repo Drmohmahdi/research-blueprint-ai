@@ -111,6 +111,16 @@ def test_password_strength_validation(client):
     assert resp4.status_code == 200
 
 
+def test_public_registration_rejects_organization_admin_role(client):
+    resp = client.post("/api/auth/register", json={
+        "username": "org_admin_self_serve",
+        "password": "SecurePassword123",
+        "email": "orgadmin.self@example.com",
+        "role": "OrganizationAdmin",
+    })
+    assert resp.status_code == 400
+
+
 def test_session_expiry_parser_accepts_legacy_naive_timestamps():
     expiry = _parse_session_expiry("2026-07-20T12:00:00")
     assert expiry.tzinfo == UTC

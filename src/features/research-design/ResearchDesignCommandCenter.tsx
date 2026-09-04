@@ -451,9 +451,9 @@ export const ResearchDesignCommandCenter: React.FC<ResearchDesignCommandCenterPr
             </div>
           </div>
           {mixed ? (
-            <div className="border border-[var(--ds-warning)] bg-[var(--ds-warning-soft)] rounded-lg p-4" data-testid="mixed-methods-deferred">
-              <p className="text-xs font-bold text-[var(--ds-warning)]">{t('طرق مختلطة', 'Mixed Methods')}: {mixed.status}</p>
-              <p className="text-xs text-[var(--ds-warning)]">{isAr ? (mixed.note ?? '') : (mixed.note ?? '')}</p>
+            <div className="border border-[var(--ds-information)] bg-[var(--ds-information-soft)] rounded-lg p-4" data-testid="mixed-methods-available">
+              <p className="text-xs font-bold text-[var(--ds-information)]">{t('طرق مختلطة', 'Mixed Methods')}: {mixed.status}</p>
+              <p className="text-xs text-[var(--ds-text-secondary)]">{mixed.note ?? ''}</p>
             </div>
           ) : null}
 

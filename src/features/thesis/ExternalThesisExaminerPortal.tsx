@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { GraduationCap, ShieldCheck, Send } from 'lucide-react';
+import { GraduationCap, ShieldCheck, Send, Globe } from 'lucide-react';
 import { PathPanel } from '../../design-system/components/Navigation';
 import { EmptyState } from '../../design-system/components/Feedback';
+import { Button } from '../../design-system/components/Button';
 import { apiExternalThesisPortal, apiExternalThesisReport, apiExternalThesisRespond } from '../../utils/api';
 
 export const ExternalThesisExaminerPortal: React.FC = () => {
   const { token = '' } = useParams();
+  const [language, setLanguage] = useState<'ar' | 'en'>(() => (localStorage.getItem('rb_lang') as 'ar' | 'en') || 'ar');
+  const ar = language === 'ar';
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState('');
   const [assessment, setAssessment] = useState('');
@@ -54,11 +57,11 @@ export const ExternalThesisExaminerPortal: React.FC = () => {
 
   if (error) {
     return (
-      <main className="min-h-screen bg-[var(--ds-surface-secondary)] p-6" dir="ltr">
+      <main className="min-h-screen bg-[var(--ds-surface-secondary)] p-6" dir={ar ? 'rtl' : 'ltr'}>
         <EmptyState
           illustration={<ShieldCheck size={40} />}
-          title="Invitation unavailable"
-          description="The secure examiner link is invalid, expired, or revoked."
+          title={ar ? 'الدعوة غير متاحة' : 'Invitation unavailable'}
+          description={ar ? 'رابط الممتحن غير صالح أو منتهٍ أو ملغى.' : 'The secure examiner link is invalid, expired, or revoked.'}
         />
       </main>
     );
@@ -67,24 +70,31 @@ export const ExternalThesisExaminerPortal: React.FC = () => {
   if (!data) {
     return (
       <div role="status" className="p-10 text-center text-sm font-bold text-[var(--ds-text-muted)]">
-        Loading secure examination assignment…
+        {ar ? 'جاري تحميل مهمة المناقشة الآمنة…' : 'Loading secure examination assignment…'}
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[var(--ds-surface-secondary)] p-4 sm:p-8" dir="ltr">
+    <main className="min-h-screen bg-[var(--ds-surface-secondary)] p-4 sm:p-8" dir={ar ? 'rtl' : 'ltr'}>
       <div className="mx-auto max-w-4xl space-y-5">
         <PathPanel accent="var(--ds-path-review)">
+          <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <GraduationCap className="h-9 w-9 text-path-review" />
             <div>
               <p className="text-xs font-black text-path-review m-0">BASEERAH · RESTRICTED EXTERNAL EXAMINATION</p>
-              <h1 className="text-2xl font-black m-0">Assigned thesis examination</h1>
+              <h1 className="text-2xl font-black m-0">{ar ? 'مناقشة الرسالة المعيَّنة' : 'Assigned thesis examination'}</h1>
             </div>
           </div>
+          <Button type="button" variant="outline" iconBefore={<Globe size={14} />} onClick={() => {
+            const next = language === 'ar' ? 'en' : 'ar';
+            setLanguage(next);
+            localStorage.setItem('rb_lang', next);
+          }}>{language === 'ar' ? 'English' : 'العربية'}</Button>
+          </div>
           <p className="mt-4 text-sm text-secondary m-0">
-            You can access only the frozen thesis version assigned to this examination. Current student workspaces and other reports are not available.
+            {ar ? 'يمكنك الوصول فقط إلى النسخة المجمّدة المعيَّنة لهذه المناقشة. مساحات الطالب الحالية وتقارير الآخرين غير متاحة.' : 'You can access only the frozen thesis version assigned to this examination. Current student workspaces and other reports are not available.'}
           </p>
         </PathPanel>
 

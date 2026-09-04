@@ -6,7 +6,7 @@ import { getTranslation } from '../utils/translations';
 import { Card } from '../design-system/components/Card';
 import { Button } from '../design-system/components/Button';
 import { PathPanel } from '../design-system/components/Navigation';
-import { EmptyState } from '../design-system/components/Feedback';
+import { EmptyActiveProject } from './EmptyActiveProject';
 import { ROUTES } from '../router/routes';
 import {
   AlertCircle,
@@ -38,10 +38,10 @@ export const ConsistencyChecker: React.FC = () => {
 
   if (!activeProject) {
     return (
-      <EmptyState
+      <EmptyActiveProject
+        language={language}
         illustration={<SearchCheck size={40} />}
-        title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No Active Project'}
-        description={language === 'ar' ? 'اختر مشروعًا نشطًا لفحص اتساق التصميم البحثي.' : 'Select an active project to check research-design consistency.'}
+        description={language === 'ar' ? 'أنشئ مشروعًا من اختيار المسار لفحص اتساق التصميم البحثي.' : 'Create a project from path selection to check research-design consistency.'}
       />
     );
   }

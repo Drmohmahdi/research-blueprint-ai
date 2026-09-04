@@ -4,6 +4,7 @@ import { AlertTriangle, Award, CheckCircle2, Clock, FileLock2, History } from 'l
 import { Button } from '../design-system/components/Button';
 import { EmptyState } from '../design-system/components/Feedback';
 import { PathPanel } from '../design-system/components/Navigation';
+import { EmptyActiveProject } from './EmptyActiveProject';
 import type { PreRegistrationRevision, ResearchProject } from '../types/research';
 import { calculateProtocolHash, getProtocolPayload } from '../utils/protocolIntegrity';
 
@@ -70,10 +71,10 @@ export const PreRegistration: React.FC = () => {
 
   if (!activeProject) {
     return (
-      <EmptyState
+      <EmptyActiveProject
+        language={language}
         illustration={<FileLock2 size={40} />}
-        title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No active project'}
-        description={language === 'ar' ? 'اختر مشروعًا نشطًا لتسجيل البروتوكول مسبقًا.' : 'Select an active project to lock the study protocol.'}
+        description={language === 'ar' ? 'أنشئ مشروعًا من اختيار المسار لتسجيل البروتوكول مسبقًا.' : 'Create a project from path selection to lock the study protocol.'}
       />
     );
   }

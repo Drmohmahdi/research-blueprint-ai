@@ -35,15 +35,26 @@ def get_analytics_overview(
             "progressPct": round((completed / 18) * 100) if completed > 0 else 0
         })
 
-    # Mock historical data for the Line Chart (progress over last 6 months)
-    # In a real scenario, this would aggregate from AuditLogs or UsageEvents
+    # Historical progress from real audit events in this organization, not a synthetic trend.
     now = datetime.datetime.now(datetime.UTC)
+    logs = db.query(models.AuditLog).filter(
+        models.AuditLog.organizationId == context.organization.id
+    ).all()
     history = []
     for i in range(5, -1, -1):
-        month_date = now - datetime.timedelta(days=i*30)
+        month_date = now - datetime.timedelta(days=i * 30)
+        key = month_date.strftime("%Y-%m")
+        month_count = 0
+        for log in logs:
+            try:
+                stamp = datetime.datetime.fromisoformat(str(log.timestamp).replace("Z", "+00:00"))
+            except (TypeError, ValueError):
+                continue
+            if stamp.strftime("%Y-%m") == key:
+                month_count += 1
         history.append({
             "month": month_date.strftime("%b"),
-            "completedTasks": total_completed // 6 + (i * 2) # Just a mock trend
+            "completedTasks": month_count,
         })
 
     return {

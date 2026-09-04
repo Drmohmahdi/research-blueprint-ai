@@ -31,6 +31,36 @@ def policy_rules(degree_type: str) -> dict[str, Any]:
     raise HTTPException(422, "Unsupported degree type")
 
 
+def ensure_active_policy(db: Session, organization_id: str, degree_type: str, creator_id: str) -> models.ThesisPolicy:
+    existing = (
+        db.query(models.ThesisPolicy)
+        .filter(
+            models.ThesisPolicy.organization_id == organization_id,
+            models.ThesisPolicy.degree_type == degree_type,
+            models.ThesisPolicy.status == "ACTIVE",
+        )
+        .order_by(models.ThesisPolicy.version.desc())
+        .first()
+    )
+    if existing:
+        return existing
+    item = models.ThesisPolicy(
+        id=f"thesis-policy-{uuid.uuid4()}",
+        organization_id=organization_id,
+        degree_type=degree_type,
+        program_code=None,
+        version=1,
+        status="ACTIVE",
+        rules_json=policy_rules(degree_type),
+        effective_from=now(),
+        created_by=creator_id,
+        created_at=now(),
+    )
+    db.add(item)
+    db.flush()
+    return item
+
+
 def create_thesis(db: Session, project: models.ResearchProject, policy: models.ThesisPolicy, student_id: str, program: str, creator_id: str, research_type: str) -> models.ThesisRecord:
     existing = db.query(models.ThesisRecord).filter(models.ThesisRecord.project_id == project.id).first()
     if existing: raise HTTPException(409, "Project already has a thesis")

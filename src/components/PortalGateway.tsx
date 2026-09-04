@@ -4,7 +4,7 @@ import { useProject } from '../context/ProjectContext';
 import { Card } from '../design-system/components/Card';
 import { Button } from '../design-system/components/Button';
 import { PathPanel } from '../design-system/components/Navigation';
-import { apiGetMyProfile, apiListScholarlyAssets } from '../utils/api';
+import { apiGetMyProfile, apiListScholarlyAssets, apiListPeerReviewCases, apiGetMyReviewerAssignments, apiGetMyPromotionApplication, apiResendVerification, type ReviewerAssignmentData } from '../utils/api';
 import { 
   FlaskConical, 
   BookOpen, 
@@ -16,28 +16,37 @@ import {
   Activity
 } from 'lucide-react';
 import { ROUTES } from '../router/routes';
+import { readIntendedPlan } from '../marketing/funnel';
 
 export const PortalGateway: React.FC = () => {
-  const { activeProject, language, projects } = useProject();
+  const { activeProject, language, projects, user } = useProject();
   const navigate = useNavigate();
   const isAr = language === 'ar';
 
   const [profile, setProfile] = useState<any>(null);
   const [assets, setAssets] = useState<any[]>([]);
+  const [peerCases, setPeerCases] = useState<Array<{ status: string }>>([]);
+  const [reviewAssignments, setReviewAssignments] = useState<ReviewerAssignmentData[]>([]);
+  const [promotionApp, setPromotionApp] = useState<{ status: string; readiness_percentage: number; evidence_selections?: unknown[] } | null>(null);
   const [metricsStatus, setMetricsStatus] = useState<'loading' | 'ready' | 'unavailable'>('loading');
+  const [resendMsg, setResendMsg] = useState('');
 
   useEffect(() => {
     const load = async () => {
       try {
-        const p = await apiGetMyProfile();
-        const a = await apiListScholarlyAssets();
-        if (p && a) {
-          setProfile(p);
-          setAssets(a);
-          setMetricsStatus('ready');
-        } else {
-          setMetricsStatus('unavailable');
-        }
+        const [p, a, cases, assignments, promo] = await Promise.all([
+          apiGetMyProfile(),
+          apiListScholarlyAssets(),
+          apiListPeerReviewCases(),
+          apiGetMyReviewerAssignments(),
+          apiGetMyPromotionApplication(),
+        ]);
+        if (p) setProfile(p);
+        if (a) setAssets(a);
+        if (cases) setPeerCases(cases);
+        if (assignments) setReviewAssignments(assignments);
+        if (promo) setPromotionApp(promo);
+        setMetricsStatus(p || a ? 'ready' : 'unavailable');
       } catch (e) {
         console.error("Failed to load portal metrics", e);
         setMetricsStatus('unavailable');
@@ -47,15 +56,51 @@ export const PortalGateway: React.FC = () => {
   }, []);
 
   const journalPapersCount = assets.filter(a => a.asset_type === 'JOURNAL_PAPER').length;
+  const manuscriptCount = assets.filter(a => a.asset_type === 'MANUSCRIPT').length;
+  const inSubmissionCount = assets.filter(a => String(a.lifecycle_status || '').includes('SUBMIT')).length;
   const completeness = profile?.completeness_score || 0;
   const channelsCount = profile?.identifiers?.length || 0;
   const totalAssetsCount = assets.length;
+  const identifierTypes = (profile?.identifiers || []).map((item: { identifier_type?: string }) => item.identifier_type).filter(Boolean);
+  const duplicateChannels = identifierTypes.filter((type: string, index: number) => identifierTypes.indexOf(type) !== index).length;
+  const researchOpenTasks = [
+    !activeProject,
+    !activeProject?.preRegistrationHash,
+    !(activeProject?.questions?.length),
+    !(activeProject?.hypotheses?.length),
+  ].filter(Boolean).length;
   const openActions = [
     !activeProject?.preRegistrationHash,
     completeness < 100,
     channelsCount < 6
   ].filter(Boolean).length;
-  const metricsValue = (value: string) => metricsStatus === 'ready' ? value : metricsStatus === 'loading' ? '...' : '—';
+  const dash = (value: string) => metricsStatus === 'ready' ? value : metricsStatus === 'loading' ? '...' : '—';
+  const activeReviews = peerCases.filter(c => c.status === 'IN_REVIEW' || c.status === 'REVISION_REQUESTED').length;
+  const completedReviews = peerCases.filter(c => c.status === 'DECIDED').length;
+  const pendingReports = peerCases.filter(c => c.status === 'DRAFT').length + reviewAssignments.filter(a => a.status === 'INVITED' || a.status === 'ACCEPTED' || a.status === 'IN_PROGRESS').length;
+  const nextDue = reviewAssignments
+    .map(a => a.due_at)
+    .filter((d): d is string => Boolean(d))
+    .sort()[0];
+  const nextDueLabel = nextDue
+    ? new Date(nextDue).toLocaleDateString(isAr ? 'ar-SA' : 'en-US')
+    : (isAr ? 'لا يوجد' : 'None');
+  const intendedPlan = readIntendedPlan();
+  const needsEmail = user?.email_verified === false;
+  const hasProject = Boolean(activeProject) || projects.length > 0;
+  const publicProfileUrl = user?.username ? `${window.location.origin}/researcher/${encodeURIComponent(user.username)}` : '';
+  const profileReady = completeness >= 40 || channelsCount > 0;
+
+  const resendVerification = async () => {
+    const result = await apiResendVerification();
+    setResendMsg(
+      result?.ok
+        ? (isAr ? 'أُعيد إرسال رابط التأكيد إن كان البريد مضبوطًا.' : 'A confirmation link was reissued if email is configured.')
+        : (isAr ? 'تعذر إعادة الإرسال الآن.' : 'Could not resend just now.')
+    );
+  };
+  const revisionRequested = peerCases.filter(c => c.status === 'REVISION_REQUESTED').length;
+  const metricsValue = dash;
   const portalSummary = [
     {
       label: isAr ? 'اكتمال الملف' : 'Profile',
@@ -84,20 +129,20 @@ export const PortalGateway: React.FC = () => {
       descEn: 'Design your study, build its conceptual model, calculate sample sizes, simulate outcomes, and monitor research execution.',
       icon: FlaskConical,
       accent: 'var(--ds-path-research)',
-      path: ROUTES.DASHBOARD,
-      statusAr: 'جاهز للعمل',
-      statusEn: 'Ready',
-      nextActionAr: 'استكمال تصميم الدراسة النشطة',
-      nextActionEn: 'Continue active study design',
+      path: activeProject ? ROUTES.LIFECYCLE : ROUTES.PATHS,
+      statusAr: activeProject ? 'جاهز للعمل' : 'بانتظار مشروع',
+      statusEn: activeProject ? 'Ready' : 'Needs a project',
+      nextActionAr: activeProject ? 'متابعة دورة حياة المشروع النشط' : 'أنشئ أو اختر مشروعًا بحثيًا',
+      nextActionEn: activeProject ? 'Continue the active project lifecycle' : 'Create or select a research project',
       stats: isAr ? [
         { label: 'المشروعات البحثية', value: String(projects.length) },
         { label: 'المشروع النشط', value: activeProject ? '1' : '0' },
-        { label: 'المهام المفتوحة', value: '2' },
+        { label: 'المهام المفتوحة', value: String(researchOpenTasks) },
         { label: 'آخر مشروع', value: activeProject?.titleAr ? (activeProject.titleAr.substring(0, 30) + '...') : 'لا يوجد' }
       ] : [
         { label: 'Research Projects', value: String(projects.length) },
         { label: 'Active Project', value: activeProject ? '1' : '0' },
-        { label: 'Open Tasks', value: '2' },
+        { label: 'Open Tasks', value: String(researchOpenTasks) },
         { label: 'Last Project', value: activeProject?.titleEn ? (activeProject.titleEn.substring(0, 30) + '...') : 'None' }
       ]
     },
@@ -109,21 +154,21 @@ export const PortalGateway: React.FC = () => {
       descEn: 'Review your manuscript, evaluate journal match, prepare submission packages, and track peer review revisions.',
       icon: BookOpen,
       accent: 'var(--ds-path-publication)',
-      path: ROUTES.REVIEW_SIM,
-      statusAr: 'يحتاج مراجعة',
-      statusEn: 'Needs review',
-      nextActionAr: 'فحص جاهزية المخطوطة التالية',
-      nextActionEn: 'Review next manuscript readiness',
+      path: ROUTES.PUBLISHING,
+      statusAr: manuscriptCount ? 'يحتاج مراجعة' : 'لا مخطوطة بعد',
+      statusEn: manuscriptCount ? 'Needs review' : 'No manuscript yet',
+      nextActionAr: manuscriptCount ? 'فتح مركز ذكاء النشر' : 'أنشئ مخطوطة من مشروع بحثي',
+      nextActionEn: manuscriptCount ? 'Open publication intelligence' : 'Create a manuscript from a research project',
       stats: isAr ? [
-        { label: 'المخطوطات (السجل الموحد)', value: String(journalPapersCount) },
-        { label: 'المجلات المحفوظة', value: '4' },
-        { label: 'ملفات قيد التقديم', value: '1' },
-        { label: 'تعديلات مطلوبة', value: '2' }
+        { label: 'المخطوطات (السجل الموحد)', value: dash(String(manuscriptCount)) },
+        { label: 'الأوراق المحكمة', value: dash(String(journalPapersCount)) },
+        { label: 'ملفات قيد التقديم', value: dash(String(inSubmissionCount)) },
+        { label: 'تعديلات مطلوبة', value: dash(String(revisionRequested)) }
       ] : [
-        { label: 'Manuscripts (Unified)', value: String(journalPapersCount) },
-        { label: 'Saved Journals', value: '4' },
-        { label: 'In Submission', value: '1' },
-        { label: 'Required Revisions', value: '2' }
+        { label: 'Manuscripts (Unified)', value: dash(String(manuscriptCount)) },
+        { label: 'Journal papers', value: dash(String(journalPapersCount)) },
+        { label: 'In Submission', value: dash(String(inSubmissionCount)) },
+        { label: 'Required Revisions', value: dash(String(revisionRequested)) }
       ]
     },
     {
@@ -135,20 +180,20 @@ export const PortalGateway: React.FC = () => {
       icon: Award,
       accent: 'var(--ds-path-review)',
       path: ROUTES.PEER_REVIEW,
-      statusAr: 'مهمة مفتوحة',
-      statusEn: 'Open assignment',
-      nextActionAr: 'متابعة تقرير التحكيم الجاري',
-      nextActionEn: 'Continue active review report',
+      statusAr: activeReviews ? 'مهمة مفتوحة' : 'لا مهام جارية',
+      statusEn: activeReviews ? 'Open assignment' : 'No active assignment',
+      nextActionAr: activeReviews ? 'متابعة تقرير التحكيم الجاري' : 'فتح بوابة التحكيم',
+      nextActionEn: activeReviews ? 'Continue active review report' : 'Open the peer-review portal',
       stats: isAr ? [
-        { label: 'التحكيمات الجارية', value: '1' },
-        { label: 'التحكيمات المكتملة', value: '3' },
-        { label: 'التقارير المعلقة', value: '0' },
-        { label: 'الموعد النهائي القادم', value: '28 يوليو 2026' }
+        { label: 'التحكيمات الجارية', value: dash(String(activeReviews)) },
+        { label: 'التحكيمات المكتملة', value: dash(String(completedReviews)) },
+        { label: 'التقارير المعلقة', value: dash(String(pendingReports)) },
+        { label: 'الموعد النهائي القادم', value: dash(nextDueLabel) }
       ] : [
-        { label: 'Active Reviews', value: '1' },
-        { label: 'Completed Reviews', value: '3' },
-        { label: 'Pending Reports', value: '0' },
-        { label: 'Next Deadline', value: 'July 28, 2026' }
+        { label: 'Active Reviews', value: dash(String(activeReviews)) },
+        { label: 'Completed Reviews', value: dash(String(completedReviews)) },
+        { label: 'Pending Reports', value: dash(String(pendingReports)) },
+        { label: 'Next Deadline', value: dash(nextDueLabel) }
       ]
     },
     {
@@ -160,20 +205,20 @@ export const PortalGateway: React.FC = () => {
       icon: Briefcase,
       accent: 'var(--ds-path-promotion)',
       path: ROUTES.PROMOTION,
-      statusAr: 'ملف غير مكتمل',
-      statusEn: 'Incomplete file',
-      nextActionAr: 'إكمال مستندات ملف الترقية',
-      nextActionEn: 'Complete promotion documents',
+      statusAr: promotionApp ? (promotionApp.readiness_percentage >= 100 ? 'جاهز للمراجعة' : 'ملف غير مكتمل') : 'لا طلب بعد',
+      statusEn: promotionApp ? (promotionApp.readiness_percentage >= 100 ? 'Ready for review' : 'Incomplete file') : 'No application yet',
+      nextActionAr: promotionApp ? 'متابعة ملف الترقية' : 'ابدأ طلب ترقية من اللوائح المعتمدة',
+      nextActionEn: promotionApp ? 'Continue the promotion file' : 'Start an application from approved bylaws',
       stats: isAr ? [
-        { label: 'طلبات الترقية النشطة', value: '1' },
-        { label: 'درجة اكتمال الملف الشخصي', value: `${completeness}%` },
-        { label: 'الأصول المؤهلة المربوطة', value: String(totalAssetsCount) },
-        { label: 'مستندات مطلوبة للتقديم', value: '1 ناقصة' }
+        { label: 'طلبات الترقية النشطة', value: dash(promotionApp && promotionApp.status !== 'CLOSED' ? '1' : '0') },
+        { label: 'درجة اكتمال الملف الشخصي', value: dash(`${completeness}%`) },
+        { label: 'الأدلة المربوطة', value: dash(String(promotionApp?.evidence_selections?.length || 0)) },
+        { label: 'جاهزية الطلب', value: dash(promotionApp ? `${promotionApp.readiness_percentage}%` : '—') }
       ] : [
-        { label: 'Active Promotion Files', value: '1' },
-        { label: 'Profile Completeness', value: `${completeness}%` },
-        { label: 'Eligible Assets Linked', value: String(totalAssetsCount) },
-        { label: 'Missing Documents', value: '1 doc' }
+        { label: 'Active Promotion Files', value: dash(promotionApp && promotionApp.status !== 'CLOSED' ? '1' : '0') },
+        { label: 'Profile Completeness', value: dash(`${completeness}%`) },
+        { label: 'Evidence linked', value: dash(String(promotionApp?.evidence_selections?.length || 0)) },
+        { label: 'Application readiness', value: dash(promotionApp ? `${promotionApp.readiness_percentage}%` : '—') }
       ]
     },
     {
@@ -185,26 +230,82 @@ export const PortalGateway: React.FC = () => {
       icon: Globe,
       accent: 'var(--ds-path-identity)',
       path: ROUTES.VISIBILITY,
-      statusAr: 'تحسين مقترح',
-      statusEn: 'Improvement suggested',
+      statusAr: completeness >= 100 ? 'مكتمل' : 'تحسين مقترح',
+      statusEn: completeness >= 100 ? 'Complete' : 'Improvement suggested',
       nextActionAr: 'تدقيق الهوية وربط القنوات',
       nextActionEn: 'Audit identity and channels',
       stats: isAr ? [
-        { label: 'مؤشر الانتشار الكلي', value: `${completeness}%` },
-        { label: 'القنوات الأكاديمية النشطة', value: `${channelsCount}/6` },
-        { label: 'إجمالي الأصول العلمية بالسجل', value: String(totalAssetsCount) },
-        { label: 'تنبيهات الدمج المطلوبة', value: 'دمج ملفين Scopus' }
+        { label: 'مؤشر الانتشار الكلي', value: dash(`${completeness}%`) },
+        { label: 'القنوات الأكاديمية النشطة', value: dash(`${channelsCount}/6`) },
+        { label: 'إجمالي الأصول العلمية بالسجل', value: dash(String(totalAssetsCount)) },
+        { label: 'تنبيهات تكرار القنوات', value: dash(duplicateChannels ? `${duplicateChannels} تكرار` : 'لا تنبيهات') }
       ] : [
-        { label: 'Visibility Score', value: `${completeness}%` },
-        { label: 'Linked Channels', value: `${channelsCount}/6` },
-        { label: 'Total Scholarly Assets', value: String(totalAssetsCount) },
-        { label: 'Action Alerts', value: 'Merge 2 Scopus profiles' }
+        { label: 'Visibility Score', value: dash(`${completeness}%`) },
+        { label: 'Linked Channels', value: dash(`${channelsCount}/6`) },
+        { label: 'Total Scholarly Assets', value: dash(String(totalAssetsCount)) },
+        { label: 'Duplicate-channel alerts', value: dash(duplicateChannels ? `${duplicateChannels} duplicates` : 'None') }
       ]
     }
   ];
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto py-8 px-4 pb-16">
+      {(needsEmail || !hasProject || !profileReady) && (
+        <div className="rounded-2xl border border-[var(--ds-primary)]/30 bg-[var(--ds-primary-soft)] p-4 space-y-3">
+          <p className="m-0 text-[10px] font-black uppercase tracking-widest text-[var(--ds-primary)]">
+            {isAr ? 'أول 15 دقيقة' : 'First 15 minutes'}
+          </p>
+          <ol className="m-0 p-0 list-none space-y-2 text-sm font-bold text-[var(--ds-text-primary)]">
+            <li className="flex flex-wrap items-center justify-between gap-2">
+              <span>{needsEmail ? (isAr ? '1. أكّد بريدك' : '1. Confirm your email') : (isAr ? '1. البريد مؤكد' : '1. Email confirmed')}</span>
+              {needsEmail && (
+                <Button type="button" size="sm" variant="outline" onClick={() => void resendVerification()}>
+                  {isAr ? 'إعادة إرسال التأكيد' : 'Resend confirmation'}
+                </Button>
+              )}
+            </li>
+            <li className="flex flex-wrap items-center justify-between gap-2">
+              <span>{hasProject ? (isAr ? '2. المشروع جاهز' : '2. Project ready') : (isAr ? '2. أنشئ مشروعك الأول' : '2. Create your first project')}</span>
+              {!hasProject && (
+                <Button type="button" size="sm" onClick={() => navigate(ROUTES.PATHS)}>
+                  {isAr ? 'اختيار المسار' : 'Choose a path'}
+                </Button>
+              )}
+            </li>
+            <li className="flex flex-wrap items-center justify-between gap-2">
+              <span>{profileReady ? (isAr ? '3. الملف قابل للمشاركة' : '3. Profile shareable') : (isAr ? '3. أكمل ملفك الأكاديمي ثم شاركه' : '3. Complete and share your profile')}</span>
+              <div className="flex gap-2">
+                <Button type="button" size="sm" variant="outline" onClick={() => navigate(ROUTES.PROFILE)}>
+                  {isAr ? 'الملف' : 'Profile'}
+                </Button>
+                {publicProfileUrl && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => void navigator.clipboard.writeText(publicProfileUrl)}
+                  >
+                    {isAr ? 'نسخ الرابط العام' : 'Copy public link'}
+                  </Button>
+                )}
+              </div>
+            </li>
+          </ol>
+          {resendMsg && <p className="m-0 text-[11px] font-semibold text-[var(--ds-text-secondary)]">{resendMsg}</p>}
+        </div>
+      )}
+      {intendedPlan && intendedPlan !== 'FREE' && (
+        <div className="rounded-2xl border border-[var(--ds-accent-gold)]/30 bg-[var(--ds-accent-gold-soft)] p-4 flex flex-wrap items-center justify-between gap-3">
+          <p className="m-0 text-sm font-bold text-[var(--ds-text-primary)]">
+            {isAr
+              ? `اخترت باقة ${intendedPlan} عند التسجيل. اطلب الترقية من الفوترة داخل المؤسسة.`
+              : `You selected ${intendedPlan} at signup. Request the upgrade from billing.`}
+          </p>
+          <Button type="button" variant="outline" onClick={() => navigate(ROUTES.BILLING)}>
+            {isAr ? 'فتح الفوترة' : 'Open billing'}
+          </Button>
+        </div>
+      )}
       
       <PathPanel accent="var(--ds-path-research)" className="p-0">
       <section className="relative overflow-hidden">

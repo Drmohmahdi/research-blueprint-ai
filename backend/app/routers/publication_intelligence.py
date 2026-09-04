@@ -118,7 +118,19 @@ def command_center(asset_id: str, db: Session = Depends(get_db), ctx: TenantCont
     shortlist = db.query(models.PublicationJournalShortlist).filter(models.PublicationJournalShortlist.asset_id == asset.id, models.PublicationJournalShortlist.organization_id == ctx.organization.id).all()
     submissions = db.query(models.PublicationSubmission).filter(models.PublicationSubmission.asset_id == asset.id, models.PublicationSubmission.organization_id == ctx.organization.id).order_by(models.PublicationSubmission.created_at.desc()).all()
     next_action = manuscript["blocking"][0] if manuscript["blocking"] else ({"code": "SELECT_JOURNAL"} if not shortlist else {"code": "PREPARE_SUBMISSION"})
-    return {"asset": {"id": asset.id, "title_ar": asset.title_ar, "title_en": asset.title_en, "lifecycle_status": asset.lifecycle_status}, "version": ({"id": version.id, "number": version.version_number, "article_type": version.article_type, "fingerprint": version.fingerprint} if version else None), "manuscript_readiness": manuscript, "reporting_compliance": {"status": "REQUIRES_HUMAN_CONFIRMATION", "score": None}, "journal_match": {"shortlisted": len(shortlist), "status": "AVAILABLE" if version else "BLOCKED"}, "submission_readiness": {"status": "READY" if manuscript["status"] == "READY" and shortlist else "NOT_READY"}, "next_best_action": {"priority": "BLOCKING" if manuscript["blocking"] else "RECOMMENDED", **next_action}, "submissions": [{"id": s.id, "status": s.status, "manuscript_version_id": s.manuscript_version_id} for s in submissions]}
+    journal_ids = {row.journal_id for row in shortlist} | {row.journal_id for row in submissions}
+    journals = {j.id: j for j in db.query(models.PublicationJournal).filter(models.PublicationJournal.id.in_(journal_ids)).all()} if journal_ids else {}
+    return {
+        "asset": {"id": asset.id, "title_ar": asset.title_ar, "title_en": asset.title_en, "lifecycle_status": asset.lifecycle_status},
+        "version": ({"id": version.id, "number": version.version_number, "article_type": version.article_type, "fingerprint": version.fingerprint} if version else None),
+        "manuscript_readiness": manuscript,
+        "reporting_compliance": {"status": "REQUIRES_HUMAN_CONFIRMATION", "score": None},
+        "journal_match": {"shortlisted": len(shortlist), "status": "AVAILABLE" if version else "BLOCKED"},
+        "submission_readiness": {"status": "READY" if manuscript["status"] == "READY" and shortlist else "NOT_READY"},
+        "next_best_action": {"priority": "BLOCKING" if manuscript["blocking"] else "RECOMMENDED", **next_action},
+        "shortlist": [{"journal_id": row.journal_id, "position": row.position, "title": (journals.get(row.journal_id).title if journals.get(row.journal_id) else row.journal_id)} for row in shortlist],
+        "submissions": [{"id": s.id, "status": s.status, "manuscript_version_id": s.manuscript_version_id, "journal_id": s.journal_id, "journal_title": (journals.get(s.journal_id).title if journals.get(s.journal_id) else s.journal_id)} for s in submissions],
+    }
 
 
 @router.post("/assets/{asset_id}/versions", status_code=201)
@@ -137,6 +149,12 @@ def update_section(asset_id: str, version_id: str, section_key: str, body: Secti
     section.status, section.content_json, section.updated_at = body.status, body.content, now()
     section.stale_at = now() if body.status == "STALE" else None
     db.commit(); return {"key": section.section_key, "status": section.status}
+
+
+@router.get("/journals")
+def list_journals(db: Session = Depends(get_db), ctx: TenantContext = Depends(get_tenant_context)):
+    rows = db.query(models.PublicationJournal).order_by(models.PublicationJournal.title.asc()).limit(200).all()
+    return [{"id": item.id, "title": item.title, "issn": item.issn, "publisher": item.publisher} for item in rows]
 
 
 @router.post("/journals", status_code=201)

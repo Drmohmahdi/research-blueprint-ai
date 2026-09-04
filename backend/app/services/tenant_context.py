@@ -239,7 +239,9 @@ def get_tenant_context(
 
 def require_role(allowed_roles: list[str]):
     def dependency(context: TenantContext = Depends(get_tenant_context)):
-        if context.role not in allowed_roles:
+        allowed = {role.upper() for role in allowed_roles}
+        current = (context.role or "").upper()
+        if current not in allowed:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have the required role for this operation in this organization"

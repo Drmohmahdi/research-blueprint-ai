@@ -34,10 +34,42 @@ function getHeaders(extraHeaders: Record<string, string> = {}): Record<string, s
   return headers;
 }
 
+export class ApiClientError extends Error {
+  status: number;
+  detail: string;
+  code?: 'PLAN_LIMIT_REACHED' | 'FEATURE_NOT_INCLUDED';
+  constructor(status: number, detail: string) {
+    super(detail);
+    this.name = 'ApiClientError';
+    this.status = status;
+    this.detail = detail;
+    if (detail.includes('PLAN_LIMIT_REACHED') || detail.includes('الحد الأقصى')) {
+      this.code = 'PLAN_LIMIT_REACHED';
+    } else if (detail.includes('FEATURE_NOT_INCLUDED')) {
+      this.code = 'FEATURE_NOT_INCLUDED';
+    }
+  }
+}
+
+export function isPlanLimitError(error: unknown): error is ApiClientError {
+  return error instanceof ApiClientError && error.code === 'PLAN_LIMIT_REACHED';
+}
+
+async function detailFromResponse(res: Response): Promise<string> {
+  try {
+    const body = await res.json();
+    if (typeof body?.detail === 'string') return body.detail;
+    if (body?.detail) return JSON.stringify(body.detail);
+  } catch {
+    /* ignore */
+  }
+  return res.statusText;
+}
+
 // Helper to check if backend is running
 export async function checkBackendAlive(): Promise<boolean> {
   try {
-    const res = await fetch(`${API_ROOT_URL}/`, { method: 'GET', signal: AbortSignal.timeout(800) });
+    const res = await fetch(`${API_ROOT_URL}/health`, { method: 'GET', signal: AbortSignal.timeout(2000) });
     return res.ok;
   } catch {
     return false;
@@ -64,7 +96,12 @@ export async function apiCreateProject(project: Omit<ResearchProject, 'id' | 've
       body: JSON.stringify(project)
     });
     if (res.ok) return await res.json();
+    const detail = await detailFromResponse(res);
+    const error = new ApiClientError(res.status, detail);
+    if (error.code) throw error;
+    console.error('Failed to create project on backend', res.status, detail);
   } catch (e) {
+    if (e instanceof ApiClientError) throw e;
     console.error('Failed to create project on backend', e);
   }
   return null;
@@ -191,10 +228,77 @@ export async function apiCreateManuscriptVersion(assetId: string, articleType: s
   return res.json();
 }
 
+export async function apiListPublicationJournals(): Promise<Array<{ id: string; title: string; issn?: string; publisher?: string }>> {
+  const res = await fetch(`${API_BASE_URL}/publication-intelligence/journals`, { headers: getHeaders() });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function apiShortlistPublicationJournal(assetId: string, journalId: string, position = 'PRIMARY'): Promise<boolean> {
+  const res = await fetch(`${API_BASE_URL}/publication-intelligence/assets/${encodeURIComponent(assetId)}/shortlist`, {
+    method: 'PUT', headers: getHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ journal_id: journalId, position })
+  });
+  return res.ok;
+}
+
+export async function apiGetManuscriptAuthorship(assetId: string, versionId: string): Promise<any | null> {
+  const res = await fetch(`${API_BASE_URL}/publication-intelligence/assets/${encodeURIComponent(assetId)}/versions/${encodeURIComponent(versionId)}/authorship`, { headers: getHeaders() });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function apiAddManuscriptAuthor(assetId: string, versionId: string, payload: Record<string, unknown>): Promise<boolean> {
+  const res = await fetch(`${API_BASE_URL}/publication-intelligence/assets/${encodeURIComponent(assetId)}/versions/${encodeURIComponent(versionId)}/authorship`, {
+    method: 'POST', headers: getHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(payload)
+  });
+  return res.ok;
+}
+
+export async function apiCreatePublicationSubmission(assetId: string, payload: { journal_id: string; manuscript_version_id: string }): Promise<any | null> {
+  const res = await fetch(`${API_BASE_URL}/publication-intelligence/assets/${encodeURIComponent(assetId)}/submissions`, {
+    method: 'POST', headers: getHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ ...payload, package_snapshot: {} })
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
 export async function apiThesisForProject(projectId: string): Promise<{ id: string } | null> {
   const res = await fetch(`${API_BASE_URL}/theses/projects/${encodeURIComponent(projectId)}`, { headers: getHeaders() });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Thesis lookup failed (${res.status})`);
+  return res.json();
+}
+
+export async function apiRegisterThesisForProject(
+  projectId: string,
+  payload: {
+    degree_type: 'MASTERS' | 'DOCTORATE';
+    program_name: string;
+    research_type: 'EMPIRICAL' | 'SYSTEMATIC_REVIEW' | 'CONCEPTUAL';
+  },
+): Promise<{ id: string; project_id: string; degree_type: string; current_stage: string }> {
+  const res = await fetch(`${API_BASE_URL}/theses/projects/${encodeURIComponent(projectId)}`, {
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function apiAssignThesisSupervisor(
+  thesisId: string,
+  payload: { user_id: string; role: 'SUPERVISOR' | 'CO_SUPERVISOR'; can_final_recommend?: boolean },
+): Promise<{ id: string; role: string; can_final_recommend: boolean }> {
+  const res = await fetch(`${API_BASE_URL}/theses/${encodeURIComponent(thesisId)}/assignments`, {
+    method: 'POST',
+    headers: getHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
@@ -230,6 +334,30 @@ export async function apiThesisCommittee(thesisId: string): Promise<any[]> {
 export async function apiThesisCorrections(thesisId: string): Promise<any[]> {
   const res = await fetch(`${API_BASE_URL}/theses/${encodeURIComponent(thesisId)}/corrections`, { headers: getHeaders() });
   if (!res.ok) throw new Error(`Corrections lookup failed (${res.status})`);
+  return res.json();
+}
+
+export async function apiListThesisFeedback(thesisId: string): Promise<any[]> {
+  const res = await fetch(`${API_BASE_URL}/theses/${encodeURIComponent(thesisId)}/feedback`, { headers: getHeaders() });
+  if (!res.ok) throw new Error(`Feedback lookup failed (${res.status})`);
+  return res.json();
+}
+
+export async function apiAddThesisFeedback(thesisId: string, payload: Record<string, unknown>): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/theses/${encodeURIComponent(thesisId)}/feedback`, {
+    method: 'POST', headers: getHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function apiResolveThesisFeedback(thesisId: string, feedbackId: string, resolutionStatus: string): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/theses/${encodeURIComponent(thesisId)}/feedback/${encodeURIComponent(feedbackId)}/resolve`, {
+    method: 'PATCH', headers: getHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ resolution_status: resolutionStatus })
+  });
+  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
@@ -272,6 +400,33 @@ export async function apiThesisCoiDecision(thesisId: string, memberId: string, d
 
 export async function apiAddThesisCorrection(thesisId: string, payload: Record<string, unknown>): Promise<any> {
   const res = await fetch(`${API_BASE_URL}/theses/${encodeURIComponent(thesisId)}/corrections`, { method: 'POST', headers: getHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(payload) });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function apiCreateThesisMeeting(thesisId: string, payload: Record<string, unknown>): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/theses/${encodeURIComponent(thesisId)}/meetings`, {
+    method: 'POST', headers: getHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function apiSubmitThesisChapterVersion(thesisId: string, chapterId: string, payload: Record<string, unknown>): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/theses/${encodeURIComponent(thesisId)}/chapters/${encodeURIComponent(chapterId)}/versions`, {
+    method: 'POST', headers: getHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export async function apiApproveThesisChapter(thesisId: string, chapterId: string, versionId: string): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/theses/${encodeURIComponent(thesisId)}/chapters/${encodeURIComponent(chapterId)}/approve`, {
+    method: 'POST', headers: getHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ version_id: versionId })
+  });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
@@ -517,6 +672,7 @@ export const apiUpdateDatasetVariable=(datasetId:string,variableId:string,payloa
 export const apiResolveDatasetIssue=(datasetId:string,issueId:string,payload:{status:string;resolution:string})=>researchDataJson(`/datasets/${encodeURIComponent(datasetId)}/issues/${encodeURIComponent(issueId)}`,{method:'PATCH',body:JSON.stringify(payload)});
 export const apiCleanResearchDataset=(datasetId:string,payload:Record<string,unknown>)=>researchDataJson(`/datasets/${encodeURIComponent(datasetId)}/clean`,{method:'POST',body:JSON.stringify(payload)});
 export const apiRunResearchAnalysis=(datasetId:string,payload:Record<string,unknown>)=>researchDataJson(`/datasets/${encodeURIComponent(datasetId)}/analyses`,{method:'POST',body:JSON.stringify(payload)});
+export const apiReviewResearchAnalysis=(analysisId:string,payload:{recommendation:string;notes?:string})=>researchDataJson(`/analyses/${encodeURIComponent(analysisId)}/review`,{method:'POST',body:JSON.stringify(payload)});
 export const apiRecommendStatisticalTest=(payload:Record<string,unknown>)=>researchDataJson('/decision',{method:'POST',body:JSON.stringify(payload)});
 export function researchDatasetExportUrl(datasetId:string){return `${API_BASE_URL}/research-data/datasets/${encodeURIComponent(datasetId)}/export.csv`;}
 
@@ -535,11 +691,34 @@ export async function apiRegister(username: string, password: string, email: str
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password, email, role })
     });
-    return res.ok;
+    if (!res.ok) return false;
+    return true;
   } catch (e) {
     console.error('Auth registration failed', e);
   }
   return false;
+}
+
+export async function apiCaptureLead(payload: {
+  name: string;
+  email: string;
+  organization?: string;
+  intent?: string;
+  message?: string;
+  source_path?: string;
+}): Promise<{ ok: boolean; intent?: string } | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/marketing/leads`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch (e) {
+    console.error('Marketing lead capture failed', e);
+    return null;
+  }
 }
 
 export async function apiValidateReadiness(projectId: string): Promise<{ readinessScore: number; isReady: boolean; recommendations: string[] } | null> {
@@ -752,13 +931,17 @@ export async function apiListMembers(): Promise<any[] | null> {
 
 export async function apiInviteMember(email: string, role: string): Promise<any | null> {
   try {
-    const res = await fetch(`${API_BASE_URL}/organizations/members/invite`, {
+    const invite = await fetch(`${API_BASE_URL}/organizations/members/invite`, {
       method: 'POST',
       headers: getHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ email, role })
     });
-    if (res.ok) return await res.json();
+    if (invite.ok) return await invite.json();
+    const detail = await detailFromResponse(invite);
+    const error = new ApiClientError(invite.status, detail);
+    if (error.code) throw error;
   } catch (e) {
+    if (e instanceof ApiClientError) throw e;
     console.error('Invite member failed', e);
   }
   return null;
@@ -774,11 +957,12 @@ export async function apiListInvitations(): Promise<any[] | null> {
   return null;
 }
 
-export async function apiAcceptInvitation(inviteId: string): Promise<boolean> {
+export async function apiAcceptInvitation(token: string): Promise<boolean> {
   try {
-    const res = await fetch(`${API_BASE_URL}/organizations/invitations/${inviteId}/accept`, {
+    const res = await fetch(`${API_BASE_URL}/organizations/invitations/accept`, {
       method: 'POST',
-      headers: getHeaders()
+      headers: getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ token }),
     });
     return res.ok;
   } catch (e) {
@@ -799,15 +983,143 @@ export async function apiGetBilling(): Promise<any | null> {
 
 export async function apiSubscribe(planCode: string): Promise<any | null> {
   try {
-    const res = await fetch(`${API_BASE_URL}/organizations/billing/subscribe?plan_code=${planCode}`, {
+    const res = await fetch(`${API_BASE_URL}/organizations/billing/subscribe`, {
       method: 'POST',
-      headers: getHeaders()
+      headers: getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ plan_code: planCode }),
     });
     if (res.ok) return await res.json();
   } catch (e) {
     console.error('Subscribe failed', e);
   }
   return null;
+}
+
+export async function apiGetMe(): Promise<{
+  id: string;
+  username: string;
+  email: string;
+  role: string;
+  account_status?: string;
+  is_global_admin?: boolean;
+  org_id?: string | null;
+  org_role?: string | null;
+  permissions?: string[];
+  email_verified?: boolean;
+} | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/me`, { headers: getHeaders() });
+    if (res.ok) return await res.json();
+  } catch (e) {
+    console.error('Get current user failed', e);
+  }
+  return null;
+}
+
+export async function apiVerifyEmail(token: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/verify-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+    return res.ok;
+  } catch (e) {
+    console.error('Verify email failed', e);
+    return false;
+  }
+}
+
+export async function apiResendVerification(): Promise<{ ok: boolean; email_verified?: boolean; verification_token?: string } | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/resend-verification`, {
+      method: 'POST',
+      headers: getHeaders(),
+    });
+    if (res.ok) return await res.json();
+  } catch (e) {
+    console.error('Resend verification failed', e);
+  }
+  return null;
+}
+
+export type MarketingLead = {
+  id: string;
+  name: string;
+  email: string;
+  organization?: string | null;
+  intent: string;
+  message?: string | null;
+  source_path?: string | null;
+  status: string;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export async function apiListMarketingLeads(): Promise<MarketingLead[] | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/leads`, { headers: getHeaders() });
+    if (res.ok) return await res.json();
+  } catch (e) {
+    console.error('List marketing leads failed', e);
+  }
+  return null;
+}
+
+export async function apiUpdateMarketingLead(id: string, payload: { status: string; notes?: string }): Promise<MarketingLead | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/admin/leads/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      headers: getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) return await res.json();
+  } catch (e) {
+    console.error('Update marketing lead failed', e);
+  }
+  return null;
+}
+
+export async function apiForgotPassword(email: string): Promise<{ ok: boolean; reset_token?: string } | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+      method: 'POST',
+      headers: getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ email }),
+    });
+    if (res.ok) return await res.json();
+  } catch (e) {
+    console.error('Forgot password failed', e);
+  }
+  return null;
+}
+
+export async function apiResetPassword(token: string, newPassword: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ token, new_password: newPassword }),
+    });
+    return res.ok;
+  } catch (e) {
+    console.error('Reset password failed', e);
+  }
+  return false;
+}
+
+export async function apiDeleteProjectComment(commentId: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+    });
+    return res.ok;
+  } catch (e) {
+    console.error('Delete comment failed', e);
+  }
+  return false;
 }
 
 export async function apiListAuditLogs(): Promise<any[] | null> {
@@ -1097,6 +1409,42 @@ export async function apiAddLiteratureStudy(
   return null;
 }
 
+export async function apiUpdateLiteratureStudy(
+  projectId: string,
+  studyId: string,
+  payload: { sampleSize?: number; effectSize?: number; ciLower?: number; ciUpper?: number; notes?: string }
+): Promise<LiteratureStudyItem | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/projects/${projectId}/literature-synthesis/studies/${encodeURIComponent(studyId)}`, {
+      method: 'PATCH',
+      headers: getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) return await res.json();
+  } catch (e) {
+    console.error('apiUpdateLiteratureStudy failed', e);
+  }
+  return null;
+}
+
+export async function apiImportLiteratureStudies(
+  projectId: string,
+  query: string,
+  source: 'crossref' | 'pubmed' = 'crossref'
+): Promise<{ query: string; source: string; imported: number; skipped: number; studies: LiteratureStudyItem[] } | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/projects/${projectId}/literature-synthesis/import`, {
+      method: 'POST',
+      headers: getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ query, source })
+    });
+    if (res.ok) return await res.json();
+  } catch (e) {
+    console.error('apiImportLiteratureStudies failed', e);
+  }
+  return null;
+}
+
 export async function apiDeleteLiteratureStudy(projectId: string, studyId: string): Promise<boolean> {
   try {
     const res = await fetch(`${API_BASE_URL}/projects/${projectId}/literature-synthesis/studies/${studyId}`, {
@@ -1326,6 +1674,8 @@ export interface PromotionApplicationData {
   created_at: string;
   updated_at: string;
   evidence_selections: PromotionEvidenceItemData[];
+  committee_assignments?: Array<{ id: string; user_id: string; status: string }>;
+  is_committee_member?: boolean;
   policy?: PromotionPolicyData;
 }
 
@@ -1436,6 +1786,44 @@ export async function apiSubmitPromotionApplication(
     console.error('apiSubmitPromotionApplication failed', e);
   }
   return null;
+}
+
+export async function apiAssignPromotionCommittee(applicationId: string, userId: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/promotions/applications/${applicationId}/committee`, {
+      method: 'POST',
+      headers: getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ user_id: userId })
+    });
+    return res.ok;
+  } catch (e) {
+    console.error('apiAssignPromotionCommittee failed', e);
+  }
+  return false;
+}
+
+export async function apiReviewPromotionApplication(applicationId: string, decision: string, notes: string): Promise<PromotionApplicationData | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/promotions/applications/${applicationId}/review`, {
+      method: 'POST',
+      headers: getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ decision, notes })
+    });
+    if (res.ok) return await res.json();
+  } catch (e) {
+    console.error('apiReviewPromotionApplication failed', e);
+  }
+  return null;
+}
+
+export async function apiListCommitteePromotionQueue(): Promise<PromotionApplicationData[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/promotions/applications/committee-queue`, { headers: getHeaders() });
+    if (res.ok) return await res.json();
+  } catch (e) {
+    console.error('apiListCommitteePromotionQueue failed', e);
+  }
+  return [];
 }
 
 
@@ -1781,6 +2169,39 @@ export async function apiRecordEditorialDecision(
     console.error('apiRecordEditorialDecision failed', e);
   }
   return null;
+}
+
+export async function apiStartPeerReviewRound(caseId: string): Promise<PeerReviewRoundData | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/peer-reviews/cases/${caseId}/rounds`, {
+      method: 'POST',
+      headers: getHeaders()
+    });
+    if (res.ok) return await res.json();
+  } catch (e) {
+    console.error('apiStartPeerReviewRound failed', e);
+  }
+  return null;
+}
+
+export async function apiUploadManuscriptRevision(caseId: string, payload: {
+  title_ar: string;
+  title_en: string;
+  abstract_ar?: string;
+  abstract_en?: string;
+  response_to_reviewers?: string;
+}): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/peer-reviews/cases/${caseId}/revisions`, {
+      method: 'POST',
+      headers: getHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(payload)
+    });
+    return res.ok;
+  } catch (e) {
+    console.error('apiUploadManuscriptRevision failed', e);
+  }
+  return false;
 }
 
 // ── External Reviewer Portal API Calls ──────────────────────────────────────
@@ -2223,7 +2644,7 @@ export interface SearchResponse {
 }
 
 export const SEARCH_DOMAINS = [
-  'PROJECT', 'LITERATURE', 'ASSET', 'PROFILE', 'PROMOTION', 'PEER_REVIEW', 'FILE'
+  'PROJECT', 'LITERATURE', 'ASSET', 'PROFILE', 'PROMOTION', 'PEER_REVIEW', 'FILE', 'THESIS'
 ] as const;
 
 export type SearchSort = 'relevance' | 'newest' | 'oldest' | 'title' | 'year';

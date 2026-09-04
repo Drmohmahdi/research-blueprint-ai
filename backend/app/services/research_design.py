@@ -419,12 +419,12 @@ def recommend_methodology(db: Session, project: models.ResearchProject, state: m
     elif any(token in design for token in ("conceptual", "theoretical", "نظري", "مفاهيمي")):
         family = "CONCEPTUAL_THEORETICAL"
         designs = ["conceptual_theoretical"]
+    elif any(token in design for token in ("mixed", "مختلط")):
+        family = "MIXED_METHODS"
+        designs = ["mixed_methods"]
     elif any(token in design for token in ("qualitative", "نوعي", "case_study", "phenomenolog")):
         family = "QUALITATIVE"
         designs = ["qualitative_generic", "case_study", "phenomenology", "grounded_theory"]
-    elif any(token in design for token in ("mixed",)):
-        family = "MIXED_METHODS"
-        designs = ["mixed_methods"]
     elif has_qual and intents and any(i in {"EXPLORE", "INTERPRET"} for i in intents):
         family = "QUALITATIVE"
         designs = ["qualitative_generic", "case_study", "phenomenology"]
@@ -442,8 +442,8 @@ def recommend_methodology(db: Session, project: models.ResearchProject, state: m
         "conflicts": conflicts,
         "causal_claim_warnings": causal_warnings,
         "mixed_methods": {
-            "status": "DEFERRED_CAPABILITY",
-            "note": "Full mixed-methods workflow is not yet implemented on this platform.",
+            "status": "AVAILABLE",
+            "note": "Mixed methods uses the qualitative lab for coding and the quantitative tools for measurement and analysis. Both strands remain researcher-confirmed.",
         } if family == "MIXED_METHODS" else None,
     }
 

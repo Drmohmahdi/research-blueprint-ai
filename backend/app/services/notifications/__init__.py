@@ -14,10 +14,12 @@ from .dispatcher import EventDispatcher
 from .email_adapter import (
     EmailDeliveryAdapter,
     NullEmailDeliveryAdapter,
+    SmtpEmailDeliveryAdapter,
     EmailMessage,
     EmailDeliveryResult,
     get_email_adapter,
-    set_email_adapter
+    set_email_adapter,
+    configure_email_adapter,
 )
 
 __all__ = [
@@ -34,8 +36,10 @@ __all__ = [
     "EventDispatcher",
     "EmailDeliveryAdapter",
     "NullEmailDeliveryAdapter",
+    "SmtpEmailDeliveryAdapter",
     "EmailMessage",
     "EmailDeliveryResult",
     "get_email_adapter",
-    "set_email_adapter"
+    "set_email_adapter",
+    "configure_email_adapter",
 ]

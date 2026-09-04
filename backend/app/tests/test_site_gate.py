@@ -62,3 +62,18 @@ def test_verify_accepts_correct_password_and_unlocks(gate_enabled):
 
     projects_res = client.get("/api/projects")
     assert not (projects_res.status_code == 401 and projects_res.json().get("detail") == "SITE_GATED")
+
+
+def test_billing_webhooks_exempt_from_gate(gate_enabled):
+    client = TestClient(app)
+    res = client.post("/api/billing/webhooks/moyasar", json={})
+    assert res.json().get("detail") != "SITE_GATED"
+
+
+def test_marketing_leads_exempt_from_gate(gate_enabled):
+    client = TestClient(app)
+    res = client.post(
+        "/api/marketing/leads",
+        json={"name": "Demo", "email": "demo@example.com", "intent": "demo"},
+    )
+    assert res.json().get("detail") != "SITE_GATED"

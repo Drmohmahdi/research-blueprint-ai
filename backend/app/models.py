@@ -11,6 +11,8 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     role = Column(String, nullable=False) # Researcher, Student, Supervisor, Statistician, OrganizationAdmin, SystemAdmin
+    account_status = Column(String, nullable=False, default="ACTIVE")  # ACTIVE, DISABLED
+    email_verified_at = Column(String, nullable=True)
     created_at = Column(String, nullable=False)
 
     # Relationships
@@ -23,6 +25,45 @@ class UserSession(Base):
     token = Column(String, primary_key=True)
     userId = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     expiresAt = Column(String, nullable=False)
+
+
+class PasswordResetToken(Base):
+    __tablename__ = "password_reset_tokens"
+
+    id = Column(String, primary_key=True)
+    userId = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    token_hash = Column(String, unique=True, nullable=False, index=True)
+    expiresAt = Column(String, nullable=False)
+    usedAt = Column(String, nullable=True)
+    createdAt = Column(String, nullable=False)
+
+
+class EmailVerificationToken(Base):
+    __tablename__ = "email_verification_tokens"
+
+    id = Column(String, primary_key=True)
+    userId = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    token_hash = Column(String, unique=True, nullable=False, index=True)
+    expiresAt = Column(String, nullable=False)
+    usedAt = Column(String, nullable=True)
+    createdAt = Column(String, nullable=False)
+
+
+class MarketingLead(Base):
+    __tablename__ = "marketing_leads"
+
+    id = Column(String, primary_key=True)
+    name = Column(String, nullable=False)
+    email = Column(String, nullable=False, index=True)
+    organization = Column(String, nullable=True)
+    intent = Column(String, nullable=False, default="demo")
+    message = Column(String, nullable=True)
+    source_path = Column(String, nullable=True)
+    status = Column(String, nullable=False, default="NEW")  # NEW, CONTACTED, DEMO, CLOSED
+    notes = Column(String, nullable=True)
+    ip_address = Column(String, nullable=True)
+    created_at = Column(String, nullable=False)
+    updated_at = Column(String, nullable=False)
 
 
 class AuditLog(Base):

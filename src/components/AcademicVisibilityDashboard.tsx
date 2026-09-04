@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { apiGetMyProfile, apiUpsertProfile, apiGetDownloadUrl } from '../utils/api';
 import { ROUTES } from '../router/routes';
@@ -49,6 +49,7 @@ const normalizeProfile = (data: any) => ({
 export const AcademicVisibilityDashboard: React.FC = () => {
   const { language, user } = useProject();
   const navigate = useNavigate();
+  const location = useLocation();
   const isAr = language === 'ar';
 
   const [profile, setProfile] = useState<any | null>(null);
@@ -89,6 +90,17 @@ export const AcademicVisibilityDashboard: React.FC = () => {
       setLoading(false);
     })();
   }, []);
+
+  useEffect(() => {
+    if (loading) return;
+    const target = location.pathname.includes('/audit')
+      ? 'visibility-audit'
+      : location.pathname.includes('/plan')
+        ? 'visibility-plan'
+        : null;
+    if (!target) return;
+    document.getElementById(target)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [loading, location.pathname]);
 
   const persist = async (updated: any) => {
     setSaving(true);
@@ -344,7 +356,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
         <div className="lg:col-span-7 space-y-6">
 
           {/* Identity audit */}
-          <Card className="p-5 space-y-4">
+          <Card id="visibility-audit" className="p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-2">
               <h3 className="text-xs font-black text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
                 <User className="text-path-identity" size={16} />
@@ -790,7 +802,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
           </Card>
 
           {/* Reputation plan, computed live from real profile completeness */}
-          <Card className="p-5 space-y-4">
+          <Card id="visibility-plan" className="p-5 space-y-4">
             <h3 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center gap-2">
               <CheckSquare className="text-path-identity" size={16} />
               <span>{isAr ? 'خطة بناء السمعة الأكاديمية' : 'Academic Reputation Plan'}</span>

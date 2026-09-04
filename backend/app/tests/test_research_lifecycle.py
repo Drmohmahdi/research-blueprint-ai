@@ -7,6 +7,7 @@ from fastapi import HTTPException
 
 from app import models
 from app.routers.research_lifecycle import project_or_404, project_timeline, require_project_write
+from app.services.research_design import save_design_section
 from app.services.research_lifecycle import (
     TEMPLATES,
     build_summary,
@@ -78,7 +79,7 @@ def lifecycle_domain(db_session):
     db_session.commit()
 
 
-def test_lifecycle_template_resolution_and_deferred_capability(lifecycle_domain):
+def test_lifecycle_template_resolution_and_qualitative_availability(lifecycle_domain):
     d = lifecycle_domain
     assert resolve_template(d.project) == "EMPIRICAL_QUANTITATIVE"
     d.project.studyDesign = "conceptual theoretical"
@@ -89,9 +90,29 @@ def test_lifecycle_template_resolution_and_deferred_capability(lifecycle_domain)
     assert resolve_template(d.project) == "QUALITATIVE"
     summary = build_summary(d.db, d.project, d.user.id)
     qualitative = {stage["key"]: stage for stage in summary["stages"]}
-    assert qualitative["QUALITATIVE_DATA"]["status"] == "DEFERRED_CAPABILITY"
+    assert qualitative["QUALITATIVE_DATA"]["status"] == "AVAILABLE"
+    assert qualitative["QUALITATIVE_ANALYSIS"]["status"] == "BLOCKED"
+    d.project.studyDesign = "mixed_methods"
+    d.db.commit()
+    assert resolve_template(d.project) == "MIXED_METHODS"
     assert summary["next_action"]["computed_by"] == "DETERMINISTIC_LIFECYCLE_ENGINE"
-    assert set(TEMPLATES) == {"EMPIRICAL_QUANTITATIVE", "CONCEPTUAL_THEORETICAL", "SYSTEMATIC_REVIEW", "QUALITATIVE"}
+    assert set(TEMPLATES) == {"EMPIRICAL_QUANTITATIVE", "CONCEPTUAL_THEORETICAL", "SYSTEMATIC_REVIEW", "QUALITATIVE", "MIXED_METHODS"}
+
+
+def test_qualitative_coding_completes_data_and_analysis_stages(lifecycle_domain):
+    d = lifecycle_domain
+    d.project.studyDesign = "qualitative"
+    d.db.commit()
+    save_design_section(d.db, d.project, "procedure", {
+        "qualitative_coding": {
+            "transcript": "Field notes from classroom interviews about motivation.",
+            "themes": [{"codeEn": "Motivation", "codeAr": "الدافعية"}],
+        }
+    }, d.user.id)
+    d.db.commit()
+    stages = {stage["key"]: stage for stage in build_summary(d.db, d.project, d.user.id)["stages"]}
+    assert stages["QUALITATIVE_DATA"]["status"] == "COMPLETED"
+    assert stages["QUALITATIVE_ANALYSIS"]["status"] == "COMPLETED"
 
 
 def test_variable_mapping_is_idempotent_and_rejects_foreign_project(lifecycle_domain):

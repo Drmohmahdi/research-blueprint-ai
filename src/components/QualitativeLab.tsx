@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
+import { ROUTES } from '../router/routes';
 import { 
   Sparkles, 
   MessageSquare, 
@@ -13,6 +15,7 @@ import { Card } from '../design-system/components/Card';
 import { Button } from '../design-system/components/Button';
 import { PathPanel } from '../design-system/components/Navigation';
 import { EmptyState } from '../design-system/components/Feedback';
+import { apiResearchDesignSaveSection, apiResearchDesignSection } from '../utils/api';
 
 const redactIdentifiers = (text: string) => {
   let redactionCount = 0;
@@ -57,7 +60,11 @@ const TRANSCRIPT_PRESETS = [
 ];
 
 export const QualitativeLab: React.FC = () => {
-  const { activeProject, updateProject, language } = useProject();
+  const navigate = useNavigate();
+  const { activeProject, updateProject, language, user, isSecureMode } = useProject();
+  const persistableProjectId = activeProject?.id && activeProject.id !== 'demo-1' && user && isSecureMode
+    ? activeProject.id
+    : null;
 
   const [transcript, setTranscript] = useState(
     language === 'ar'
@@ -88,7 +95,14 @@ export const QualitativeLab: React.FC = () => {
     setSuccessMessage('');
     setRedactionNotice('');
     setLoading(false);
-  }, [activeProject?.id, language]);
+    if (!persistableProjectId) return;
+    void apiResearchDesignSection(persistableProjectId, 'procedure').then(section => {
+      const coding = section?.data?.qualitative_coding;
+      if (!coding) return;
+      if (typeof coding.transcript === 'string' && coding.transcript.trim()) setTranscript(coding.transcript);
+      if (Array.isArray(coding.themes) && coding.themes.length) setThemes(coding.themes);
+    }).catch(() => undefined);
+  }, [persistableProjectId, language]);
 
   const handleAnalyzeQualitative = () => {
     const runId = analysisRunId.current + 1;
@@ -163,6 +177,19 @@ export const QualitativeLab: React.FC = () => {
 
       setThemes(extracted);
       setLoading(false);
+      if (persistableProjectId) {
+        void apiResearchDesignSection(persistableProjectId, 'procedure').then(section => {
+          const current = section?.data && typeof section.data === 'object' ? section.data : {};
+          return apiResearchDesignSaveSection(persistableProjectId, 'procedure', {
+            ...current,
+            qualitative_coding: {
+              transcript: sanitizedTranscript,
+              themes: extracted,
+              saved_at: new Date().toISOString(),
+            },
+          });
+        }).catch(() => undefined);
+      }
     }, 1200);
   };
 
@@ -205,6 +232,23 @@ export const QualitativeLab: React.FC = () => {
     );
   };
 
+  if (!activeProject) {
+    return (
+      <EmptyState
+        illustration={<MessageSquare size={40} />}
+        title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No active project'}
+        description={language === 'ar'
+          ? 'أنشئ مشروعًا من اختيار المسار لحفظ ترميز المقابلات في إجراءات الدراسة.'
+          : 'Create a project from path selection to save interview coding to the study procedure.'}
+        actionButton={
+          <Button type="button" variant="primary" size="sm" onClick={() => navigate(ROUTES.PATHS)}>
+            {language === 'ar' ? 'اختيار مسار البحث' : 'Choose a research path'}
+          </Button>
+        }
+      />
+    );
+  }
+
   return (
     <div className="space-y-8 max-w-[1280px] mx-auto pb-16">
       <PathPanel accent="var(--ds-path-data)">
@@ -218,8 +262,8 @@ export const QualitativeLab: React.FC = () => {
           </h2>
           <p className="text-xs text-secondary font-medium m-0">
             {language === 'ar' 
-              ? 'قم بتحليل نصوص المقابلات المفتوحة، التغذية الراجعة، وملاحظات الميدان واستخرج المحاور والرموز بدقة علمية.'
-              : 'Analyze open-ended interview transcripts, field notes, and feedback to extract thematic codes.'}
+              ? 'حلّل نصوص المقابلات والملاحظات الميدانية واستخرج المحاور. يُحفظ الترميز في إجراءات المشروع ويُكمل مرحلتي البيانات والتحليل النوعي في دورة الحياة.'
+              : 'Analyze open-ended interview transcripts, field notes, and feedback to extract thematic codes. Coding is saved to the project procedure and completes qualitative lifecycle stages.'}
           </p>
         </div>
       </PathPanel>

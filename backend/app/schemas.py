@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict, Field, model_validator, field_validator
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Literal
 
 class SampleSettingsSchema(BaseModel):
     populationSize: Optional[int] = None
@@ -224,11 +224,31 @@ class UserLogin(BaseModel):
     password: str
 
 
+class PasswordForgotRequest(BaseModel):
+    email: str
+
+
+class PasswordResetRequest(BaseModel):
+    token: str
+    new_password: str
+
+
+class EmailVerifyRequest(BaseModel):
+    token: str
+
+
 class UserResponse(BaseModel):
     id: str
     username: str
     email: str
     role: str
+    account_status: str = "ACTIVE"
+    email_verified: bool = False
+    is_global_admin: bool = False
+    org_id: Optional[str] = None
+    org_role: Optional[str] = None
+    permissions: List[str] = Field(default_factory=list)
+    verification_token: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -303,6 +323,7 @@ class OrganizationInvitationResponse(BaseModel):
     accepted_at: Optional[str] = None
     revoked_at: Optional[str] = None
     created_at: str
+    token: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 
 class PlanResponse(BaseModel):
@@ -655,6 +676,14 @@ class LiteratureStudyCreate(LiteratureStudyBase):
     id: Optional[str] = None
 
 
+class LiteratureStudyPatch(BaseModel):
+    sampleSize: Optional[int] = Field(default=None, gt=0)
+    effectSize: Optional[float] = None
+    ciLower: Optional[float] = None
+    ciUpper: Optional[float] = None
+    notes: Optional[str] = None
+
+
 class LiteratureStudySchema(LiteratureStudyBase):
     id: str
     projectId: str
@@ -678,6 +707,19 @@ class LiteratureSynthesisResponse(BaseModel):
     pooledUpper: float
     heterogeneityQ: float
     heterogeneityI2: float
+
+
+class LiteratureImportRequest(BaseModel):
+    query: str = Field(min_length=3, max_length=400)
+    source: Literal["crossref", "pubmed"] = "crossref"
+
+
+class LiteratureImportResponse(BaseModel):
+    query: str
+    source: str
+    imported: int
+    skipped: int
+    studies: List[LiteratureStudySchema]
 
 
 # ── PRISMA Flow Schemas ─────────────────────────────────────────────────────
@@ -1300,7 +1342,7 @@ class NotificationPreferencesUpdateRequest(BaseModel):
 
 ALLOWED_SEARCH_DOMAINS = [
     "PROJECT", "LITERATURE", "ASSET", "PROFILE",
-    "PROMOTION", "PEER_REVIEW", "FILE"
+    "PROMOTION", "PEER_REVIEW", "FILE", "THESIS"
 ]
 
 ALLOWED_SEARCH_SORTS = ["relevance", "newest", "oldest", "title", "year"]

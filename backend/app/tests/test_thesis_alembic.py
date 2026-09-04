@@ -14,7 +14,7 @@ from app.tests.test_thesis_postgres import _resolve_url
 
 
 PREVIOUS_HEAD = "b2c3d4e5f607"
-CURRENT_HEAD = "208eef3f1888"
+CURRENT_HEAD = "c8d9e0f1a2b3"
 BACKEND_DIR = Path(__file__).resolve().parents[2]
 
 

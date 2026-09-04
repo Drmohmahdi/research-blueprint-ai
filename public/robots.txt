@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /app
+Disallow: /saas
+Disallow: /admin
+Disallow: /system
+Disallow: /organizations
+
+Sitemap: https://research.ehaastore.com/sitemap.xml

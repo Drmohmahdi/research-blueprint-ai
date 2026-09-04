@@ -7,6 +7,7 @@ import { Card } from '../../design-system/components/Card';
 import { EmptyState } from '../../design-system/components/Feedback';
 import { PathPanel } from '../../design-system/components/Navigation';
 import { ROUTES } from '../../router/routes';
+import { EmptyActiveProject } from '../../components/EmptyActiveProject';
 import { apiAcceptAcademicHandoff, apiApproveAnalysisResult, apiCreateAcademicHandoff, apiGetResearchLifecycle, apiGetResearchLineage, apiGetResearchTimeline, apiListAcademicHandoffs, type AcademicHandoffSummary, type LifecycleStage, type ResearchLifecycleSummary } from '../../utils/api';
 
 const STAGE_ROUTES: Record<string, string> = {
@@ -19,6 +20,8 @@ const STAGE_ROUTES: Record<string, string> = {
   SCREENING: ROUTES.LIT_SYNTHESIZER,
   PRISMA: ROUTES.PRISMA,
   SYNTHESIS: ROUTES.LIT_SYNTHESIZER,
+  QUALITATIVE_DATA: ROUTES.QUALITATIVE,
+  QUALITATIVE_ANALYSIS: ROUTES.QUALITATIVE,
   MANUSCRIPT: ROUTES.PUBLISHING,
   SUBMISSION: ROUTES.PEER_REVIEW,
   PEER_REVIEW: ROUTES.PEER_REVIEW,
@@ -93,7 +96,7 @@ export const ResearchLifecycleCommandCenter: React.FC = () => {
   const stageLabel = (key: string) => labels[key]?.[ar ? 0 : 1] ?? key.replaceAll('_', ' ');
   const routeFor = (stage: string) => STAGE_ROUTES[stage]?.replace(':projectId', activeProject?.id ?? '');
 
-  if (!activeProject) return <EmptyState title={ar ? 'لا يوجد مشروع نشط' : 'No active project'} description={ar ? 'اختر مشروعًا لعرض دورة حياته البحثية.' : 'Select a project to view its research lifecycle.'} />;
+  if (!activeProject) return <EmptyActiveProject language={language} description={ar ? 'أنشئ مشروعًا من اختيار المسار لعرض دورة حياته البحثية.' : 'Create a project from path selection to view its research lifecycle.'} />;
   if (loading) return <section className="mx-auto max-w-[1440px] space-y-4" aria-busy="true"><Card><div className="h-32 motion-safe:animate-pulse rounded-xl bg-[var(--ds-surface-secondary)]" /></Card></section>;
 
   return <section className="mx-auto max-w-[1440px] min-w-0 space-y-6 overflow-x-clip pb-16" aria-labelledby="lifecycle-title">

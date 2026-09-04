@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useProject } from '../../context/ProjectContext';
 import { BarChart3, Building2, Eye, FlaskConical, Layers, ListChecks, Lock } from 'lucide-react';
+import { PathPanel } from '../../design-system/components/Navigation';
 
 import { apiResearchOfficeOperations } from '../../utils/api';
 
@@ -78,15 +79,18 @@ export const ResearchOfficeOperations: React.FC<ResearchOfficeOperationsProps> =
 
   return (
     <div className="space-y-6" data-testid="research-office">
-      <div className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl p-5 flex items-start gap-3">
-        <div className="p-3 rounded-xl bg-[var(--ds-primary-soft)] text-[var(--ds-primary)]"><Building2 size={24} /></div>
-        <div>
-          <h2 className="text-base font-bold text-[var(--ds-text-primary)]">{t('عمليات مكتب البحث', 'Research Office Operations')}</h2>
-          <p className="text-xs text-[var(--ds-text-secondary)] mt-1">
-            {t('نظرة تجميعية أولاً — لا يعرض هذا العرض محتوى بحثي خام.', 'Aggregate-first view — raw research content is never shown here.')}
-          </p>
+      <PathPanel accent="var(--ds-path-research)">
+        <div className="flex items-start gap-3">
+          <div className="p-3 rounded-xl bg-[var(--ds-primary-soft)] text-[var(--ds-primary)]"><Building2 size={24} /></div>
+          <div>
+            <p className="m-0 text-xs font-black text-[var(--ds-primary)]">BASEERAH · RESEARCH OFFICE</p>
+            <h2 className="text-base font-bold text-[var(--ds-text-primary)] m-0 mt-1">{t('عمليات مكتب البحث', 'Research Office Operations')}</h2>
+            <p className="text-xs text-[var(--ds-text-secondary)] mt-1">
+              {t('نظرة تجميعية أولاً — لا يعرض هذا العرض محتوى بحثي خام.', 'Aggregate-first view — raw research content is never shown here.')}
+            </p>
+          </div>
         </div>
-      </div>
+      </PathPanel>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" data-testid="office-stats">
         {statCards.map((card, i) => {

@@ -12,7 +12,7 @@ from ..db import get_db
 from ..services.tenant_context import TenantContext, get_tenant_context
 from ..services.notifications.outbox import OutboxService
 from ..services.notifications.events import AggregateType, EventPayload, WorkflowEventType
-from ..services.thesis_workflow import approve_chapter, approve_final, committee_composition_gaps, committee_eligibility, complete_deposit, correction_requires_final_authority, create_post_approval_amendment, create_thesis, decide_examination, defense_readiness, freeze_final_version, issue_examiner_token, next_action, now, policy_rules, submit_chapter_version
+from ..services.thesis_workflow import approve_chapter, approve_final, committee_composition_gaps, committee_eligibility, complete_deposit, correction_requires_final_authority, create_post_approval_amendment, create_thesis, decide_examination, defense_readiness, ensure_active_policy, freeze_final_version, issue_examiner_token, next_action, now, policy_rules, submit_chapter_version
 
 router = APIRouter(prefix="/theses", tags=["thesis-supervision"])
 ADMIN_ROLES = {"OWNER", "ORGANIZATION_ADMIN"}
@@ -23,6 +23,12 @@ class PolicyCreate(BaseModel):
     program_code: str | None = Field(default=None, max_length=100)
     version: int = Field(default=1, ge=1)
     rules: dict[str, Any] | None = None
+
+
+class ThesisFromProjectCreate(BaseModel):
+    degree_type: Literal["MASTERS", "DOCTORATE"] = "MASTERS"
+    program_name: str = Field(min_length=2, max_length=300)
+    research_type: Literal["EMPIRICAL", "SYSTEMATIC_REVIEW", "CONCEPTUAL"] = "EMPIRICAL"
 
 
 class ThesisCreate(BaseModel):
@@ -199,9 +205,9 @@ def require_supervisor(db: Session, thesis: models.ThesisRecord, ctx: TenantCont
     # explicit ThesisSupervisionAssignment — generic OWNER/ORGANIZATION_ADMIN
     # role membership, and platform admin, no longer substitute for it, matching
     # the resource-scoped-relationship rule already enforced in Peer Review,
-    # Promotion, Academic Identity and Research Data. The assignment authority
-    # itself (who may assign a supervisor) remains admin-gated in
-    # assign_supervisor — this function only governs acting AS the supervisor.
+    # Promotion, Academic Identity and Research Data. Assignment of a supervisor
+    # is permitted for the student or an organization admin in assign_supervisor;
+    # this function only governs acting AS the supervisor.
     item = db.query(models.ThesisSupervisionAssignment).filter(models.ThesisSupervisionAssignment.thesis_id == thesis.id, models.ThesisSupervisionAssignment.user_id == ctx.user.id, models.ThesisSupervisionAssignment.status == "ACTIVE").first()
     if not item or (final and not item.can_final_recommend): raise HTTPException(403, "Supervisor relationship does not permit this operation")
     return item
@@ -240,11 +246,35 @@ def thesis_for_project(project_id: str, db: Session = Depends(get_db), ctx: Tena
     return {"id": item.id, "project_id": item.project_id}
 
 
+@router.post("/projects/{project_id}", status_code=201)
+def register_thesis_for_project(project_id: str, body: ThesisFromProjectCreate, db: Session = Depends(get_db), ctx: TenantContext = Depends(get_tenant_context)):
+    project = db.query(models.ResearchProject).filter(models.ResearchProject.id == project_id, models.ResearchProject.organizationId == ctx.organization.id).first()
+    if not project:
+        raise HTTPException(404, "Project not found")
+    is_owner = project.userId == ctx.user.id
+    if not is_owner and not admin(ctx):
+        raise HTTPException(403, "Thesis registration is not permitted")
+    policy = ensure_active_policy(db, ctx.organization.id, body.degree_type, ctx.user.id)
+    student_id = ctx.user.id if is_owner else project.userId
+    item = create_thesis(db, project, policy, student_id, body.program_name, ctx.user.id, body.research_type)
+    db.commit()
+    return {"id": item.id, "project_id": item.project_id, "degree_type": item.degree_type, "current_stage": item.current_stage}
+
+
 @router.get("/{thesis_id}/command-center")
 def command_center(thesis_id: str, db: Session = Depends(get_db), ctx: TenantContext = Depends(get_tenant_context)):
     thesis = thesis_or_404(db, thesis_id, ctx)
     ready = defense_readiness(db, thesis)
     chapters = db.query(models.ThesisChapter).filter(models.ThesisChapter.thesis_id == thesis.id).order_by(models.ThesisChapter.sort_order).all()
+    latest_version_id_by_chapter: dict[str, str] = {}
+    if chapters:
+        versions = db.query(models.ThesisChapterVersion).filter(models.ThesisChapterVersion.chapter_id.in_([c.id for c in chapters])).all()
+        latest_by_chapter: dict[str, models.ThesisChapterVersion] = {}
+        for version in versions:
+            previous = latest_by_chapter.get(version.chapter_id)
+            if previous is None or version.version_number > previous.version_number:
+                latest_by_chapter[version.chapter_id] = version
+        latest_version_id_by_chapter = {chapter_id: version.id for chapter_id, version in latest_by_chapter.items()}
     meetings = db.query(models.ThesisMeeting).filter(models.ThesisMeeting.thesis_id == thesis.id).order_by(models.ThesisMeeting.scheduled_at.desc()).limit(10).all()
     overdue = db.query(models.ThesisAction).filter(models.ThesisAction.thesis_id == thesis.id, models.ThesisAction.status == "OPEN", models.ThesisAction.due_at.isnot(None), models.ThesisAction.due_at < now()).count()
     open_feedback = db.query(models.ThesisFeedback).filter(models.ThesisFeedback.thesis_id == thesis.id, models.ThesisFeedback.resolution_status == "OPEN").count()
@@ -254,25 +284,36 @@ def command_center(thesis_id: str, db: Session = Depends(get_db), ctx: TenantCon
     examinations = db.query(models.ThesisExaminationRound).filter(models.ThesisExaminationRound.thesis_id == thesis.id).order_by(models.ThesisExaminationRound.round_number).all()
     stage_states = thesis.stage_states_json or {}; completed = sum(1 for s in stage_states.values() if s.get("status") in {"APPROVED", "COMPLETED", "NOT_REQUIRED"}); applicable = sum(1 for s in stage_states.values() if s.get("applicability") != "NOT_REQUIRED") or 1
     return {
-        "thesis": {"id": thesis.id, "title_ar": thesis.title_ar, "title_en": thesis.title_en, "degree_type": thesis.degree_type, "program": thesis.program_name, "current_stage": thesis.current_stage, "status": thesis.status, "final_version_id": thesis.final_version_id},
+        "thesis": {"id": thesis.id, "title_ar": thesis.title_ar, "title_en": thesis.title_en, "degree_type": thesis.degree_type, "program": thesis.program_name, "current_stage": thesis.current_stage, "status": thesis.status, "final_version_id": thesis.final_version_id, "student_user_id": thesis.student_user_id},
         "progress": round(100 * completed / applicable),
         "defense_readiness": ready,
         "next_best_action": next_action(ready, overdue, corrections_due, examiner_reports_due),
         "open_feedback": open_feedback,
         "corrections_due": corrections_due,
         "examiner_reports_due": examiner_reports_due,
-        "chapters": [{"id": c.id, "key": c.chapter_key, "title": c.title, "status": c.status, "version": c.current_version_number, "stale_at": c.stale_at, "approved_version_id": c.approved_version_id} for c in chapters],
+        "chapters": [{"id": c.id, "key": c.chapter_key, "title": c.title, "status": c.status, "version": c.current_version_number, "stale_at": c.stale_at, "approved_version_id": c.approved_version_id, "latest_version_id": latest_version_id_by_chapter.get(c.id)} for c in chapters],
         "meetings": [{"id": m.id, "scheduled_at": m.scheduled_at, "status": m.status} for m in meetings],
         "committee": [{"id": m.id, "role": m.role, "eligibility_status": m.eligibility_status, "appointment_status": m.appointment_status, "external_name": m.external_name} for m in committee],
         "examinations": [{"id": r.id, "round_number": r.round_number, "status": r.status, "decision": r.human_decision, "defense_at": r.defense_at} for r in examinations],
+        "supervisors": [{"id": a.id, "user_id": a.user_id, "role": a.role, "can_final_recommend": a.can_final_recommend, "status": a.status} for a in db.query(models.ThesisSupervisionAssignment).filter(models.ThesisSupervisionAssignment.thesis_id == thesis.id, models.ThesisSupervisionAssignment.status == "ACTIVE").all()],
     }
 
 
 @router.post("/{thesis_id}/assignments", status_code=201)
 def assign_supervisor(thesis_id: str, body: AssignmentCreate, db: Session = Depends(get_db), ctx: TenantContext = Depends(get_tenant_context)):
     thesis = thesis_or_404(db, thesis_id, ctx)
-    if not admin(ctx): raise HTTPException(403, "Supervisor assignment is not permitted")
-    if body.role == "CO_SUPERVISOR" and body.can_final_recommend: raise HTTPException(422, "Co-supervisor final authority requires an explicit institutional policy workflow")
+    if thesis.student_user_id != ctx.user.id and not admin(ctx):
+        raise HTTPException(403, "Supervisor assignment is not permitted")
+    if body.user_id == thesis.student_user_id:
+        raise HTTPException(422, "The student cannot be assigned as their own supervisor")
+    if body.role == "CO_SUPERVISOR" and body.can_final_recommend:
+        raise HTTPException(422, "Co-supervisor final authority requires an explicit institutional policy workflow")
+    member = db.query(models.OrganizationMembership).filter(models.OrganizationMembership.organization_id == ctx.organization.id, models.OrganizationMembership.user_id == body.user_id, models.OrganizationMembership.status == "ACTIVE").first()
+    if not member:
+        raise HTTPException(404, "Supervisor must be an active organization member")
+    existing = db.query(models.ThesisSupervisionAssignment).filter(models.ThesisSupervisionAssignment.thesis_id == thesis.id, models.ThesisSupervisionAssignment.user_id == body.user_id, models.ThesisSupervisionAssignment.role == body.role, models.ThesisSupervisionAssignment.status == "ACTIVE").first()
+    if existing:
+        raise HTTPException(409, "This supervisor assignment already exists")
     item = models.ThesisSupervisionAssignment(id=f"thesis-assignment-{uuid.uuid4()}", organization_id=ctx.organization.id, thesis_id=thesis.id, user_id=body.user_id, role=body.role, can_final_recommend=body.can_final_recommend, assigned_at=now())
     db.add(item); db.commit(); return {"id": item.id, "role": item.role, "can_final_recommend": item.can_final_recommend}
 
@@ -347,6 +388,13 @@ def resolve_feedback(thesis_id: str, feedback_id: str, body: FeedbackResolve, db
     elif thesis.student_user_id != ctx.user.id: require_supervisor(db, thesis, ctx)
     item.resolution_status = body.resolution_status; item.resolved_by = ctx.user.id; item.resolved_at = now() if body.resolution_status == "RESOLVED" else None
     db.commit(); return {"id": item.id, "resolution_status": item.resolution_status}
+
+
+@router.get("/{thesis_id}/feedback")
+def list_feedback(thesis_id: str, db: Session = Depends(get_db), ctx: TenantContext = Depends(get_tenant_context)):
+    thesis = thesis_or_404(db, thesis_id, ctx)
+    items = db.query(models.ThesisFeedback).filter(models.ThesisFeedback.thesis_id == thesis.id, models.ThesisFeedback.organization_id == ctx.organization.id).order_by(models.ThesisFeedback.created_at.desc()).all()
+    return [{"id": item.id, "chapter_version_id": item.chapter_version_id, "category": item.category, "severity": item.severity, "comment_text": item.comment_text, "resolution_status": item.resolution_status, "created_at": item.created_at} for item in items]
 
 
 @router.post("/{thesis_id}/examinations", status_code=201)

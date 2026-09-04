@@ -13,8 +13,6 @@ import os
 import sys
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 
 from ..db import get_db
@@ -22,15 +20,15 @@ from .. import schemas
 from ..services.tenant_context import get_tenant_context, TenantContext
 from ..services.search.providers import UnifiedSearchService, get_provider
 from ..services.search import signals
+from ..rate_limit import limiter
 
 signals.register_search_signals()
 
 router = APIRouter(prefix="/search", tags=["Unified Search & Discovery"])
-limiter = Limiter(key_func=get_remote_address, enabled=not ("pytest" in sys.modules or os.getenv("TESTING") == "True"))
 
 MAX_QUERY_LENGTH = 200
 MAX_FILTER_KEYS = 20
-MAX_DOMAINS = 8
+MAX_DOMAINS = 10
 MAX_LIMIT = 100
 DEFAULT_LIMIT = 20
 MAX_PAGE = 10000

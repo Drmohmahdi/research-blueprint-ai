@@ -116,9 +116,41 @@ def test_new_study_design_path_progression_and_comments_isolation(client):
 
     # Try posting comment to User A's project from User B -> Must block
     res_intruder_comment = client.post("/api/comments/", json=comment_payload, headers=headers_b)
-    # The comment service doesn't require direct write permissions for guest authors on arbitrary projects,
-    # but since the project belongs to Org A and User B belongs to Org B, it must check workspace membership.
-    # Let's verify that listing comments of User A's project from User B is restricted.
-    # Note: listing endpoint relies on project access.
-    # In comments router list_project_comments doesn't enforce active auth, but in full tenant mode,
-    # tenant context filters endpoints. Let's make sure it isolates properly.
+    assert res_intruder_comment.status_code in [403, 404]
+
+
+def test_create_project_persists_active_path(client):
+    username = "studypath_create_path"
+    client.post("/api/auth/register", json={
+        "username": username,
+        "password": "securepassword123",
+        "email": f"{username}@example.com",
+        "role": "Researcher",
+    })
+    login = client.post("/api/auth/login", json={"username": username, "password": "securepassword123"})
+    token = login.json()["token"]
+    headers = {"Authorization": f"Bearer {token}"}
+    org = client.get("/api/organizations/active", headers=headers)
+    headers["X-Organization-ID"] = org.json()["id"]
+
+    payload = {
+        "titleAr": "مشروع من اختيار المسار",
+        "titleEn": "Path Adopted Project",
+        "studyDesign": "quasi_experimental_pre_post",
+        "variables": [],
+        "questions": [],
+        "hypotheses": [],
+        "sampleSettings": {"confidenceLevel": 0.95, "marginOfError": 0.05},
+        "activePathId": "NEW_STUDY_DESIGN",
+        "completedSteps": [],
+    }
+    created = client.post("/api/projects", json=payload, headers=headers)
+    assert created.status_code == 200
+    body = created.json()
+    assert body["id"].startswith("proj-")
+    assert body["id"] != "demo-1"
+    assert body["activePathId"] == "NEW_STUDY_DESIGN"
+
+    listed = client.get("/api/projects", headers=headers)
+    assert listed.status_code == 200
+    assert any(item["id"] == body["id"] and item["activePathId"] == "NEW_STUDY_DESIGN" for item in listed.json())

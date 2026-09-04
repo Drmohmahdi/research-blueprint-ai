@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { legacyResearchStorageEnabled, purgeLegacyResearchStorage, researchStorage } from '../utils/researchStorage';
 import type { ResearchProject, SimulationResult, SimulationParameters } from '../types/research';
 
@@ -19,7 +19,6 @@ export interface WorkflowProfilePayload {
   intelligenceProfile?: IntelligenceProfile;
 }
 import {
-  checkBackendAlive,
   apiListProjects,
   apiCreateProject,
   apiUpdateProject,
@@ -28,15 +27,30 @@ import {
   apiLogin,
   apiLogout,
   apiRegister,
+  apiGetMe,
   setApiAuthToken,
+  setApiActiveOrgId,
   apiUpdateProjectWorkflowProfile
 } from '../utils/api';
+import { FUNNEL_EVENTS, track } from '../utils/analytics';
+
+export interface AuthUser {
+  id?: string;
+  username: string;
+  role: string;
+  org_id?: string | null;
+  org_role?: string | null;
+  permissions?: string[];
+  is_global_admin?: boolean;
+  account_status?: string;
+  email_verified?: boolean;
+}
 
 interface ProjectContextType {
   projects: ResearchProject[];
   activeProject: ResearchProject | null;
   setActiveProject: (project: ResearchProject) => void;
-  createProject: (project: Omit<ResearchProject, 'id' | 'version'>) => ResearchProject;
+  createProject: (project: Omit<ResearchProject, 'id' | 'version'>) => Promise<ResearchProject>;
   updateProject: (project: ResearchProject) => void;
   deleteProject: (id: string) => void;
   theme: 'light' | 'dark';
@@ -49,7 +63,7 @@ interface ProjectContextType {
   // Auth & Modes
   isSecureMode: boolean;
   setSecureMode: (mode: boolean) => void;
-  user: { id?: string; username: string; role: string } | null;
+  user: AuthUser | null;
   login: (username: string, password: string) => Promise<boolean>;
   register: (username: string, password: string, email: string, role: string) => Promise<boolean>;
   logout: () => void;
@@ -170,14 +184,46 @@ const defaultProject: ResearchProject = {
   version: 1
 };
 
+function authUserFromMe(
+  me: {
+    id: string;
+    username: string;
+    role: string;
+    org_id?: string | null;
+    org_role?: string | null;
+    permissions?: string[];
+    is_global_admin?: boolean;
+    account_status?: string;
+    email_verified?: boolean;
+  },
+  fallback?: AuthUser | null
+): AuthUser {
+  return {
+    id: me.id,
+    username: me.username,
+    role: me.role,
+    org_id: me.org_id ?? fallback?.org_id ?? null,
+    org_role: me.org_role ?? fallback?.org_role ?? null,
+    permissions: me.permissions ?? fallback?.permissions ?? [],
+    is_global_admin: me.is_global_admin ?? fallback?.is_global_admin ?? false,
+    account_status: me.account_status ?? fallback?.account_status ?? 'ACTIVE',
+    email_verified: me.email_verified ?? fallback?.email_verified ?? false,
+  };
+}
+
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
 export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSecureMode, setSecureModeState] = useState<boolean>(() => {
-    return !legacyResearchStorageEnabled || localStorage.getItem('rb_secure_mode') === 'true';
+    try {
+      const hasSessionUser = Boolean(localStorage.getItem('rb_user'));
+      return !legacyResearchStorageEnabled || localStorage.getItem('rb_secure_mode') === 'true' || hasSessionUser;
+    } catch {
+      return !legacyResearchStorageEnabled;
+    }
   });
 
-  const [user, setUser] = useState<{ id?: string; username: string; role: string } | null>(() => {
+  const [user, setUser] = useState<AuthUser | null>(() => {
     try {
       const saved = localStorage.getItem('rb_user');
       return saved ? JSON.parse(saved) : null;
@@ -187,9 +233,8 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   });
 
   const [projects, setProjects] = useState<ResearchProject[]>(() => {
-    // If secure mode is enabled, projects should load dynamically from the backend and NOT persist in localStorage
-    if (!legacyResearchStorageEnabled || localStorage.getItem('rb_secure_mode') === 'true') {
-      return [defaultProject];
+    if (!legacyResearchStorageEnabled || localStorage.getItem('rb_secure_mode') === 'true' || localStorage.getItem('rb_user')) {
+      return [];
     }
     try {
       const saved = researchStorage.getItem('rb_projects');
@@ -255,17 +300,40 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     async function syncWithBackend() {
       if (!isSecureMode || !user) return;
-      const alive = await checkBackendAlive();
-      if (alive) {
-        const backendProjects = await apiListProjects();
-        if (backendProjects && backendProjects.length > 0) {
-          setProjects(backendProjects);
-          setActiveProjectState(backendProjects[0]);
-        }
+      const me = await apiGetMe();
+      if (!me) {
+        setUser(null);
+        localStorage.removeItem('rb_user');
+        setApiAuthToken(null);
+        setApiActiveOrgId(null);
+        setProjects(legacyResearchStorageEnabled ? [defaultProject] : []);
+        setActiveProjectState(legacyResearchStorageEnabled ? defaultProject : null);
+        return;
+      }
+      if (
+        me.id !== user.id ||
+        me.username !== user.username ||
+        me.role !== user.role ||
+        me.org_role !== user.org_role ||
+        me.is_global_admin !== user.is_global_admin
+      ) {
+        const nextUser = authUserFromMe(me, user);
+        setUser(nextUser);
+        localStorage.setItem('rb_user', JSON.stringify(nextUser));
+      }
+      const backendProjects = await apiListProjects();
+      if (backendProjects && backendProjects.length > 0) {
+        setProjects(backendProjects);
+        setActiveProjectState(prev => (
+          prev && backendProjects.some(item => item.id === prev.id) ? prev : backendProjects[0]
+        ));
+      } else if (backendProjects) {
+        setProjects([]);
+        setActiveProjectState(null);
       }
     }
     syncWithBackend();
-  }, [isSecureMode, user]);
+  }, [isSecureMode, user?.id]);
 
   const setSecureMode = (mode: boolean) => {
     const effectiveMode = legacyResearchStorageEnabled ? mode : true;
@@ -279,17 +347,35 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const login = async (username: string, password: string): Promise<boolean> => {
     const data = await apiLogin(username, password);
     if (data) {
-      setUser({ id: data.userId || 'local-id', username: data.username, role: data.role });
-      localStorage.setItem('rb_user', JSON.stringify({ id: data.userId || 'local-id', username: data.username, role: data.role }));
+      const me = await apiGetMe();
+      const nextUser = me
+        ? authUserFromMe(me)
+        : {
+            id: data.userId || 'local-id',
+            username: data.username,
+            role: data.role,
+            permissions: [],
+            is_global_admin: false,
+          };
+      setUser(nextUser);
+      localStorage.setItem('rb_user', JSON.stringify(nextUser));
       setApiAuthToken(null);
-      
+      setSecureModeState(true);
+      localStorage.setItem('rb_secure_mode', 'true');
+
       const backendProjects = await apiListProjects();
       if (backendProjects && backendProjects.length > 0) {
         setProjects(backendProjects);
         setActiveProjectState(backendProjects[0]);
       } else {
-        setProjects([defaultProject]);
-        setActiveProjectState(defaultProject);
+        setProjects([]);
+        setActiveProjectState(null);
+      }
+      const refreshed = await apiGetMe();
+      if (refreshed) {
+        const withOrg = authUserFromMe(refreshed, nextUser);
+        setUser(withOrg);
+        localStorage.setItem('rb_user', JSON.stringify(withOrg));
       }
       return true;
     }
@@ -297,7 +383,9 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const register = async (username: string, password: string, email: string, role: string): Promise<boolean> => {
-    return await apiRegister(username, password, email, role);
+    const created = await apiRegister(username, password, email, role);
+    if (!created) return false;
+    return login(username, password);
   };
 
   const logout = async () => {
@@ -305,83 +393,74 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setUser(null);
     localStorage.removeItem('rb_user');
     setApiAuthToken(null);
-    setProjects([defaultProject]);
-    setActiveProjectState(defaultProject);
+    setApiActiveOrgId(null);
+    setProjects(legacyResearchStorageEnabled ? [defaultProject] : []);
+    setActiveProjectState(legacyResearchStorageEnabled ? defaultProject : null);
   };
 
-  const setActiveProject = (project: ResearchProject) => {
+  const setActiveProject = useCallback((project: ResearchProject) => {
     setActiveProjectState(project);
-  };
+  }, []);
 
-  const createProject = (proj: Omit<ResearchProject, 'id' | 'version'>) => {
+  const createProject = useCallback(async (proj: Omit<ResearchProject, 'id' | 'version'>) => {
+    if (isSecureMode && user) {
+      const backendProj = await apiCreateProject(proj);
+      if (!backendProj) {
+        throw new Error('Could not create project on server');
+      }
+      setProjects(prev => {
+        if (prev.length === 0) track(FUNNEL_EVENTS.createFirstProject);
+        return [backendProj, ...prev.filter(item => item.id !== backendProj.id)];
+      });
+      setActiveProjectState(backendProj);
+      return backendProj;
+    }
+
     const tempId = `proj-${Date.now()}`;
     const newProject: ResearchProject = {
       ...proj,
       id: tempId,
       version: 1
     };
-    
     setProjects(prev => [newProject, ...prev]);
     setActiveProjectState(newProject);
-    
-    if (isSecureMode && user) {
-      checkBackendAlive().then(alive => {
-        if (alive) {
-          apiCreateProject(proj).then(backendProj => {
-            if (backendProj) {
-              setProjects(prev => prev.map(p => p.id === tempId ? backendProj : p));
-              setActiveProjectState(backendProj);
-            }
-          });
-        }
-      });
-    }
-
     return newProject;
-  };
+  }, [isSecureMode, user]);
 
-  const updateProject = (proj: ResearchProject) => {
+  const updateProject = useCallback((proj: ResearchProject) => {
     const updated = { ...proj, version: proj.version + 1 };
-    
     setProjects(prev => prev.map(p => p.id === proj.id ? updated : p));
-    if (activeProject?.id === proj.id) {
-      setActiveProjectState(updated);
-    }
+    setActiveProjectState(prev => (prev?.id === proj.id ? updated : prev));
 
     if (isSecureMode && user) {
-      checkBackendAlive().then(alive => {
-        if (alive) {
-          apiUpdateProject(updated);
-        }
-      });
+      void apiUpdateProject(updated);
     }
-  };
+  }, [isSecureMode, user]);
 
-  const deleteProject = (id: string) => {
-    const filtered = projects.filter(p => p.id !== id);
-    setProjects(filtered);
-    if (activeProject?.id === id) {
-      setActiveProjectState(filtered.length > 0 ? filtered[0] : null);
-    }
+  const deleteProject = useCallback((id: string) => {
+    setProjects(prev => {
+      const filtered = prev.filter(p => p.id !== id);
+      setActiveProjectState(current => {
+        if (current?.id !== id) return current;
+        return filtered.length > 0 ? filtered[0] : null;
+      });
+      return filtered;
+    });
 
     if (isSecureMode && user) {
-      checkBackendAlive().then(alive => {
-        if (alive) {
-          apiDeleteProject(id);
-        }
-      });
+      void apiDeleteProject(id);
     }
-  };
+  }, [isSecureMode, user]);
 
-  const toggleTheme = () => {
+  const toggleTheme = useCallback(() => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
-  };
+  }, []);
 
-  const setLanguage = (lang: 'ar' | 'en') => {
+  const setLanguage = useCallback((lang: 'ar' | 'en') => {
     setLanguageState(lang);
-  };
+  }, []);
 
-  const runProjectSimulation = async (params: SimulationParameters): Promise<SimulationResult> => {
+  const runProjectSimulation = useCallback(async (params: SimulationParameters): Promise<SimulationResult> => {
     if (!activeProject) throw new Error('No active project to simulate');
     
     const sampleSize = activeProject.sampleSettings.populationSize 
@@ -396,9 +475,9 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }));
     
     return result;
-  };
+  }, [activeProject]);
 
-  const updateProjectWorkflowProfile = async (
+  const updateProjectWorkflowProfile = useCallback(async (
     projectId: string,
     payload: { activePathId?: string; completedSteps?: string[]; intelligenceProfile?: any }
   ) => {
@@ -415,23 +494,21 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return p;
     }));
 
-    if (activeProject?.id === projectId) {
-      setActiveProjectState(prev => prev ? {
+    setActiveProjectState(prev => {
+      if (!prev || prev.id !== projectId) return prev;
+      return {
         ...prev,
         activePathId: payload.activePathId !== undefined ? payload.activePathId : prev.activePathId,
         completedSteps: payload.completedSteps !== undefined ? payload.completedSteps : prev.completedSteps,
         intelligenceProfile: payload.intelligenceProfile !== undefined ? payload.intelligenceProfile : prev.intelligenceProfile,
         version: prev.version + 1
-      } : null);
-    }
+      };
+    });
 
     if (isSecureMode && user) {
-      const alive = await checkBackendAlive();
-      if (alive) {
-        await apiUpdateProjectWorkflowProfile(projectId, payload);
-      }
+      await apiUpdateProjectWorkflowProfile(projectId, payload);
     }
-  };
+  }, [isSecureMode, user]);
 
   return (
     <ProjectContext.Provider value={{

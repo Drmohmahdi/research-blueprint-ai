@@ -10,7 +10,21 @@ from pydantic import BaseModel
 
 from ..db import get_db
 from .. import models, schemas
-from ..services.tenant_context import get_tenant_context, TenantContext, require_role, record_usage_event, get_organization_family_ids
+from ..config import settings
+from ..services.tenant_context import get_tenant_context, TenantContext, record_usage_event, get_organization_family_ids
+from ..services.rbac import (
+    PERM_AUDIT_VIEW,
+    PERM_BILLING_MANAGE,
+    PERM_BILLING_VIEW,
+    PERM_INVITATIONS_VIEW,
+    PERM_MEMBERS_INVITE,
+    PERM_MEMBERS_MANAGE,
+    PERM_MEMBERS_VIEW_PII,
+    can_assign_role,
+    has_permission,
+    normalize_org_role,
+    require_permission,
+)
 from ..services.sanitization import sanitize_text
 
 router = APIRouter(prefix="/organizations", tags=["organizations"])
@@ -30,6 +44,10 @@ class SubscribeBody(BaseModel):
 
 class AcceptInvitationBody(BaseModel):
     token: str
+
+class MembershipPatchBody(BaseModel):
+    role: Optional[str] = None
+    status: Optional[str] = None
 
 
 @router.get("", response_model=List[schemas.OrganizationResponse])
@@ -178,9 +196,11 @@ def list_organization_members(
         models.OrganizationMembership.status != "REMOVED"
     ).all()
     
+    reveal_pii = has_permission(context, PERM_MEMBERS_VIEW_PII)
     result = []
     for m in memberships:
         user = db.query(models.User).filter(models.User.id == m.user_id).first()
+        email = user.email if user else None
         res = schemas.OrganizationMembershipResponse(
             id=m.id,
             organization_id=m.organization_id,
@@ -190,7 +210,7 @@ def list_organization_members(
             joined_at=m.joined_at,
             created_at=m.created_at,
             username=user.username if user else "Unknown",
-            email=user.email if user else "Unknown"
+            email=email if reveal_pii else None,
         )
         result.append(res)
     return result
@@ -200,8 +220,15 @@ def list_organization_members(
 def invite_member(
     body: InviteMemberBody,
     db: Session = Depends(get_db),
-    context: TenantContext = Depends(require_role(["OWNER", "ORGANIZATION_ADMIN"]))
+    context: TenantContext = Depends(require_permission(PERM_MEMBERS_INVITE))
 ):
+    assigned_role = normalize_org_role(body.role)
+    if not assigned_role or not can_assign_role(context.role, assigned_role):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot invite this role. Allowed roles are below your own rank, and OWNER cannot be invited.",
+        )
+
     # Entitlement Limit Check (max members)
     member_count = db.query(models.OrganizationMembership).filter(
         models.OrganizationMembership.organization_id == context.organization.id,
@@ -212,30 +239,35 @@ def invite_member(
     if member_count >= max_members:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"لقد تجاوزت الحد الأقصى للأعضاء في خطتك الحالية ({member_count}/{max_members}). يرجى الترقية لإضافة أعضاء."
+            detail=f"PLAN_LIMIT_REACHED: لقد تجاوزت الحد الأقصى للأعضاء في خطتك الحالية ({member_count}/{max_members}). يرجى الترقية لإضافة أعضاء."
         )
 
-    # Check if user already exists
-    invited_user = db.query(models.User).filter(models.User.email == body.email).first()
-    
-    # Generate token
     token = str(uuid.uuid4())
     token_hash = hashlib.sha256(token.encode('utf-8')).hexdigest()
     
     now = datetime.datetime.now(datetime.UTC)
-    expires_at = (now + datetime.timedelta(days=7)).isoformat() # Expires in 7 days
+    expires_at = (now + datetime.timedelta(days=7)).isoformat()
     
     inv = models.OrganizationInvitation(
         id=f"inv-{str(uuid.uuid4())[:8]}",
         organization_id=context.organization.id,
         email=body.email,
-        role=body.role,
+        role=assigned_role,
         token_hash=token_hash,
         invited_by=context.user.id,
         expires_at=expires_at,
         created_at=now.isoformat()
     )
     db.add(inv)
+    audit = models.AuditLog(
+        id=f"aud-{str(uuid.uuid4())[:8]}",
+        userId=context.user.id,
+        organizationId=context.organization.id,
+        action="INVITE_MEMBER",
+        details=f"Invited {body.email} as {assigned_role}",
+        timestamp=now.isoformat(),
+    )
+    db.add(audit)
     db.commit()
     db.refresh(inv)
 
@@ -252,14 +284,93 @@ def invite_member(
     )
     # Set mock custom attribute for UI token display
     res_dict = res.model_dump()
-    res_dict["token"] = token # Send token explicitly in dev mode
+    if settings.ENVIRONMENT != "production":
+        res_dict["token"] = token
     return res_dict
+
+
+@router.patch("/members/{membership_id}", response_model=schemas.OrganizationMembershipResponse)
+def patch_organization_member(
+    membership_id: str,
+    body: MembershipPatchBody,
+    db: Session = Depends(get_db),
+    context: TenantContext = Depends(require_permission(PERM_MEMBERS_MANAGE)),
+):
+    membership = db.query(models.OrganizationMembership).filter(
+        models.OrganizationMembership.id == membership_id,
+        models.OrganizationMembership.organization_id == context.organization.id,
+        models.OrganizationMembership.status != "REMOVED",
+    ).first()
+    if not membership:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Membership not found")
+
+    if membership.user_id == context.user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You cannot change your own membership",
+        )
+
+    before_role = membership.role
+    before_status = membership.status
+    now = datetime.datetime.now(datetime.UTC).isoformat()
+
+    if body.role is not None:
+        target_role = normalize_org_role(body.role)
+        if not target_role or not can_assign_role(context.role, target_role):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot assign this role",
+            )
+        if normalize_org_role(membership.role) == "OWNER":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Ownership cannot be changed through membership patch",
+            )
+        membership.role = target_role
+
+    if body.status is not None:
+        next_status = body.status.upper()
+        if next_status not in {"ACTIVE", "SUSPENDED", "REMOVED"}:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid membership status")
+        if normalize_org_role(membership.role) == "OWNER":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="The organization owner cannot be suspended through this endpoint",
+            )
+        membership.status = next_status
+
+    membership.updated_at = now
+    audit = models.AuditLog(
+        id=f"aud-{str(uuid.uuid4())[:8]}",
+        userId=context.user.id,
+        organizationId=context.organization.id,
+        action="UPDATE_MEMBERSHIP",
+        details=f"membership={membership.id} role {before_role}->{membership.role} status {before_status}->{membership.status}",
+        before_json={"role": before_role, "status": before_status},
+        after_json={"role": membership.role, "status": membership.status},
+        timestamp=now,
+    )
+    db.add(audit)
+    db.commit()
+    db.refresh(membership)
+    user = db.query(models.User).filter(models.User.id == membership.user_id).first()
+    return schemas.OrganizationMembershipResponse(
+        id=membership.id,
+        organization_id=membership.organization_id,
+        user_id=membership.user_id,
+        role=membership.role,
+        status=membership.status,
+        joined_at=membership.joined_at,
+        created_at=membership.created_at,
+        username=user.username if user else "Unknown",
+        email=user.email if user else None,
+    )
 
 
 @router.get("/invitations", response_model=List[schemas.OrganizationInvitationResponse])
 def list_organization_invitations(
     db: Session = Depends(get_db),
-    context: TenantContext = Depends(get_tenant_context)
+    context: TenantContext = Depends(require_permission(PERM_INVITATIONS_VIEW))
 ):
     invitations = db.query(models.OrganizationInvitation).filter(
         models.OrganizationInvitation.organization_id == context.organization.id,
@@ -317,6 +428,24 @@ def accept_invitation(
             detail=f"هذه الدعوة مخصصة للبريد {inv.email}، ولكن حسابك مسجل بالبريد {context.user.email}"
         )
 
+    assigned_role = normalize_org_role(inv.role)
+    if not assigned_role or assigned_role == "OWNER":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invitation role is not valid",
+        )
+
+    existing = db.query(models.OrganizationMembership).filter(
+        models.OrganizationMembership.organization_id == inv.organization_id,
+        models.OrganizationMembership.user_id == context.user.id,
+        models.OrganizationMembership.status != "REMOVED",
+    ).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="You are already a member of this organization",
+        )
+
     now = datetime.datetime.now(datetime.UTC).isoformat()
     
     # Accept invitation
@@ -327,7 +456,7 @@ def accept_invitation(
         id=f"mbr-{str(uuid.uuid4())[:8]}",
         organization_id=inv.organization_id,
         user_id=context.user.id,
-        role=inv.role,
+        role=assigned_role,
         status="ACTIVE",
         joined_at=now,
         created_at=now
@@ -340,19 +469,19 @@ def accept_invitation(
         userId=context.user.id,
         organizationId=inv.organization_id,
         action="ACCEPT_INVITATION",
-        details=f"Joined organization via invitation",
+        details=f"Joined organization as {assigned_role}",
         timestamp=now
     )
     db.add(audit)
     db.commit()
     
-    return {"ok": True, "organizationId": inv.organization_id, "role": inv.role}
+    return {"ok": True, "organizationId": inv.organization_id, "role": assigned_role}
 
 
 @router.get("/billing", response_model=schemas.UsageResponse)
 def get_billing_and_usage(
     db: Session = Depends(get_db),
-    context: TenantContext = Depends(get_tenant_context)
+    context: TenantContext = Depends(require_permission(PERM_BILLING_VIEW))
 ):
     current_period = datetime.datetime.now(datetime.UTC).strftime("%Y-%m")
     
@@ -415,13 +544,19 @@ def get_billing_and_usage(
 def subscribe_to_plan(
     body: SubscribeBody,
     db: Session = Depends(get_db),
-    context: TenantContext = Depends(require_role(["OWNER"]))
+    context: TenantContext = Depends(require_permission(PERM_BILLING_MANAGE))
 ):
     target_plan = db.query(models.Plan).filter(models.Plan.code == body.plan_code).first()
     if not target_plan:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="الخطة المطلوبة غير موجودة"
+        )
+
+    if target_plan.price and target_plan.price > 0 and settings.ENVIRONMENT == "production":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Paid plan changes in production require a verified checkout session",
         )
 
     now = datetime.datetime.now(datetime.UTC)
@@ -468,7 +603,7 @@ def subscribe_to_plan(
 @router.get("/audit-logs", response_model=List[schemas.AuditLogResponse])
 def get_audit_logs(
     db: Session = Depends(get_db),
-    context: TenantContext = Depends(require_role(["OWNER", "ORGANIZATION_ADMIN"]))
+    context: TenantContext = Depends(require_permission(PERM_AUDIT_VIEW))
 ):
     logs = db.query(models.AuditLog).filter(
         models.AuditLog.organizationId == context.organization.id

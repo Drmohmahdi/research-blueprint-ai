@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpenCheck, CalendarDays, CheckCircle2, ClipboardList, ShieldCheck } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
-import { VIEW_TO_PATH } from '../router/routes';
+import { ROUTES } from '../router/routes';
 import { Alert, Button, Card, EmptyState, PathPanel, Textarea } from '../design-system';
 import type { EthicsApprovalStatus, EthicsFeasibilityPlan } from '../types/research';
 
@@ -48,8 +48,8 @@ export const ResearchPlanning: React.FC = () => {
           ? 'اختر مشروعًا نشطًا لتوثيق أهدافه وخطته الزمنية واعتبارات أخلاقياته.'
           : 'Select an active project to document its objectives, timeline, and ethical considerations.'}
         actionButton={
-          <Button type="button" variant="primary" size="sm" onClick={() => navigate(VIEW_TO_PATH.wizard)}>
-            {language === 'ar' ? 'فتح معالج البحث' : 'Open Research Wizard'}
+          <Button type="button" variant="primary" size="sm" onClick={() => navigate(ROUTES.PATHS)}>
+            {language === 'ar' ? 'اختيار مسار البحث' : 'Choose a research path'}
           </Button>
         }
       />
@@ -219,7 +219,7 @@ export const ResearchPlanning: React.FC = () => {
               {language === 'ar' ? 'عرض مشتق من متغيرات المشروع المعتمدة.' : 'A view derived from the project’s approved variables.'}
             </p>
           </div>
-          <Button type="button" variant="outline" size="sm" onClick={() => navigate(VIEW_TO_PATH.wizard)}>
+          <Button type="button" variant="outline" size="sm" onClick={() => navigate(ROUTES.NEW_STUDY_DESIGN.replaceAll(':projectId', activeProject.id))}>
             {language === 'ar' ? 'إدارة المتغيرات' : 'Manage Variables'}
           </Button>
         </div>

@@ -4,28 +4,35 @@ import { CreditCard, Check, ArrowUpCircle, Download, Activity, HardDrive } from 
 import { Card } from '../../design-system/components/Card';
 import { Button } from '../../design-system/components/Button';
 import { PathPanel } from '../../design-system/components/Navigation';
+import { useProject } from '../../context/ProjectContext';
 
 interface BillingDashboardProps {
   language: 'ar' | 'en';
 }
 
 export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) => {
+  const { user } = useProject();
+  const canManageBilling = Boolean(user?.permissions?.includes('billing.manage'));
   const [billing, setBilling] = useState<any | null>(null);
   const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [upgrading, setUpgrading] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
   const loadData = async () => {
     setLoading(true);
+    setError('');
     try {
       const bill = await apiGetBilling();
-      if (bill) setBilling(bill);
-      
       const list = await apiListPlans();
+      if (!bill && !list) {
+        setError(language === 'ar' ? 'تعذر تحميل بيانات الاشتراك.' : 'Could not load billing data.');
+      }
+      if (bill) setBilling(bill);
       if (list) setPlans(list);
     } catch (e) {
-      console.error("Failed to load billing data", e);
+      setError(language === 'ar' ? 'تعذر تحميل بيانات الاشتراك.' : 'Could not load billing data.');
     } finally {
       setLoading(false);
     }
@@ -36,14 +43,20 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
   }, []);
 
   const handleUpgrade = async (planCode: string) => {
+    if (upgrading) return;
     setMessage('');
     setError('');
-    const sub = await apiSubscribe(planCode);
-    if (sub) {
-      setMessage(language === 'ar' ? 'تم تحديث اشتراكك بنجاح!' : 'Subscription upgraded successfully!');
-      loadData();
-    } else {
-      setError(language === 'ar' ? 'فشل ترقية الاشتراك.' : 'Failed to upgrade subscription.');
+    setUpgrading(planCode);
+    try {
+      const sub = await apiSubscribe(planCode);
+      if (sub) {
+        setMessage(language === 'ar' ? 'تم تحديث اشتراكك بنجاح!' : 'Subscription upgraded successfully!');
+        await loadData();
+      } else {
+        setError(language === 'ar' ? 'لا يمكن ترقية الخطة المدفوعة دون عملية دفع موثّقة.' : 'Paid upgrades require a verified checkout session.');
+      }
+    } finally {
+      setUpgrading(null);
     }
   };
 
@@ -55,14 +68,22 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
     );
   }
 
-  const activeSub = billing?.subscription;
-  const activePlan = billing?.plan;
-  const usage = billing?.usage || { projects_count: 0, storage_mb: 0 };
+  const quota = billing?.quota || {};
+  const usage = billing?.usage || {};
+  const activePlan = plans.find((plan) => plan.code === quota.plan_code) || null;
+  const activeSub = {
+    status: quota.subscription_status,
+    current_period_end: quota.current_period_end,
+  };
   const invoices = billing?.invoices || [];
-
-  const limits = activePlan?.limits_json || { max_projects: 2, max_storage_mb: 50 };
-  const projectPct = Math.min((usage.projects_count / limits.max_projects) * 100, 100);
-  const storagePct = Math.min((usage.storage_mb / limits.max_storage_mb) * 100, 100);
+  const limits = {
+    max_projects: quota.max_projects ?? activePlan?.limits_json?.max_projects ?? 2,
+    max_storage_mb: quota.max_storage_mb ?? activePlan?.limits_json?.max_storage_mb ?? 50,
+  };
+  const projectCount = usage.projects ?? usage.projects_count ?? 0;
+  const storageMb = Number(usage.storage_mb ?? 0);
+  const projectPct = Math.min((projectCount / Math.max(limits.max_projects, 1)) * 100, 100);
+  const storagePct = Math.min((storageMb / Math.max(limits.max_storage_mb, 1)) * 100, 100);
 
   return (
     <div className="space-y-8">
@@ -85,7 +106,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
         </div>
       )}
       {error && (
-        <div className="p-3.5 border border-danger/20 bg-danger/5 text-danger rounded-2xl text-xs font-bold">
+        <div role="alert" className="p-3.5 border border-danger/20 bg-danger/5 text-danger rounded-2xl text-xs font-bold">
           {error}
         </div>
       )}
@@ -110,7 +131,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
                 <CreditCard size={20} />
               </div>
               <div>
-                <h4 className="text-base font-black m-0">{activePlan ? activePlan.name : 'Free Plan'}</h4>
+                <h4 className="text-base font-black m-0">{activePlan ? activePlan.name : (quota.plan_name || 'Free Plan')}</h4>
                 <div className="text-[10px] text-[var(--ds-text-muted)] font-semibold mt-0.5">
                   {activeSub?.status === 'ACTIVE' 
                     ? (language === 'ar' ? 'استحقاقات الخطة نشطة' : 'Plan entitlements active') 
@@ -149,7 +170,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
                   <Activity size={14} className="text-[var(--ds-primary)]" />
                   <span>{language === 'ar' ? 'عدد المشاريع البحثية' : 'Research Projects'}</span>
                 </span>
-                <span>{usage.projects_count} / {limits.max_projects}</span>
+                <span>{projectCount} / {limits.max_projects}</span>
               </div>
               <div className="h-2.5 w-full bg-[var(--ds-surface-secondary)] rounded-full overflow-hidden">
                 <div 
@@ -166,7 +187,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
                   <HardDrive size={14} className="text-[var(--ds-primary)]" />
                   <span>{language === 'ar' ? 'مساحة ملفات المستندات' : 'Document File Storage'}</span>
                 </span>
-                <span>{usage.storage_mb.toFixed(2)} MB / {limits.max_storage_mb} MB</span>
+                <span>{storageMb.toFixed(2)} MB / {limits.max_storage_mb} MB</span>
               </div>
               <div className="h-2.5 w-full bg-[var(--ds-surface-secondary)] rounded-full overflow-hidden">
                 <div 
@@ -187,7 +208,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
         
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           {plans.map(plan => {
-            const isCurrent = activePlan?.code === plan.code;
+            const isCurrent = (activePlan?.code || quota.plan_code) === plan.code;
             const pLimits = plan.limits_json || {};
             const pFeatures = plan.features_json || {};
 
@@ -239,14 +260,20 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
                     <Button variant="secondary" disabled className="w-full justify-center py-2 text-xs font-black rounded-xl">
                       {language === 'ar' ? 'الخطة الحالية' : 'Current Plan'}
                     </Button>
-                  ) : (
+                  ) : canManageBilling ? (
                     <Button 
                       variant="primary" 
+                      loading={upgrading === plan.code}
+                      disabled={Boolean(upgrading)}
                       onClick={() => handleUpgrade(plan.code)}
                       className="w-full justify-center py-2 text-xs font-black rounded-xl shadow-md flex items-center gap-1.5"
                     >
                       <ArrowUpCircle size={14} />
                       <span>{language === 'ar' ? 'ترقية / اختيار' : 'Upgrade Plan'}</span>
+                    </Button>
+                  ) : (
+                    <Button variant="secondary" disabled className="w-full justify-center py-2 text-xs font-black rounded-xl">
+                      {language === 'ar' ? 'يتطلب مالك مساحة العمل' : 'Owner only'}
                     </Button>
                   )}
                 </div>

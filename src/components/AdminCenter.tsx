@@ -6,11 +6,12 @@ import {
   Settings, Shield, Building2, CreditCard, Terminal,
   Activity, Database, Layers, ToggleLeft, ToggleRight,
   Sparkles, Server, Save, RefreshCw,
-  FileText, Brain
+  FileText, Brain, Mail
 } from 'lucide-react';
 import { SuperAdminDashboard } from '../features/saas/SuperAdminDashboard';
 import { BillingDashboard } from '../features/saas/BillingDashboard';
 import { OrganizationSwitcher } from '../features/saas/OrganizationSwitcher';
+import { MarketingLeadsPanel } from './MarketingLeadsPanel';
 import { SmokeTestDashboard } from './SmokeTestDashboard';
 import { DEFAULT_FEATURE_FLAGS, applyFeatureFlagOverrides } from '../utils/featureFlags';
 import { apiGetAdminSettings, apiUpdateAdminSettings, apiGetSystemStatus } from '../utils/api';
@@ -18,7 +19,7 @@ import type { SystemStatusResponse } from '../utils/api';
 
 export const AdminCenter: React.FC = () => {
   const { language } = useProject();
-  const [activeTab, setActiveTab] = useState<'config' | 'orgs' | 'billing' | 'audits' | 'diagnostics'>('config');
+  const [activeTab, setActiveTab] = useState<'leads' | 'config' | 'orgs' | 'billing' | 'audits' | 'diagnostics'>('leads');
 
   // ── Real data from the API ──
   const [status, setStatus] = useState<SystemStatusResponse | null>(null);
@@ -103,6 +104,7 @@ export const AdminCenter: React.FC = () => {
   };
 
   const tabConfig = [
+    { id: 'leads' as const, labelAr: 'طلبات التواصل', labelEn: 'Inbound leads', icon: Mail },
     { id: 'config' as const, labelAr: 'إعدادات المنصة', labelEn: 'General Settings', icon: Settings },
     { id: 'orgs' as const, labelAr: 'المستأجرين والأعضاء', labelEn: 'Organizations & Users', icon: Building2 },
     { id: 'billing' as const, labelAr: 'الباقات والفوترة', labelEn: 'Plans & Billing', icon: CreditCard },
@@ -216,6 +218,7 @@ export const AdminCenter: React.FC = () => {
 
       {/* Tab content */}
       <div className="space-y-4">
+        {activeTab === 'leads' && <MarketingLeadsPanel language={language} />}
         {/* Tab 1: Real platform settings */}
         {activeTab === 'config' && (
           loading ? (

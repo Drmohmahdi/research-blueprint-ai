@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
@@ -8,8 +8,10 @@ import uuid
 from ..db import get_db
 from .. import models, schemas
 from ..services.tenant_context import get_tenant_context, TenantContext
+from ..services.rbac import PERM_PROJECTS_CREATE, require_permission
 from ..services.sanitization import sanitize_text
 from ..services.research_design import project_access, member_relationship
+from ..rate_limit import limiter
 
 # Edit-capable relationships on ResearchProjectMember for a full-project
 # overwrite — matches research_lifecycle.py's own EDIT_CAPABLE_RELATIONSHIPS,
@@ -139,25 +141,16 @@ def serialize_project_model(proj: models.ResearchProject) -> schemas.ProjectResp
         hypothesisAnalysisPlans=proj.hypothesisAnalysisPlans
     )
 
-from fastapi import Request
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-import sys
-import os
-
-is_testing = "pytest" in sys.modules or os.getenv("TESTING") == "True"
-limiter = Limiter(key_func=get_remote_address, enabled=not is_testing)
-
 @router.post("", response_model=schemas.ProjectResponse)
 @limiter.limit("5/minute")
 def create_project(
     request: Request,
     project: schemas.ProjectCreate,
     db: Session = Depends(get_db),
-    context: TenantContext = Depends(get_tenant_context)
+    context: TenantContext = Depends(require_permission(PERM_PROJECTS_CREATE))
 ):
     project = sanitize_project_data(project)
-    
+
     # Enforce atomic project limit for organization's active plan
     from ..services.billing import EntitlementService
     project_count = db.query(models.ResearchProject).filter(
@@ -193,6 +186,8 @@ def create_project(
         preRegistrationHash=project.preRegistrationHash,
         preRegistrationLockedAt=project.preRegistrationLockedAt,
         preRegistrationHistory=[revision.model_dump() for revision in project.preRegistrationHistory or []],
+        activePathId=project.activePathId,
+        completedSteps=project.completedSteps or [],
         version=1
     )
     db.add(db_project)
@@ -262,23 +257,17 @@ def list_projects(
 ):
     # Same-tenant horizontal boundary: this returns the full project record
     # (identical shape to get_project below), so it must not be org-wide —
-    # scoped to ownership, an active ResearchProjectMember relationship, or
-    # platform admin, matching research_design.py's project_access() for the
-    # same resource.
-    if context.is_global_admin:
-        projects = db.query(models.ResearchProject).filter(
-            models.ResearchProject.organizationId == context.organization.id
-        ).all()
-    else:
-        member_project_ids = db.query(models.ResearchProjectMember.project_id).filter(
-            models.ResearchProjectMember.user_id == context.user.id,
-            models.ResearchProjectMember.status == "ACTIVE",
-        )
-        projects = db.query(models.ResearchProject).filter(
-            models.ResearchProject.organizationId == context.organization.id,
-            (models.ResearchProject.userId == context.user.id) |
-            (models.ResearchProject.id.in_(member_project_ids)),
-        ).all()
+    # scoped to ownership or an active ResearchProjectMember relationship.
+    # Platform admin is deliberately excluded from academic project enumeration.
+    member_project_ids = db.query(models.ResearchProjectMember.project_id).filter(
+        models.ResearchProjectMember.user_id == context.user.id,
+        models.ResearchProjectMember.status == "ACTIVE",
+    )
+    projects = db.query(models.ResearchProject).filter(
+        models.ResearchProject.organizationId == context.organization.id,
+        (models.ResearchProject.userId == context.user.id) |
+        (models.ResearchProject.id.in_(member_project_ids)),
+    ).all()
     return [serialize_project_model(p) for p in projects]
 
 @router.get("/{project_id}", response_model=schemas.ProjectResponse)

@@ -1,5 +1,6 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ROUTES } from '../../router/routes';
 import { useWorkspaceState } from './useWorkspaceState';
 import { WorkspaceStepper } from './components/WorkspaceStepper';
 import { WorkspaceStepContent } from './components/WorkspaceStepContent';
@@ -17,6 +18,7 @@ import { EmptyState } from '../../design-system/components/Feedback';
 import { PathPanel } from '../../design-system/components/Navigation';
 
 export const NewStudyDesignWorkspace: React.FC = () => {
+  const navigate = useNavigate();
   const { stepId } = useParams<{ stepId?: string }>();
   const engine = useWorkspaceState(stepId);
   const {
@@ -35,7 +37,12 @@ export const NewStudyDesignWorkspace: React.FC = () => {
       <EmptyState
         illustration={<Unlock size={40} />}
         title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No active project'}
-        description={language === 'ar' ? 'اختر مشروعًا نشطًا لفتح مسار تصميم الدراسة.' : 'Select an active project to open the study design path.'}
+        description={language === 'ar' ? 'أنشئ مشروعًا من اختيار المسار لفتح مسار تصميم الدراسة.' : 'Create a project from path selection to open the study design path.'}
+        actionButton={
+          <Button type="button" variant="primary" size="sm" onClick={() => navigate(ROUTES.PATHS)}>
+            {language === 'ar' ? 'اختيار مسار البحث' : 'Choose a research path'}
+          </Button>
+        }
       />
     );
   }

@@ -24,13 +24,25 @@ def test_suite_uses_isolated_database():
     assert "research_blueprint.db" not in database_url
 
 
-def test_health_is_lightweight_and_correlated():
+def test_health_and_readiness_are_rate_limit_exempt():
+    from app.main import limiter
+    assert "app.main.health" in limiter._exempt_routes
+    assert "app.main.ready" in limiter._exempt_routes
+    assert "app.main.ready_compat" in limiter._exempt_routes
     response = client.get("/health", headers={"X-Request-ID": "2df9de80-dad8-4b8d-8a71-a38fa99e930f"})
     assert response.status_code == 200
     assert response.json()["liveness"] == "alive"
     assert response.headers["X-Request-ID"] == "2df9de80-dad8-4b8d-8a71-a38fa99e930f"
     assert response.headers["X-Content-Type-Options"] == "nosniff"
     assert "default-src 'none'" in response.headers["Content-Security-Policy"]
+
+
+def test_auth_and_app_share_the_same_limiter():
+    from app.main import limiter as app_limiter
+    from app.routers.auth import limiter as auth_limiter
+    from app.routers.projects import limiter as projects_limiter
+    assert app_limiter is auth_limiter
+    assert app_limiter is projects_limiter
 
 
 def test_untrusted_request_id_is_regenerated_and_bounded():
@@ -47,6 +59,7 @@ def test_readiness_reports_optional_providers_truthfully():
     assert body["database"] == "ready"
     assert body["ai_live_provider"] in {"configured", "not_configured"}
     assert body["payment_live_provider"] in {"configured", "not_configured"}
+    assert body["email_live_provider"] in {"configured", "not_configured"}
     assert "DATABASE_URL" not in response.text
 
 

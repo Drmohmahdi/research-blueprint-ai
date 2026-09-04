@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useProject } from '../../context/ProjectContext';
 import { MessageSquare, Send, Check, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { EmptyState } from '../../design-system/components/Feedback';
-import { researchStorage } from '../../utils/researchStorage';
+import { apiCreateProjectComment, apiDeleteProjectComment, apiListProjectComments, apiResolveProjectComment } from '../../utils/api';
 
 interface Comment {
   id: string;
@@ -18,8 +18,6 @@ interface Comment {
   resolvedAt?: string;
 }
 
-const STORAGE_KEY = 'rb_comments_';
-
 export const SupervisorPanel: React.FC = () => {
   const { activeProject, language } = useProject();
   const [comments, setComments] = useState<Comment[]>([]);
@@ -30,42 +28,39 @@ export const SupervisorPanel: React.FC = () => {
 
   const projectId = activeProject?.id;
 
-  // Load comments from localStorage
   useEffect(() => {
     if (!projectId) return;
-    const saved = researchStorage.getItem(STORAGE_KEY + projectId);
-    if (saved) setComments(JSON.parse(saved));
+    void apiListProjectComments(projectId).then((list) => {
+      if (list) setComments(list);
+    });
   }, [projectId]);
 
-  // Save to localStorage
-  const persist = (updated: Comment[]) => {
-    if (!projectId) return;
-    researchStorage.setItem(STORAGE_KEY + projectId, JSON.stringify(updated));
-    setComments(updated);
-  };
-
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!newComment.trim() || !projectId) return;
-    const comment: Comment = {
-      id: `c-${Date.now()}`,
+    const created = await apiCreateProjectComment({
       projectId,
-      authorUsername: language === 'ar' ? 'المشرف' : 'Supervisor',
-      contentAr: language === 'ar' ? newComment : '',
-      contentEn: language === 'en' ? newComment : '',
-      resolved: false,
+      contentAr: newComment,
+      step: undefined,
       priority: newPriority,
-      createdAt: new Date().toISOString(),
-    };
-    persist([comment, ...comments]);
-    setNewComment('');
+    });
+    if (created) {
+      setComments((current) => [created, ...current]);
+      setNewComment('');
+    }
   };
 
-  const handleResolve = (id: string) => {
-    persist(comments.map(c => c.id === id ? { ...c, resolved: !c.resolved, resolvedAt: !c.resolved ? new Date().toISOString() : undefined } : c));
+  const handleResolve = async (id: string) => {
+    const current = comments.find((item) => item.id === id);
+    if (!current) return;
+    const updated = await apiResolveProjectComment(id, !current.resolved);
+    if (updated) {
+      setComments((items) => items.map((item) => item.id === id ? { ...item, resolved: !item.resolved, resolvedAt: !item.resolved ? new Date().toISOString() : undefined } : item));
+    }
   };
 
-  const handleDelete = (id: string) => {
-    persist(comments.filter(c => c.id !== id));
+  const handleDelete = async (id: string) => {
+    const ok = await apiDeleteProjectComment(id);
+    if (ok) setComments((items) => items.filter((item) => item.id !== id));
   };
 
   const filtered = filterResolved ? comments : comments.filter(c => !c.resolved);

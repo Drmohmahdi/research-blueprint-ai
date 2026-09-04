@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ROUTES } from '../router/routes';
 import { PathPanel } from '../design-system/components/Navigation';
 import { EmptyState } from '../design-system/components/Feedback';
 import { useProject } from '../context/ProjectContext';
@@ -19,9 +21,25 @@ import {
 } from 'lucide-react';
 
 export const UnifiedProfileEditor: React.FC = () => {
-  const { language } = useProject();
+  const { language, user } = useProject();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const tabFromPath = location.pathname.includes('/identifiers')
+    ? 'identifiers'
+    : location.pathname.includes('/affiliations')
+      ? 'affiliations'
+      : 'general';
   const [profile, setProfile] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'general' | 'identifiers' | 'affiliations'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'identifiers' | 'affiliations'>(tabFromPath);
+
+  useEffect(() => {
+    setActiveTab(tabFromPath);
+  }, [tabFromPath]);
+
+  const openTab = (tab: 'general' | 'identifiers' | 'affiliations') => {
+    setActiveTab(tab);
+    navigate(tab === 'identifiers' ? ROUTES.PROFILE_IDENTIFIERS : tab === 'affiliations' ? ROUTES.PROFILE_AFFILIATIONS : ROUTES.PROFILE);
+  };
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -262,6 +280,16 @@ export const UnifiedProfileEditor: React.FC = () => {
             </h2>
             <p className="text-xs text-secondary mt-1">{t.desc}</p>
           </div>
+          <div className="flex flex-wrap gap-2">
+            {user?.username && (
+              <button
+                type="button"
+                onClick={() => void navigator.clipboard.writeText(`${window.location.origin}/researcher/${encodeURIComponent(user.username)}`)}
+                className="w-full md:w-auto px-5 py-2.5 border border-[var(--ds-border-default)] rounded-lg text-sm font-bold flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {language === 'ar' ? 'نسخ الرابط العام' : 'Copy public link'}
+              </button>
+            )}
           <button
             onClick={() => handleSave()}
             disabled={saving}
@@ -269,6 +297,7 @@ export const UnifiedProfileEditor: React.FC = () => {
           >
             {saving ? t.saving : t.save}
           </button>
+          </div>
         </div>
       </PathPanel>
 
@@ -365,7 +394,7 @@ export const UnifiedProfileEditor: React.FC = () => {
           {/* Navigation Tab Menu */}
           <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl p-2 flex flex-col gap-1 shadow-sm">
             <button
-              onClick={() => setActiveTab('general')}
+              onClick={() => openTab('general')}
               className={`w-full px-4 py-3 rounded-xl text-xs font-bold text-right flex items-center gap-2.5 transition-all cursor-pointer ${
                 activeTab === 'general'
                   ? 'bg-[var(--ds-primary-soft)] text-ink'
@@ -377,7 +406,7 @@ export const UnifiedProfileEditor: React.FC = () => {
             </button>
 
             <button
-              onClick={() => setActiveTab('identifiers')}
+              onClick={() => openTab('identifiers')}
               className={`w-full px-4 py-3 rounded-xl text-xs font-bold text-right flex items-center gap-2.5 transition-all cursor-pointer ${
                 activeTab === 'identifiers'
                   ? 'bg-[var(--ds-primary-soft)] text-ink'
@@ -389,7 +418,7 @@ export const UnifiedProfileEditor: React.FC = () => {
             </button>
 
             <button
-              onClick={() => setActiveTab('affiliations')}
+              onClick={() => openTab('affiliations')}
               className={`w-full px-4 py-3 rounded-xl text-xs font-bold text-right flex items-center gap-2.5 transition-all cursor-pointer ${
                 activeTab === 'affiliations'
                   ? 'bg-[var(--ds-primary-soft)] text-ink'

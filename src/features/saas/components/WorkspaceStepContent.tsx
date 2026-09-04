@@ -23,6 +23,8 @@ const LiteratureSynthesizer = lazy(() => import('../../../components/LiteratureS
 const SimulationLab = lazy(() => import('../../../components/SimulationLab').then(m => ({ default: m.SimulationLab })));
 const ResearchOutcomePredictor = lazy(() => import('../../../components/ResearchOutcomePredictor').then(m => ({ default: m.ResearchOutcomePredictor })));
 const ConsistencyChecker = lazy(() => import('../../../components/ConsistencyChecker').then(m => ({ default: m.ConsistencyChecker })));
+const MeasurementInstruments = lazy(() => import('../../../components/MeasurementInstruments').then(m => ({ default: m.MeasurementInstruments })));
+const AnalysisPlan = lazy(() => import('../../../components/AnalysisPlan').then(m => ({ default: m.AnalysisPlan })));
 const PreRegistration = lazy(() => import('../../../components/PreRegistration').then(m => ({ default: m.PreRegistration })));
 
 export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engine }) => {
@@ -167,34 +169,104 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
           {/* 5. Questions and hypotheses */}
           {activeStep === 'questionsHypotheses' && (
             <div className="space-y-4">
-              <div className="p-4 bg-[var(--ds-surface-secondary)] rounded-2xl border border-[var(--ds-border-subtle)] text-xs font-semibold text-[var(--ds-text-secondary)]">
-                {language === 'ar' ? 'صياغة الأسئلة والفروض الإحصائية للدراسة. يمكنك تعديل هذه الصياغات عبر معالج إنشاء البحث في الخطوة الخامسة.' : 'Formulate research questions and hypotheses. You can edit them in the Wizard.'}
+              <div className="flex items-center justify-between gap-3">
+                <p className="m-0 text-xs font-semibold text-[var(--ds-text-secondary)]">
+                  {language === 'ar' ? 'أضف أسئلة الدراسة والفروض هنا داخل مساحة التصميم.' : 'Add research questions and hypotheses here inside the design workspace.'}
+                </p>
+                <Button type="button" size="sm" onClick={() => updateProject({
+                  ...activeProject,
+                  questions: [...(activeProject.questions || []), { id: `q-${Date.now()}`, textAr: '', textEn: '', associatedVariables: [] }]
+                })}>{language === 'ar' ? 'إضافة سؤال' : 'Add question'}</Button>
               </div>
-              <div className="space-y-2">
-                <h5 className="text-xs font-black mb-1">{language === 'ar' ? 'الأسئلة الحالية:' : 'Current Questions:'}</h5>
-                {(activeProject.questions || []).map((q, idx) => (
-                  <div key={idx} className="p-2.5 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-xl text-xs font-semibold">
-                    {language === 'ar' ? q.textAr : q.textEn}
-                  </div>
-                ))}
-              </div>
+              {(activeProject.questions || []).length === 0 ? (
+                <p className="text-xs text-[var(--ds-text-muted)]">{language === 'ar' ? 'لا أسئلة بعد.' : 'No questions yet.'}</p>
+              ) : (activeProject.questions || []).map((question, index) => (
+                <div key={question.id} className="space-y-2 rounded-xl border border-[var(--ds-border-subtle)] p-3">
+                  <input
+                    className="w-full rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] px-3 py-2 text-xs"
+                    value={language === 'ar' ? question.textAr : question.textEn}
+                    placeholder={language === 'ar' ? 'نص السؤال' : 'Question text'}
+                    onChange={event => {
+                      const questions = [...(activeProject.questions || [])];
+                      questions[index] = { ...question, [language === 'ar' ? 'textAr' : 'textEn']: event.target.value };
+                      updateProject({ ...activeProject, questions });
+                    }}
+                  />
+                  <Button type="button" size="sm" variant="ghost" onClick={() => updateProject({
+                    ...activeProject,
+                    hypotheses: [...(activeProject.hypotheses || []), {
+                      id: `h-${Date.now()}`,
+                      questionId: question.id,
+                      textAr: '',
+                      textEn: '',
+                      type: 'directional',
+                      independentVarId: activeProject.variables?.[0]?.id || '',
+                      dependentVarId: activeProject.variables?.find(variable => variable.type === 'dependent')?.id || ''
+                    }]
+                  })}>{language === 'ar' ? 'إضافة فرض مرتبط' : 'Add linked hypothesis'}</Button>
+                </div>
+              ))}
+              {(activeProject.hypotheses || []).length > 0 && (
+                <div className="space-y-2">
+                  <h5 className="m-0 text-xs font-black">{language === 'ar' ? 'الفروض' : 'Hypotheses'}</h5>
+                  {(activeProject.hypotheses || []).map((hypothesis, index) => (
+                    <input
+                      key={hypothesis.id}
+                      className="w-full rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] px-3 py-2 text-xs"
+                      value={language === 'ar' ? hypothesis.textAr : hypothesis.textEn}
+                      placeholder={language === 'ar' ? 'نص الفرض' : 'Hypothesis text'}
+                      onChange={event => {
+                        const hypotheses = [...(activeProject.hypotheses || [])];
+                        hypotheses[index] = { ...hypothesis, [language === 'ar' ? 'textAr' : 'textEn']: event.target.value };
+                        updateProject({ ...activeProject, hypotheses });
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           {/* 6. Variables */}
           {activeStep === 'variables' && (
             <div className="space-y-4">
-              <div className="p-4 bg-[var(--ds-surface-secondary)] rounded-2xl border border-[var(--ds-border-subtle)] text-xs font-semibold text-[var(--ds-text-secondary)]">
-                {language === 'ar' ? 'المتغيرات المستخرجة من العنوان للدراسة.' : 'Extracted study variables and scale designs.'}
+              <div className="flex items-center justify-between gap-3">
+                <p className="m-0 text-xs font-semibold text-[var(--ds-text-secondary)]">
+                  {language === 'ar' ? 'عرّف متغيرات الدراسة داخل مساحة التصميم.' : 'Define study variables inside the design workspace.'}
+                </p>
+                <Button type="button" size="sm" onClick={() => updateProject({
+                  ...activeProject,
+                  variables: [...(activeProject.variables || []), { id: `v-${Date.now()}`, nameAr: '', nameEn: '', type: 'independent', scale: 'interval' }]
+                })}>{language === 'ar' ? 'إضافة متغير' : 'Add variable'}</Button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {(activeProject.variables || []).map((v, idx) => (
-                  <Card key={idx} className="p-3 border-[var(--ds-border-subtle)] text-xs font-bold bg-[var(--ds-surface-primary)]">
-                    <div>{language === 'ar' ? v.nameAr : v.nameEn}</div>
-                    <div className="flex gap-2 mt-2">
-                      <span className="px-2 py-0.5 rounded-full bg-[var(--ds-primary-soft)] text-ink text-[9px] uppercase">{v.type}</span>
-                      <span className="px-2 py-0.5 rounded-full bg-[var(--ds-information-soft)] text-[var(--ds-information)] text-[9px] uppercase">{v.scale}</span>
-                    </div>
+                {(activeProject.variables || []).map((variable, index) => (
+                  <Card key={variable.id} className="space-y-2 p-3 border-[var(--ds-border-subtle)] text-xs font-bold bg-[var(--ds-surface-primary)]">
+                    <input
+                      className="w-full rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] px-2 py-1.5"
+                      value={language === 'ar' ? variable.nameAr : variable.nameEn}
+                      placeholder={language === 'ar' ? 'اسم المتغير' : 'Variable name'}
+                      onChange={event => {
+                        const variables = [...(activeProject.variables || [])];
+                        variables[index] = { ...variable, [language === 'ar' ? 'nameAr' : 'nameEn']: event.target.value };
+                        updateProject({ ...activeProject, variables });
+                      }}
+                    />
+                    <select
+                      className="w-full rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] px-2 py-1.5"
+                      value={variable.type}
+                      onChange={event => {
+                        const variables = [...(activeProject.variables || [])];
+                        variables[index] = { ...variable, type: event.target.value as typeof variable.type };
+                        updateProject({ ...activeProject, variables });
+                      }}
+                    >
+                      <option value="independent">independent</option>
+                      <option value="dependent">dependent</option>
+                      <option value="mediator">mediator</option>
+                      <option value="moderator">moderator</option>
+                      <option value="control">control</option>
+                    </select>
                   </Card>
                 ))}
               </div>
@@ -226,22 +298,10 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
           {activeStep === 'populationSample' && <SampleSizeCalc />}
 
           {/* 10. Measurement instruments */}
-          {activeStep === 'measurementInstruments' && (
-            <div className="space-y-4 text-xs font-bold">
-              <div className="p-4 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-2xl text-[var(--ds-text-secondary)]">
-                {language === 'ar' ? 'وثق مقاييس وصدق وثبات أدوات القياس العلمية المعتمدة للتحليل.' : 'Document reliability and validity parameters for study scales.'}
-              </div>
-            </div>
-          )}
+          {activeStep === 'measurementInstruments' && <MeasurementInstruments />}
 
           {/* 11. Analysis plan */}
-          {activeStep === 'analysisPlan' && (
-            <div className="space-y-4 text-xs font-bold">
-              <div className="p-4 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-2xl text-[var(--ds-text-secondary)]">
-                {language === 'ar' ? 'حدد خطة الاختبارات الإحصائية (مثل T-Test مستقل، ANOVA) لكل سؤال.' : 'Configure primary and exploratory statistical analysis models.'}
-              </div>
-            </div>
-          )}
+          {activeStep === 'analysisPlan' && <AnalysisPlan />}
 
           {/* 12. Literature Evidence */}
           {activeStep === 'literatureEvidence' && <LiteratureSynthesizer />}

@@ -433,6 +433,33 @@ def get_my_promotion_application(
     return schemas.PromotionApplicationResponse.model_validate(app)
 
 
+@router.get("/applications/committee-queue", response_model=List[schemas.PromotionApplicationResponse])
+def list_committee_queue(
+    db: Session = Depends(get_db),
+    context: TenantContext = Depends(get_tenant_context)
+):
+    assignment_ids = [
+        row.application_id
+        for row in db.query(models.PromotionCommitteeAssignment).filter(
+            models.PromotionCommitteeAssignment.organization_id == context.organization.id,
+            models.PromotionCommitteeAssignment.user_id == context.user.id,
+            models.PromotionCommitteeAssignment.status == "ACTIVE",
+        ).all()
+    ]
+    if not assignment_ids:
+        return []
+    apps = db.query(models.PromotionApplication).filter(
+        models.PromotionApplication.organization_id == context.organization.id,
+        models.PromotionApplication.id.in_(assignment_ids),
+    ).order_by(models.PromotionApplication.updated_at.desc()).all()
+    results = []
+    for app in apps:
+        resp = schemas.PromotionApplicationResponse.model_validate(app)
+        resp.is_committee_member = True
+        results.append(resp)
+    return results
+
+
 @router.post("/applications", response_model=schemas.PromotionApplicationResponse, status_code=status.HTTP_201_CREATED)
 def create_promotion_application(
     payload: schemas.PromotionApplicationCreate,

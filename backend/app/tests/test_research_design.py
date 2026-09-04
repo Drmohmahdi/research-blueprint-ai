@@ -752,15 +752,15 @@ def test_qualitative_no_hypothesis_forced(domain):
         assert f["severity"] not in {"BLOCKING", "HIGH"}
 
 
-def test_mixed_methods_deferred(domain):
-    """Mixed methods research family is DEFERRED_CAPABILITY."""
+def test_mixed_methods_available(domain):
+    """Mixed methods research family is available as a dual-strand workflow."""
     d = domain
     d.project.studyDesign = "mixed_methods"
     d.db.commit()
     state = get_or_create_design_state(d.db, d.project, d.owner.id)
     meth = recommend_methodology(d.db, d.project, state)
     assert meth["mixed_methods"] is not None
-    assert meth["mixed_methods"]["status"] == "DEFERRED_CAPABILITY"
+    assert meth["mixed_methods"]["status"] == "AVAILABLE"
 
 
 def test_dependency_chain_no_protocol(domain):

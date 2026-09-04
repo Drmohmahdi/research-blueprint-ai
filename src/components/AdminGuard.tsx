@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { ROUTES } from '../router/routes';
 
@@ -13,21 +13,16 @@ interface AdminGuardProps {
  * يُعيد توجيه المستخدمين العاديين للرئيسية
  */
 export const AdminGuard: React.FC<AdminGuardProps> = ({ children }) => {
-  const { user, isSecureMode } = useProject();
+  const { user, isSecureMode, language } = useProject();
+  const ar = language === 'ar';
 
-  // في وضع التطوير (isSecureMode=false) نسمح بالوصول للمطوّرين
-  if (!isSecureMode) {
-    return <>{children}</>;
-  }
+  const isAdmin = Boolean(
+    user?.is_global_admin ||
+    (user?.role && ['admin', 'superadmin', 'SystemAdmin', 'Developer'].includes(user.role))
+  );
 
-  // في الإنتاج: تحقق من دور المستخدم
-  if (!user) {
-    return <Navigate to={ROUTES.DASHBOARD} replace />;
-  }
-
-  const isAdmin = ['admin', 'superadmin', 'SystemAdmin', 'Developer'].includes(user.role);
-
-  if (!isAdmin) {
+  // Logged-in non-admins are always blocked, including local secure-mode off.
+  if (user && !isAdmin) {
     return (
       <div
         style={{
@@ -60,18 +55,29 @@ export const AdminGuard: React.FC<AdminGuardProps> = ({ children }) => {
             margin: 0,
           }}
         >
-          وصول مقيّد
+          {ar ? 'وصول مقيّد' : 'Access restricted'}
         </h2>
         <p style={{ margin: 0, fontSize: '0.9rem', textAlign: 'center' }}>
-          هذه الصفحة متاحة للمسؤولين والمطوّرين فقط.
-          <br />
-          <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>
-            Access Restricted — Admin role required.
-          </span>
+          {ar ? 'هذه الصفحة متاحة لمشغّلي المنصة فقط.' : 'This page is available to platform operators only.'}
         </p>
+        <Link
+          to={ROUTES.PORTAL}
+          className="rounded-lg bg-action px-4 py-2.5 text-sm font-bold text-on-action"
+        >
+          {ar ? 'العودة إلى البوابة' : 'Return to portal'}
+        </Link>
       </div>
     );
   }
 
+  if (!isSecureMode && !user) {
+    return <>{children}</>;
+  }
+
+  if (!user) {
+    return <Navigate to={ROUTES.DASHBOARD} replace />;
+  }
+
   return <>{children}</>;
 };
+

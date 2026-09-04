@@ -183,7 +183,7 @@ export const useProjectWizardState = () => {
     return errors;
   }, [formData.titleAr, formData.titleEn, formData.problemStatementAr, formData.problemStatementEn, language]);
 
-  const handleSave = useCallback((silent = false) => {
+  const handleSave = useCallback(async (silent = false) => {
     const saveErrors = {
       ...validateCoreDetails(),
       ...validateSampleSettings(),
@@ -197,10 +197,20 @@ export const useProjectWizardState = () => {
     }
     if (formData.id) {
       updateProject(formData);
+      setLastSavedData(formData);
     } else {
-      createProject(formData);
+      try {
+        const { id: _id, version: _version, ...payload } = formData;
+        const created = await createProject(payload);
+        setFormData(created);
+        setLastSavedData(created);
+      } catch {
+        if (!silent) {
+          showToast('error', language === 'ar' ? 'تعذر إنشاء المشروع على الخادم.' : 'Could not create the project on the server.');
+        }
+        return false;
+      }
     }
-    setLastSavedData(formData);
     if (!silent) {
       showToast('success', language === 'ar' ? 'تم حفظ التعديلات بنجاح!' : 'Changes saved successfully!');
     }

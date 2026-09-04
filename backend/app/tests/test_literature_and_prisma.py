@@ -61,13 +61,17 @@ def create_test_tenant(db, username: str, org_id: str, email: str):
     if not plan:
         plan = Plan(
             id="pln-free",
+            code="FREE",
+            name="Free Plan",
             name_ar="الخطة المجانية",
             name_en="Free Plan",
-            tier="FREE",
-            monthly_price=0,
-            annual_price=0,
+            billing_interval="MONTHLY",
+            price=0,
+            price_minor_units=0,
+            currency="SAR",
             features_json={},
-            limits_json={"projects_limit": 100}
+            limits_json={"projects_limit": 100},
+            created_at="2026-08-22T00:00:00Z",
         )
         db.add(plan)
 
@@ -522,10 +526,120 @@ def test_cross_tenant_write_protection_all_methods():
     # Intruder attempts all operations on Owner's project -> Expect 404 on each
     assert client.get(f"/api/projects/{project_a_id}/literature-synthesis", headers=headers_b).status_code == 404
     assert client.post(f"/api/projects/{project_a_id}/literature-synthesis/studies", json={"author": "X", "year": 2024, "sampleSize": 10, "effectSize": 0.1, "ciLower": 0.0, "ciUpper": 0.2}, headers=headers_b).status_code == 404
+    assert client.post(f"/api/projects/{project_a_id}/literature-synthesis/import", json={"query": "smart classroom", "source": "crossref"}, headers=headers_b).status_code == 404
+    assert client.patch(f"/api/projects/{project_a_id}/literature-synthesis/studies/protected-study-1", json={"sampleSize": 80, "effectSize": 0.45, "ciLower": 0.21, "ciUpper": 0.69}, headers=headers_b).status_code == 404
     assert client.put(f"/api/projects/{project_a_id}/literature-synthesis/sync", json={"studies": []}, headers=headers_b).status_code == 404
     assert client.delete(f"/api/projects/{project_a_id}/literature-synthesis/studies/protected-study-1", headers=headers_b).status_code == 404
     assert client.delete(f"/api/projects/{project_a_id}/literature-synthesis", headers=headers_b).status_code == 404
     assert client.get(f"/api/projects/{project_a_id}/prisma-flow", headers=headers_b).status_code == 404
     assert client.put(f"/api/projects/{project_a_id}/prisma-flow", json={"identified": 10, "duplicates": 0, "excludedScreening": 0, "excludedEligibility": 0}, headers=headers_b).status_code == 404
     assert client.delete(f"/api/projects/{project_a_id}/prisma-flow", headers=headers_b).status_code == 404
+
+
+def test_literature_import_from_crossref_and_pubmed_is_bibliographic_only(monkeypatch):
+    from app.services import literature_import as lit_imp
+    from app.services.literature_import import LiteratureImportError
+
+    def fake_fetch_json(url, params=None):
+        if "crossref.org" in url:
+            return {"message": {"items": [{
+                "title": ["Smart classrooms in Saudi schools"],
+                "author": [{"family": "Alharbi", "given": "Noura"}],
+                "DOI": "10.1000/baseerah-test",
+                "published-print": {"date-parts": [[2024, 3]]},
+            }]}}
+        if "esearch.fcgi" in url:
+            return {"esearchresult": {"idlist": ["991122"]}}
+        if "esummary.fcgi" in url:
+            return {"result": {"991122": {
+                "title": "Qualitative classroom inquiry",
+                "pubdate": "2022 Jun",
+                "authors": [{"name": "Nasser M"}],
+                "articleids": [{"idtype": "doi", "value": "10.1000/pubmed-test"}],
+            }}}
+        raise AssertionError(url)
+
+    monkeypatch.setattr(lit_imp, "fetch_json", fake_fetch_json)
+
+    db = SessionLocal()
+    user, org = create_test_tenant(db, "lit_import", "org-lit-imp", "litimp@test.com")
+    project = create_test_project(db, user, org, "proj-lit-imp")
+    project_id = project.id
+    db.close()
+    headers = get_auth_headers("lit_import", "org-lit-imp")
+
+    res = client.post(
+        f"/api/projects/{project_id}/literature-synthesis/import",
+        json={"query": "smart classroom", "source": "crossref"},
+        headers=headers,
+    )
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert body["imported"] == 1
+    assert body["skipped"] == 0
+    study = body["studies"][0]
+    assert study["source"] == "crossref"
+    assert study["author"].startswith("Alharbi")
+    assert study["year"] == 2024
+    assert study["sampleSize"] == 1
+    assert study["effectSize"] == 0.0
+    assert study["ciLower"] == 0.0
+    assert study["ciUpper"] == 0.0
+    assert study["doi"] == "10.1000/baseerah-test"
+
+    duplicate = client.post(
+        f"/api/projects/{project_id}/literature-synthesis/import",
+        json={"query": "smart classroom", "source": "crossref"},
+        headers=headers,
+    )
+    assert duplicate.status_code == 200
+    assert duplicate.json()["imported"] == 0
+    assert duplicate.json()["skipped"] == 1
+
+    pubmed = client.post(
+        f"/api/projects/{project_id}/literature-synthesis/import",
+        json={"query": "classroom inquiry", "source": "pubmed"},
+        headers=headers,
+    )
+    assert pubmed.status_code == 200, pubmed.text
+    pubmed_body = pubmed.json()
+    assert pubmed_body["imported"] == 1
+    assert pubmed_body["studies"][0]["source"] == "pubmed"
+    assert pubmed_body["studies"][0]["doi"] == "10.1000/pubmed-test"
+    assert "PMID 991122" in (pubmed_body["studies"][0]["notes"] or "")
+
+    metrics = client.get(f"/api/projects/{project_id}/literature-synthesis", headers=headers).json()
+    assert metrics["totalStudies"] == 2
+    assert metrics["pooledEffectSize"] == 0.0
+    assert metrics["totalSampleCount"] == 0
+
+    def boom(_url, params=None):
+        raise LiteratureImportError("External literature source is unavailable.")
+
+    monkeypatch.setattr(lit_imp, "fetch_json", boom)
+    failed = client.post(
+        f"/api/projects/{project_id}/literature-synthesis/import",
+        json={"query": "smart classroom", "source": "crossref"},
+        headers=headers,
+    )
+    assert failed.status_code == 502
+
+    short = client.post(
+        f"/api/projects/{project_id}/literature-synthesis/import",
+        json={"query": "ab", "source": "crossref"},
+        headers=headers,
+    )
+    assert short.status_code == 422
+
+    patched = client.patch(
+        f"/api/projects/{project_id}/literature-synthesis/studies/{study['id']}",
+        json={"sampleSize": 80, "effectSize": 0.45, "ciLower": 0.21, "ciUpper": 0.69},
+        headers=headers,
+    )
+    assert patched.status_code == 200, patched.text
+    assert patched.json()["sampleSize"] == 80
+    assert patched.json()["effectSize"] == 0.45
+    evidence = client.get(f"/api/projects/{project_id}/literature-synthesis", headers=headers).json()
+    assert evidence["totalSampleCount"] == 80
+    assert evidence["pooledEffectSize"] == 0.45
 

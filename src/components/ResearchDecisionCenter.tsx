@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, ArrowRight, CheckCircle2, Circle, GitBranch, Sparkles } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
 import { checkConsistency, type AuditIssue } from '../utils/ruleEngine';
-import { VIEW_TO_PATH } from '../router/routes';
+import { VIEW_TO_PATH, ROUTES } from '../router/routes';
 import { Button, Card, EmptyState, PathPanel, Progress } from '../design-system';
 
 const severityRank: Record<AuditIssue['type'], number> = {
@@ -28,16 +28,17 @@ export const ResearchDecisionCenter: React.FC = () => {
           <Button
             variant="primary"
             size="sm"
-            onClick={() => navigate(VIEW_TO_PATH.wizard)}
+            onClick={() => navigate(ROUTES.PATHS)}
             iconAfter={<ArrowRight size={14} className={language === 'ar' ? 'rotate-180' : ''} />}
           >
-            {language === 'ar' ? 'فتح معالج البحث' : 'Open Research Wizard'}
+            {language === 'ar' ? 'اختيار مسار البحث' : 'Choose a research path'}
           </Button>
         }
       />
     );
   }
 
+  const designPath = ROUTES.NEW_STUDY_DESIGN.replaceAll(':projectId', activeProject.id);
   const audit = checkConsistency(activeProject);
   const issues = [...audit.issues].sort((first, second) => severityRank[first.type] - severityRank[second.type]);
   const blockers = issues.filter(issue => issue.type !== 'improvement');
@@ -48,7 +49,7 @@ export const ResearchDecisionCenter: React.FC = () => {
     if (issue.section === 'analysis') return VIEW_TO_PATH.analysisPlan;
     if (issue.section === 'ethics') return VIEW_TO_PATH.planning;
     if (issue.section === 'variables' || issue.section === 'questions' || issue.section === 'hypotheses' || issue.section === 'sample') {
-      return VIEW_TO_PATH.wizard;
+      return designPath;
     }
     if (issue.section === 'methodology') return VIEW_TO_PATH.assistant;
     return VIEW_TO_PATH.consistency;
@@ -60,21 +61,21 @@ export const ResearchDecisionCenter: React.FC = () => {
       labelAr: 'العنوان والمشكلة',
       labelEn: 'Title & Problem',
       ready: Boolean(activeProject.titleAr.trim() && activeProject.titleEn.trim() && (activeProject.problemStatementAr.trim() || activeProject.problemStatementEn.trim())),
-      path: VIEW_TO_PATH.wizard
+      path: designPath
     },
     {
       id: 'questions',
       labelAr: 'الأسئلة والفروض',
       labelEn: 'Questions & Hypotheses',
       ready: activeProject.questions.length > 0 && activeProject.hypotheses.length > 0,
-      path: VIEW_TO_PATH.wizard
+      path: designPath
     },
     {
       id: 'variables',
       labelAr: 'المتغيرات والعينة',
       labelEn: 'Variables & Sample',
       ready: activeProject.variables.length > 0 && activeProject.sampleSettings.groupsCount > 0,
-      path: VIEW_TO_PATH.wizard
+      path: designPath
     },
     {
       id: 'measurement',

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardCheck, Ruler, Save } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
-import { VIEW_TO_PATH } from '../router/routes';
+import { ROUTES } from '../router/routes';
 import { Alert, Button, Card, EmptyState, PathPanel, Textarea } from '../design-system';
 import type { MeasurementInstrument, MeasurementInstrumentKind, ReliabilityMethod } from '../types/research';
 
@@ -53,7 +53,7 @@ export const MeasurementInstruments: React.FC = () => {
         illustration={<Ruler size={40} />}
         title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No Active Project'}
         description={language === 'ar' ? 'اختر مشروعًا نشطًا لتوثيق أدوات القياس.' : 'Select an active project to document measurement instruments.'}
-        actionButton={<Button type="button" variant="primary" size="sm" onClick={() => navigate(VIEW_TO_PATH.wizard)}>{language === 'ar' ? 'فتح معالج البحث' : 'Open Research Wizard'}</Button>}
+        actionButton={<Button type="button" variant="primary" size="sm" onClick={() => navigate(ROUTES.PATHS)}>{language === 'ar' ? 'اختيار مسار البحث' : 'Choose a research path'}</Button>}
       />
     );
   }
@@ -109,7 +109,7 @@ export const MeasurementInstruments: React.FC = () => {
           illustration={<ClipboardCheck size={40} />}
           title={language === 'ar' ? 'لا توجد متغيرات تابعة' : 'No dependent variables'}
           description={language === 'ar' ? 'عرّف متغيراً تابعاً أولاً حتى يمكن توثيق أداة قياسه.' : 'Define a dependent variable first, then document its instrument.'}
-          actionButton={<Button type="button" variant="primary" size="sm" onClick={() => navigate(VIEW_TO_PATH.wizard)}>{language === 'ar' ? 'إدارة المتغيرات' : 'Manage Variables'}</Button>}
+          actionButton={<Button type="button" variant="primary" size="sm" onClick={() => navigate(ROUTES.NEW_STUDY_DESIGN.replaceAll(':projectId', activeProject.id))}>{language === 'ar' ? 'إدارة المتغيرات' : 'Manage Variables'}</Button>}
         />
       ) : dependentVariables.map(variable => {
         const instrument = getInstrument(variable.id);

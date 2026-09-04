@@ -14,8 +14,8 @@ from ..config import settings
 from ..services.tenant_context import (
     TenantContext,
     get_tenant_context,
-    require_role
 )
+from ..services.rbac import PERM_BILLING_MANAGE, PERM_BILLING_VIEW, require_permission
 from ..services.billing import (
     EntitlementService,
     get_payment_provider_adapter,
@@ -199,7 +199,7 @@ def list_commercial_plans(
 
 @router.get("/subscription", response_model=SubscriptionDetailsResponse, summary="Get current organization subscription")
 def get_current_subscription(
-    context: TenantContext = Depends(get_tenant_context),
+    context: TenantContext = Depends(require_permission(PERM_BILLING_VIEW)),
     db: Session = Depends(get_db)
 ):
     """
@@ -251,7 +251,7 @@ def get_organization_entitlements_api(
 
 @router.get("/usage", response_model=UsageMetricsResponse, summary="Get organization usage metrics vs quota limits")
 def get_organization_usage(
-    context: TenantContext = Depends(get_tenant_context),
+    context: TenantContext = Depends(require_permission(PERM_BILLING_VIEW)),
     db: Session = Depends(get_db)
 ):
     """
@@ -310,7 +310,7 @@ def get_organization_usage(
 @router.post("/checkout", summary="Initiate checkout session with server-authoritative pricing")
 def create_checkout_session(
     body: CheckoutRequest,
-    context: TenantContext = Depends(get_tenant_context),
+    context: TenantContext = Depends(require_permission(PERM_BILLING_MANAGE)),
     db: Session = Depends(get_db)
 ):
     """
@@ -318,12 +318,6 @@ def create_checkout_session(
     Server determines exact authoritative price based on plan_code and interval.
     Client CANNOT tamper with price or tax calculations.
     """
-    if context.role not in ["OWNER", "ORGANIZATION_ADMIN"] and not getattr(context.user, "is_superadmin", False):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="صلاحيات مدير المؤسسة مطلوبة لبدء عملية الدفع / Admin role required to initiate checkout"
-        )
-
     ensure_plans_and_pricing_seeded(db)
 
     # 1. Fetch Plan and Interval Price
@@ -387,18 +381,12 @@ def create_checkout_session(
 @router.post("/change-plan", summary="Change subscription plan (Admin only)")
 def change_subscription_plan(
     body: ChangePlanRequest,
-    context: TenantContext = Depends(get_tenant_context),
+    context: TenantContext = Depends(require_permission(PERM_BILLING_MANAGE)),
     db: Session = Depends(get_db)
 ):
     """
-    Direct plan change by authorized organization admin.
+    Direct plan change by authorized organization owner.
     """
-    if context.role not in ["OWNER", "ORGANIZATION_ADMIN"] and not getattr(context.user, "is_superadmin", False):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="صلاحيات مدير المؤسسة مطلوبة لتغيير الخطة / Admin role required to change plan"
-        )
-
     ensure_plans_and_pricing_seeded(db)
 
     target_plan = db.query(models.Plan).filter(
@@ -477,7 +465,7 @@ def change_subscription_plan(
 @router.post("/cancel", summary="Cancel organization subscription (Admin only)")
 def cancel_subscription(
     body: CancelSubscriptionRequest,
-    context: TenantContext = Depends(get_tenant_context),
+    context: TenantContext = Depends(require_permission(PERM_BILLING_MANAGE)),
     db: Session = Depends(get_db)
 ):
     """
@@ -486,12 +474,6 @@ def cancel_subscription(
     Immediately: cancels immediately and downgrades to FREE.
     Never deletes research or organization records.
     """
-    if context.role not in ["OWNER", "ORGANIZATION_ADMIN"] and not getattr(context.user, "is_superadmin", False):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="صلاحيات مدير المؤسسة مطلوبة لإلغاء الاشتراك / Admin role required to cancel subscription"
-        )
-
     sub = ensure_organization_subscription(db, context.organization.id)
     now_str = datetime.datetime.now(datetime.UTC).isoformat()
 
@@ -527,18 +509,12 @@ def cancel_subscription(
 
 @router.post("/reactivate", summary="Reactivate canceling subscription (Admin only)")
 def reactivate_subscription(
-    context: TenantContext = Depends(get_tenant_context),
+    context: TenantContext = Depends(require_permission(PERM_BILLING_MANAGE)),
     db: Session = Depends(get_db)
 ):
     """
     Reactivates a subscription that was set to cancel at period end.
     """
-    if context.role not in ["OWNER", "ORGANIZATION_ADMIN"] and not getattr(context.user, "is_superadmin", False):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="صلاحيات مدير المؤسسة مطلوبة لإعادة تفعيل الاشتراك / Admin role required"
-        )
-
     sub = ensure_organization_subscription(db, context.organization.id)
     sub.cancel_at_period_end = False
     sub.status = SubscriptionStatus.ACTIVE.value
@@ -554,7 +530,7 @@ def reactivate_subscription(
 
 @router.get("/invoices", response_model=List[InvoiceItemResponse], summary="List invoices for current organization")
 def list_organization_invoices(
-    context: TenantContext = Depends(get_tenant_context),
+    context: TenantContext = Depends(require_permission(PERM_BILLING_VIEW)),
     db: Session = Depends(get_db)
 ):
     """
@@ -595,7 +571,7 @@ def list_organization_invoices(
 @router.get("/invoices/{invoice_id}", response_model=InvoiceItemResponse, summary="Get single invoice details")
 def get_invoice_details(
     invoice_id: str,
-    context: TenantContext = Depends(get_tenant_context),
+    context: TenantContext = Depends(require_permission(PERM_BILLING_VIEW)),
     db: Session = Depends(get_db)
 ):
     """
@@ -634,7 +610,7 @@ def get_invoice_details(
 @router.get("/invoices/{invoice_id}/download", summary="Download invoice PDF or print document")
 def download_invoice(
     invoice_id: str,
-    context: TenantContext = Depends(get_tenant_context),
+    context: TenantContext = Depends(require_permission(PERM_BILLING_VIEW)),
     db: Session = Depends(get_db)
 ):
     """

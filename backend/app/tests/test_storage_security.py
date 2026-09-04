@@ -103,7 +103,7 @@ def create_test_tenant(db: Session, suffix: str, plan_id: str = "pln-enterprise"
         unit_amount_minor_units=0,
         currency="SAR",
         current_period_start="2026-08-01T00:00:00Z",
-        current_period_end="2026-09-01T00:00:00Z",
+        current_period_end="2036-09-01T00:00:00Z",
         created_at="2026-08-01T00:00:00Z"
     )
     db.add(sub)
@@ -514,7 +514,7 @@ def test_external_reviewer_scoped_manuscript_download(db_session: Session):
         id="tok-ext-file-1",
         assignment_id=assignment.id,
         token_hash=token_hash,
-        expires_at="2026-09-01T00:00:00Z",
+        expires_at="2036-09-01T00:00:00Z",
         created_at="2026-08-23T00:00:00Z"
     )
     db_session.add(token_record)
@@ -775,7 +775,7 @@ def test_external_reviewer_wrong_assignment_cannot_download(db_session: Session)
         id="tok-wrong-asg-2",
         assignment_id=asg2.id,
         token_hash=hashlib.sha256(raw_token_b.encode("utf-8")).hexdigest(),
-        expires_at="2026-09-01T00:00:00Z",
+        expires_at="2036-09-01T00:00:00Z",
         created_at="2026-08-23T00:00:00Z"
     )
     db_session.add(tok2)
@@ -1241,7 +1241,7 @@ def test_external_reviewer_revoked_token_cannot_download(db_session: Session):
     db_session.add(models.ExternalReviewerToken(
         id="tok-ext-rev-tok-1", assignment_id=assignment.id,
         token_hash=hashlib.sha256(raw_token.encode("utf-8")).hexdigest(),
-        expires_at="2026-09-01T00:00:00Z", revoked_at="2026-08-22T00:00:00Z",
+        expires_at="2036-09-01T00:00:00Z", revoked_at="2026-08-22T00:00:00Z",
         created_at="2026-08-23T00:00:00Z"
     ))
     db_session.commit()

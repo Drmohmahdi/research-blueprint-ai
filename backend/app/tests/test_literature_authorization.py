@@ -112,6 +112,15 @@ def tenants():
     db.close()
 
 
+def test_same_org_colleague_with_no_relationship_cannot_import_literature(tenants):
+    r = client.post(
+        f"/api/projects/{tenants['project_id']}/literature-synthesis/import",
+        json={"query": "smart classroom", "source": "crossref"},
+        headers=tenants["headers_colleague"],
+    )
+    assert r.status_code == 404
+
+
 def test_same_org_colleague_with_no_relationship_cannot_view_literature_synthesis(tenants):
     r = client.get(f"/api/projects/{tenants['project_id']}/literature-synthesis", headers=tenants["headers_colleague"])
     assert r.status_code == 404

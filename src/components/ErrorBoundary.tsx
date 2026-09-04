@@ -75,7 +75,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
             <span>{isAr ? 'إعادة المحاولة' : 'Try Again'}</span>
           </button>
           <button
-            onClick={() => window.location.href = '/'}
+            onClick={() => { window.location.href = '/app'; }}
             className="px-4 py-2 rounded-xl border border-[var(--ds-border-subtle)] text-[var(--ds-text-secondary)] text-sm font-bold cursor-pointer hover:bg-[var(--ds-surface-secondary)] transition-colors"
           >
             {isAr ? 'الرئيسية' : 'Dashboard'}

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { getTranslation } from '../utils/translations';
-import { VIEW_TO_PATH, PATH_TO_VIEW } from '../router/routes';
+import { VIEW_TO_PATH, viewFromPathname, ROUTES } from '../router/routes';
 import { 
   LayoutDashboard, 
   Sparkles, 
@@ -52,16 +52,7 @@ interface LayoutV2Props {
 export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-
-  // Derive currentView from URL path
-  const currentView = PATH_TO_VIEW[pathname] ?? 'portal';
-
-  const setCurrentView = (viewId: string) => {
-    const path = VIEW_TO_PATH[viewId] ?? '/app';
-    navigate(path);
-  };
-
-  const { 
+    const { 
     projects, 
     activeProject, 
     setActiveProject, 
@@ -73,6 +64,26 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
     user,
     logout
   } = useProject();
+    const canViewBilling = Boolean(user?.permissions?.includes('billing.view'));
+    const canViewAudit = Boolean(user?.permissions?.includes('audit.view'));
+    const isPlatformAdmin = Boolean(user?.is_global_admin);
+
+  const currentView = viewFromPathname(pathname);
+
+  const setCurrentView = (viewId: string) => {
+    let path = VIEW_TO_PATH[viewId] ?? '/app';
+    if (path.includes(':projectId')) {
+      if (!activeProject?.id) {
+        navigate(ROUTES.PATHS);
+        return;
+      }
+      path = path.replaceAll(':projectId', activeProject.id);
+    }
+    if (path.includes(':organizationId')) {
+      path = path.replaceAll(':organizationId', activeProject?.organizationId || 'personal');
+    }
+    navigate(path);
+  };
 
   // Sidebar state
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -118,8 +129,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
       titleAr: 'المنظومة الأكاديمية',
       titleEn: 'Baseerah Portal',
       items: [
-        { id: 'portal', labelAr: 'البوابة الرئيسية', labelEn: 'Portal Gateway', icon: LayoutDashboard },
-        { id: 'lifecycle', labelAr: 'مركز قيادة المشروع', labelEn: 'Project Command Center', icon: GitBranch }
+        { id: 'portal', labelAr: 'البوابة الرئيسية', labelEn: 'Portal Gateway', icon: LayoutDashboard }
       ]
     };
 
@@ -144,14 +154,13 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
           titleAr: 'البحث العلمي',
           titleEn: 'Scientific Research',
           items: [
-            { id: 'dashboard', labelAr: 'لوحة التحكم', labelEn: 'Dashboard', icon: LayoutDashboard },
-            { id: 'lifecycle', labelAr: 'دورة حياة البحث', labelEn: 'Research Lifecycle', icon: GitBranch },
+            { id: 'lifecycle', labelAr: 'مركز قيادة المشروع', labelEn: 'Project Command Center', icon: GitBranch },
+            { id: 'newStudyDesign', labelAr: 'مساحة تصميم الدراسة', labelEn: 'Study design workspace', icon: FolderGit2 },
+            { id: 'researchOffice', labelAr: 'عمليات مكتب البحث', labelEn: 'Research office', icon: Briefcase },
             { id: 'thesisOperations', labelAr: 'تشغيل الرسالة العلمية', labelEn: 'Thesis operations', icon: GraduationCap },
             { id: 'graduateStudies', labelAr: 'عمليات الدراسات العليا', labelEn: 'Graduate Studies', icon: ClipboardList },
-            { id: 'decisionCenter', labelAr: 'مركز قرارات البحث', labelEn: 'Research Decision Center', icon: GitBranch },
             { id: 'planning', labelAr: 'خطة البحث', labelEn: 'Research Plan', icon: ClipboardList },
-            { id: 'pathSelector', labelAr: 'اختيار المسار', labelEn: 'Path Selector', icon: Map },
-            { id: 'wizard', labelAr: 'معالج البحث', labelEn: 'Research Wizard', icon: FolderGit2 }
+            { id: 'pathSelector', labelAr: 'اختيار المسار', labelEn: 'Path Selector', icon: Map }
           ]
         },
         {
@@ -165,7 +174,8 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
             { id: 'sampleCalc', labelAr: 'حاسبة حجم العينة', labelEn: 'Sample Size Calculator', icon: Calculator },
             { id: 'measurement', labelAr: 'أدوات القياس والصدق والثبات', labelEn: 'Measurement and Reliability', icon: Ruler },
             { id: 'analysisPlan', labelAr: 'خطة التحليل الإحصائي', labelEn: 'Statistical Analysis Plan', icon: BarChart3 },
-            { id: 'consistency', labelAr: 'مدقق الاتساق', labelEn: 'Consistency Checker', icon: CheckSquare }
+            { id: 'consistency', labelAr: 'مدقق الاتساق', labelEn: 'Consistency Checker', icon: CheckSquare },
+            { id: 'decisionCenter', labelAr: 'مركز قرارات البحث', labelEn: 'Research Decision Center', icon: GitBranch }
           ]
         },
         {
@@ -209,6 +219,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
           titleAr: 'النشر العلمي',
           titleEn: 'Scientific Publishing',
           items: [
+            { id: 'publishing', labelAr: 'مركز ذكاء النشر', labelEn: 'Publication intelligence', icon: BookOpen },
             { id: 'reviewSim', labelAr: 'جاهزية النشر', labelEn: 'Publication Reviewer', icon: UserCheck },
             { id: 'export', labelAr: 'تصدير التقرير المنهجي', labelEn: 'Export Blueprint', icon: FileText }
           ]
@@ -233,7 +244,8 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
           titleAr: 'تحكيم البحث العلمي',
           titleEn: 'Scientific Peer Review',
           items: [
-            { id: 'peerReview', labelAr: 'بوابة التحكيم العلمي', labelEn: 'Peer Review Portal', icon: Award }
+            { id: 'peerReview', labelAr: 'بوابة التحكيم العلمي', labelEn: 'Peer Review Portal', icon: Award },
+            { id: 'peerReviewAssignments', labelAr: 'تعييناتي كمُحكّم', labelEn: 'My reviewer assignments', icon: ClipboardList }
           ]
         }
       ];
@@ -247,7 +259,8 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
           titleAr: 'الترقيات الأكاديمية',
           titleEn: 'Academic Promotion',
           items: [
-            { id: 'promotion', labelAr: 'بصيرة للترقيات', labelEn: 'Promotion Dashboard', icon: Briefcase }
+            { id: 'promotion', labelAr: 'بصيرة للترقيات', labelEn: 'Promotion Dashboard', icon: Briefcase },
+            { id: 'promotionRegulations', labelAr: 'اللوائح المرجعية', labelEn: 'Promotion regulations', icon: BookOpen }
           ]
         }
       ];
@@ -276,10 +289,11 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
         titleAr: 'التحكم والإدارة',
         titleEn: 'Administration Center',
         items: [
-          { id: 'adminCenter', labelAr: 'مركز الإعدادات', labelEn: 'Control Center', icon: Settings },
+          ...(isPlatformAdmin ? [{ id: 'adminCenter', labelAr: 'مركز الإعدادات', labelEn: 'Control Center', icon: Settings }] : []),
           { id: 'saasWorkspaces', labelAr: 'مساحات العمل', labelEn: 'SaaS Workspaces', icon: FolderGit2 },
-          { id: 'saasBilling', labelAr: 'الاشتراكات والفوترة', labelEn: 'Plans & Billing', icon: Calculator }
-        ]
+          ...(canViewBilling ? [{ id: 'saasBilling', labelAr: 'الاشتراكات والفوترة', labelEn: 'Plans & Billing', icon: Calculator }] : []),
+          ...(canViewAudit ? [{ id: 'saasAudit', labelAr: 'سجل الرقابة', labelEn: 'Audit logs', icon: FileLock2 }] : []),
+        ].filter(Boolean)
       }
     ];
   };
@@ -368,6 +382,10 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
       prisma: { ar: 'الأدلة والبحوث', en: 'Literature' },
       qualitative: { ar: 'الأدلة والبحوث', en: 'Literature' },
       reviewSim: { ar: 'النشر العلمي', en: 'Publishing' },
+      publishing: { ar: 'النشر العلمي', en: 'Publishing' },
+      newStudyDesign: { ar: 'تصميم الدراسة', en: 'Study Design' },
+      researchCommandCenter: { ar: 'البحث العلمي', en: 'Research' },
+      researchOffice: { ar: 'البحث العلمي', en: 'Research' },
       peerReview: { ar: 'التحكيم العلمي', en: 'Peer Review' },
       export: { ar: 'النشر العلمي', en: 'Publishing' },
       progress: { ar: 'البحث العلمي', en: 'Research' },
@@ -411,6 +429,10 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
       prisma: { ar: 'مخطط PRISMA', en: 'PRISMA' },
       qualitative: { ar: 'الترميز النوعي', en: 'Qualitative Lab' },
       reviewSim: { ar: 'جاهزية النشر', en: 'Readiness Review' },
+      publishing: { ar: 'مركز ذكاء النشر', en: 'Publication Intelligence' },
+      newStudyDesign: { ar: 'مساحة تصميم الدراسة', en: 'Study Design Workspace' },
+      researchCommandCenter: { ar: 'مركز قيادة التصميم', en: 'Design Command Center' },
+      researchOffice: { ar: 'عمليات مكتب البحث', en: 'Research Office' },
       peerReview: { ar: 'تحكيم الأبحاث العلمية', en: 'Peer Review' },
       export: { ar: 'تصدير التقرير المنهجي', en: 'Export Blueprint' },
       progress: { ar: 'تقدم البحث', en: 'Research Progress' },
@@ -476,7 +498,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
 
           {/* Project Selection Dropdown / Metadata */}
           {pathname !== '/app' && (
-            <div className="hidden xl:flex min-w-0 max-w-[34vw] items-center gap-3">
+            <div className="hidden md:flex min-w-0 max-w-[34vw] items-center gap-3">
               <span className="text-[10px] font-bold text-[var(--ds-text-muted)] uppercase tracking-wider">
                 {language === 'ar' ? 'المشروع النشط:' : 'Active Project:'}
               </span>
@@ -552,7 +574,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
                 </div>
                 <div className="hidden xl:block text-start">
                   <div className="text-xs font-extrabold leading-none">{user.username}</div>
-                  <div className="text-[9px] text-[var(--ds-text-muted)] font-semibold mt-0.5">{user.role}</div>
+                  <div className="text-[9px] text-[var(--ds-text-muted)] font-semibold mt-0.5">{user.org_role || user.role}</div>
                 </div>
                 <button
                   onClick={logout}
@@ -718,9 +740,21 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
                       <span>{language === 'ar' ? 'المشروع النشط' : 'Active project'}</span>
                       <span>{activeProjectCompletion}%</span>
                     </div>
-                    <p className="m-0 text-xs font-bold text-[var(--ds-text-primary)] line-clamp-2">
-                      {language === 'ar' ? activeProject.titleAr : activeProject.titleEn}
-                    </p>
+                    <select
+                      value={activeProject.id}
+                      onChange={(e) => {
+                        const found = projects.find(p => p.id === e.target.value);
+                        if (found) setActiveProject(found);
+                      }}
+                      aria-label={language === 'ar' ? 'اختيار المشروع النشط' : 'Select active project'}
+                      className="w-full truncate rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] px-2 py-1.5 text-xs font-bold text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
+                    >
+                      {projects.map(p => (
+                        <option key={p.id} value={p.id}>
+                          {language === 'ar' ? p.titleAr : p.titleEn}
+                        </option>
+                      ))}
+                    </select>
                     <div className="h-1.5 overflow-hidden rounded-full bg-[var(--ds-surface-tertiary)]" role="progressbar" aria-label={language === 'ar' ? 'اكتمال المشروع' : 'Project completion'} aria-valuemin={0} aria-valuemax={100} aria-valuenow={activeProjectCompletion}>
                       <div className="h-full bg-[var(--ds-primary)]" style={{ width: `${activeProjectCompletion}%` }} />
                     </div>

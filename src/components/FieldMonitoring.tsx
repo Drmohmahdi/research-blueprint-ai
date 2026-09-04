@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Activity, AlertTriangle, CheckCircle2, ClipboardCheck, Plus, Users } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
 import { Button } from '../design-system/components/Button';
-import { EmptyState } from '../design-system/components/Feedback';
+import { EmptyActiveProject } from './EmptyActiveProject';
 import { PathPanel } from '../design-system/components/Navigation';
 import { ROUTES } from '../router/routes';
 import { calculateProtocolHash } from '../utils/protocolIntegrity';
@@ -24,31 +24,33 @@ type SessionRow = {
 const getMonitoringStorageKey = (projectId: string) => `rb_monitoring_sessions_${projectId}`;
 const getEnrollmentStorageKey = (projectId: string) => `rb_monitoring_enrolled_${projectId}`;
 
+const parseSessionRows = (value: unknown): SessionRow[] => {
+  if (!Array.isArray(value)) return [];
+  return value.filter((row): row is SessionRow => {
+    if (!row || typeof row !== 'object') return false;
+    const candidate = row as Partial<SessionRow>;
+    const attendanceValue = candidate.attendance;
+    const complianceValue = candidate.compliance;
+    return typeof candidate.sessionAr === 'string'
+      && typeof candidate.sessionEn === 'string'
+      && typeof candidate.date === 'string'
+      && typeof attendanceValue === 'number'
+      && typeof complianceValue === 'number'
+      && Number.isFinite(attendanceValue)
+      && Number.isFinite(complianceValue)
+      && attendanceValue >= 0
+      && attendanceValue <= 100
+      && complianceValue >= 0
+      && complianceValue <= 100
+      && (candidate.tone === 'success' || candidate.tone === 'warning');
+  });
+};
+
 const loadSessionRows = (projectId: string): SessionRow[] => {
   try {
     const stored = researchStorage.getItem(getMonitoringStorageKey(projectId));
     if (!stored) return [];
-    const parsed: unknown = JSON.parse(stored);
-    if (!Array.isArray(parsed)) return [];
-    const validRows = parsed.filter((row): row is SessionRow => {
-      if (!row || typeof row !== 'object') return false;
-      const candidate = row as Partial<SessionRow>;
-      const attendanceValue = candidate.attendance;
-      const complianceValue = candidate.compliance;
-      return typeof candidate.sessionAr === 'string'
-        && typeof candidate.sessionEn === 'string'
-        && typeof candidate.date === 'string'
-        && typeof attendanceValue === 'number'
-        && typeof complianceValue === 'number'
-        && Number.isFinite(attendanceValue)
-        && Number.isFinite(complianceValue)
-        && attendanceValue >= 0
-        && attendanceValue <= 100
-        && complianceValue >= 0
-        && complianceValue <= 100
-        && (candidate.tone === 'success' || candidate.tone === 'warning');
-    });
-    return validRows;
+    return parseSessionRows(JSON.parse(stored));
   } catch {
     return [];
   }
@@ -75,7 +77,7 @@ const loadEnrolledCount = (projectId: string, target: number, protocolHash?: str
 
 export const FieldMonitoring: React.FC = () => {
   const navigate = useNavigate();
-  const { activeProject, language } = useProject();
+  const { activeProject, language, isSecureMode, updateProjectWorkflowProfile } = useProject();
   const [sessionRows, setSessionRows] = useState<SessionRow[]>([]);
   const [enrolled, setEnrolled] = useState(0);
   const [enrolledDraft, setEnrolledDraft] = useState('0');
@@ -92,8 +94,21 @@ export const FieldMonitoring: React.FC = () => {
   const preregHash = activeProject?.preRegistrationHash;
 
   useEffect(() => {
-    setSessionRows(projectId ? loadSessionRows(projectId) : []);
-    const loadedEnrolled = projectId ? loadEnrolledCount(projectId, populationTarget, preregHash) : 0;
+    if (!projectId || !activeProject) {
+      setSessionRows([]);
+      setEnrolled(0);
+      setEnrolledDraft('0');
+      return;
+    }
+    const server = activeProject.intelligenceProfile?.fieldMonitoring as { sessions?: unknown; enrolled?: unknown; protocolHash?: unknown } | undefined;
+    const serverSessions = parseSessionRows(server?.sessions);
+    const localSessions = loadSessionRows(projectId);
+    const nextRows = serverSessions.length > 0 ? serverSessions : localSessions;
+    const serverEnrolled = typeof server?.enrolled === 'number' && Number.isInteger(server.enrolled) && server.protocolHash === preregHash
+      ? Math.max(0, Math.min(populationTarget, server.enrolled))
+      : null;
+    const loadedEnrolled = serverEnrolled ?? loadEnrolledCount(projectId, populationTarget, preregHash);
+    setSessionRows(nextRows);
     setEnrolled(loadedEnrolled);
     setEnrolledDraft(String(loadedEnrolled));
     setSessionName('');
@@ -102,7 +117,19 @@ export const FieldMonitoring: React.FC = () => {
     setCompliance('');
     setFormError(null);
     setEnrollmentError(null);
-  }, [projectId, populationTarget, preregHash]);
+    if (isSecureMode && serverSessions.length === 0 && localSessions.length > 0) {
+      void updateProjectWorkflowProfile(projectId, {
+        intelligenceProfile: {
+          ...(activeProject.intelligenceProfile || {}),
+          fieldMonitoring: {
+            sessions: localSessions,
+            enrolled: loadedEnrolled,
+            protocolHash: preregHash
+          }
+        }
+      });
+    }
+  }, [projectId, populationTarget, preregHash, isSecureMode]);
 
   useEffect(() => {
     let cancelled = false;
@@ -135,6 +162,24 @@ export const FieldMonitoring: React.FC = () => {
   const latestNeedsFollowUp = latestSession && (latestSession.attendance < 90 || latestSession.compliance < 90);
   const hasCurrentProtocolSessions = currentProtocolRows.length > 0;
   const canRecordFieldData = protocolStatus === 'verified';
+
+  const persistFieldMonitoring = (nextRows: SessionRow[], nextEnrolled: number) => {
+    if (!activeProject) return;
+    researchStorage.setItem(getMonitoringStorageKey(activeProject.id), JSON.stringify(nextRows));
+    researchStorage.setItem(getEnrollmentStorageKey(activeProject.id), JSON.stringify({ count: nextEnrolled, protocolHash: activeProject.preRegistrationHash }));
+    if (isSecureMode) {
+      void updateProjectWorkflowProfile(activeProject.id, {
+        intelligenceProfile: {
+          ...(activeProject.intelligenceProfile || {}),
+          fieldMonitoring: {
+            sessions: nextRows,
+            enrolled: nextEnrolled,
+            protocolHash: activeProject.preRegistrationHash
+          }
+        }
+      });
+    }
+  };
 
   const cardClass = 'bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-3';
   const labelClass = 'text-xs font-semibold text-[var(--ds-text-muted)] uppercase tracking-wider';
@@ -169,7 +214,7 @@ export const FieldMonitoring: React.FC = () => {
       protocolHash: activeProject.preRegistrationHash
     }];
     setSessionRows(nextRows);
-    researchStorage.setItem(getMonitoringStorageKey(activeProject.id), JSON.stringify(nextRows));
+    persistFieldMonitoring(nextRows, enrolled);
     setSessionName('');
     setSessionDate('');
     setAttendance('');
@@ -192,15 +237,15 @@ export const FieldMonitoring: React.FC = () => {
       return;
     }
     setEnrolled(parsedEnrolled);
-    researchStorage.setItem(getEnrollmentStorageKey(activeProject.id), JSON.stringify({ count: parsedEnrolled, protocolHash: activeProject.preRegistrationHash }));
+    persistFieldMonitoring(sessionRows, parsedEnrolled);
   };
 
   if (!activeProject) {
     return (
-      <EmptyState
+      <EmptyActiveProject
+        language={language}
         illustration={<Activity size={40} />}
-        title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No active project'}
-        description={language === 'ar' ? 'اختر مشروعًا نشطًا لتوثيق التنفيذ الميداني.' : 'Select an active project to document field implementation.'}
+        description={language === 'ar' ? 'أنشئ مشروعًا من اختيار المسار لتوثيق التنفيذ الميداني.' : 'Create a project from path selection to document field implementation.'}
       />
     );
   }

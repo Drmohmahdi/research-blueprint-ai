@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PathPanel } from '../design-system/components/Navigation';
 import { useProject } from '../context/ProjectContext';
+import type { ResearchProject } from '../types/research';
 import { apiAnalyzeTitle } from '../utils/api';
 import { localLiteratureForecast } from '../utils/predictionFallback';
 import { 
@@ -143,11 +144,12 @@ export const SmokeTestDashboard: React.FC = () => {
 
     // 2. Project Creation Test
     let createdProjId = '';
+    let createdProj: ResearchProject | null = null;
     try {
       updateTestStatus('project-creation', 'RUNNING');
       addLog(language === 'ar' ? 'محاكاة إنشاء مشروع بحثي جديد...' : 'Simulating new project creation...');
       
-      const newProj = createProject({
+      const newProj = await createProject({
         titleAr: 'مشروع اختبار الدخان المؤقت',
         titleEn: 'Temporary Smoke Test Project',
         departmentAr: 'قسم الاختبارات',
@@ -178,6 +180,7 @@ export const SmokeTestDashboard: React.FC = () => {
       if (!newProj || !newProj.id) {
         throw new Error(language === 'ar' ? 'فشل إنشاء كائن المشروع.' : 'Failed to instantiate project object.');
       }
+      createdProj = newProj;
       createdProjId = newProj.id;
       addLog(language === 'ar' ? `تم إنشاء المشروع بنجاح بالمعرف المؤقت: ${createdProjId}` : `Project created successfully with ID: ${createdProjId}`);
       updateTestStatus('project-creation', 'PASSED');
@@ -196,7 +199,7 @@ export const SmokeTestDashboard: React.FC = () => {
       }
 
       // Simulate modifying variables in wizard
-      const targetProj = projects.find(p => p.id === createdProjId);
+      const targetProj = createdProj;
       if (targetProj) {
         const updated = {
           ...targetProj,

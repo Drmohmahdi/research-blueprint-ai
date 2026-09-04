@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { PathPanel } from '../design-system/components/Navigation';
 import { EmptyState } from '../design-system/components/Feedback';
 import { useProject } from '../context/ProjectContext';
@@ -28,6 +29,7 @@ const LIFECYCLE_STATUSES = ['DRAFT', 'UNDER_REVIEW', 'ACCEPTED', 'PUBLISHED', 'A
 
 export const ScholarlyAssetsList: React.FC = () => {
   const { language } = useProject();
+  const { assetId } = useParams<{ assetId?: string }>();
   const [assets, setAssets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -190,6 +192,12 @@ export const ScholarlyAssetsList: React.FC = () => {
     });
     setShowAddModal(true);
   };
+
+  useEffect(() => {
+    if (!assetId || assets.length === 0) return;
+    const match = assets.find((asset: any) => asset.id === assetId);
+    if (match) openEditModal(match);
+  }, [assetId, assets]);
 
   const handleSaveAsset = async (e: React.FormEvent) => {
     e.preventDefault();

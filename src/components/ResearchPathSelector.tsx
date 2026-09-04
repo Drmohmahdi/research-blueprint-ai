@@ -19,7 +19,16 @@ import {
   Database,
   BookOpen
 } from 'lucide-react';
-import { VIEW_TO_PATH } from '../router/routes';
+import { VIEW_TO_PATH, ROUTES } from '../router/routes';
+import { PlanLimitNotice } from './PlanLimitNotice';
+import { isPlanLimitError } from '../utils/api';
+import type { StudyDesignType } from '../types/research';
+
+const starterStudyDesign = (pathId: string): StudyDesignType => (
+  pathId === 'SCIENTIFIC_PAPER_READING' || pathId === 'SYSTEMATIC_REVIEW'
+    ? 'correlational'
+    : 'quasi_experimental_pre_post'
+);
 
 const CATEGORY_LABELS = {
   all: { ar: '\u062c\u0645\u064a\u0639 \u0627\u0644\u0645\u0633\u0627\u0631\u0627\u062a', en: 'All Paths' },
@@ -57,16 +66,16 @@ const STEP_NAMES: Record<string, { ar: string, en: string }> = {
 };
 
 const STEP_ROUTE_MAP: Record<string, string> = {
-  ideaExploration: VIEW_TO_PATH.wizard,
+  ideaExploration: ROUTES.NEW_STUDY_DESIGN,
   titleAnalysis: VIEW_TO_PATH.analyzer,
-  problemGap: VIEW_TO_PATH.wizard,
-  objectives: VIEW_TO_PATH.wizard,
+  problemGap: ROUTES.NEW_STUDY_DESIGN,
+  objectives: ROUTES.NEW_STUDY_DESIGN,
   questionsHypotheses: VIEW_TO_PATH.consistency,
   variables: VIEW_TO_PATH.modelBuilder,
   conceptualModel: VIEW_TO_PATH.modelBuilder,
   methodologyDesign: VIEW_TO_PATH.modelBuilder,
   populationSample: VIEW_TO_PATH.sampleCalc,
-  measurementInstruments: VIEW_TO_PATH.consistency,
+  measurementInstruments: VIEW_TO_PATH.measurement,
   analysisPlan: VIEW_TO_PATH.analysisPlan,
   literatureEvidence: VIEW_TO_PATH.litSynthesizer,
   prediction: VIEW_TO_PATH.outcomePredictor,
@@ -88,10 +97,13 @@ const PATH_ICON_MAP: Record<string, React.ComponentType<{ size?: number; classNa
 
 export const ResearchPathSelector: React.FC = () => {
   const navigate = useNavigate();
-  const { activeProject, language, updateProjectWorkflowProfile } = useProject();
+  const { activeProject, language, updateProjectWorkflowProfile, createProject } = useProject();
   
   const [selectedPathId, setSelectedPathId] = useState<string>('NEW_STUDY_DESIGN');
   const [activeTab, setActiveTab] = useState<'all' | 'design' | 'simulation' | 'fieldwork' | 'publishing'>('all');
+  const [starting, setStarting] = useState(false);
+  const [startError, setStartError] = useState('');
+  const [planLimitHit, setPlanLimitHit] = useState(false);
 
   const filteredPaths = RESEARCH_PATHS_CONFIG.filter(
     path => activeTab === 'all' || path.category === activeTab
@@ -124,30 +136,86 @@ export const ResearchPathSelector: React.FC = () => {
     return Math.round((getCompletedStepsCount(path) / path.orderedSteps.length) * 100);
   };
 
-  const getStepPath = (stepKey: string) => VIEW_TO_PATH[stepKey] || STEP_ROUTE_MAP[stepKey];
+  const getStepPath = (stepKey: string, projectId?: string) => {
+    const raw = VIEW_TO_PATH[stepKey] || STEP_ROUTE_MAP[stepKey];
+    if (!raw) return ROUTES.LIFECYCLE;
+    if (raw.includes(':projectId')) {
+      const id = projectId || activeProject?.id;
+      if (!id) return ROUTES.PATHS;
+      return raw.replaceAll(':projectId', id);
+    }
+    return raw;
+  };
 
   const handleStartPath = async (path: ResearchPath) => {
-    if (!activeProject) return;
+    setStartError('');
+    setPlanLimitHit(false);
+    setStarting(true);
+    try {
+      let project = activeProject;
+      if (!project) {
+        const studyDesign = starterStudyDesign(path.id);
+        project = await createProject({
+          titleAr: path.titleAr,
+          titleEn: path.titleEn,
+          departmentAr: '',
+          departmentEn: '',
+          institutionAr: '',
+          institutionEn: '',
+          descriptionAr: path.descriptionAr,
+          descriptionEn: path.descriptionEn,
+          problemStatementAr: '',
+          problemStatementEn: '',
+          studyDesign,
+          variables: [],
+          questions: [],
+          hypotheses: [],
+          sampleSettings: {
+            marginOfError: 0.05,
+            confidenceLevel: 0.95,
+            expectedPower: 0.80,
+            expectedEffectSize: 0.5,
+            expectedAttritionRate: 0.15,
+            groupsCount: 2,
+          },
+          activePathId: path.id,
+          completedSteps: [],
+        });
+      }
+      if (!project?.id || project.id === 'demo-1') {
+        setStartError(language === 'ar'
+          ? 'تعذر إنشاء مشروع على الخادم. تحقق من تسجيل الدخول ثم أعد المحاولة.'
+          : 'Could not create a server project. Sign in and try again.');
+        return;
+      }
 
-    await updateProjectWorkflowProfile(activeProject.id, {
-      activePathId: path.id,
-      completedSteps: activeProject.completedSteps || []
-    });
+      await updateProjectWorkflowProfile(project.id, {
+        activePathId: path.id,
+        completedSteps: project.completedSteps || []
+      });
 
-    const orgId = activeProject.organizationId || 'personal';
-    
-    if (path.id === 'COMPLETED_STUDY_ANALYSIS') {
-      navigate(VIEW_TO_PATH.researchData);
-    } else if (path.id === 'NEW_STUDY_DESIGN') {
-      navigate(`/organizations/${orgId}/projects/${activeProject.id}/paths/new-study-design`);
-    } else if (path.id === 'SEMINAR_PROPOSAL_REVIEW') {
-      navigate(`/organizations/${orgId}/projects/${activeProject.id}/paths/seminar-proposal`);
-    } else if (path.id === 'THESIS_DEFENSE_PREPARATION') {
-      navigate(`/organizations/${orgId}/projects/${activeProject.id}/paths/thesis-defense`);
-    } else {
-      // Find first uncompleted step and navigate to it
-      const nextStep = getFirstUncompletedStep(path);
-      navigate(VIEW_TO_PATH[nextStep] ?? '/');
+      const orgId = project.organizationId || 'personal';
+      if (path.id === 'COMPLETED_STUDY_ANALYSIS') {
+        navigate(VIEW_TO_PATH.researchData);
+      } else if (path.id === 'NEW_STUDY_DESIGN') {
+        navigate(ROUTES.NEW_STUDY_DESIGN.replace(':projectId', project.id));
+      } else if (path.id === 'SEMINAR_PROPOSAL_REVIEW') {
+        navigate(`/organizations/${orgId}/projects/${project.id}/paths/seminar-proposal`);
+      } else if (path.id === 'THESIS_DEFENSE_PREPARATION') {
+        navigate(`/organizations/${orgId}/projects/${project.id}/paths/thesis-defense`);
+      } else {
+        const nextStep = getFirstUncompletedStep(path);
+        navigate(getStepPath(nextStep, project.id) || ROUTES.LIFECYCLE);
+      }
+    } catch (error) {
+      if (isPlanLimitError(error)) {
+        setPlanLimitHit(true);
+        setStartError('');
+      } else {
+        setStartError(language === 'ar' ? 'تعذر بدء المسار.' : 'Could not start the path.');
+      }
+    } finally {
+      setStarting(false);
     }
   };
 
@@ -441,20 +509,25 @@ export const ResearchPathSelector: React.FC = () => {
               {/* Action Buttons */}
               <div className="pt-4 border-t border-[var(--ds-border-subtle)] space-y-2">
                 {!activeProject && (
-                  <p className="text-[10px] text-[var(--ds-warning)] font-bold m-0 text-center">
+                  <p className="text-[10px] text-[var(--ds-text-secondary)] font-bold m-0 text-center">
                     {language === 'ar'
-                      ? 'اختر أو أنشئ مشروعًا نشطًا لاعتماد هذا المسار.'
-                      : 'Select or create an active project to adopt this path.'}
+                      ? 'لا يوجد مشروع بعد؛ سيُنشأ مشروع على الخادم عند اعتماد المسار.'
+                      : 'No project yet; adopting this path will create a server-saved project.'}
                   </p>
                 )}
+                {planLimitHit && <PlanLimitNotice language={language} />}
+                {startError && <p className="text-[10px] text-[var(--ds-danger)] font-bold m-0 text-center" role="alert">{startError}</p>}
                 <Button
                   onClick={() => handleStartPath(selectedPath)}
                   variant="primary"
                   className="w-full flex items-center justify-center gap-1.5 font-bold cursor-pointer"
-                  disabled={!selectedPath.available || !activeProject}
+                  disabled={!selectedPath.available || starting}
+                  loading={starting}
                 >
                   <span>
-                    {activeProject?.activePathId === selectedPath.id 
+                    {starting
+                      ? (language === 'ar' ? 'جارٍ إنشاء المشروع...' : 'Creating project...')
+                      : activeProject?.activePathId === selectedPath.id 
                       ? (language === 'ar' ? '\u0627\u0633\u062a\u0626\u0646\u0627\u0641 \u062e\u0637\u0648\u0627\u062a \u0627\u0644\u0645\u0633\u0627\u0631' : 'Resume Research Path')
                       : (language === 'ar' ? '\u0627\u0639\u062a\u0645\u0627\u062f \u0648\u0628\u062f\u0621 \u0627\u0644\u0645\u0633\u0627\u0631 \u0627\u0644\u0645\u0646\u0647\u062c\u064a' : 'Adopt & Start Path')}
                   </span>

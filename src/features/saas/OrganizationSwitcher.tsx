@@ -7,12 +7,15 @@ import {
   apiInviteMember, 
   apiListInvitations, 
   apiAcceptInvitation,
-  setApiActiveOrgId
+  setApiActiveOrgId,
+  isPlanLimitError,
 } from '../../utils/api';
+import { PlanLimitNotice } from '../../components/PlanLimitNotice';
 import { Building2, UserPlus, Send, CheckCircle, Mail, Plus, Shield, Users } from 'lucide-react';
 import { Card } from '../../design-system/components/Card';
 import { Button } from '../../design-system/components/Button';
 import { PathPanel } from '../../design-system/components/Navigation';
+import { useProject } from '../../context/ProjectContext';
 
 interface OrganizationSwitcherProps {
   language: 'ar' | 'en';
@@ -41,6 +44,9 @@ const buildHierarchy = (orgs: any[]): any[] => {
 };
 
 export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ language }) => {
+  const { user } = useProject();
+  const canInvite = Boolean(user?.permissions?.includes('members.invite'));
+  const canViewPii = Boolean(user?.permissions?.includes('members.view_pii'));
   const [organizations, setOrganizations] = useState<any[]>([]);
   const [activeOrg, setActiveOrg] = useState<any | null>(null);
   const [members, setMembers] = useState<any[]>([]);
@@ -50,7 +56,10 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
   const [newOrgName, setNewOrgName] = useState('');
   const [parentId, setParentId] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState('MEMBER');
+  const [inviteRole, setInviteRole] = useState('RESEARCHER');
+  const [inviteToken, setInviteToken] = useState('');
+  const [planLimitHit, setPlanLimitHit] = useState(false);
+  const [issuedToken, setIssuedToken] = useState('');
   
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -112,21 +121,33 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
     if (!inviteEmail.trim()) return;
     setError('');
     setMessage('');
+    setPlanLimitHit(false);
     
-    const invite = await apiInviteMember(inviteEmail, inviteRole);
-    if (invite) {
-      setMessage(language === 'ar' ? 'تم إرسال الدعوة بنجاح!' : 'Invitation sent successfully!');
-      setInviteEmail('');
-      loadData();
-    } else {
-      setError(language === 'ar' ? 'فشل إرسال الدعوة. يرجى التحقق من الصلاحيات أو الباقة.' : 'Failed to send invitation. Check plan limits.');
+    try {
+      const invite = await apiInviteMember(inviteEmail, inviteRole);
+      if (invite) {
+        setIssuedToken(invite.token || '');
+        setMessage(language === 'ar'
+          ? (invite.token ? `تم إنشاء الدعوة. سلّم الرمز للمستدعى: ${invite.token}` : 'تم إرسال الدعوة بنجاح!')
+          : (invite.token ? `Invitation created. Share this token: ${invite.token}` : 'Invitation sent successfully!'));
+        setInviteEmail('');
+        loadData();
+      } else {
+        setError(language === 'ar' ? 'فشل إرسال الدعوة. يرجى التحقق من الصلاحيات أو الباقة.' : 'Failed to send invitation. Check plan limits.');
+      }
+    } catch (error) {
+      if (isPlanLimitError(error)) {
+        setPlanLimitHit(true);
+      } else {
+        setError(language === 'ar' ? 'فشل إرسال الدعوة. يرجى التحقق من الصلاحيات أو الباقة.' : 'Failed to send invitation. Check plan limits.');
+      }
     }
   };
 
-  const handleAcceptInvite = async (inviteId: string) => {
+  const handleAcceptInvite = async (token: string) => {
     setError('');
     setMessage('');
-    const ok = await apiAcceptInvitation(inviteId);
+    const ok = await apiAcceptInvitation(token.trim());
     if (ok) {
       setMessage(language === 'ar' ? 'تم قبول الدعوة بنجاح!' : 'Invitation accepted successfully!');
       loadData();
@@ -184,6 +205,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
         </div>
       )}
 
+      {planLimitHit && <PlanLimitNotice language={language} />}
       {error && (
         <div className="p-3.5 border border-danger/20 bg-danger/5 text-danger rounded-2xl text-xs font-bold flex items-center gap-2">
           <Shield size={16} />
@@ -241,29 +263,45 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
             <Card className="p-6 border-[var(--ds-border-subtle)] rounded-2xl bg-[var(--ds-surface-primary)]">
               <h4 className="text-sm font-black mb-4 flex items-center gap-2">
                 <Mail size={18} className="text-path-identity" />
-                <span>{language === 'ar' ? 'الدعوات المعلقة' : 'Pending Invitations'}</span>
+                <span>{language === 'ar' ? 'دعوات صادرة معلّقة' : 'Outgoing pending invitations'}</span>
               </h4>
               <div className="space-y-3">
                 {invitations.map(invite => (
                   <div key={invite.id} className="p-3.5 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-2xl flex items-center justify-between gap-4">
                     <div>
-                      <div className="text-xs font-black">{invite.organization_name}</div>
+                      <div className="text-xs font-black">{invite.email}</div>
                       <div className="text-[10px] text-[var(--ds-text-muted)] font-semibold mt-1">
                         {language === 'ar' ? `الدور المقترح: ${invite.role}` : `Role: ${invite.role}`}
                       </div>
                     </div>
-                    <Button 
-                      variant="primary" 
-                      onClick={() => handleAcceptInvite(invite.id)}
-                      className="px-3.5 py-1.5 rounded-xl text-[10px] font-black"
-                    >
-                      {language === 'ar' ? 'قبول' : 'Accept'}
-                    </Button>
                   </div>
                 ))}
               </div>
             </Card>
           )}
+
+          <Card className="p-6 border-[var(--ds-border-subtle)] rounded-2xl bg-[var(--ds-surface-primary)]">
+            <h4 className="text-sm font-black mb-3">{language === 'ar' ? 'الانضمام برمز دعوة' : 'Join with invitation token'}</h4>
+            <form
+              className="flex flex-col sm:flex-row gap-3"
+              onSubmit={(e) => { e.preventDefault(); if (inviteToken.trim()) void handleAcceptInvite(inviteToken); }}
+            >
+              <input
+                value={inviteToken}
+                onChange={(e) => setInviteToken(e.target.value)}
+                placeholder={language === 'ar' ? 'الصق رمز الدعوة' : 'Paste invitation token'}
+                className="flex-1 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-2xl px-4 py-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
+              />
+              <Button type="submit" variant="primary" className="px-4 py-2 rounded-xl text-xs font-black">
+                {language === 'ar' ? 'قبول الدعوة' : 'Accept invitation'}
+              </Button>
+            </form>
+            {issuedToken && (
+              <p className="mt-3 m-0 text-[10px] font-bold text-[var(--ds-text-secondary)] break-all">
+                {language === 'ar' ? 'آخر رمز صادر:' : 'Last issued token:'} {issuedToken}
+              </p>
+            )}
+          </Card>
         </div>
 
         {/* Team Members List & Invitation Form */}
@@ -278,7 +316,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
                 <div key={member.id} className="p-3 bg-[var(--ds-surface-secondary)] rounded-2xl flex items-center justify-between gap-4 border border-[var(--ds-border-subtle)]">
                   <div>
                     <div className="text-xs font-black">{member.username}</div>
-                    <div className="text-[10px] text-[var(--ds-text-muted)] font-semibold mt-0.5">{member.email}</div>
+                    <div className="text-[10px] text-[var(--ds-text-muted)] font-semibold mt-0.5">{canViewPii ? member.email : '—'}</div>
                   </div>
                   <div className="px-3 py-1 rounded-full bg-[var(--ds-information-soft)] text-[var(--ds-information)] text-[10px] font-extrabold uppercase border border-info/20">
                     {member.role}
@@ -287,7 +325,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
               ))}
             </div>
 
-            {/* Invite team member form */}
+            {canInvite && (
             <div className="border-t border-[var(--ds-border-subtle)] pt-4">
               <h5 className="text-xs font-black mb-3 flex items-center gap-1.5 text-[var(--ds-text-secondary)]">
                 <UserPlus size={14} />
@@ -308,9 +346,12 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
                     onChange={(e) => setInviteRole(e.target.value)}
                     className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-2xl px-3 py-2 text-xs font-bold text-[var(--ds-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
                   >
-                    <option value="ADMIN">{language === 'ar' ? 'مشرف (Admin)' : 'Admin'}</option>
-                    <option value="MEMBER">{language === 'ar' ? 'باحث (Member)' : 'Member'}</option>
-                    <option value="VIEWER">{language === 'ar' ? 'مراقب (Viewer)' : 'Viewer'}</option>
+                    {user?.org_role === 'OWNER' && (
+                      <option value="ORGANIZATION_ADMIN">{language === 'ar' ? 'مدير المؤسسة' : 'Organization admin'}</option>
+                    )}
+                    <option value="SUPERVISOR">{language === 'ar' ? 'مشرف أكاديمي' : 'Supervisor'}</option>
+                    <option value="RESEARCHER">{language === 'ar' ? 'باحث' : 'Researcher'}</option>
+                    <option value="VIEWER">{language === 'ar' ? 'مراقب' : 'Viewer'}</option>
                   </select>
                 </div>
                 <Button type="submit" variant="primary" className="w-full py-2.5 rounded-2xl font-black justify-center flex items-center gap-1.5 shadow-md">
@@ -319,6 +360,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
                 </Button>
               </form>
             </div>
+            )}
           </Card>
         </div>
       </div>

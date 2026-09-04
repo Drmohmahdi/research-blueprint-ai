@@ -11,6 +11,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { EmptyState } from '../design-system/components/Feedback';
+import { EmptyActiveProject } from './EmptyActiveProject';
 import { dsChartAxisTick, dsChartTooltipItemStyle, dsChartTooltipStyle } from '../design-system/components/ChartPrimitives';
 import { 
   ResponsiveContainer, 
@@ -44,10 +45,10 @@ export const SimulationLab: React.FC = () => {
 
   if (!activeProject) {
     return (
-      <EmptyState
+      <EmptyActiveProject
+        language={language}
         illustration={<PlayCircle size={40} />}
-        title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No Active Project'}
-        description={language === 'ar' ? 'اختر مشروعًا نشطًا لتشغيل محاكاة المجموعات.' : 'Select an active project to run the group simulation.'}
+        description={language === 'ar' ? 'أنشئ مشروعًا من اختيار المسار لتشغيل محاكاة المجموعات.' : 'Create a project from path selection to run the group simulation.'}
       />
     );
   }

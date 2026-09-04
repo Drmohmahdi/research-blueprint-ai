@@ -3,7 +3,7 @@ import { useProject } from '../context/ProjectContext';
 import { AlertTriangle, CheckCircle2, Database } from 'lucide-react';
 import { apiInspectData } from '../utils/api';
 import { Button } from '../design-system/components/Button';
-import { EmptyState } from '../design-system/components/Feedback';
+import { EmptyActiveProject } from './EmptyActiveProject';
 import { PathPanel } from '../design-system/components/Navigation';
 
 export const DataInspector: React.FC = () => {
@@ -37,10 +37,10 @@ export const DataInspector: React.FC = () => {
 
   if (!activeProject) {
     return (
-      <EmptyState
+      <EmptyActiveProject
+        language={language}
         illustration={<Database size={40} />}
-        title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No active project'}
-        description={language === 'ar' ? 'اختر مشروعًا نشطًا لفحص جودة البيانات.' : 'Select an active project to inspect data quality.'}
+        description={language === 'ar' ? 'أنشئ مشروعًا من اختيار المسار لفحص جودة البيانات.' : 'Create a project from path selection to inspect data quality.'}
       />
     );
   }

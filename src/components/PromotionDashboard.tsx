@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
 import { Card } from '../design-system/components/Card';
 import { Button } from '../design-system/components/Button';
@@ -27,6 +28,10 @@ import {
   apiRemovePromotionEvidence,
   apiEvaluatePromotionApplication,
   apiSubmitPromotionApplication,
+  apiAssignPromotionCommittee,
+  apiReviewPromotionApplication,
+  apiListCommitteePromotionQueue,
+  apiListMembers,
   type PromotionPolicyData,
   type PromotionApplicationData,
   type PromotionEvaluationResultData,
@@ -36,6 +41,7 @@ import {
 export const PromotionDashboard: React.FC = () => {
   const { language } = useProject();
   const isAr = language === 'ar';
+  const location = useLocation();
 
   const [policies, setPolicies] = useState<PromotionPolicyData[]>([]);
   const [application, setApplication] = useState<PromotionApplicationData | null>(null);
@@ -48,18 +54,31 @@ export const PromotionDashboard: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedAssetId, setSelectedAssetId] = useState<string>('');
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+  const [members, setMembers] = useState<Array<{ user_id: string; username?: string; email?: string }>>([]);
+  const [committeeUserId, setCommitteeUserId] = useState('');
+  const [queue, setQueue] = useState<PromotionApplicationData[]>([]);
+  const [reviewNotes, setReviewNotes] = useState('');
+  const [reviewDecision, setReviewDecision] = useState('ELIGIBLE_RECOMMENDED');
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [fetchedPolicies, fetchedApp, fetchedAssets] = await Promise.all([
+      const [fetchedPolicies, fetchedApp, fetchedAssets, fetchedMembers, fetchedQueue] = await Promise.all([
         apiGetPromotionPolicies(),
         apiGetMyPromotionApplication(),
-        apiGetScholarlyAssets()
+        apiGetScholarlyAssets(),
+        apiListMembers(),
+        apiListCommitteePromotionQueue(),
       ]);
 
       setPolicies(fetchedPolicies);
       setScholarlyAssets(fetchedAssets);
+      setMembers((fetchedMembers || []).map((member: any) => ({
+        user_id: member.user_id,
+        username: member.username,
+        email: member.email,
+      })));
+      setQueue(fetchedQueue);
 
       if (fetchedApp) {
         setApplication(fetchedApp);
@@ -86,6 +105,11 @@ export const PromotionDashboard: React.FC = () => {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    if (!location.pathname.includes('/regulations') || isLoading) return;
+    document.getElementById('promotion-regulations')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [location.pathname, isLoading]);
 
   const handleRankSwitch = async (newRank: string) => {
     setTargetRank(newRank);
@@ -377,7 +401,7 @@ export const PromotionDashboard: React.FC = () => {
           </div>
 
           {/* Criteria Checklist from Rules Engine */}
-          <Card className="p-5 space-y-4">
+          <Card id="promotion-regulations" className="p-5 space-y-4">
             <div className="flex justify-between items-center border-b border-[var(--ds-border-subtle)] pb-2">
               <h3 className="text-xs font-black text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
                 <FileCheck className="text-warning" size={16} />
@@ -595,6 +619,64 @@ export const PromotionDashboard: React.FC = () => {
           )}
         </div>
       </div>
+
+      <Card className="p-5 space-y-4">
+        <h3 className="m-0 text-sm font-black">{isAr ? 'لجنة المراجعة البشرية' : 'Human review committee'}</h3>
+        <p className="m-0 text-xs text-[var(--ds-text-muted)]">{isAr ? 'تعيين اللجنة إجراء إداري. قرار الاستحقاق النهائي بشري ولا يُستبدل بدرجة الجاهزية.' : 'Committee assignment is administrative. The final eligibility decision remains human and is never replaced by the readiness score.'}</p>
+        {(application?.committee_assignments || []).filter(item => item.status === 'ACTIVE').map(item => (
+          <div key={item.id} className="rounded-xl bg-[var(--ds-surface-secondary)] p-3 text-xs font-bold">{item.user_id}</div>
+        ))}
+        {application && (
+          <form className="flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={async (event) => {
+            event.preventDefault();
+            if (!committeeUserId || !application) return;
+            const ok = await apiAssignPromotionCommittee(application.id, committeeUserId);
+            if (ok) {
+              setCommitteeUserId('');
+              await loadData();
+            }
+          }}>
+            <label className="block flex-1 text-xs font-bold">{isAr ? 'عضو المؤسسة' : 'Organization member'}
+              <select value={committeeUserId} onChange={e => setCommitteeUserId(e.target.value)} className="mt-2 w-full rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] p-2 text-xs">
+                <option value="">{isAr ? 'اختر عضوًا' : 'Select a member'}</option>
+                {members.map(member => (
+                  <option key={member.user_id} value={member.user_id}>{member.username || member.email} · {member.user_id}</option>
+                ))}
+              </select>
+            </label>
+            <Button type="submit" disabled={!committeeUserId}>{isAr ? 'تعيين في اللجنة' : 'Assign to committee'}</Button>
+          </form>
+        )}
+      </Card>
+
+      {queue.length > 0 && (
+        <Card className="p-5 space-y-4">
+          <h3 className="m-0 text-sm font-black">{isAr ? 'ملفات معيّنة لمراجعتك' : 'Dossiers assigned to you'}</h3>
+          {queue.map(item => (
+            <article key={item.id} className="rounded-xl border border-[var(--ds-border-subtle)] p-4 space-y-3">
+              <p className="m-0 text-sm font-bold">{item.target_rank} · {item.status}</p>
+              {(item.status === 'SUBMITTED' || item.status === 'UNDER_REVIEW') && (
+                <form className="space-y-2" onSubmit={async (event) => {
+                  event.preventDefault();
+                  const updated = await apiReviewPromotionApplication(item.id, reviewDecision, reviewNotes);
+                  if (updated) {
+                    setReviewNotes('');
+                    await loadData();
+                  }
+                }}>
+                  <select value={reviewDecision} onChange={e => setReviewDecision(e.target.value)} className="w-full rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] p-2 text-xs">
+                    <option value="ELIGIBLE_RECOMMENDED">{isAr ? 'موصى بالاستحقاق' : 'Eligible recommended'}</option>
+                    <option value="INELIGIBLE_DEFICIENT">{isAr ? 'غير مستوفٍ' : 'Ineligible / deficient'}</option>
+                    <option value="REQUIRES_FURTHER_DOCS">{isAr ? 'يطلب مستندات إضافية' : 'Requires further documents'}</option>
+                  </select>
+                  <textarea required value={reviewNotes} onChange={e => setReviewNotes(e.target.value)} rows={3} className="w-full rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] p-2 text-xs" placeholder={isAr ? 'ملاحظات اللجنة البشرية' : 'Human committee notes'} />
+                  <Button type="submit">{isAr ? 'تسجيل القرار البشري' : 'Record human decision'}</Button>
+                </form>
+              )}
+            </article>
+          ))}
+        </Card>
+      )}
     </div>
   );
 };

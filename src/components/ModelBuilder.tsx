@@ -3,7 +3,7 @@ import { useProject } from '../context/ProjectContext';
 import { Card } from '../design-system/components/Card';
 import { Button } from '../design-system/components/Button';
 import { PathPanel } from '../design-system/components/Navigation';
-import { EmptyState } from '../design-system/components/Feedback';
+import { EmptyActiveProject } from './EmptyActiveProject';
 import { Plus, Trash, ArrowRight, GitFork, Download } from 'lucide-react';
 
 interface Node {
@@ -71,10 +71,10 @@ export const ModelBuilder: React.FC = () => {
   // ── Early return AFTER all hooks ─────────────────────────────────────────
   if (!activeProject) {
     return (
-      <EmptyState
+      <EmptyActiveProject
+        language={language}
         illustration={<GitFork size={40} />}
-        title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No active project'}
-        description={language === 'ar' ? 'اختر مشروعًا نشطًا لبناء نموذج المتغيرات.' : 'Select an active project to build the variable model.'}
+        description={language === 'ar' ? 'أنشئ مشروعًا من اختيار المسار لبناء نموذج المتغيرات.' : 'Create a project from path selection to build the variable model.'}
       />
     );
   }

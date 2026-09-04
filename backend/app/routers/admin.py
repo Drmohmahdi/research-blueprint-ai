@@ -6,6 +6,7 @@ by the global admin role (SYSTEMADMIN/ADMIN/SUPERADMIN/DEVELOPER).
 """
 import datetime
 import json
+import secrets
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, ConfigDict
@@ -54,6 +55,32 @@ class SystemStatusResponse(BaseModel):
     payment_provider: str
     counts: Dict[str, int]
     recent_audit_count: int
+
+
+class UserAccountStatusUpdate(BaseModel):
+    account_status: str
+
+
+LEAD_STATUSES = {"NEW", "CONTACTED", "DEMO", "CLOSED"}
+
+
+class MarketingLeadOut(BaseModel):
+    id: str
+    name: str
+    email: str
+    organization: Optional[str] = None
+    intent: str
+    message: Optional[str] = None
+    source_path: Optional[str] = None
+    status: str
+    notes: Optional[str] = None
+    created_at: str
+    updated_at: str
+
+
+class MarketingLeadStatusUpdate(BaseModel):
+    status: str
+    notes: Optional[str] = None
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -237,3 +264,107 @@ def get_system_status(
         counts=counts,
         recent_audit_count=recent_audit,
     )
+
+
+@router.patch("/users/{user_id}/status")
+def update_user_account_status(
+    user_id: str,
+    body: UserAccountStatusUpdate,
+    db: Session = Depends(get_db),
+    context: TenantContext = Depends(get_tenant_context),
+):
+    """Platform-wide enable/disable. Does not grant the operator access to the
+    target user's academic data — it only controls whether they can authenticate."""
+    _require_global_admin(context)
+    next_status = (body.account_status or "").upper()
+    if next_status not in {"ACTIVE", "DISABLED"}:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="account_status must be ACTIVE or DISABLED")
+    if user_id == context.user.id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You cannot change your own account status")
+
+    target = db.query(models.User).filter(models.User.id == user_id).first()
+    if not target:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    previous = getattr(target, "account_status", None) or "ACTIVE"
+    target.account_status = next_status
+    revoked = 0
+    if next_status == "DISABLED":
+        revoked = db.query(models.UserSession).filter(models.UserSession.userId == user_id).delete()
+
+    now = datetime.datetime.now(datetime.UTC).isoformat()
+    db.add(models.AuditLog(
+        id=secrets.token_hex(8),
+        userId=context.user.id,
+        organizationId=context.organization.id,
+        action="UPDATE_ACCOUNT_STATUS",
+        details=f"user={user_id} {previous}->{next_status} sessions_revoked={revoked}",
+        before_json={"account_status": previous},
+        after_json={"account_status": next_status},
+        timestamp=now,
+    ))
+    db.commit()
+    return {"ok": True, "user_id": user_id, "account_status": next_status, "sessions_revoked": revoked}
+
+
+def _lead_out(row: models.MarketingLead) -> MarketingLeadOut:
+    return MarketingLeadOut(
+        id=row.id,
+        name=row.name,
+        email=row.email,
+        organization=row.organization,
+        intent=row.intent,
+        message=row.message,
+        source_path=row.source_path,
+        status=row.status,
+        notes=row.notes,
+        created_at=row.created_at,
+        updated_at=row.updated_at,
+    )
+
+
+@router.get("/leads", response_model=List[MarketingLeadOut])
+def list_marketing_leads(
+    db: Session = Depends(get_db),
+    context: TenantContext = Depends(get_tenant_context),
+):
+    _require_global_admin(context)
+    rows = (
+        db.query(models.MarketingLead)
+        .order_by(models.MarketingLead.created_at.desc())
+        .limit(200)
+        .all()
+    )
+    return [_lead_out(row) for row in rows]
+
+
+@router.patch("/leads/{lead_id}", response_model=MarketingLeadOut)
+def update_marketing_lead(
+    lead_id: str,
+    body: MarketingLeadStatusUpdate,
+    db: Session = Depends(get_db),
+    context: TenantContext = Depends(get_tenant_context),
+):
+    _require_global_admin(context)
+    next_status = (body.status or "").upper()
+    if next_status not in LEAD_STATUSES:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid lead status")
+    row = db.query(models.MarketingLead).filter(models.MarketingLead.id == lead_id).first()
+    if not row:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found")
+    from ..services.sanitization import sanitize_text
+    previous = row.status
+    row.status = next_status
+    if body.notes is not None:
+        row.notes = sanitize_text(body.notes).strip()[:2000] or None
+    row.updated_at = datetime.datetime.now(datetime.UTC).isoformat()
+    db.add(models.AuditLog(
+        id=secrets.token_hex(8),
+        userId=context.user.id,
+        action="MARKETING_LEAD_STATUS",
+        details=f"lead={lead_id} {previous}->{next_status}",
+        timestamp=row.updated_at,
+    ))
+    db.commit()
+    db.refresh(row)
+    return _lead_out(row)

@@ -142,6 +142,27 @@ def test_production_owner_cannot_self_activate_paid_plan(monkeypatch):
         db.close()
 
 
+def test_production_owner_cannot_self_activate_via_legacy_subscribe(monkeypatch):
+    db = SessionLocal()
+    try:
+        owner, org = create_test_tenant(db, "legacy_subscribe_bypass", role="OWNER")
+        headers = get_auth_headers(owner.username, org.id)
+        before = ensure_organization_subscription(db, org.id)
+        original_plan_id = before.plan_id
+        monkeypatch.setattr(settings, "ENVIRONMENT", "production")
+        response = client.post(
+            "/api/organizations/billing/subscribe",
+            json={"plan_code": "PROFESSIONAL"},
+            headers=headers,
+        )
+        assert response.status_code == 409
+        db.expire_all()
+        after = ensure_organization_subscription(db, org.id)
+        assert after.plan_id == original_plan_id
+    finally:
+        db.close()
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 1. Money Precision & Arithmetic Tests
 # ─────────────────────────────────────────────────────────────────────────────
@@ -182,7 +203,7 @@ def test_client_price_tampering_blocked():
     calculates prices and invoices.
     """
     db = SessionLocal()
-    user, org = create_test_tenant(db, "usr_bill_tamper", "ORGANIZATION_ADMIN")
+    user, org = create_test_tenant(db, "usr_bill_tamper", "OWNER")
     username = user.username
     org_id = org.id
     db.close()
@@ -265,7 +286,7 @@ def test_upgrade_plan_unlocks_premium_entitlements():
     Verifies that upgrading to STARTER or PROFESSIONAL plan immediately unlocks DOCX export.
     """
     db = SessionLocal()
-    user, org = create_test_tenant(db, "usr_bill_upg", "ORGANIZATION_ADMIN")
+    user, org = create_test_tenant(db, "usr_bill_upg", "OWNER")
     username = user.username
     org_id = org.id
 
@@ -515,22 +536,30 @@ def test_same_tenant_billing_rbac():
     Verifies that a regular RESEARCHER cannot perform administrative billing actions (403 Forbidden).
     """
     db = SessionLocal()
-    admin, org = create_test_tenant(db, "usr_rbac_adm", "ORGANIZATION_ADMIN")
+    admin, org = create_test_tenant(db, "usr_rbac_adm", "OWNER")
+    org_admin = add_tenant_member(db, org.id, "usr_rbac_oa", "ORGANIZATION_ADMIN")
     researcher = add_tenant_member(db, org.id, "usr_rbac_res", "RESEARCHER")
     username_res = researcher.username
     username_admin = admin.username
+    username_org_admin = org_admin.username
     org_id = org.id
     db.close()
 
     headers_res = get_auth_headers(username_res, org_id)
     headers_admin = get_auth_headers(username_admin, org_id)
+    headers_org_admin = get_auth_headers(username_org_admin, org_id)
 
-    # Canonical organization administrators are admitted to the administrative
-    # endpoint. In test mode this reaches the configured sandbox boundary.
+    # Workspace owners may initiate checkout. Organization admins may view
+    # billing but cannot mutate the subscription (least privilege / finance split).
     res_admin = client.post("/api/billing/checkout", json={
         "plan_code": "PROFESSIONAL"
     }, headers=headers_admin)
     assert res_admin.status_code != 403
+
+    res_oa = client.post("/api/billing/checkout", json={
+        "plan_code": "PROFESSIONAL"
+    }, headers=headers_org_admin)
+    assert res_oa.status_code == 403
 
     # 1. Researcher tries to initiate checkout -> 403
     res_co = client.post("/api/billing/checkout", json={

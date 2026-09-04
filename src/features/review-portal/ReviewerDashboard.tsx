@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useProject } from '../../context/ProjectContext';
+import { ROUTES } from '../../router/routes';
 import { Card } from '../../design-system/components/Card';
 import { Button } from '../../design-system/components/Button';
 import { PathPanel } from '../../design-system/components/Navigation';
@@ -30,6 +32,9 @@ import {
   apiSaveReviewDraft,
   apiSubmitCompletedReview,
   apiRecordEditorialDecision,
+  apiStartPeerReviewRound,
+  apiUploadManuscriptRevision,
+  apiAssignReviewerToRound,
   type ReviewerAssignmentData,
   type PeerReviewCaseData,
   type PeerReviewCaseSummaryData,
@@ -39,8 +44,20 @@ import {
 export const ReviewerDashboard: React.FC = () => {
   const { activeProject, language } = useProject();
   const isAr = language === 'ar';
+  const location = useLocation();
+  const navigate = useNavigate();
+  const tabFromPath = location.pathname.includes('/assignments') ? 'my_reviews' : 'editorial_cases';
 
-  const [activeTab, setActiveTab] = useState<'my_reviews' | 'editorial_cases' | 'instrument_referee'>('my_reviews');
+  const [activeTab, setActiveTab] = useState<'my_reviews' | 'editorial_cases' | 'instrument_referee'>(tabFromPath);
+
+  useEffect(() => {
+    setActiveTab(tabFromPath);
+  }, [tabFromPath]);
+
+  const openTab = (tab: 'my_reviews' | 'editorial_cases') => {
+    setActiveTab(tab);
+    navigate(tab === 'my_reviews' ? ROUTES.PEER_REVIEW_ASSIGNMENTS : ROUTES.PEER_REVIEW);
+  };
 
   // ── State for My Assignments ───────────────────────────────────────────────
   const [assignments, setAssignments] = useState<ReviewerAssignmentData[]>([]);
@@ -77,6 +94,8 @@ export const ReviewerDashboard: React.FC = () => {
   const [editorialNotes, setEditorialNotes] = useState('');
   const [editorialNotesError, setEditorialNotesError] = useState<string | null>(null);
   const editorialNotesRef = useRef<HTMLTextAreaElement>(null);
+  const [reviewerEmail, setReviewerEmail] = useState('');
+  const [revisionResponse, setRevisionResponse] = useState('');
 
   // ── Load My Review Assignments ─────────────────────────────────────────────
   const loadMyAssignments = useCallback(async () => {
@@ -335,7 +354,7 @@ export const ReviewerDashboard: React.FC = () => {
 
         <div className="flex bg-[var(--ds-surface-secondary)] p-1 rounded-xl border border-[var(--ds-border-subtle)]">
           <button
-            onClick={() => setActiveTab('my_reviews')}
+            onClick={() => openTab('my_reviews')}
             className={`px-4 py-2 text-xs font-semibold rounded-lg ds-transition ${
               activeTab === 'my_reviews'
                 ? 'bg-[var(--ds-primary-soft)] text-ink shadow-sm'
@@ -345,7 +364,7 @@ export const ReviewerDashboard: React.FC = () => {
             {isAr ? 'مهام التحكيم المسندة إليّ' : 'My Review Assignments'}
           </button>
           <button
-            onClick={() => setActiveTab('editorial_cases')}
+            onClick={() => openTab('editorial_cases')}
             className={`px-4 py-2 text-xs font-semibold rounded-lg ds-transition ${
               activeTab === 'editorial_cases'
                 ? 'bg-[var(--ds-primary-soft)] text-ink shadow-sm'
@@ -723,7 +742,7 @@ export const ReviewerDashboard: React.FC = () => {
                       role. An org member who is not this case's assigned
                       editor never sees a control the backend would reject. */}
                   {c.is_editor ? (
-                    <div className="flex gap-2 pt-2 border-t border-[var(--ds-border-subtle)]">
+                    <div className="flex flex-col gap-2 pt-2 border-t border-[var(--ds-border-subtle)]">
                       <Button
                         onClick={() => { setEditorialNotesError(null); setDecisionCaseId(c.id); }}
                         variant="secondary"
@@ -732,11 +751,60 @@ export const ReviewerDashboard: React.FC = () => {
                         <Award className="w-3.5 h-3.5" />
                         <span>{isAr ? 'تسجيل قرار هيئة التحرير' : 'Record Final Decision'}</span>
                       </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full text-xs"
+                        onClick={async () => {
+                          await apiStartPeerReviewRound(c.id);
+                          await loadEditorialCases();
+                        }}
+                      >
+                        {isAr ? 'بدء الجولة التالية' : 'Start next round'}
+                      </Button>
+                      <form className="space-y-2" onSubmit={async (event) => {
+                        event.preventDefault();
+                        const details = await apiGetPeerReviewCase(c.id);
+                        const round = details?.rounds?.find(r => r.status === 'ACTIVE') || details?.rounds?.at(-1);
+                        if (!round || !reviewerEmail.trim()) return;
+                        await apiAssignReviewerToRound(round.id, {
+                          reviewer_type: 'EXTERNAL_REVIEWER',
+                          external_email: reviewerEmail.trim(),
+                          external_name: reviewerEmail.trim(),
+                        });
+                        setReviewerEmail('');
+                        await loadEditorialCases();
+                      }}>
+                        <input
+                          type="email"
+                          required
+                          value={reviewerEmail}
+                          onChange={e => setReviewerEmail(e.target.value)}
+                          placeholder={isAr ? 'بريد المحكم الخارجي' : 'External reviewer email'}
+                          className="w-full rounded-xl border border-[var(--ds-border-default)] bg-[var(--ds-surface-secondary)] p-2 text-xs"
+                        />
+                        <Button type="submit" className="w-full text-xs">{isAr ? 'تعيين محكم' : 'Assign reviewer'}</Button>
+                      </form>
                     </div>
                   ) : (
-                    <div className="pt-2 border-t border-[var(--ds-border-subtle)] text-xs text-[var(--ds-text-muted)]">
-                      {isAr ? 'ملف تحكيم — للاطلاع فقط (بدون صلاحية تحريرية على هذا الملف)' : 'Review case — view only (no editorial authority on this case)'}
-                    </div>
+                    <form className="pt-2 border-t border-[var(--ds-border-subtle)] space-y-2" onSubmit={async (event) => {
+                      event.preventDefault();
+                      await apiUploadManuscriptRevision(c.id, {
+                        title_ar: c.title_ar,
+                        title_en: c.title_en,
+                        response_to_reviewers: revisionResponse,
+                      });
+                      setRevisionResponse('');
+                      await loadEditorialCases();
+                    }}>
+                      <textarea
+                        value={revisionResponse}
+                        onChange={e => setRevisionResponse(e.target.value)}
+                        rows={3}
+                        className="w-full rounded-xl border border-[var(--ds-border-default)] bg-[var(--ds-surface-secondary)] p-2 text-xs"
+                        placeholder={isAr ? 'رد المؤلف على المحكمين' : 'Author response to reviewers'}
+                      />
+                      <Button type="submit" variant="secondary" className="w-full text-xs">{isAr ? 'رفع نسخة معدّلة' : 'Upload revision'}</Button>
+                    </form>
                   )}
                 </Card>
               ))}

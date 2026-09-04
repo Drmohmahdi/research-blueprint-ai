@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { Card } from '../../design-system/components/Card';
 import { Button } from '../../design-system/components/Button';
-import { EmptyState } from '../../design-system/components/Feedback';
+import { EmptyActiveProject } from '../../components/EmptyActiveProject';
 import { PathPanel } from '../../design-system/components/Navigation';
 
 export const ThesisDefenseWorkspace: React.FC = () => {
@@ -31,10 +31,10 @@ export const ThesisDefenseWorkspace: React.FC = () => {
 
   if (!activeProject) {
     return (
-      <EmptyState
+      <EmptyActiveProject
+        language={language}
         illustration={<Unlock size={40} />}
-        title={language === 'ar' ? 'لا يوجد مشروع نشط' : 'No active project'}
-        description={language === 'ar' ? 'اختر مشروعًا نشطًا لفتح مسار إعداد المناقشة.' : 'Select an active project to open the thesis defense path.'}
+        description={language === 'ar' ? 'أنشئ مشروعًا من اختيار المسار لفتح مسار إعداد المناقشة.' : 'Create a project from path selection to open the thesis defense path.'}
       />
     );
   }
