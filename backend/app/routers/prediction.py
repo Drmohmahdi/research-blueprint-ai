@@ -1,12 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import uuid
 import datetime
 from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 
 from app.db import get_db
-from app.models import ResearchProject, User, PredictionRun, PredictionResult, PredictionScenario, HypothesisForecast, PredictionModel, PredictionModelVersion, PredictedObservedComparison, PredictionRecommendation
+from app.models import PredictionRun, PredictionResult, PredictionScenario, HypothesisForecast, PredictionModel, PredictionModelVersion, PredictedObservedComparison, PredictionRecommendation
 from app.services.tenant_context import get_tenant_context, TenantContext
 from app.services.research_design import project_access
 from app.services.prediction_service import (
@@ -14,15 +14,13 @@ from app.services.prediction_service import (
     run_pilot_forecast,
     run_dynamic_forecast,
     train_and_predict_historical,
-    calculate_prediction_quality_score,
     generate_scenarios_from_point_estimate,
     predict_attrition_forecast,
     predict_completion_forecast,
     predict_fidelity_forecast,
     predict_statistical_power_forecast,
     predict_methodological_risk_forecast,
-    predict_publication_readiness_forecast,
-    evaluate_predicted_vs_observed
+    predict_publication_readiness_forecast
 )
 
 router = APIRouter(prefix="/projects", tags=["Prediction Engine"])

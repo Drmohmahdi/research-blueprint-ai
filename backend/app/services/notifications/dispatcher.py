@@ -1,13 +1,10 @@
 import datetime
 import uuid
 import logging
-from typing import List, Optional
+from typing import Optional
 from sqlalchemy.orm import Session
 from ... import models
 from .events import (
-    WorkflowEventType,
-    AggregateType,
-    NotificationCategory,
     NotificationChannel,
     EventStatus,
     DeliveryStatus

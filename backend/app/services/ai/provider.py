@@ -6,10 +6,9 @@ provider SDK directly; they go through the AI service layer. A deterministic
 FakeAIProvider is used for tests and when no live provider is configured.
 """
 import json
-import re
 import time
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from ...config import settings
 

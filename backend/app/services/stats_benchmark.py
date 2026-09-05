@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import scipy.stats as stats
-from statsmodels.stats.power import TTestIndPower, TTestPower
+from statsmodels.stats.power import TTestIndPower
 from .stats_service import normal_cdf, normal_inverse, run_independent_t_test, calculate_power_sample_size
 
 def run_benchmarks():

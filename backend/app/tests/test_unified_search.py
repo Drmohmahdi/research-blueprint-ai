@@ -7,19 +7,14 @@ Golden dataset markers used throughout:
     SECRET_REVIEWER_NAME         — must never leak in author search
     CONFIDENTIAL_EDITOR_NOTE     — must never leak to non-editors
 """
-import io
 import json
 import time
-import threading
 import datetime
-import pytest
 from sqlalchemy.dialects import postgresql
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 
 from app.main import app
-from app.db import get_db
 from app import models
 from app.routers.auth import hash_password
 from app.services.billing.bootstrap import ensure_plans_and_pricing_seeded

@@ -6,7 +6,7 @@ import datetime
 
 from app.db import Base, get_db
 from app.main import app
-from app.models import User, Organization, OrganizationMembership, Plan, Subscription, ResearchProject
+from app.models import Plan
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test_hierarchy.db"
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})

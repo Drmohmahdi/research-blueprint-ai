@@ -114,7 +114,7 @@ export const Stepper: React.FC<StepperProps> = ({
             </button>
 
             {!isVertical && idx < steps.length - 1 && (
-              <ArrowIcon size={14} className="text-[var(--ds-text-disabled)] shrink-0 hidden sm:block" />
+              <ArrowIcon size={14} className="text-[var(--ds-text-muted)] shrink-0 hidden sm:block" />
             )}
           </React.Fragment>
         );
@@ -158,7 +158,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
             <span className="text-[var(--ds-text-primary)] font-extrabold">{item.label}</span>
           )}
           {idx < items.length - 1 && (
-            <ArrowIcon size={12} className="text-[var(--ds-text-disabled)]" />
+            <ArrowIcon size={12} className="text-[var(--ds-text-muted)]" />
           )}
         </React.Fragment>
       ))}

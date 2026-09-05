@@ -12,7 +12,7 @@ from .. import models
 from ..db import get_db
 from ..services.data_authz import (
     effective_access_level, grant_dataset_access, has_capability, list_dataset_grants,
-    require_capability, resolve_capabilities, revoke_dataset_access,
+    require_capability, revoke_dataset_access,
 )
 from ..services.research_data import ENGINE_VERSION, decide_test, fingerprint, frame_records, infer_variables, load_tabular, quality_scan, run_analysis, safe_csv_value
 from ..services.research_lifecycle import propagate_dataset_staleness

@@ -1,4 +1,3 @@
-import os
 import re
 import urllib.parse
 import datetime
@@ -7,11 +6,9 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Query, Form
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 
 from ..db import get_db
-from ..models import UploadedFile, ResearchProject, AuditLog
-from .. import models
+from ..models import UploadedFile, AuditLog
 from ..services.tenant_context import get_tenant_context, TenantContext, record_usage_event
 from ..services.storage import (
     get_storage_provider,

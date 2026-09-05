@@ -1,9 +1,8 @@
 import datetime
-import json
 import logging
 from sqlalchemy.orm import Session
 from ... import models
-from .types import PlanCode, BillingInterval, FeatureKey, LimitKey, DEFAULT_CURRENCY
+from .types import FeatureKey, DEFAULT_CURRENCY
 
 logger = logging.getLogger(__name__)
 

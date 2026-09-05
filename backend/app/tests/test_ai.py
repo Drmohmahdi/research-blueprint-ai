@@ -10,17 +10,14 @@ Golden markers:
 """
 import datetime
 import json
-import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 
 from app.main import app
-from app.db import get_db
 from app import models
 from app.routers.auth import hash_password
 from app.services.billing.bootstrap import ensure_plans_and_pricing_seeded
-from app.services.ai import GovernedAIService, FakeAIProvider, AIProviderFactory
+from app.services.ai import GovernedAIService, FakeAIProvider
 
 client = TestClient(app)
 

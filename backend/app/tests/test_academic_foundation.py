@@ -6,10 +6,9 @@ import app.models
 from app.db import Base, get_db
 from app.main import app
 from app.models import (
-    User, Organization, Plan, UnifiedAcademicProfile, ScholarlyAsset,
+    Plan, ScholarlyAsset,
     PublicationSubmission, PublicationJournal, PublicationManuscriptVersion
 )
-import json
 import uuid
 import datetime
 

@@ -1,12 +1,10 @@
 import os
 import hmac
 import hashlib
-import json
 import secrets
-import datetime
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional
-from .types import CheckoutSessionRequest, CheckoutSessionResponse, DEFAULT_CURRENCY
+from typing import Optional
+from .types import CheckoutSessionResponse, DEFAULT_CURRENCY
 
 
 class PaymentProviderAdapter(ABC):

@@ -5,7 +5,6 @@ Rule: Authorize -> Retrieve -> Build context. Context is always tenant-scoped
 and RBAC-checked BEFORE any provider call. Redaction happens before context
 leaves the backend. Retrieved/source content is marked as UNTRUSTED DATA.
 """
-import datetime
 import json
 from typing import Any, Dict, List, Optional
 

@@ -63,7 +63,7 @@ export const Input: React.FC<InputProps> = ({
           aria-describedby={(error || helperText) ? helpId : undefined}
           aria-busy={loading || undefined}
           required={props.required || requiredIndicator}
-          className={`w-full bg-[var(--ds-surface-primary)] border rounded-xl px-3.5 py-2.5 text-xs text-[var(--ds-text-primary)] placeholder-[var(--ds-text-disabled)] transition-all focus:outline-none focus-visible:ring-4 disabled:opacity-50 disabled:cursor-not-allowed ${prefixIcon ? 'pl-9' : ''} ${suffixIcon || loading ? 'pr-9' : ''} ${stateClass} ${className}`}
+          className={`w-full bg-[var(--ds-surface-primary)] border rounded-xl px-3.5 py-2.5 text-xs text-[var(--ds-text-primary)] placeholder-[var(--ds-text-muted)] transition-all focus:outline-none focus-visible:ring-4 disabled:opacity-50 disabled:cursor-not-allowed ${prefixIcon ? 'pl-9' : ''} ${suffixIcon || loading ? 'pr-9' : ''} ${stateClass} ${className}`}
           {...props}
         />
 
@@ -120,7 +120,7 @@ export const Textarea: React.FC<TextareaProps> = ({
         aria-describedby={(error || helperText) ? helpId : undefined}
         aria-busy={loading || undefined}
         required={props.required || requiredIndicator}
-        className={`w-full bg-[var(--ds-surface-primary)] border rounded-xl px-3.5 py-2.5 text-xs text-[var(--ds-text-primary)] placeholder-[var(--ds-text-disabled)] transition-all focus:outline-none focus-visible:ring-4 disabled:opacity-50 disabled:cursor-not-allowed ${stateClass} ${className}`}
+        className={`w-full bg-[var(--ds-surface-primary)] border rounded-xl px-3.5 py-2.5 text-xs text-[var(--ds-text-primary)] placeholder-[var(--ds-text-muted)] transition-all focus:outline-none focus-visible:ring-4 disabled:opacity-50 disabled:cursor-not-allowed ${stateClass} ${className}`}
         {...props}
       />
 

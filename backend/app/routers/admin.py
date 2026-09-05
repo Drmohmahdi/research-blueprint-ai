@@ -5,7 +5,6 @@ Persistent platform settings, feature flags, and system status — all guarded
 by the global admin role (SYSTEMADMIN/ADMIN/SUPERADMIN/DEVELOPER).
 """
 import datetime
-import json
 import secrets
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -13,11 +12,10 @@ from pydantic import BaseModel, ConfigDict
 from sqlalchemy import func, text
 from sqlalchemy.orm import Session
 
-from ..db import engine, get_db
+from ..db import get_db
 from .. import models
 from ..services.tenant_context import (
     get_tenant_context, TenantContext,
-    GLOBAL_ADMIN_ROLES,
 )
 
 router = APIRouter(prefix="/admin", tags=["Platform Administration"])

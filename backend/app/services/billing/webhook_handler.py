@@ -2,7 +2,7 @@ import json
 import logging
 import datetime
 import secrets
-from typing import Dict, Any, Tuple
+from typing import Dict, Any
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError

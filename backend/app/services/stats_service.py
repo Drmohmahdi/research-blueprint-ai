@@ -1,10 +1,9 @@
 import math
-import random
 import numpy as np
 import scipy.stats as stats
 from statsmodels.stats.power import TTestIndPower, TTestPower, FTestAnovaPower
 from typing import List, Dict, Any
-from ..schemas import SimulationParamsSchema, SimulationResponse
+from ..schemas import SimulationParamsSchema
 
 def normal_cdf(x: float) -> float:
     return float(stats.norm.cdf(x))

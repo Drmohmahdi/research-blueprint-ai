@@ -50,7 +50,7 @@ export const PredictorInputPanel: React.FC<PredictorInputPanelProps> = ({ engine
         ? 'border-[var(--ds-primary)] bg-[var(--ds-primary-soft)] text-ink'
         : 'border-[var(--ds-border-subtle)] hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)]'
     }`;
-  const activeDotClass = (active: boolean) => `w-2 h-2 rounded-full ${active ? 'bg-[var(--ds-primary)]' : 'bg-[var(--ds-text-disabled)]'}`;
+  const activeDotClass = (active: boolean) => `w-2 h-2 rounded-full ${active ? 'bg-[var(--ds-primary)]' : 'bg-[var(--ds-text-muted)]'}`;
   const readinessTone = loadingReadiness
     ? 'bg-[var(--ds-surface-secondary)] text-[var(--ds-text-muted)] border border-[var(--ds-border-subtle)]'
     : readiness?.isReady

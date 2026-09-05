@@ -12,8 +12,7 @@ Each domain provider implements:
   - project(row, context)          -> SearchResultItem
 """
 import math
-from typing import Any, Dict, List, Optional
-from fastapi import HTTPException, status
+from typing import List, Optional
 from sqlalchemy import and_, case, func, or_, select
 from sqlalchemy.orm import Session, joinedload
 

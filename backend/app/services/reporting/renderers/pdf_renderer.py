@@ -5,14 +5,12 @@ from bidi.algorithm import get_display
 
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
-from reportlab.lib.units import inch
 from reportlab.platypus import (
     SimpleDocTemplate,
     Paragraph,
     Spacer,
     Table,
     TableStyle,
-    KeepTogether,
     HRFlowable
 )
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle

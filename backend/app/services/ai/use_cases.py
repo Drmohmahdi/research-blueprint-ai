@@ -6,7 +6,7 @@ types, privacy level, output schema, and token limits. Prompt templates are
 versioned server-side. Clients can never supply system prompts, models, or
 provider parameters.
 """
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional
 

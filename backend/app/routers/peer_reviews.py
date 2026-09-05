@@ -1,7 +1,7 @@
 import datetime
 import hashlib
 import secrets
-from typing import List, Optional
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session

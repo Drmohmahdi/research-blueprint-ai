@@ -20,7 +20,7 @@ from app.db import SessionLocal
 from app.main import app
 from app.routers.auth import hash_password
 from app.services.publication_intelligence import (
-    canonical_doi, canonical_issn, reference_integrity, select_reporting_guidelines,
+    canonical_doi, canonical_issn, select_reporting_guidelines,
 )
 from app.services.research_data import fingerprint
 

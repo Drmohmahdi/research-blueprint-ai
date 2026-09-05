@@ -5,7 +5,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.db import Base, get_db
 from app.main import app
-from app.models import User, ResearchProject, UserSession
 from app.services.stats_service import (
     normal_cdf,
     normal_inverse,
@@ -13,7 +12,6 @@ from app.services.stats_service import (
     run_independent_t_test,
     inspect_uploaded_csv
 )
-from app.routers.auth import hash_password, verify_password
 
 # Setup temporary memory SQLite database for testing
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test_db.db"

@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.db import Base, get_db
 from app.main import app
-from app.models import User, ResearchProject, Organization, OrganizationMembership, Plan, Subscription
+from app.models import Plan
 
 # Setup temporary memory SQLite database for testing
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test_db.db"
@@ -27,7 +27,7 @@ def setup_db():
     Base.metadata.create_all(bind=engine)
     db = TestingSessionLocal()
     # Seed free and pro plans for testing limit enforcement
-    import json, datetime
+    import datetime
     now = datetime.datetime.now(datetime.UTC).isoformat()
     free_plan = Plan(
         id="pln-free",

@@ -1,30 +1,12 @@
 import math
 import numpy as np
 import scipy.stats as stats
-import statsmodels.api as sm
 from sklearn.linear_model import LinearRegression, ElasticNet, LogisticRegression
-from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, GradientBoostingRegressor, GradientBoostingClassifier
-from sklearn.metrics import mean_absolute_error, root_mean_squared_error, r2_score, roc_auc_score, precision_score, recall_score, f1_score
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from sklearn.metrics import mean_absolute_error, root_mean_squared_error, r2_score
 from sqlalchemy.orm import Session
-import uuid
-import datetime
 
 # Database references
-from app.models import (
-    PredictionModel,
-    PredictionModelVersion,
-    PredictionTrainingDataset,
-    PredictionFeature,
-    PredictionRun,
-    PredictionScenario,
-    PredictionResult,
-    HypothesisForecast,
-    StudentPrediction,
-    GroupPrediction,
-    ModelMetric,
-    PredictionExplanation,
-    PredictedObservedComparison
-)
 
 # ---------------------------------------------------------
 # Helper: Hastings Normal CDF & Box-Muller Inverse

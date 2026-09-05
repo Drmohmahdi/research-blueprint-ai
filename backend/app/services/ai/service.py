@@ -20,7 +20,6 @@ import time
 import uuid
 from typing import Any, Dict, List, Optional
 
-from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import text as sql_text
 
@@ -36,7 +35,7 @@ from .provider import (
     AIOutputInvalidError,
 )
 from .use_cases import get_prompt_template, get_all_use_cases
-from .context_builder import AcademicAIContextBuilder, AuthorizationError
+from .context_builder import AcademicAIContextBuilder
 
 # Hard technical limits (applied server-side regardless of plan)
 MAX_USER_INPUT_CHARS = 20000

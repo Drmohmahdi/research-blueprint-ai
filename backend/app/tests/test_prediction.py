@@ -4,11 +4,10 @@ from app.services.prediction_service import (
     run_pilot_forecast,
     run_dynamic_forecast,
     train_and_predict_historical,
-    calculate_prediction_quality_score,
-    generate_scenarios_from_point_estimate
+    calculate_prediction_quality_score
 )
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker
 
 def test_literature_forecast_bounds():
     """

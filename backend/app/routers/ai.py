@@ -5,17 +5,15 @@ Server-side controlled AI assistance. Clients may only send use_case + minimal
 task inputs; they can NEVER supply system_prompt, provider, model, or provider
 parameters. Entitlement (AI_ASSISTANCE) is enforced on every call.
 """
-from typing import Any, Dict, List, Optional
-import os
-import sys
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
 
 from ..db import get_db
 from .. import models, schemas
 from ..services.tenant_context import get_tenant_context, TenantContext
-from ..services.ai import GovernedAIService, AIServiceError, get_all_use_cases, AuthorizationError, ContextBuildError
+from ..services.ai import GovernedAIService, AIServiceError, AuthorizationError, ContextBuildError
 from ..services.billing import EntitlementService, FeatureKey
 from ..rate_limit import limiter
 

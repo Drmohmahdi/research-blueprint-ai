@@ -1,8 +1,5 @@
-import pytest
-from sqlalchemy import create_engine, MetaData
 from sqlalchemy.dialects import postgresql
 from app.db import Base
-from app.models import User, ResearchProject, ResearchVariable, ResearchQuestion, Hypothesis, SimulationJob
 
 def test_postgresql_schema_compilation():
     """

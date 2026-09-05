@@ -5,8 +5,7 @@ from sqlalchemy.orm import sessionmaker
 import app.models  # Import all models to ensure Base.metadata is populated
 from app.db import Base, get_db
 from app.main import app
-from app.models import User, ResearchProject, Organization, Plan, ProjectComment
-import json
+from app.models import Plan
 import datetime
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test_comments_db.db"

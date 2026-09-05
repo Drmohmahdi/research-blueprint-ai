@@ -6,16 +6,12 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.main import app
-from app.db import get_db
 from app import models
 from app.routers.auth import hash_password
 from app.services.billing.bootstrap import ensure_plans_and_pricing_seeded
 from app.services.storage import (
     FileValidationService,
-    LocalStorageProvider,
     StorageQuotaService,
-    MAX_FILE_SIZE_BYTES,
-    BLOCKED_EXTENSIONS,
     get_storage_provider,
 )
 
@@ -1319,8 +1315,6 @@ def test_storage_integrity_hash_matches_actual_bytes(db_session: Session):
 
 def test_upload_near_limit_boundary(monkeypatch):
     """Verifies boundary behavior at exactly limit-1, limit, and limit+1 bytes."""
-    from app import routers as routers_pkg
-    from app import services as services_pkg
     import app.services.storage as storage_service
     import app.routers.storage as storage_router
 

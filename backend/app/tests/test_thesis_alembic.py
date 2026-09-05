@@ -1,5 +1,4 @@
 """Fresh PostgreSQL Alembic upgrade, previous-head upgrade, and roundtrip."""
-import os
 from pathlib import Path
 
 import pytest

@@ -5,15 +5,12 @@ Tests use a mix of direct service calls (fast, precise) and TestClient API
 calls (E2E) with real auth, mirroring the research-design test pattern.
 """
 import datetime
-import io
 import json
-import math
 import uuid
 from types import SimpleNamespace
 
 import pandas as pd
 import pytest
-from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from scipy import stats
 
@@ -23,12 +20,10 @@ from app.main import app
 from app.routers.auth import hash_password
 from app.services import research_data as rd
 from app.services.data_authz import (
-    effective_access_level, grant_dataset_access, has_capability,
-    project_relationship, require_capability, resolve_capabilities,
-    revoke_dataset_access,
+    grant_dataset_access, resolve_capabilities,
 )
 from app.services.research_data import (
-    decide_test, fingerprint, frame_records, load_tabular, quality_scan,
+    decide_test, fingerprint, quality_scan,
     run_analysis, safe_csv_value,
 )
 

@@ -9,12 +9,11 @@ producing genuine multi-connection races rather than single-session simulation.
 import threading
 
 import pytest
-from sqlalchemy.exc import IntegrityError
 
 from app import models
 from app.db import engine
 from app.tests.test_publication_intelligence import (
-    client, create_manuscript_version, create_tenant, domain, login, stamp,
+    client, create_manuscript_version, stamp,
 )
 
 pytestmark = pytest.mark.skipif(engine.dialect.name != "postgresql", reason="PostgreSQL-only publication closure gate")

@@ -11,7 +11,7 @@ from app.main import app
 from app.db import Base, engine, SessionLocal
 from app.models import (
     User, Organization, OrganizationMembership, Plan, Subscription,
-    PlatformSetting, AuditLog
+    PlatformSetting
 )
 from app.routers.auth import hash_password
 from app.services.billing.bootstrap import ensure_plans_and_pricing_seeded

@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from .. import models
 from ..db import get_db
 from ..services.publication_intelligence import (
-    SECTION_STATES, canonical_doi, canonical_issn, create_version, match_journal,
+    canonical_doi, canonical_issn, create_version, match_journal,
     now, readiness, reference_integrity, select_reporting_guidelines,
     transition_submission, authorship_snapshot, authorship_complete, CREDIT_TAXONOMY,
 )

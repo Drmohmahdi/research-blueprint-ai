@@ -4,7 +4,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.db import Base, get_db
 from app.main import app
-from app.models import User, ResearchProject, Organization, OrganizationMembership, Plan, ProjectComment
 
 # Setup temporary memory SQLite database for testing
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test_db.db"

@@ -1,8 +1,7 @@
 import datetime
 import uuid
-import json
 import hashlib
-from fastapi import APIRouter, Depends, HTTPException, status, Header, Response, Cookie
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -11,7 +10,7 @@ from pydantic import BaseModel
 from ..db import get_db
 from .. import models, schemas
 from ..config import settings
-from ..services.tenant_context import get_tenant_context, TenantContext, record_usage_event, get_organization_family_ids
+from ..services.tenant_context import get_tenant_context, TenantContext, get_organization_family_ids
 from ..services.rbac import (
     PERM_AUDIT_VIEW,
     PERM_BILLING_MANAGE,

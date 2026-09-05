@@ -10,22 +10,19 @@ import uuid
 from types import SimpleNamespace
 
 import pytest
-from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app import models
-from app.db import Base, get_db
+from app.db import Base
 from app.main import app
 from app.services import research_design as rd
 from app.services.research_design import (
-    _analysis_family_for_intent, _analysis_intent, _coherence_finding, _detect_causal_claims,
-    _detect_design_conflicts, _gate, _question_type, _registry_map, as_list,
+    _analysis_intent, _coherence_finding, _question_type, as_list,
     add_project_member, can_edit_section, check_protocol_staleness, compute_coherence,
     compute_design_map, compute_next_action, compute_readiness, create_protocol,
-    get_or_create_design_state, list_project_members, protocol_snapshot,
-    recommend_methodology, remove_project_member, save_design_section,
+    get_or_create_design_state, list_project_members, recommend_methodology, save_design_section,
 )
 
 # ── DB setup ─────────────────────────────────────────────────────────────────

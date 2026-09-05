@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime, timezone
 
 from ..db import get_db
-from ..models import ProjectComment, ResearchProject
+from ..models import ProjectComment
 from ..services.tenant_context import get_tenant_context, TenantContext
 from ..services.sanitization import sanitize_text
 from ..services.research_design import project_access, member_relationship

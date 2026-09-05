@@ -9,10 +9,8 @@ Security model:
   - Query length, page size, and page count are bounded.
 """
 import json
-import os
-import sys
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
 from ..db import get_db

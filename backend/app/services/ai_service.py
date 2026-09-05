@@ -2,7 +2,6 @@ import logging
 import re
 import json
 from google import genai
-from google.genai import types as genai_types
 from ..config import settings
 from ..observability import log_event
 from ..schemas import TitleAnalysisResponse

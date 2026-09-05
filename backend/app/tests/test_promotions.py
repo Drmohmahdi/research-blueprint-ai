@@ -5,16 +5,10 @@ from app.main import app
 from app.db import Base, engine, SessionLocal
 from app.models import (
     User, Organization, OrganizationMembership, Plan, Subscription,
-    ScholarlyAsset, ScholarlyAssetContributor,
-    PromotionPolicy, PromotionCriterion, PromotionApplication,
-    PromotionAssetSelection, PromotionEvaluationSnapshot, PromotionCommitteeAssignment, AuditLog
+    ScholarlyAsset, PromotionApplication,
+    PromotionAssetSelection, PromotionCommitteeAssignment
 )
 from app.routers.auth import hash_password
-from app.services.promotion_evaluator import (
-    evaluate_promotion_application,
-    compute_evidence_points,
-    generate_evaluation_fingerprint
-)
 
 client = TestClient(app)
 

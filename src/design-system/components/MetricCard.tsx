@@ -33,7 +33,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
             <span className="text-xs font-semibold text-[var(--ds-text-secondary)]">{label}</span>
             {tooltipText && (
               <div className="relative group cursor-help">
-                <HelpCircle size={13} className="text-[var(--ds-text-disabled)]" />
+                <HelpCircle size={13} className="text-[var(--ds-text-muted)]" />
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block z-50 bg-[var(--ds-navy)] text-white text-[10px] p-2 rounded-xl border border-white/10 leading-normal">
                   {tooltipText}
                 </div>

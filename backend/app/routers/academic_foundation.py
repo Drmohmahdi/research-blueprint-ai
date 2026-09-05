@@ -1,8 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Header
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional
-import os
 import uuid
 import datetime
 
@@ -15,8 +14,6 @@ from ..models import (
 from ..schemas import (
     UnifiedAcademicProfileResponse, UnifiedAcademicProfileUpsert,
     ScholarlyAssetResponse, ScholarlyAssetCreate,
-    IdentifierSchema, AffiliationSchema,
-    ScholarlyAssetContributorSchema, ScholarlyAssetFileSchema,
     PublicProfileResponse, PublicScholarlyAssetResponse
 )
 from ..services.tenant_context import get_tenant_context, TenantContext
