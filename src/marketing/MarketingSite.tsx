@@ -548,7 +548,7 @@ export const MarketingSite: React.FC = () => {
             <div className="absolute top-[30%] -left-[15%] w-[40vw] h-[40vw] rounded-full bg-[var(--ds-aurora-gold)] blur-[120px]" />
           </div>
           <div className="relative max-w-5xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--ds-accent-gold)]/25 bg-[var(--ds-accent-gold-soft)] text-[var(--ds-accent-gold)] text-[10px] font-black mb-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--ds-accent-gold)]/25 bg-[var(--ds-accent-gold-soft)] text-[var(--ds-accent-gold-text)] text-[10px] font-black mb-6">
               <Sparkles size={12} />
               <span>{isAr ? 'منصة سعودية لدورة البحث العلمي — ليست مولّد أوراق' : 'Saudi research-operations platform — not a paper generator'}</span>
             </div>
@@ -591,7 +591,7 @@ export const MarketingSite: React.FC = () => {
                 { value: isAr ? 'عزل مؤسسي' : 'Isolated', labelAr: 'بيانات كل جهة منفصلة', labelEn: 'Per-institution tenancy' },
               ].map((item) => (
                 <div key={item.value} className="rounded-2xl border border-[var(--ds-border-subtle)] bg-white/[0.03] p-4">
-                  <div className="text-sm font-black text-[var(--ds-accent-gold)]">{item.value}</div>
+                  <div className="text-sm font-black text-[var(--ds-accent-gold-text)]">{item.value}</div>
                   <div className="text-[10px] font-bold text-[var(--ds-text-muted)] mt-1">{isAr ? item.labelAr : item.labelEn}</div>
                 </div>
               ))}
@@ -603,7 +603,7 @@ export const MarketingSite: React.FC = () => {
       {!showHome && (
         <section className="relative pt-32 pb-10 px-4 sm:px-6">
           <div className="max-w-4xl mx-auto text-center">
-            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold)] m-0">
+            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold-text)] m-0">
               {page === '/institutional'
                 ? (isAr ? 'للجامعات' : 'Universities')
                 : NAV.find((item) => item.to === page)
@@ -689,7 +689,7 @@ export const MarketingSite: React.FC = () => {
           <div className="max-w-7xl mx-auto">
             {showHome && (
               <div className="text-center mb-12">
-                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold)]">{isAr ? 'لمن؟' : 'Who it is for'}</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold-text)]">{isAr ? 'لمن؟' : 'Who it is for'}</span>
                 <h2 className="text-h2 mt-2 m-0">{isAr ? 'حل واحد، مسارات حسب الدور' : 'One platform, role-based paths'}</h2>
               </div>
             )}
@@ -714,7 +714,7 @@ export const MarketingSite: React.FC = () => {
           <div className="max-w-7xl mx-auto">
             {showHome && (
               <div className="text-center mb-12">
-                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold)]">{isAr ? 'المميزات' : 'Features'}</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold-text)]">{isAr ? 'المميزات' : 'Features'}</span>
                 <h2 className="text-h2 mt-2 m-0">{isAr ? 'ماذا يُحل داخل المنصة' : 'What gets solved in-product'}</h2>
               </div>
             )}
@@ -736,7 +736,7 @@ export const MarketingSite: React.FC = () => {
           <div className="max-w-6xl mx-auto">
             {showHome && (
               <div className="text-center mb-12">
-                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold)]">{isAr ? 'كيف تعمل' : 'How it works'}</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold-text)]">{isAr ? 'كيف تعمل' : 'How it works'}</span>
                 <h2 className="text-h2 mt-2 m-0">{isAr ? 'أربع خطوات بعد التسجيل' : 'Four steps after signup'}</h2>
               </div>
             )}
@@ -744,7 +744,7 @@ export const MarketingSite: React.FC = () => {
               {STEPS.map((step) => (
                 <div key={step.step} className="relative rounded-3xl border border-[var(--ds-border-subtle)] bg-white/[0.03] p-6">
                   <div className="absolute top-4 end-4 text-3xl font-black text-white/5">{step.step}</div>
-                  <div className="h-10 w-10 rounded-xl bg-[var(--ds-accent-gold-soft)] text-[var(--ds-accent-gold)] flex items-center justify-center mb-4">{step.icon}</div>
+                  <div className="h-10 w-10 rounded-xl bg-[var(--ds-accent-gold-soft)] text-[var(--ds-accent-gold-text)] flex items-center justify-center mb-4">{step.icon}</div>
                   <h3 className="text-h3 m-0">{isAr ? step.titleAr : step.titleEn}</h3>
                   <p className="text-caption text-[var(--ds-text-muted)] font-medium mt-2">{isAr ? step.descAr : step.descEn}</p>
                 </div>
@@ -760,7 +760,7 @@ export const MarketingSite: React.FC = () => {
             <div className="text-center mb-10">
               {showHome && (
                 <>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold)]">{isAr ? 'الباقات' : 'Pricing'}</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold-text)]">{isAr ? 'الباقات' : 'Pricing'}</span>
                   <h2 className="text-h2 mt-2 m-0">{isAr ? 'ابدأ مجانًا. ادفع عندما يكبر الفريق.' : 'Start free. Pay when the team grows.'}</h2>
                 </>
               )}
@@ -849,7 +849,7 @@ export const MarketingSite: React.FC = () => {
           <div className="max-w-3xl mx-auto">
             {showHome && (
               <div className="text-center mb-10">
-                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold)]">{isAr ? 'الأسئلة الشائعة' : 'FAQ'}</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold-text)]">{isAr ? 'الأسئلة الشائعة' : 'FAQ'}</span>
                 <h2 className="text-h2 mt-2 m-0">{isAr ? 'قبل أن تنشئ الحساب' : 'Before you create an account'}</h2>
               </div>
             )}
@@ -863,7 +863,7 @@ export const MarketingSite: React.FC = () => {
                     aria-expanded={openFaq === index}
                   >
                     <span>{isAr ? item.qAr : item.qEn}</span>
-                    <ChevronDown size={14} className={`text-[var(--ds-accent-gold)] ds-transition ${openFaq === index ? 'rotate-180' : ''}`} />
+                    <ChevronDown size={14} className={`text-[var(--ds-accent-gold-text)] ds-transition ${openFaq === index ? 'rotate-180' : ''}`} />
                   </button>
                   {openFaq === index && (
                     <div className="px-5 pb-4 text-xs text-[var(--ds-text-muted)] font-medium leading-relaxed">
@@ -883,7 +883,7 @@ export const MarketingSite: React.FC = () => {
             <div>
               {showHome && (
                 <>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold)]">{isAr ? 'الخطوة التالية' : 'Next step'}</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold-text)]">{isAr ? 'الخطوة التالية' : 'Next step'}</span>
                   <h2 className="text-h2 mt-2 m-0">{isAr ? 'باحث؟ ابدأ. جامعة؟ اطلب عرضًا.' : 'Researcher? Start. University? Book a demo.'}</h2>
                 </>
               )}
@@ -904,7 +904,7 @@ export const MarketingSite: React.FC = () => {
                   <div className="text-sm font-black text-[var(--ds-text-primary)] mt-1 break-all" dir="ltr">{CONTACT_EMAIL}</div>
                 </a>
                 <a href={`tel:${CONTACT_PHONE}`} className="rounded-3xl border border-[var(--ds-border-subtle)] bg-white/[0.03] p-5 no-underline">
-                  <Phone size={18} className="text-[var(--ds-accent-gold)] mb-2" />
+                  <Phone size={18} className="text-[var(--ds-accent-gold-text)] mb-2" />
                   <div className="text-[10px] font-bold text-[var(--ds-text-muted)]">{isAr ? 'الجوال' : 'Phone'}</div>
                   <div className="text-sm font-black text-[var(--ds-text-primary)] mt-1" dir="ltr">{CONTACT_PHONE}</div>
                 </a>

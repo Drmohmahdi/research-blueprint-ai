@@ -65,6 +65,10 @@
   --ds-accent-gold-hover: #A88646;
   --ds-accent-gold-bright: #D4B46A;
   --ds-accent-gold-soft: rgba(198, 161, 91, 0.14);
+  /* Darkened for use as TEXT on light surfaces: --ds-accent-gold itself is
+     ~2.4:1 on white/canvas, well under WCAG AA's 4.5:1 for normal text.
+     Same hue, darkened until it clears 4.5:1 with margin. */
+  --ds-accent-gold-text: #81642D;
   --ds-accent-gold-glow: rgba(198, 161, 91, 0.18);
 
   --ds-data-teal: #167D7F;
@@ -167,6 +171,9 @@
   --ds-accent-gold: #D4B46A;
   --ds-accent-gold-hover: #E4C98A;
   --ds-accent-gold-bright: #E4C98A;
+  /* Dark mode's base gold already clears 4.5:1 on dark surfaces, so no
+     separate darkened text variant is needed here — reuse it directly. */
+  --ds-accent-gold-text: #D4B46A;
   --ds-accent-gold-soft: rgba(212, 180, 106, 0.16);
   --ds-accent-gold-glow: rgba(212, 180, 106, 0.2);
 

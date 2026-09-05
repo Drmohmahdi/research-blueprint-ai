@@ -313,7 +313,7 @@ export const PortalGateway: React.FC = () => {
         <div className="relative space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="space-y-2 max-w-2xl">
-              <p className="m-0 text-[10px] font-bold uppercase tracking-widest text-[var(--ds-accent-gold)]">
+              <p className="m-0 text-[10px] font-bold uppercase tracking-widest text-[var(--ds-accent-gold-text)]">
                 {isAr ? 'مركز القيادة الأكاديمية' : 'Academic Command Center'}
               </p>
               <h2 className="text-h2 text-[var(--ds-text-primary)] m-0">

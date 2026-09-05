@@ -243,7 +243,7 @@ export const Login: React.FC = () => {
             aria-label={theme === 'dark' ? (language === 'ar' ? 'تفعيل الوضع الفاتح' : 'Use light theme') : (language === 'ar' ? 'تفعيل الوضع الداكن' : 'Use dark theme')}
             className="p-2 rounded-xl border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] ds-transition cursor-pointer shadow-sm"
           >
-            {theme === 'dark' ? <Sun size={14} className="text-[var(--ds-accent-gold)]" /> : <Moon size={14} className="text-[var(--ds-navy-elevated)]" />}
+            {theme === 'dark' ? <Sun size={14} className="text-[var(--ds-accent-gold-text)]" /> : <Moon size={14} className="text-[var(--ds-navy-elevated)]" />}
           </button>
         </div>
       </div>
@@ -258,7 +258,7 @@ export const Login: React.FC = () => {
             <span aria-hidden className="absolute inset-y-0 start-0 w-1 bg-[var(--ds-primary)]" />
             
             <div className="space-y-4 relative z-10 ps-2">
-              <span className="px-2.5 py-1 rounded-md text-[9px] font-black bg-[var(--ds-accent-gold-soft)] border border-[var(--ds-accent-gold)]/25 text-[var(--ds-accent-gold)] tracking-wider uppercase">
+              <span className="px-2.5 py-1 rounded-md text-[9px] font-black bg-[var(--ds-accent-gold-soft)] border border-[var(--ds-accent-gold)]/25 text-[var(--ds-accent-gold-text)] tracking-wider uppercase">
                 {language === 'ar' ? 'الجودة الأكاديمية السعودية' : 'Saudi Academic Premium'}
               </span>
               <h1 className="text-h1 text-ink m-0">
@@ -478,7 +478,7 @@ export const Login: React.FC = () => {
                   setErrorMsg('');
                   setSuccessMsg('');
                 }}
-                className="text-[var(--ds-primary-bright)] hover:text-[var(--ds-accent-gold)] hover:underline text-xs font-black bg-transparent border-none cursor-pointer"
+                className="text-[var(--ds-primary-bright)] hover:text-[var(--ds-accent-gold-text)] hover:underline text-xs font-black bg-transparent border-none cursor-pointer"
               >
                 {authMode === 'login'
                   ? (language === 'ar' ? 'لا تملك حساباً؟ أنشئ حساباً أكاديمياً الآن' : 'Do not have an account? Sign up')

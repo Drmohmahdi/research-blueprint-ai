@@ -165,7 +165,7 @@ export const DesignSystemShowcase: React.FC = () => {
               </div>
               <div className="p-3 rounded-xl border border-[var(--ds-border-subtle)] text-center bg-[var(--ds-surface-primary)] space-y-1">
                 <div className="h-8 w-full rounded bg-[var(--ds-accent-gold)]" />
-                <span className="text-[10px] font-bold block text-[var(--ds-accent-gold)]">Muted Warm Gold</span>
+                <span className="text-[10px] font-bold block text-[var(--ds-accent-gold-text)]">Muted Warm Gold</span>
               </div>
               <div className="p-3 rounded-xl border border-[var(--ds-border-subtle)] text-center bg-[var(--ds-surface-primary)] space-y-1">
                 <div className="h-8 w-full rounded bg-[var(--ds-data-teal)]" />

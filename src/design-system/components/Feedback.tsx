@@ -91,7 +91,7 @@ export const Alert: React.FC<AlertProps> = ({
     success: <CheckCircle2 size={16} className="text-[var(--ds-success)] shrink-0 mt-0.5" />,
     warning: <AlertTriangle size={16} className="text-[var(--ds-warning)] shrink-0 mt-0.5" />,
     danger: <XCircle size={16} className="text-[var(--ds-danger)] shrink-0 mt-0.5" />,
-    ethical: <AlertTriangle size={16} className="text-[var(--ds-accent-gold)] shrink-0 mt-0.5" />,
+    ethical: <AlertTriangle size={16} className="text-[var(--ds-accent-gold-text)] shrink-0 mt-0.5" />,
     'simulation-disclaimer': <FlaskConical size={16} className="text-[var(--ds-data-teal)] shrink-0 mt-0.5" />,
   };
 
