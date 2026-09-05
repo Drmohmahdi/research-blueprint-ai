@@ -180,3 +180,37 @@ def test_owner_retains_full_crud(tenants):
     assert r_put.status_code == 200
     r_delete = client.delete(f"/api/projects/{tenants['project_id']}", headers=tenants["headers_owner"])
     assert r_delete.status_code == 204
+
+
+def test_creating_a_project_after_deleting_one_does_not_collide_on_id():
+    """Regression: project IDs were once generated from a row COUNT
+    (proj-{count+1}). Deleting a project lowers the count while a
+    later-numbered row still exists, so the next create reused an ID
+    still in use and raised an uncaught IntegrityError (500) instead of
+    creating the project. IDs must stay unique across create/delete cycles."""
+    db = SessionLocal()
+    suffix = uuid.uuid4().hex[:6]
+    owner, org = create_tenant(db, f"idgen_owner_{suffix}", f"idgen-org-{suffix}", role="OWNER")
+    headers = get_auth_headers(owner.username, org.id)
+
+    body = {
+        "titleAr": "مشروع", "titleEn": "Project", "studyDesign": "quasi_experimental_pre_post",
+        "variables": [], "questions": [], "hypotheses": [],
+        "sampleSettings": {"confidenceLevel": 0.95, "marginOfError": 0.05},
+    }
+    created_ids = []
+    for _ in range(3):
+        res = client.post("/api/projects", json=body, headers=headers)
+        assert res.status_code == 200, res.text
+        created_ids.append(res.json()["id"])
+
+    # Delete the middle project, then create a new one — this is exactly the
+    # sequence that used to produce a colliding ID under count-based generation.
+    assert client.delete(f"/api/projects/{created_ids[1]}", headers=headers).status_code == 204
+
+    res_after_delete = client.post("/api/projects", json=body, headers=headers)
+    assert res_after_delete.status_code == 200, res_after_delete.text
+    new_id = res_after_delete.json()["id"]
+
+    assert new_id not in created_ids
+    db.close()

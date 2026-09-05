@@ -329,6 +329,45 @@ def test_same_tenant_horizontal_file_access(db_session: Session):
     assert "attachment" in res_admin.headers.get("Content-Disposition", "")
 
 
+def test_upload_to_project_requires_explicit_relationship_not_just_org_membership(db_session: Session):
+    """A same-org colleague with no ownership/membership relationship to a
+    specific project must not be able to attach files to it merely by knowing
+    its ID — organization membership alone is not project-level authority
+    (see storage.py upload_file, which must use project_access(), not a bare
+    organization-scoped project lookup)."""
+    t = create_test_tenant(db_session, "upload_scope", "pln-enterprise")
+    headers_owner_project = get_auth_headers(t["researcher"].username, t["org"].id)
+    headers_colleague = get_auth_headers(t["colleague"].username, t["org"].id)
+
+    project = models.ResearchProject(
+        id="proj-upload-scope-test",
+        userId=t["researcher"].id,
+        organizationId=t["org"].id,
+        titleAr="مشروع تجريبي", titleEn="Upload Scope Test Project",
+        studyDesign="quasi_experimental_pre_post", sampleSettings={}, version=1,
+    )
+    db_session.add(project)
+    db_session.commit()
+
+    # Colleague has an org membership but no relationship to this project -> 404
+    res_colleague = client.post(
+        "/api/storage/upload",
+        headers=headers_colleague,
+        data={"projectId": project.id, "classification": "INTERNAL"},
+        files={"file": ("scope_test.pdf", io.BytesIO(b"%PDF-1.4\n% scope\n%%EOF"), "application/pdf")}
+    )
+    assert res_colleague.status_code == 404
+
+    # The actual project owner can still upload to their own project
+    res_owner = client.post(
+        "/api/storage/upload",
+        headers=headers_owner_project,
+        data={"projectId": project.id, "classification": "INTERNAL"},
+        files={"file": ("scope_test_owner.pdf", io.BytesIO(b"%PDF-1.4\n% scope\n%%EOF"), "application/pdf")}
+    )
+    assert res_owner.status_code == 200
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 4. STORAGE QUOTA & ENTITLEMENT TESTS
 # ─────────────────────────────────────────────────────────────────────────────

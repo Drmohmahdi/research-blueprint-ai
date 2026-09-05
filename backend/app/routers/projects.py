@@ -158,8 +158,10 @@ def create_project(
     ).count()
     EntitlementService.require_limit(db, context.organization.id, "MAX_PROJECTS", project_count)
 
-    # Generate unique ID
-    project_id = f"proj-{int(db.query(models.ResearchProject).count() + 1)}"
+    # Generate unique ID. A count-based scheme (proj-{count+1}) collides with
+    # an existing row's ID as soon as any earlier project is deleted while a
+    # later-numbered one still exists, raising an uncaught IntegrityError.
+    project_id = f"proj-{secrets.token_hex(8)}"
     
     db_project = models.ResearchProject(
         id=project_id,

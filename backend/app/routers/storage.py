@@ -21,6 +21,7 @@ from ..services.storage import (
     StorageQuotaService,
     MAX_FILE_SIZE_BYTES
 )
+from ..services.research_design import project_access
 from .. import schemas
 
 router = APIRouter(prefix="/storage", tags=["storage"])
@@ -45,12 +46,9 @@ def upload_file(
     Performs server-side filename sanitization, magic bytes verification, MIME validation,
     storage quota checks, SHA-256 integrity calculation, and audit logging.
     """
-    # 1. Verify project ownership if project is specified
+    # 1. Verify the caller has an explicit relationship to the project, not just org membership
     if projectId:
-        proj = db.query(ResearchProject).filter(
-            ResearchProject.id == projectId,
-            ResearchProject.organizationId == context.organization.id
-        ).first()
+        proj = project_access(db, projectId, context)
         if not proj:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
