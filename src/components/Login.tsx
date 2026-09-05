@@ -308,7 +308,7 @@ export const Login: React.FC = () => {
               </svg>
             </div>
 
-            <div className="text-[10px] text-[var(--ds-text-muted)] font-bold border-t border-[var(--ds-border-subtle)] pt-4">
+            <div className="text-[10px] text-secondary font-bold border-t border-[var(--ds-border-subtle)] pt-4">
               {language === 'ar' ? 'منصة بصيرة © ٢٠٢٦ حقوق الطبع محفوظة.' : 'Baseerah © 2026. All rights reserved.'}
             </div>
           </div>

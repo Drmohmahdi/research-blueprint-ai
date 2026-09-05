@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from ..db import get_db
 from .. import models, schemas
-from ..services.tenant_context import get_tenant_context, TenantContext
+from ..services.tenant_context import get_tenant_context, TenantContext, verify_usage_limit
 from ..services.ai import GovernedAIService, AIServiceError, AuthorizationError, ContextBuildError
 from ..services.billing import EntitlementService, FeatureKey
 from ..rate_limit import limiter
@@ -64,6 +64,7 @@ def ai_assist(
     req: AIAssistRequest,
     db: Session = Depends(get_db),
     context: TenantContext = Depends(get_tenant_context),
+    _usage_gate: TenantContext = Depends(verify_usage_limit("AI_TOKENS", "ai_tokens_limit")),
 ):
     try:
         result = GovernedAIService.assist(

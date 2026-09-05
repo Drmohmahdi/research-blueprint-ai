@@ -7,7 +7,7 @@ from typing import List, Optional
 
 from app.db import get_db
 from app.models import PredictionRun, PredictionResult, PredictionScenario, HypothesisForecast, PredictionModel, PredictionModelVersion, PredictedObservedComparison, PredictionRecommendation
-from app.services.tenant_context import get_tenant_context, TenantContext
+from app.services.tenant_context import get_tenant_context, TenantContext, verify_usage_limit, record_usage_event
 from app.services.research_design import project_access
 from app.services.prediction_service import (
     run_literature_forecast,
@@ -223,7 +223,8 @@ def run_prediction(
     id: str,
     req: PredictionRunRequest,
     db: Session = Depends(get_db),
-    context: TenantContext = Depends(get_tenant_context)
+    context: TenantContext = Depends(get_tenant_context),
+    _usage_gate: TenantContext = Depends(verify_usage_limit("PREDICTION_RUNS", "prediction_runs_limit"))
 ):
     project = project_access(db, id, context)
     if not project:
@@ -421,9 +422,10 @@ def run_prediction(
                 probabilitySupported=prob_hyp
             )
             db.add(hf)
-            
+
     db.commit()
-    
+    record_usage_event(db, context.organization.id, context.user.id, "PREDICTION_RUNS", quantity=1.0)
+
     # Return run representation
     return get_prediction_run_details(run_id, id, db)
 

@@ -213,3 +213,42 @@ def test_cross_tenant_run_cannot_be_read_via_a_foreign_but_owned_project_id(tena
         headers=headers_other,
     )
     assert r_compare.status_code == 404
+
+
+def test_prediction_runs_plan_limit_enforced():
+    """prediction_runs_limit was defined on every plan but never enforced —
+    verify_usage_limit is now wired into run_prediction. A finite limit
+    already reached must actually block a further run."""
+    from app.services.billing.bootstrap import ensure_plans_and_pricing_seeded
+
+    db = SessionLocal()
+    suffix = uuid.uuid4().hex[:6]
+    ensure_plans_and_pricing_seeded(db)
+    owner, org = create_tenant(db, f"predquota_{suffix}", f"pred-quota-org-{suffix}", role="OWNER")
+    db.query(models.Subscription).filter(models.Subscription.organization_id == org.id).update(
+        {"plan_id": "pln-starter"}
+    )
+    db.commit()
+    owner_username, org_id = owner.username, org.id
+    db.close()
+
+    headers = get_auth_headers(owner_username, org_id)
+    project_id = _create_project(headers)
+
+    db2 = SessionLocal()
+    current_period = datetime.datetime.now(datetime.UTC).strftime("%Y-%m")
+    db2.add(models.UsageEvent(
+        id=f"use-predquota-{suffix}", organization_id=org_id, user_id=owner.id,
+        event_type="PREDICTION_RUNS", quantity=25.0, unit="count",  # pln-starter's prediction_runs_limit
+        occurred_at=datetime.datetime.now(datetime.UTC).isoformat(), billing_period=current_period,
+    ))
+    db2.commit()
+    db2.close()
+
+    res = client.post(
+        f"/api/projects/{project_id}/prediction/run",
+        json={"forecastMode": "LITERATURE_BASED_FORECAST", "studies": []},
+        headers=headers,
+    )
+    assert res.status_code == 403
+    assert "prediction_runs_limit" in res.json()["detail"]

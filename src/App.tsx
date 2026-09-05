@@ -6,6 +6,8 @@ import { Login } from './components/Login';
 import { AppRouter } from './router/AppRouter';
 import { PublicResearcherProfile } from './components/PublicResearcherProfile';
 import { MarketingSite } from './marketing/MarketingSite';
+import { TermsOfService } from './marketing/TermsOfService';
+import { PrivacyPolicy } from './marketing/PrivacyPolicy';
 
 const ExternalReviewerPortal = lazy(() => import('./features/review-portal/ExternalReviewerPortal').then(module => ({ default: module.ExternalReviewerPortal })));
 const ExternalThesisExaminerPortal = lazy(() => import('./features/thesis/ExternalThesisExaminerPortal'));
@@ -41,6 +43,8 @@ const AppContent: React.FC = () => {
       <Route path="/about" element={<MarketingSite />} />
       <Route path="/contact" element={<MarketingSite />} />
       <Route path="/institutional" element={<MarketingSite />} />
+      <Route path="/terms" element={<TermsOfService />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/login" element={user && !hasPasswordResetToken ? <Navigate to="/app" replace /> : <Login />} />
       <Route path="/researcher/:username" element={<PublicResearcherProfile />} />
       <Route

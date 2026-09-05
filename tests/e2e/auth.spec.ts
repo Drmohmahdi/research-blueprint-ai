@@ -21,7 +21,7 @@ test('@critical protected route, invalid login, valid login, and logout', async 
 });
 
 test('@a11y logged-out marketing home and login page have no serious axe violations', async ({ page }) => {
-  for (const path of ['/', '/login']) {
+  for (const path of ['/', '/login', '/terms', '/privacy']) {
     await page.goto(path);
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
     expect(results.violations.filter(item => item.impact === 'serious' || item.impact === 'critical'), JSON.stringify(results.violations, null, 2)).toEqual([]);

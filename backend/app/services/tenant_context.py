@@ -266,7 +266,7 @@ def verify_usage_limit(event_type: str, limit_key: str):
     def dependency(context: TenantContext = Depends(get_tenant_context), db: Session = Depends(get_db)):
         limits = context.limits
         max_val = limits.get(limit_key)
-        if max_val is None:
+        if max_val is None or max_val == -1:
             return context
 
         # Resolve family organization IDs (all children under subscription owner)

@@ -708,6 +708,39 @@ def test_ai_idempotency_no_duplicate_cost(db_session: Session):
     assert len(runs) == 1  # one billable AI run, not two
 
 
+def test_ai_tokens_plan_limit_enforced(db_session: Session):
+    """A plan with a finite ai_tokens_limit is actually enforced, not just
+    displayed. Regression: verify_usage_limit previously treated an
+    unlimited plan's -1 as a finite cap (0 >= -1 is true), blocking every
+    org on an unlimited plan; enterprise-plan tests catch that. This test
+    covers the opposite and equally important case — a plan with a real,
+    finite limit that has already been reached must actually block."""
+    _seed_plans(db_session)
+    t = create_test_tenant(db_session, "quota", "pln-starter")  # AI_ASSISTANCE=True, ai_tokens_limit=50000
+    headers = get_auth_headers(t["researcher"].username, t["org"].id)
+    current_period = datetime.datetime.now(datetime.UTC).strftime("%Y-%m")
+    db_session.add(models.UsageEvent(
+        id="use-quota-preexisting", organization_id=t["org"].id, user_id=t["researcher"].id,
+        event_type="AI_TOKENS", quantity=50000.0, unit="count",
+        occurred_at=datetime.datetime.now(datetime.UTC).isoformat(), billing_period=current_period,
+    ))
+    db_session.commit()
+
+    resp = client.post("/api/ai/assist", json={
+        "use_case": "ACADEMIC_WRITING_ASSIST", "text": "One more request over budget.",
+    }, headers=headers)
+    assert resp.status_code == 403
+    assert "ai_tokens_limit" in resp.json()["detail"]
+
+    # A sibling org on the same plan with no prior usage this period is unaffected.
+    t2 = create_test_tenant(db_session, "quota-fresh", "pln-starter")
+    headers2 = get_auth_headers(t2["researcher"].username, t2["org"].id)
+    resp2 = client.post("/api/ai/assist", json={
+        "use_case": "ACADEMIC_WRITING_ASSIST", "text": "First request, within budget.",
+    }, headers=headers2)
+    assert resp2.status_code == 200
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 10. RUNTIME SCENARIOS (spec §172–§183)
 # ─────────────────────────────────────────────────────────────────────────────

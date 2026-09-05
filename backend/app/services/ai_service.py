@@ -1,7 +1,9 @@
 import logging
 import re
 import json
+from typing import Optional
 from google import genai
+from sqlalchemy.orm import Session
 from ..config import settings
 from ..observability import log_event
 from ..schemas import TitleAnalysisResponse
@@ -125,7 +127,12 @@ def run_local_fallback_analyzer(title: str) -> TitleAnalysisResponse:
         isFallback=True
     )
 
-def analyze_research_title_ai(title: str) -> TitleAnalysisResponse:
+def analyze_research_title_ai(
+    title: str,
+    db: Optional[Session] = None,
+    org_id: Optional[str] = None,
+    user_id: Optional[str] = None,
+) -> TitleAnalysisResponse:
     # 1. Prompt Injection Sanitization
     cleaned_title = title.strip()
     injection_keywords = ["ignore", "instruction", "system prompt", "translate", "bypass", "delete", "drop", "select *", "you are now"]
@@ -172,14 +179,21 @@ def analyze_research_title_ai(title: str) -> TitleAnalysisResponse:
                 contents=prompt
             )
             text = response.text.strip()
-            
+
+            if db is not None and org_id is not None:
+                usage_md = getattr(response, "usage_metadata", None)
+                total_tokens = int(getattr(usage_md, "total_token_count", 0) or 0) if usage_md else 0
+                if total_tokens > 0:
+                    from .tenant_context import record_usage_event
+                    record_usage_event(db, org_id, user_id, "AI_TOKENS", quantity=float(total_tokens))
+
             # Clean any accidental markdown wrap
             if text.startswith("```"):
                 text = re.sub(r"^```(?:json)?\n", "", text)
                 text = re.sub(r"\n```$", "", text)
-                
+
             data = json.loads(text.strip())
-            
+
             # Validate required fields
             return TitleAnalysisResponse(
                 independentVariables=data.get("independentVariables", []),

@@ -935,8 +935,12 @@ export const MarketingSite: React.FC = () => {
             <Link to="/login" className="hover:text-[var(--ds-primary-bright)] no-underline text-inherit">{isAr ? 'دخول' : 'Login'}</Link>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto mt-6 pt-6 border-t border-[var(--ds-border-subtle)] text-center text-[10px] text-[var(--ds-text-muted)] font-semibold">
-          © {new Date().getFullYear()} {isAr ? 'بصيرة للبحث العلمي — جميع الحقوق محفوظة.' : 'Baseerah Academic Suite — All rights reserved.'}
+        <div className="max-w-7xl mx-auto mt-6 pt-6 border-t border-[var(--ds-border-subtle)] flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 text-center text-[10px] text-[var(--ds-text-muted)] font-semibold">
+          <span>© {new Date().getFullYear()} {isAr ? 'بصيرة للبحث العلمي — جميع الحقوق محفوظة.' : 'Baseerah Academic Suite — All rights reserved.'}</span>
+          <span className="flex items-center gap-3">
+            <Link to="/terms" className="hover:text-[var(--ds-primary-bright)] no-underline text-inherit">{isAr ? 'الشروط والأحكام' : 'Terms of Service'}</Link>
+            <Link to="/privacy" className="hover:text-[var(--ds-primary-bright)] no-underline text-inherit">{isAr ? 'سياسة الخصوصية' : 'Privacy Policy'}</Link>
+          </span>
         </div>
       </footer>
     </div>

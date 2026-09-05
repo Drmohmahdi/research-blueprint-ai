@@ -24,7 +24,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text as sql_text
 
 from ... import models
-from ...services.tenant_context import TenantContext
+from ...services.tenant_context import TenantContext, record_usage_event
 from ...services.billing import EntitlementService, FeatureKey
 from .provider import (
     AIProviderFactory,
@@ -282,6 +282,10 @@ class GovernedAIService:
 
         # 9. Audit (safe metadata only)
         _audit(db, ctx, use_case, status_label, len(sources))
+
+        total_tokens = (input_tokens or 0) + (output_tokens or 0) or (estimated_tokens or 0)
+        if total_tokens > 0:
+            record_usage_event(db, ctx.organization.id, ctx.user.id, "AI_TOKENS", quantity=float(total_tokens))
 
         return {
             "use_case": use_case,
