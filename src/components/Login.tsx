@@ -21,6 +21,12 @@ import { apiForgotPassword, apiResetPassword, apiVerifyEmail } from '../utils/ap
 import { rememberIntendedPlan } from '../marketing/funnel';
 import { FUNNEL_EVENTS, track } from '../utils/analytics';
 
+const PLAN_DISPLAY_NAMES: Record<string, { ar: string; en: string }> = {
+  STARTER: { ar: 'الباحث', en: 'Starter' },
+  PROFESSIONAL: { ar: 'الفرق', en: 'Professional' },
+  INSTITUTIONAL: { ar: 'المؤسسات', en: 'Institutional' },
+};
+
 export const Login: React.FC = () => {
   const {
     login,
@@ -351,8 +357,8 @@ export const Login: React.FC = () => {
             {intendedPlan && (
               <p className="m-0 text-[11px] font-semibold text-[var(--ds-text-secondary)] rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] p-3">
                 {language === 'ar'
-                  ? `اخترت باقة ${intendedPlan}. بعد الدخول يمكنك طلب الترقية من الفوترة داخل الحساب.`
-                  : `You selected ${intendedPlan}. After sign-in you can request the upgrade from billing.`}
+                  ? `اخترت باقة ${PLAN_DISPLAY_NAMES[intendedPlan]?.ar ?? intendedPlan}. بعد الدخول يمكنك طلب الترقية من الفوترة داخل الحساب.`
+                  : `You selected the ${PLAN_DISPLAY_NAMES[intendedPlan]?.en ?? intendedPlan} plan. After sign-in you can request the upgrade from billing.`}
               </p>
             )}
               <div className="space-y-2">
