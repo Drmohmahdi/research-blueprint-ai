@@ -420,10 +420,10 @@ export const LiteratureSynthesizer: React.FC = () => {
     <div className="space-y-6 max-w-5xl mx-auto">
       <PathPanel accent="var(--ds-path-publication)">
         <div className="space-y-1">
-          <h2 className="text-lg font-black text-ink m-0">
+          <h2 className="text-h2 text-ink m-0">
             {language === 'ar' ? 'تحليل ومكاملة الأدبيات والدراسات السابقة' : 'Literature Synthesis & Meta-Analysis'}
           </h2>
-          <p className="text-xs text-secondary m-0">
+          <p className="text-caption text-secondary m-0">
             {language === 'ar'
               ? 'أدخل أحجام الأثر يدويًا، أو استورد البيانات الببليوغرافية من Crossref وPubMed ثم أكمل العينة والأثر قبل التحليل البعدي.'
               : 'Enter effect sizes by hand, or import bibliographic records from Crossref and PubMed, then complete sample and effect fields before meta-analysis.'}
@@ -486,10 +486,10 @@ export const LiteratureSynthesizer: React.FC = () => {
       <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-6 shadow-sm text-center space-y-4">
         <BookOpen size={40} className="text-[var(--ds-primary)] mx-auto" />
         <div>
-          <h3 className="text-md font-bold text-[var(--ds-text-primary)] m-0">
+          <h3 className="text-h3 text-[var(--ds-text-primary)] m-0">
             {language === 'ar' ? 'رفع ملف دراسة PDF' : 'Upload a PDF study file'}
           </h3>
-          <p className="text-xs text-[var(--ds-text-secondary)] mt-1 max-w-lg mx-auto">
+          <p className="text-caption text-[var(--ds-text-secondary)] mt-1 max-w-lg mx-auto">
             {language === 'ar'
               ? 'يُحفظ الملف كمرجع للمراجعة؛ أدخل بيانات الدراسة يدوياً إلى أن تتوفر خدمة استخراج فعلية.'
               : 'The file is kept as a review reference; enter study data until extraction is available.'}
@@ -505,7 +505,7 @@ export const LiteratureSynthesizer: React.FC = () => {
             className="text-xs text-[var(--ds-text-muted)] file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[var(--ds-primary-soft)] file:text-[var(--ds-primary)] cursor-pointer"
           />
           {selectedFile && (
-            <p className="text-xs text-[var(--ds-text-secondary)] m-0" data-testid="selected-literature-file">
+            <p className="text-caption text-[var(--ds-text-secondary)] m-0" data-testid="selected-literature-file">
               {language === 'ar' ? 'الملف المحدد:' : 'Selected file:'} {selectedFile.name}
             </p>
           )}
@@ -520,8 +520,8 @@ export const LiteratureSynthesizer: React.FC = () => {
         <div className="flex items-start gap-2">
           <Search size={16} className="text-[var(--ds-primary)] mt-0.5 shrink-0" />
           <div>
-            <h4 className="text-sm font-bold text-[var(--ds-text-primary)] m-0">{language === 'ar' ? 'استيراد مراجع من Crossref أو PubMed' : 'Import references from Crossref or PubMed'}</h4>
-            <p className="text-xs text-[var(--ds-text-secondary)] m-0 mt-1">
+            <h4 className="text-h4 text-[var(--ds-text-primary)] m-0">{language === 'ar' ? 'استيراد مراجع من Crossref أو PubMed' : 'Import references from Crossref or PubMed'}</h4>
+            <p className="text-caption text-[var(--ds-text-secondary)] m-0 mt-1">
               {language === 'ar'
                 ? 'يُحفظ العنوان والمؤلف والسنة ومعرّف DOI فقط. أدخل حجم العينة والأثر لاحقًا؛ المراجع المستوردة لا تدخل التحليل البعدي حتى يكتمل فاصل الثقة.'
                 : 'Only title, authors, year, and DOI are stored. Enter sample size and effect later; imported rows stay out of meta-analysis until the confidence interval is complete.'}
@@ -548,7 +548,7 @@ export const LiteratureSynthesizer: React.FC = () => {
       </div>
 
       <form onSubmit={handleAddStudy} noValidate className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-4">
-        <h4 className="text-sm font-bold text-[var(--ds-text-primary)] m-0">{language === 'ar' ? 'إضافة دليل دراسة' : 'Add Study Evidence'}</h4>
+        <h4 className="text-h4 text-[var(--ds-text-primary)] m-0">{language === 'ar' ? 'إضافة دليل دراسة' : 'Add Study Evidence'}</h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <input value={studyDraft.author} onChange={event => setStudyDraft(current => ({ ...current, author: event.target.value }))} placeholder={language === 'ar' ? 'المرجع أو المؤلفون' : 'Reference or authors'} aria-label={language === 'ar' ? 'المرجع أو المؤلفون' : 'Reference or authors'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" />
           <input type="number" value={studyDraft.year} onChange={event => setStudyDraft(current => ({ ...current, year: event.target.value }))} placeholder={language === 'ar' ? 'سنة النشر' : 'Publication year'} aria-label={language === 'ar' ? 'سنة النشر' : 'Publication year'} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-xs text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" />
@@ -579,7 +579,7 @@ export const LiteratureSynthesizer: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Studies Table */}
         <div className="lg:col-span-1 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-4">
-          <h4 className="text-xs font-bold text-[var(--ds-text-muted)] uppercase tracking-wider m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
+          <h4 className="text-h4 text-[var(--ds-text-muted)] uppercase m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
             {language === 'ar' ? 'الأدلة والـ Effect Sizes المستخرجة' : 'Extracted Literature Evidence'}
           </h4>
 
@@ -639,7 +639,7 @@ export const LiteratureSynthesizer: React.FC = () => {
 
         {/* Forest Plot Chart */}
         <div className="lg:col-span-2 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-4">
-          <h4 className="text-xs font-bold text-[var(--ds-text-muted)] uppercase tracking-wider m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
+          <h4 className="text-h4 text-[var(--ds-text-muted)] uppercase m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
             {language === 'ar' ? 'مخطط الغابة التلوي (Meta-Analysis Forest Plot)' : 'Forest Plot Synthesis'}
           </h4>
 

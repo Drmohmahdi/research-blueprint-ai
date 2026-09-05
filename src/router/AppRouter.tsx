@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route, Navigate, useParams, Link } from 'react-router-dom';
+import { Routes, Route, Navigate, Link } from 'react-router-dom';
 import { ROUTES } from './routes';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { SkeletonGrid } from '../components/SkeletonCard';
@@ -38,7 +38,7 @@ const GraduateStudiesDashboard  = lazy(() => import('../features/thesis/Graduate
 
 const DesignSystemUnavailable: React.FC = () => (
   <div className="p-6">
-    <h2 className="text-xl font-semibold">Design system is available in development only.</h2>
+    <h2 className="text-h2">Design system is available in development only.</h2>
   </div>
 );
 
@@ -47,10 +47,10 @@ const NotFound: React.FC = () => {
   return (
     <section className="mx-auto flex min-h-[45vh] max-w-xl flex-col items-center justify-center gap-4 text-center" aria-labelledby="not-found-title">
       <span className="text-5xl font-black text-ink ds-numeric" aria-hidden="true">404</span>
-      <h2 id="not-found-title" className="m-0 text-2xl font-extrabold text-[var(--ds-text-primary)]">
+      <h2 id="not-found-title" className="text-h2 m-0 text-[var(--ds-text-primary)]">
         {language === 'ar' ? 'الصفحة غير موجودة' : 'Page not found'}
       </h2>
-      <p className="m-0 text-sm text-[var(--ds-text-secondary)]">
+      <p className="text-body-sm m-0 text-[var(--ds-text-secondary)]">
         {language === 'ar' ? 'قد يكون الرابط قد تغير أو لا يتوفر ضمن مساحة عملك.' : 'The link may have changed or may not be available in your workspace.'}
       </p>
       <Link to={ROUTES.PORTAL} className="rounded-lg bg-action px-4 py-2.5 font-bold text-on-action">
@@ -69,6 +69,7 @@ const OrganizationSwitcher      = lazy(() => import('../features/saas/Organizati
 const BillingDashboard          = lazy(() => import('../features/saas/BillingDashboard').then(m => ({ default: m.BillingDashboard })));
 const SuperAdminDashboard        = lazy(() => import('../features/saas/SuperAdminDashboard').then(m => ({ default: m.SuperAdminDashboard })));
 const NewStudyDesignWorkspace   = lazy(() => import('../features/saas/NewStudyDesignWorkspace').then(m => ({ default: m.NewStudyDesignWorkspace })));
+const ResearchDesignCommandCenter = lazy(() => import('../features/research-design/ResearchDesignCommandCenter').then(m => ({ default: m.ResearchDesignCommandCenter })));
 const ResearchOfficeOperations    = lazy(() => import('../features/research-design/ResearchOfficeOperations').then(m => ({ default: m.ResearchOfficeOperations })));
 const SeminarProposalWorkspace  = lazy(() => import('../features/saas/SeminarProposalWorkspace').then(m => ({ default: m.SeminarProposalWorkspace })));
 const ThesisDefenseWorkspace    = lazy(() => import('../features/saas/ThesisDefenseWorkspace').then(m => ({ default: m.ThesisDefenseWorkspace })));
@@ -110,14 +111,6 @@ const WizardToDesign: React.FC = () => {
     return <Navigate to={ROUTES.NEW_STUDY_DESIGN.replace(':projectId', activeProject.id)} replace />;
   }
   return <Navigate to={ROUTES.PATHS} replace />;
-};
-
-const ProjectDesignHome: React.FC = () => {
-  const { projectId } = useParams<{ projectId: string }>();
-  const { activeProject } = useProject();
-  const id = projectId || activeProject?.id;
-  if (!id) return <Navigate to={ROUTES.PATHS} replace />;
-  return <Navigate to={ROUTES.NEW_STUDY_DESIGN.replace(':projectId', id)} replace />;
 };
 
 // ── App Router ────────────────────────────────────────────────────────────────
@@ -216,7 +209,7 @@ export const AppRouter: React.FC = () => {
       {/* Study Design Path Routes */}
       <Route path={ROUTES.NEW_STUDY_DESIGN} element={<SafeRoute><NewStudyDesignWorkspace /></SafeRoute>} />
       <Route path={ROUTES.NEW_STUDY_DESIGN_STEP} element={<SafeRoute><NewStudyDesignWorkspace /></SafeRoute>} />
-      <Route path={ROUTES.RESEARCH_COMMAND_CENTER} element={<SafeRoute><ProjectDesignHome /></SafeRoute>} />
+      <Route path={ROUTES.RESEARCH_COMMAND_CENTER} element={<SafeRoute><ResearchDesignCommandCenter /></SafeRoute>} />
       <Route path={ROUTES.RESEARCH_OFFICE} element={<SafeRoute><ResearchOfficeOperations /></SafeRoute>} />
 
       {/* Seminar Proposal Path Routes */}

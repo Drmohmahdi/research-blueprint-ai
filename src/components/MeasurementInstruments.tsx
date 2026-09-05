@@ -96,8 +96,8 @@ export const MeasurementInstruments: React.FC = () => {
         <div className="flex items-start gap-3">
           <span className="h-10 w-10 shrink-0 rounded-lg border border-[var(--ds-primary)]/20 bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] flex items-center justify-center"><Ruler size={20} /></span>
           <div>
-            <h3 className="m-0 text-xl font-black text-ink">{language === 'ar' ? 'أدوات القياس والصدق والثبات' : 'Measurement, Validity, and Reliability'}</h3>
-            <p className="m-0 mt-1 text-sm text-secondary">{language === 'ar' ? 'وثّق خطة الأداة لكل متغير تابع قبل جمع البيانات والتسجيل المسبق.' : 'Document an instrument plan for each dependent variable before data collection and preregistration.'}</p>
+            <h3 className="text-h3 m-0 text-ink">{language === 'ar' ? 'أدوات القياس والصدق والثبات' : 'Measurement, Validity, and Reliability'}</h3>
+            <p className="text-body-sm m-0 mt-1 text-secondary">{language === 'ar' ? 'وثّق خطة الأداة لكل متغير تابع قبل جمع البيانات والتسجيل المسبق.' : 'Document an instrument plan for each dependent variable before data collection and preregistration.'}</p>
           </div>
         </div>
       </PathPanel>
@@ -116,8 +116,8 @@ export const MeasurementInstruments: React.FC = () => {
         return (
           <Card key={variable.id} padding="lg" className="space-y-5">
             <div>
-              <h3 className="m-0 text-base font-black text-[var(--ds-text-primary)]">{language === 'ar' ? variable.nameAr : variable.nameEn}</h3>
-              <p className="m-0 mt-1 text-xs text-[var(--ds-text-secondary)]">{language === 'ar' ? `متغير تابع · ${variable.scale}` : `Dependent variable · ${variable.scale}`}</p>
+              <h3 className="text-h3 m-0 text-[var(--ds-text-primary)]">{language === 'ar' ? variable.nameAr : variable.nameEn}</h3>
+              <p className="text-caption m-0 mt-1 text-[var(--ds-text-secondary)]">{language === 'ar' ? `متغير تابع · ${variable.scale}` : `Dependent variable · ${variable.scale}`}</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <label className="block text-xs font-bold text-[var(--ds-text-secondary)]">{language === 'ar' ? 'اسم الأداة' : 'Instrument name'}<input value={instrument.name} onChange={event => updateInstrument(variable.id, { name: event.target.value })} className="mt-1.5 w-full rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-3 py-2 text-sm text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" /></label>

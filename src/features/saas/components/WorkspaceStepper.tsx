@@ -19,7 +19,7 @@ export const WorkspaceStepper: React.FC<WorkspaceStepperProps> = ({ engine }) =>
 
   return (
     <aside className="w-full lg:w-[260px] space-y-4 shrink-0">
-      <h4 className="text-xs font-black text-[var(--ds-text-muted)] uppercase tracking-widest px-2 m-0">
+      <h4 className="text-h4 text-[var(--ds-text-muted)] uppercase px-2 m-0">
         {language === 'ar' ? 'خطوات مسار التصميم' : 'Study Design Steps'}
       </h4>
       <nav className="space-y-1 max-h-[580px] overflow-y-auto pr-1 no-scrollbar text-xs font-bold">

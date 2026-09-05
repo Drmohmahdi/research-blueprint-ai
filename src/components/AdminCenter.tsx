@@ -116,10 +116,10 @@ export const AdminCenter: React.FC = () => {
     <div className="space-y-6">
       <PathPanel accent="var(--ds-path-identity)">
         <div>
-          <h2 className="text-xl font-bold text-ink m-0">
+          <h2 className="text-h2 text-ink m-0">
             {language === 'ar' ? 'مركز التحكم وإدارة إعدادات المنصة' : 'Platform Administration & Settings Center'}
           </h2>
-          <p className="text-xs text-[var(--ds-text-muted)] m-0 mt-1 font-bold">
+          <p className="text-caption text-[var(--ds-text-muted)] m-0 mt-1 font-bold">
             {language === 'ar' 
               ? 'التحكم الإداري الموحد في تهيئة النظام، سجلات الأمان، الفوترة وتراخيص المستأجرين وفحوصات الدخان.' 
               : 'Unified administrative controls over system configuration, security audit trail, client quotas, and system health.'}
@@ -229,7 +229,7 @@ export const AdminCenter: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               <Card className="p-6 border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] rounded-2xl space-y-4">
-                <h3 className="text-sm font-black text-ink m-0 flex items-center gap-2 border-b border-[var(--ds-border-subtle)] pb-3">
+                <h3 className="text-h3 text-ink m-0 flex items-center gap-2 border-b border-[var(--ds-border-subtle)] pb-3">
                   <Settings size={16} className="text-path-identity" />
                   <span>{language === 'ar' ? 'إعدادات المنصة الأساسية' : 'Primary Platform Configurations'}</span>
                 </h3>
@@ -298,7 +298,7 @@ export const AdminCenter: React.FC = () => {
               {/* Feature Flags card */}
               <Card className="p-6 border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] rounded-2xl space-y-4">
                 <div>
-                  <h3 className="text-sm font-black text-ink m-0 flex items-center gap-2">
+                  <h3 className="text-h3 text-ink m-0 flex items-center gap-2">
                     <Layers size={16} className="text-path-identity" />
                     <span>{language === 'ar' ? 'مفاتيح الميزات (Feature Flags)' : 'Platform Feature Flags'}</span>
                   </h3>
@@ -332,7 +332,7 @@ export const AdminCenter: React.FC = () => {
             {/* Right side: System status */}
             <div className="lg:col-span-1 space-y-6">
               <Card className="p-6 border-[var(--ds-border-subtle)] bg-canvas rounded-2xl space-y-4 text-xs font-semibold text-muted leading-relaxed">
-                <h4 className="text-xs font-black text-ink m-0 uppercase tracking-wider flex items-center gap-1.5">
+                <h4 className="text-h4 text-ink m-0 uppercase flex items-center gap-1.5">
                   <Server size={14} className="text-path-identity" />
                   <span>{language === 'ar' ? 'حالة النظام' : 'System Status'}</span>
                 </h4>

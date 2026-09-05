@@ -38,14 +38,14 @@ export const ResearchDesignHeader: React.FC<ResearchDesignHeaderProps> = ({
         </button>
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold text-[var(--ds-text-primary)]">
+            <h2 className="text-h2 text-[var(--ds-text-primary)]">
               {isAr ? 'تصميم دراسة جديدة' : 'New Study Design'}
             </h2>
             <span className="px-2 py-0.5 text-xs rounded-full font-semibold bg-[var(--ds-primary-soft)] text-ink">
               {activeStepTitle}
             </span>
           </div>
-          <p className="text-xs text-[var(--ds-text-secondary)] mt-1">
+          <p className="text-caption text-[var(--ds-text-secondary)] mt-1">
             {project ? (isAr ? project.titleAr : project.titleEn) : ''}
           </p>
         </div>

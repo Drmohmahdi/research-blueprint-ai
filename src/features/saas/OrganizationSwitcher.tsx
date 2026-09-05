@@ -169,7 +169,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
               <span className="text-[10px] font-black text-[var(--ds-text-muted)] uppercase tracking-widest block">
                 {language === 'ar' ? 'مساحة العمل النشطة' : 'Active Workspace'}
               </span>
-              <h3 className="text-lg font-black text-[var(--ds-text-primary)] m-0">
+              <h3 className="text-h3 text-[var(--ds-text-primary)] m-0">
                 {activeOrg ? activeOrg.name : (language === 'ar' ? 'جاري التحميل...' : 'Loading...')}
               </h3>
             </div>
@@ -220,7 +220,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
           
           {/* Create Workspace */}
           <Card className="p-6 border-[var(--ds-border-subtle)] rounded-2xl bg-[var(--ds-surface-primary)]">
-            <h4 className="text-sm font-black mb-4 flex items-center gap-2">
+            <h4 className="text-h4 mb-4 flex items-center gap-2">
               <Plus size={18} className="text-path-identity" />
               <span>{language === 'ar' ? 'إنشاء مساحة عمل جديدة' : 'Create New Workspace'}</span>
             </h4>
@@ -261,7 +261,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
           {/* Pending Invitations list */}
           {invitations.length > 0 && (
             <Card className="p-6 border-[var(--ds-border-subtle)] rounded-2xl bg-[var(--ds-surface-primary)]">
-              <h4 className="text-sm font-black mb-4 flex items-center gap-2">
+              <h4 className="text-h4 mb-4 flex items-center gap-2">
                 <Mail size={18} className="text-path-identity" />
                 <span>{language === 'ar' ? 'دعوات صادرة معلّقة' : 'Outgoing pending invitations'}</span>
               </h4>
@@ -281,7 +281,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
           )}
 
           <Card className="p-6 border-[var(--ds-border-subtle)] rounded-2xl bg-[var(--ds-surface-primary)]">
-            <h4 className="text-sm font-black mb-3">{language === 'ar' ? 'الانضمام برمز دعوة' : 'Join with invitation token'}</h4>
+            <h4 className="text-h4 mb-3">{language === 'ar' ? 'الانضمام برمز دعوة' : 'Join with invitation token'}</h4>
             <form
               className="flex flex-col sm:flex-row gap-3"
               onSubmit={(e) => { e.preventDefault(); if (inviteToken.trim()) void handleAcceptInvite(inviteToken); }}
@@ -307,7 +307,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
         {/* Team Members List & Invitation Form */}
         <div className="space-y-6">
           <Card className="p-6 border-[var(--ds-border-subtle)] rounded-2xl bg-[var(--ds-surface-primary)]">
-            <h4 className="text-sm font-black mb-4 flex items-center gap-2">
+            <h4 className="text-h4 mb-4 flex items-center gap-2">
               <Users size={18} className="text-[var(--ds-primary)]" />
               <span>{language === 'ar' ? 'فريق العمل النشط' : 'Active Team Members'}</span>
             </h4>

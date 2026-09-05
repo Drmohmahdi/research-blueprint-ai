@@ -267,7 +267,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
               <div className="p-1.5 rounded-lg bg-[var(--ds-primary-soft)] text-[var(--ds-primary)]">
                 <Bell size={16} />
               </div>
-              <h2 className="text-sm font-black text-[var(--ds-text-primary)] m-0">
+              <h2 className="text-h2 text-[var(--ds-text-primary)] m-0">
                 {language === 'ar' ? 'الإشعارات الأكاديمية' : 'Academic Notifications'}
               </h2>
               {unreadCount > 0 && (
@@ -308,7 +308,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
           {showPreferences ? (
             <div className="p-4 flex-1 overflow-y-auto max-h-[60vh]">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xs font-black text-[var(--ds-text-primary)] uppercase tracking-wider">
+                <h3 className="text-h3 text-[var(--ds-text-primary)] uppercase">
                   {language === 'ar' ? 'تفضيلات قنوات الإشعارات' : 'Notification Channel Preferences'}
                 </h3>
                 <span className="text-[11px] text-[var(--ds-text-muted)]">

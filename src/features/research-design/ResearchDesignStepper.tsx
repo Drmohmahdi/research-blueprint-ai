@@ -50,7 +50,7 @@ export const ResearchDesignStepper: React.FC<ResearchDesignStepperProps> = ({
 
   return (
     <div className="w-full md:w-80 bg-[var(--ds-surface-primary)] border-b md:border-b-0 md:border-r border-[var(--ds-border-subtle)] p-4 space-y-2 overflow-y-auto max-h-[80vh] md:max-h-[calc(100vh-120px)]">
-      <h3 className="text-xs font-bold text-[var(--ds-text-secondary)] uppercase tracking-wider mb-3 px-2">
+      <h3 className="text-h3 text-[var(--ds-text-secondary)] uppercase mb-3 px-2">
         {isAr ? 'خطوات تصميم الدراسة (18)' : 'Study Design Steps (18)'}
       </h3>
       {RESEARCH_STEPS_CONFIG.map((step) => {

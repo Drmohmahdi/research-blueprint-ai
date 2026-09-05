@@ -276,10 +276,10 @@ export const ResearchPathSelector: React.FC = () => {
             <Sparkles size={14} />
             <span>{language === 'ar' ? '\u0645\u0633\u0627\u0631\u0627\u062a \u0627\u0644\u0628\u062d\u062b \u0627\u0644\u0645\u0646\u0647\u062c\u064a\u0629' : 'Methodological Paths'}</span>
           </div>
-          <h2 className="text-2xl md:text-4xl font-black m-0 leading-tight text-[var(--ds-text-primary)]">
+          <h2 className="text-h2 m-0 text-[var(--ds-text-primary)]">
             {language === 'ar' ? '\u0627\u062e\u062a\u0631 \u0627\u0644\u0645\u0633\u0627\u0631 \u0627\u0644\u0623\u0646\u0633\u0628 \u0644\u062f\u0631\u0627\u0633\u0629 \u0627\u0644\u064a\u0648\u0645' : 'How can Baseerah assist your study today?'}
           </h2>
-          <p className="text-sm md:text-base text-[var(--ds-text-secondary)] leading-relaxed font-medium m-0">
+          <p className="text-body-sm md:text-base text-[var(--ds-text-secondary)] font-medium m-0">
             {language === 'ar'
               ? '\u0627\u062e\u062a\u0631 \u0645\u0633\u0627\u0631\u0627 \u0645\u0646\u0647\u062c\u064a\u0627 \u0645\u062d\u062f\u062f\u0627 \u0644\u062a\u0631\u062a\u064a\u0628 \u0623\u062f\u0648\u0627\u062a \u0627\u0644\u062a\u0635\u0645\u064a\u0645 \u0648\u0627\u0644\u062a\u062d\u0644\u064a\u0644 \u0648\u0627\u0644\u0645\u062d\u0627\u0643\u0627\u0629 \u0648\u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629 \u0648\u0641\u0642 \u0645\u0631\u062d\u0644\u0629 \u0645\u0634\u0631\u0648\u0639\u0643 \u0627\u0644\u062d\u0627\u0644\u064a\u0629.'
               : 'Select a research path to orchestrate study design validation, predictive modeling, and publishing audits.'}
@@ -369,7 +369,7 @@ export const ResearchPathSelector: React.FC = () => {
                     </div>
 
                     <div className="space-y-1">
-                      <h3 className="text-sm font-black text-[var(--ds-text-primary)] m-0">
+                      <h3 className="text-h3 text-[var(--ds-text-primary)] m-0">
                         {language === 'ar' ? path.titleAr : path.titleEn}
                       </h3>
                       <p className="text-[11px] text-[var(--ds-text-secondary)] leading-relaxed m-0 h-10 overflow-hidden">
@@ -412,7 +412,7 @@ export const ResearchPathSelector: React.FC = () => {
                     <span className="h-7 w-7 rounded-lg bg-[var(--ds-primary-soft)] border border-[var(--ds-primary)]/20 flex items-center justify-center shrink-0 text-[var(--ds-primary)]">
                       {React.createElement(PATH_ICON_MAP[selectedPath.iconName] || Compass, { size: 14 })}
                     </span>
-                    <h3 className="text-base font-black text-[var(--ds-text-primary)] m-0">
+                    <h3 className="text-h3 text-[var(--ds-text-primary)] m-0">
                       {language === 'ar' ? selectedPath.titleAr : selectedPath.titleEn}
                     </h3>
                   </div>
@@ -420,7 +420,7 @@ export const ResearchPathSelector: React.FC = () => {
                     {language === 'ar' ? selectedPath.recommendedStageAr : selectedPath.recommendedStageEn}
                   </span>
                 </div>
-                <p className="text-xs text-[var(--ds-text-secondary)] m-0 leading-relaxed">
+                <p className="text-caption text-[var(--ds-text-secondary)] m-0">
                   {language === 'ar' ? selectedPath.descriptionAr : selectedPath.descriptionEn}
                 </p>
               </div>
@@ -459,7 +459,7 @@ export const ResearchPathSelector: React.FC = () => {
 
               {/* Steps Timeline */}
               <div className="space-y-3.5 max-h-[350px] overflow-y-auto pr-2 no-scrollbar">
-                <h4 className="text-xs font-black text-[var(--ds-text-primary)] uppercase tracking-wider block">
+                <h4 className="text-h4 text-[var(--ds-text-primary)] uppercase block">
                   {language === 'ar' ? '\u062e\u0627\u0631\u0637\u0629 \u0637\u0631\u064a\u0642 \u0627\u0644\u0623\u062f\u0648\u0627\u062a \u0648\u0627\u0644\u062e\u0637\u0648\u0627\u062a:' : 'Roadmap Timeline & Tools:'}
                 </h4>
                 

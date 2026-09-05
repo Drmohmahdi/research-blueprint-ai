@@ -257,10 +257,10 @@ export const QualitativeLab: React.FC = () => {
             <Sparkles size={13} />
             <span>{language === 'ar' ? 'البحوث النوعية والمختلطة' : 'Qualitative Lab'}</span>
           </div>
-          <h2 className="text-2xl font-black text-ink m-0">
+          <h2 className="text-h2 text-ink m-0">
             {language === 'ar' ? 'مختبر ترميز المقابلات النوعية بالذكاء الاصطناعي' : 'Qualitative Interview AI Coding Lab'}
           </h2>
-          <p className="text-xs text-secondary font-medium m-0">
+          <p className="text-caption text-secondary font-medium m-0">
             {language === 'ar' 
               ? 'حلّل نصوص المقابلات والملاحظات الميدانية واستخرج المحاور. يُحفظ الترميز في إجراءات المشروع ويُكمل مرحلتي البيانات والتحليل النوعي في دورة الحياة.'
               : 'Analyze open-ended interview transcripts, field notes, and feedback to extract thematic codes. Coding is saved to the project procedure and completes qualitative lifecycle stages.'}
@@ -280,7 +280,7 @@ export const QualitativeLab: React.FC = () => {
         {/* Left Column: Transcript Input & Presets */}
         <div className="lg:col-span-1 space-y-6">
           <Card className="space-y-4">
-            <h3 className="text-sm font-black text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
+            <h3 className="text-h3 text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
               <MessageSquare className="text-[var(--ds-primary)]" size={16} />
               <span>{language === 'ar' ? 'تفريغ المقابلة الصوتية' : 'Interview Transcript'}</span>
             </h3>
@@ -382,7 +382,7 @@ export const QualitativeLab: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center gap-1.5 pb-2 border-b border-[var(--ds-border-subtle)]">
                   <ClipboardList className="text-[var(--ds-primary)]" size={16} />
-                  <h4 className="text-xs font-black text-[var(--ds-text-primary)] m-0">
+                  <h4 className="text-h4 text-[var(--ds-text-primary)] m-0">
                     {language === 'ar' ? 'المحاور والرموز المستخرجة (Thematic Coding Results)' : 'Thematic Coding Results'}
                   </h4>
                 </div>
@@ -429,7 +429,7 @@ export const QualitativeLab: React.FC = () => {
                 <Card className="p-5 border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] space-y-3">
                   <div className="flex items-center gap-2">
                     <GitBranch className="text-[var(--ds-primary)]" size={16} />
-                    <h4 className="text-xs font-black text-[var(--ds-text-primary)] m-0">
+                    <h4 className="text-h4 text-[var(--ds-text-primary)] m-0">
                       {language === 'ar' ? 'توصيات البحث المنهجي المختلط (Mixed Methods Integration)' : 'Mixed Methods Integration'}
                     </h4>
                   </div>

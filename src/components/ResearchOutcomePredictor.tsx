@@ -18,10 +18,10 @@ export const ResearchOutcomePredictor: React.FC = () => {
             <Sparkles size={14} />
             <span>{language === 'ar' ? 'محرك التنبؤ الاحتمالي' : 'Probabilistic Prediction Engine'}</span>
           </div>
-          <h2 className="text-2xl md:text-4xl font-black m-0 tracking-tight text-ink">
+          <h2 className="text-h2 m-0 text-ink">
             {language === 'ar' ? 'المحرك الاحتمالي المتكامل للنتائج' : 'Probabilistic Outcome Prediction Suite'}
           </h2>
-          <p className="text-sm md:text-base text-secondary max-w-3xl m-0 leading-relaxed font-medium">
+          <p className="text-body-sm md:text-base text-secondary max-w-3xl m-0 font-medium">
             {language === 'ar'
               ? 'نموذج محاكاة بايزي لتقدير حجم الأثر، ومعدلات تسرب العينة، والالتزام بالبروتوكول قبل النزول الميداني.'
               : 'A Bayesian simulation suite to forecast effect size, attrition, and protocol fidelity before field deployment.'}

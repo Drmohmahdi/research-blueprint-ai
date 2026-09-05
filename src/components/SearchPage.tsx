@@ -155,10 +155,10 @@ export const SearchPage: React.FC = () => {
         <div className="flex items-center gap-2">
           <Sparkles size={20} className="text-[var(--ds-primary)]" />
           <div>
-            <h2 className="text-lg font-black text-ink m-0">
+            <h2 className="text-h2 text-ink m-0">
               {isAr ? 'البحث الأكاديمي الموحد' : 'Unified Academic Search'}
             </h2>
-            <p className="text-xs text-secondary font-medium m-0 mt-1">
+            <p className="text-caption text-secondary font-medium m-0 mt-1">
               {isAr ? 'ابحث عبر المشاريع والدراسات والأصول والملفات الأكاديمية من مكان واحد.' : 'Search projects, literature, assets, and academic profiles from one place.'}
             </p>
           </div>
@@ -309,16 +309,16 @@ export const SearchPage: React.FC = () => {
                   </span>
                 )}
               </div>
-              <h3 className="text-sm font-extrabold text-[var(--ds-text-primary)] m-0 line-clamp-2">
+              <h3 className="text-h3 text-[var(--ds-text-primary)] m-0 line-clamp-2">
                 {item.title}
               </h3>
               {item.subtitle && (
-                <p className="text-xs font-semibold text-[var(--ds-text-secondary)] m-0 mt-1 line-clamp-1">
+                <p className="text-caption font-semibold text-[var(--ds-text-secondary)] m-0 mt-1 line-clamp-1">
                   {item.subtitle}
                 </p>
               )}
               {item.snippet && (
-                <p className="text-xs text-[var(--ds-text-muted)] m-0 mt-1 line-clamp-2">
+                <p className="text-caption text-[var(--ds-text-muted)] m-0 mt-1 line-clamp-2">
                   {item.snippet}
                 </p>
               )}

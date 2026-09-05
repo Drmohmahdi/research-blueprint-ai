@@ -83,10 +83,10 @@ export const NewStudyDesignWorkspace: React.FC = () => {
                 </div>
               )}
             </div>
-            <h3 className="text-xl md:text-3xl font-black m-0 leading-tight text-ink">
+            <h3 className="text-h3 m-0 text-ink">
               {language === 'ar' ? activeProject.titleAr : activeProject.titleEn}
             </h3>
-            <p className="text-xs text-secondary font-medium m-0">
+            <p className="text-caption text-secondary font-medium m-0">
               {language === 'ar' ? `المؤسسة: ${activeProject.institutionAr || 'مساحة شخصية'}` : `Institution: ${activeProject.institutionEn || 'Personal Workspace'}`}
             </p>
           </div>

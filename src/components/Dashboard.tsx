@@ -283,10 +283,10 @@ export const Dashboard: React.FC = () => {
                   <span>{activeOrg.name}</span>
                 </div>
               )}
-              <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--ds-text-primary)] m-0">
+              <h2 className="text-h2 text-[var(--ds-text-primary)] m-0">
                 {language === 'ar' ? `مرحباً بك في لوحة تصميم البحوث` : `Welcome to the Research Design Dashboard`}
               </h2>
-              <p className="text-[var(--ds-text-secondary)] text-sm max-w-2xl m-0 leading-relaxed">
+              <p className="text-body-sm text-[var(--ds-text-secondary)] max-w-2xl m-0">
                 {language === 'ar' 
                   ? 'بيت المشروع هو دورة الحياة. هذه اللوحة ملخص سريع، والأدوات الذرية تُفتح من الخطوة المناسبة.'
                   : 'The project home is the research lifecycle. This dashboard is a summary; atomic tools open from the matching step.'}
@@ -328,10 +328,10 @@ export const Dashboard: React.FC = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-3xl font-black text-ink ds-numeric m-0 tracking-tight">
+                    <h3 className="text-h3 text-ink ds-numeric m-0">
                       {card.value}
                     </h3>
-                    <p className="text-xs text-[var(--ds-text-secondary)] font-semibold m-0 leading-5 min-h-[20px]">
+                    <p className="text-caption text-[var(--ds-text-secondary)] font-semibold m-0 min-h-[20px]">
                       {card.description}
                     </p>
                     {typeof card.progress === 'number' && (
@@ -347,10 +347,10 @@ export const Dashboard: React.FC = () => {
             <div className="xl:col-span-3 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-5">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div>
-                  <h3 className="text-lg font-bold text-[var(--ds-text-primary)] m-0">
+                  <h3 className="text-h3 text-[var(--ds-text-primary)] m-0">
                     {language === 'ar' ? 'مسار البحث العلمي' : 'Research Workflow'}
                   </h3>
-                  <p className="text-xs text-[var(--ds-text-secondary)] m-0 mt-1">
+                  <p className="text-caption text-[var(--ds-text-secondary)] m-0 mt-1">
                     {language === 'ar' ? 'متابعة عملية من الفكرة حتى المراجعة والنشر' : 'Operational flow from idea to review and publication'}
                   </p>
                 </div>
@@ -421,7 +421,7 @@ export const Dashboard: React.FC = () => {
                       <span className="h-9 w-9 rounded-lg bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] border border-[var(--ds-primary)]/20 flex items-center justify-center">
                         <FolderGit2 size={17} />
                       </span>
-                      <h3 className="text-lg font-bold text-[var(--ds-text-primary)] m-0">
+                      <h3 className="text-h3 text-[var(--ds-text-primary)] m-0">
                       {language === 'ar' ? 'المشروع الحالي' : 'Active Project'}
                       </h3>
                     </div>
@@ -431,10 +431,10 @@ export const Dashboard: React.FC = () => {
                   </div>
                   
                   <div className="space-y-3">
-                    <h4 className="text-md font-bold text-[var(--ds-text-primary)] m-0">
+                    <h4 className="text-h4 text-[var(--ds-text-primary)] m-0">
                       {language === 'ar' ? activeProject.titleAr : activeProject.titleEn}
                     </h4>
-                    <p className="text-[var(--ds-text-secondary)] text-sm leading-relaxed m-0">
+                    <p className="text-body-sm text-[var(--ds-text-secondary)] m-0">
                       {language === 'ar' ? activeProject.descriptionAr : activeProject.descriptionEn}
                     </p>
                   </div>
@@ -462,7 +462,7 @@ export const Dashboard: React.FC = () => {
                   
                   {/* Interactive Checklist */}
                   <div className="pt-4 border-t border-[var(--ds-border-subtle)] space-y-3">
-                    <h4 className="text-xs font-black text-[var(--ds-text-primary)] uppercase tracking-wider block">
+                    <h4 className="text-h4 text-[var(--ds-text-primary)] uppercase block">
                       {language === 'ar' ? 'خطوات تصميم البحث المطلوبة:' : 'Required Study Design Steps:'}
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -516,7 +516,7 @@ export const Dashboard: React.FC = () => {
               {/* Key Warnings List */}
               {audit.issues.length > 0 && (
                 <div className={panelCardClass}>
-                  <h3 className="text-lg font-bold text-[var(--ds-danger)] flex items-center gap-2 m-0 border-b border-[var(--ds-border-subtle)] pb-3">
+                  <h3 className="text-h3 text-[var(--ds-danger)] flex items-center gap-2 m-0 border-b border-[var(--ds-border-subtle)] pb-3">
                     <span className="h-8 w-8 rounded-lg bg-[var(--ds-danger-soft)] border border-[var(--ds-danger)]/20 flex items-center justify-center">
                       <AlertTriangle size={16} />
                     </span>
@@ -527,7 +527,7 @@ export const Dashboard: React.FC = () => {
                     {audit.issues.map((issue) => (
                       <div key={issue.id} className="py-3 px-2 rounded-lg hover:bg-[var(--ds-surface-secondary)] flex items-start gap-3">
                         <span className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${issue.type === 'critical' ? 'bg-[var(--ds-danger)]' : 'bg-[var(--ds-warning)]'}`}></span>
-                        <p className="text-sm font-medium text-[var(--ds-text-secondary)] m-0">
+                        <p className="text-body-sm font-medium text-[var(--ds-text-secondary)] m-0">
                           {language === 'ar' ? issue.textAr : issue.textEn}
                         </p>
                       </div>
@@ -541,7 +541,7 @@ export const Dashboard: React.FC = () => {
             <div className="space-y-6">
               {/* Quick Actions List */}
               <div className={panelCardClass}>
-                <h3 className="text-lg font-bold text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)]">
+                <h3 className="text-h3 text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)]">
                   {getTranslation(language, 'quickActions')}
                 </h3>
 
@@ -579,7 +579,7 @@ export const Dashboard: React.FC = () => {
 
               {/* Supervisor comments panel */}
               <div className={panelCardClass}>
-                <h3 className="text-lg font-bold text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)] flex items-center gap-2">
+                <h3 className="text-h3 text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)] flex items-center gap-2">
               <MessageSquareCode size={18} className="text-[var(--ds-primary)]" />
                   <span>{language === 'ar' ? 'ملاحظات المشرف العلمي المعلقة' : 'Pending Supervisor Notes'}</span>
                 </h3>
@@ -624,10 +624,10 @@ export const Dashboard: React.FC = () => {
                 <ShieldCheck size={12} />
                 <span>{language === 'ar' ? 'بوابة المشرف العلمي المعتمَد' : 'Certified Academic Advisor Portal'}</span>
               </div>
-              <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--ds-text-primary)] m-0">
+              <h2 className="text-h2 text-[var(--ds-text-primary)] m-0">
                 {language === 'ar' ? `مرحباً د. ${user?.username || 'المشرف'}` : `Welcome Dr. ${user?.username || 'Advisor'}`}
               </h2>
-              <p className="text-[var(--ds-text-secondary)] text-sm max-w-2xl m-0 leading-relaxed">
+              <p className="text-body-sm text-[var(--ds-text-secondary)] max-w-2xl m-0">
                 {language === 'ar' 
                   ? 'تابع تصاميم أبحاث طلابك، وراجع جودتها المنهجية وإحصائياتها، واطرح تعليقاتك وتوجيهاتك الأكاديمية مباشرة.'
                   : 'Track your students\' study designs, audit their methodological quality, and write academic feedback directly.'}
@@ -639,7 +639,7 @@ export const Dashboard: React.FC = () => {
           {/* Supervisor Split Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className={`lg:col-span-2 ${panelCardClass}`}>
-              <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)]">
+              <h3 className="text-h3 text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)]">
                 {language === 'ar' ? 'متابعة تصاميم أبحاث الطلاب' : 'Student Research Pipeline'}
               </h3>
               <EmptyState
@@ -662,7 +662,7 @@ export const Dashboard: React.FC = () => {
 
             <div className="space-y-6">
               <div className={panelCardClass}>
-                <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)]">
+                <h3 className="text-h3 text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)]">
                   {language === 'ar' ? 'إرشادات الإشراف الأكاديمي' : 'Advisor Guidelines'}
                 </h3>
                 <div className="space-y-3 text-xs text-[var(--ds-text-secondary)] leading-relaxed">
@@ -695,10 +695,10 @@ export const Dashboard: React.FC = () => {
                 <Building2 size={12} />
                 <span>{activeOrg ? activeOrg.name : (language === 'ar' ? 'مساحة الإدارة العامة' : 'Central Admin Console')}</span>
               </div>
-              <h2 className="text-2xl md:text-3xl font-extrabold text-[var(--ds-text-primary)] m-0">
+              <h2 className="text-h2 text-[var(--ds-text-primary)] m-0">
                 {language === 'ar' ? 'إدارة المؤسسة والاشتراكات (Tenant Control)' : 'Tenant & Subscription Management'}
               </h2>
-              <p className="text-[var(--ds-text-secondary)] text-sm max-w-2xl m-0 leading-relaxed">
+              <p className="text-body-sm text-[var(--ds-text-secondary)] max-w-2xl m-0">
                 {language === 'ar' 
                   ? 'راقب استهلاك موارد المؤسسة للذكاء الاصطناعي، وأدر الهيكل التنظيمي للمساحات الفرعية، وتابع تفاصيل التراخيص والفوترة.'
                   : 'Monitor resource usage metrics, manage organization workspace hierarchy, and check billing history.'}
@@ -715,7 +715,7 @@ export const Dashboard: React.FC = () => {
                 <CreditCard size={20} className="text-[var(--ds-primary)]" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-sm font-black text-[var(--ds-text-primary)] m-0">{quota?.plan_name ?? (language === 'ar' ? '—' : '—')}</h3>
+                <h3 className="text-h3 text-[var(--ds-text-primary)] m-0">{quota?.plan_name ?? (language === 'ar' ? '—' : '—')}</h3>
                 <span className="text-[10px] text-[var(--ds-text-muted)] font-medium">
                   {language === 'ar' ? `تاريخ التجديد: ${quota?.current_period_end ?? '—'}` : `Renewal Date: ${quota?.current_period_end ?? '—'}`}
                 </span>
@@ -727,7 +727,7 @@ export const Dashboard: React.FC = () => {
             <Users size={20} className="text-[var(--ds-primary)]" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-2xl font-extrabold text-[var(--ds-text-primary)] m-0">{usage?.members ?? '—'} / {quota?.max_members ?? '—'}</h3>
+                <h3 className="text-h3 text-[var(--ds-text-primary)] m-0">{usage?.members ?? '—'} / {quota?.max_members ?? '—'}</h3>
                 <Progress value={usage && quota ? (usage.members / quota.max_members) * 100 : 0} variant="primary" className="mt-2" />
               </div>
             </div>
@@ -737,7 +737,7 @@ export const Dashboard: React.FC = () => {
             <Activity size={20} className="text-[var(--ds-success)]" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-2xl font-extrabold text-[var(--ds-text-primary)] m-0">{usage?.ai_tokens ?? '—'} / {quota?.ai_tokens_limit ?? '—'}</h3>
+                <h3 className="text-h3 text-[var(--ds-text-primary)] m-0">{usage?.ai_tokens ?? '—'} / {quota?.ai_tokens_limit ?? '—'}</h3>
                 <Progress value={usage && quota ? (usage.ai_tokens / quota.ai_tokens_limit) * 100 : 0} variant="success" className="mt-2" />
               </div>
             </div>
@@ -747,7 +747,7 @@ export const Dashboard: React.FC = () => {
                 <Sparkles size={20} className="text-[var(--ds-primary)]" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-2xl font-extrabold text-[var(--ds-text-primary)] m-0">{usage?.prediction_runs ?? '—'} / {quota?.prediction_runs_limit ?? '—'}</h3>
+                <h3 className="text-h3 text-[var(--ds-text-primary)] m-0">{usage?.prediction_runs ?? '—'} / {quota?.prediction_runs_limit ?? '—'}</h3>
                 <Progress value={usage && quota ? (usage.prediction_runs / quota.prediction_runs_limit) * 100 : 0} variant="primary" className="mt-2" />
               </div>
             </div>
@@ -757,7 +757,7 @@ export const Dashboard: React.FC = () => {
             <Layers size={20} className="text-[var(--ds-danger)]" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-2xl font-extrabold text-[var(--ds-text-primary)] m-0">{usage?.storage_mb ?? '—'}MB / {quota?.max_storage_mb ?? '—'}MB</h3>
+                <h3 className="text-h3 text-[var(--ds-text-primary)] m-0">{usage?.storage_mb ?? '—'}MB / {quota?.max_storage_mb ?? '—'}MB</h3>
                 <Progress value={usage && quota ? (usage.storage_mb / quota.max_storage_mb) * 100 : 0} variant="danger" className="mt-2" />
               </div>
             </div>
@@ -766,7 +766,7 @@ export const Dashboard: React.FC = () => {
           {/* Admin Split Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className={`lg:col-span-2 ${panelCardClass}`}>
-              <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)]">
+              <h3 className="text-h3 text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)]">
                 {language === 'ar' ? 'المؤسسة الحالية' : 'Current Organization'}
               </h3>
               <div className="p-3 bg-[var(--ds-surface-secondary)] border border-dashed border-[var(--ds-border-subtle)] rounded-xl flex items-center justify-between">
@@ -776,7 +776,7 @@ export const Dashboard: React.FC = () => {
                 </div>
                 <span className="text-[10px] text-ink font-bold bg-[var(--ds-primary-soft)] px-2 py-0.5 rounded border border-[var(--ds-primary)]/10">{quota?.subscription_status ?? '—'}</span>
               </div>
-              <p className="text-xs text-[var(--ds-text-secondary)] m-0 mt-3">
+              <p className="text-caption text-[var(--ds-text-secondary)] m-0 mt-3">
                 {language === 'ar'
                   ? `${usage?.projects ?? 0} مشروع بحثي عبر هذه المؤسسة.`
                   : `${usage?.projects ?? 0} research projects across this organization.`}
@@ -785,7 +785,7 @@ export const Dashboard: React.FC = () => {
 
             <div className="space-y-6">
               <div className={panelCardClass}>
-                <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)] flex items-center gap-2">
+                <h3 className="text-h3 text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)] flex items-center gap-2">
                   <CreditCard size={16} className="text-[var(--ds-primary)]" />
                   <span>{language === 'ar' ? 'الفواتير والمدفوعات' : 'Billing & Invoices'}</span>
                 </h3>

@@ -222,8 +222,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         </div>
       )}
       <div className="space-y-1.5 max-w-sm">
-        <h4 className="text-sm font-extrabold text-[var(--ds-text-primary)] m-0">{title}</h4>
-        <p className="text-xs text-[var(--ds-text-muted)] leading-relaxed m-0">{description}</p>
+        <h4 className="text-h4 text-[var(--ds-text-primary)] m-0">{title}</h4>
+        <p className="text-caption text-[var(--ds-text-muted)] m-0">{description}</p>
       </div>
       {actionButton && (
         <div className="pt-2">

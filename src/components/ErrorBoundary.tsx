@@ -49,10 +49,10 @@ export class ErrorBoundary extends React.Component<Props, State> {
         </div>
 
         <div className="space-y-2">
-          <h2 className="text-base font-extrabold text-[var(--ds-text-primary)] m-0">
+          <h2 className="text-h2 text-[var(--ds-text-primary)] m-0">
             {isAr ? 'حدث خطأ غير متوقع' : 'An unexpected error occurred'}
           </h2>
-          <p className="text-sm text-[var(--ds-text-secondary)] m-0 max-w-md">
+          <p className="text-body-sm text-[var(--ds-text-secondary)] m-0 max-w-md">
             {isAr
               ? 'تعذّر تحميل هذا القسم. يمكنك المحاولة مرة أخرى أو العودة للوحة الرئيسية.'
               : 'This section failed to load. You can try again or return to the dashboard.'}

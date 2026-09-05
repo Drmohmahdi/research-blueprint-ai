@@ -116,7 +116,7 @@ export const ResearchDesignOverview: React.FC<ResearchDesignOverviewProps> = ({
             <BookOpen size={24} />
           </div>
           <div>
-            <h2 className="text-base font-bold text-[var(--ds-text-primary)]">
+            <h2 className="text-h2 text-[var(--ds-text-primary)]">
               {isAr ? project.titleAr : project.titleEn}
             </h2>
             <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--ds-text-secondary)] mt-1.5 font-medium">
@@ -136,7 +136,7 @@ export const ResearchDesignOverview: React.FC<ResearchDesignOverviewProps> = ({
 
       {/* 9 Quality Indicators Grid */}
       <div className="space-y-3">
-        <h3 className="text-xs font-bold text-[var(--ds-text-secondary)] uppercase tracking-wider px-1">
+        <h3 className="text-h3 text-[var(--ds-text-secondary)] uppercase px-1">
           {isAr ? 'مؤشرات جودة تصميم الدراسة التسعة' : '9 Study Quality Indicators'}
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

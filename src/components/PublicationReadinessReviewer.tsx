@@ -275,10 +275,10 @@ export const PublicationReadinessReviewer: React.FC = () => {
               {language === 'ar' ? 'تحكيم متعدد الأبعاد' : 'Multi-Dimensional Peer Review'}
             </span>
           </div>
-          <h2 className="text-xl md:text-2xl font-extrabold text-[var(--ds-text-primary)] m-0">
+          <h2 className="text-h2 text-[var(--ds-text-primary)] m-0">
             {language === 'ar' ? 'فاحص الجاهزية المنهجية للنشر' : 'Publication Readiness Reviewer'}
           </h2>
-          <p className="text-sm text-[var(--ds-text-secondary)] max-w-2xl m-0 leading-relaxed">
+          <p className="text-body-sm text-[var(--ds-text-secondary)] max-w-2xl m-0">
             {language === 'ar'
               ? 'تقييم شامل يحاكي قرار المحكّمين عبر خمسة أبعاد منهجية: التصميم، الإحصاء، القياس، الأدبيات، والأخلاقيات.'
               : 'A comprehensive assessment simulating reviewer decisions across five methodological dimensions: design, statistics, measurement, literature, and ethics.'}
@@ -307,7 +307,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
       {/* Disclaimer */}
       <div className="flex items-start gap-3 p-4 rounded-xl border border-warning/20 bg-warning/5">
         <Info size={16} className="text-warning shrink-0 mt-0.5" />
-        <p className="text-xs text-[var(--ds-text-secondary)] leading-relaxed m-0">
+        <p className="text-caption text-[var(--ds-text-secondary)] m-0">
           {language === 'ar'
             ? 'هذا التقييم استرشادي وتنبؤي، يستند إلى البيانات المدخلة في المنصة. لا يُغني عن التحكيم العلمي الرسمي من مجلة أو مؤتمر أكاديمي.'
             : 'This assessment is advisory and predictive, based on data entered in the platform. It does not replace formal peer review from a journal or academic conference.'}
@@ -399,7 +399,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
               <Card className="p-6 border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] shadow-[var(--ds-shadow-layered)] space-y-4 sticky top-6">
                 <div className="flex items-center gap-1.5 pb-2 border-b border-[var(--ds-border-subtle)]">
                   <TrendingUp size={14} className="text-path-publication" />
-                  <h4 className="text-[10px] font-black text-[var(--ds-text-secondary)] uppercase tracking-wider m-0">
+                  <h4 className="text-h4 text-[10px] text-[var(--ds-text-secondary)] uppercase m-0">
                     {language === 'ar' ? 'بصمة الجاهزية خماسية الأبعاد' : '5D Readiness Assessment Web'}
                   </h4>
                 </div>
@@ -439,7 +439,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
 
           {/* Dimension Cards Accordion details */}
           <div className="space-y-3.5">
-            <h3 className="text-sm font-black text-[var(--ds-text-primary)] m-0">
+            <h3 className="text-h3 text-[var(--ds-text-primary)] m-0">
               {language === 'ar' ? 'تقرير التحكيم التفصيلي حسب البُعد' : 'Detailed Peer Review Report by Dimension'}
             </h3>
 
@@ -524,7 +524,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
                       )}
 
                       {dim.majorComments.length === 0 && dim.minorComments.length === 0 && (
-                        <p className="text-xs text-[var(--ds-text-muted)] text-center py-2">
+                        <p className="text-caption text-[var(--ds-text-muted)] text-center py-2">
                           {language === 'ar' ? 'لا ملاحظات — البُعد ممتاز.' : 'No comments — this dimension is excellent.'}
                         </p>
                       )}

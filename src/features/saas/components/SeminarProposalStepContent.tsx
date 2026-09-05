@@ -37,10 +37,10 @@ export const SeminarProposalStepContent: React.FC<SeminarProposalStepContentProp
       {/* Step Header */}
       <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-4">
         <div>
-          <h4 className="text-base font-black m-0">
+          <h4 className="text-h4 m-0">
             {language === 'ar' ? stepConfig.titleAr : stepConfig.titleEn}
           </h4>
-          <p className="text-xs text-[var(--ds-text-muted)] font-semibold mt-1 mb-0">
+          <p className="text-caption text-[var(--ds-text-muted)] font-semibold mt-1 mb-0">
             {language === 'ar' ? stepConfig.descriptionAr : stepConfig.descriptionEn}
           </p>
         </div>

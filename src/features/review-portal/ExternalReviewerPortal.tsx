@@ -216,7 +216,7 @@ export const ExternalReviewerPortal: React.FC = () => {
         <div role="status" aria-live="polite" className="text-center text-secondary">
           <div aria-hidden="true" className="motion-safe:animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--ds-primary)] mx-auto mb-4"></div>
           <h1 className="sr-only">بوابة التحكيم العلمي الخارجي</h1>
-          <p className="text-lg">جارٍ التحقق من رابط التحكيم وتأمين الجلسة...</p>
+          <p className="text-body-lg">جارٍ التحقق من رابط التحكيم وتأمين الجلسة...</p>
         </div>
       </main>
     );
@@ -227,7 +227,7 @@ export const ExternalReviewerPortal: React.FC = () => {
       <main className="dark min-h-screen bg-canvas flex items-center justify-center p-4">
         <Card className="max-w-md w-full p-8 text-center bg-surface border-danger/50">
           <AlertTriangle className="w-16 h-16 text-danger mx-auto mb-4" />
-          <h1 className="text-xl font-bold text-ink mb-2">تعذر الوصول إلى الجلسة</h1>
+          <h1 className="text-h1 text-ink mb-2">تعذر الوصول إلى الجلسة</h1>
           <p className="text-muted mb-6">{error || 'الرابط غير صالح'}</p>
           <div className="text-xs text-muted">منصة بصيرة للبحث العلمي — بوابة التحكيم الخارجي الآمنة</div>
         </Card>
@@ -249,7 +249,7 @@ export const ExternalReviewerPortal: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold text-ink m-0">{ar ? 'بوابة التحكيم العلمي الخارجي' : 'External peer-review portal'}</h1>
+                <h1 className="text-h1 text-ink m-0">{ar ? 'بوابة التحكيم العلمي الخارجي' : 'External peer-review portal'}</h1>
                 <span className="text-xs px-2.5 py-0.5 rounded-full bg-[var(--ds-success-soft)] text-success border border-success/30">{ar ? 'جلسة مشفرة وآمنة' : 'Encrypted session'}</span>
                 <Button type="button" variant="outline" className="text-xs" iconBefore={<Globe size={14} />} onClick={() => {
                   const next = language === 'ar' ? 'en' : 'ar';
@@ -257,7 +257,7 @@ export const ExternalReviewerPortal: React.FC = () => {
                   localStorage.setItem('rb_lang', next);
                 }}>{language === 'ar' ? 'English' : 'العربية'}</Button>
               </div>
-              <p className="text-sm text-secondary m-0">مرحباً د. {portalData.reviewer_name || 'المحكم العلمي'} — الجولة رقم {portalData.round_number}</p>
+              <p className="text-body-sm text-secondary m-0">مرحباً د. {portalData.reviewer_name || 'المحكم العلمي'} — الجولة رقم {portalData.round_number}</p>
             </div>
           </div>
           {portalData.due_at && (
@@ -279,7 +279,7 @@ export const ExternalReviewerPortal: React.FC = () => {
         {/* Manuscript Overview Card */}
         <Card className="p-6 space-y-4">
           <div className="flex items-center justify-between border-b border-subtle pb-3">
-            <h2 className="text-lg font-bold text-ink flex items-center gap-2">
+            <h2 className="text-h2 text-ink flex items-center gap-2">
               <FileText className="w-5 h-5 text-path-identity" />
               <span>بيانات المخطوطة العلمية المحكمة</span>
             </h2>
@@ -294,7 +294,7 @@ export const ExternalReviewerPortal: React.FC = () => {
           {portalData.manuscript_abstract && (
             <div>
               <div className="text-xs text-muted mb-1">المستخلص الأكاديمي:</div>
-              <p className="text-sm text-secondary bg-[var(--ds-surface-secondary)] p-4 rounded-xl border border-subtle leading-relaxed">
+              <p className="text-body-sm text-secondary bg-[var(--ds-surface-secondary)] p-4 rounded-xl border border-subtle">
                 {portalData.manuscript_abstract}
               </p>
             </div>
@@ -318,11 +318,11 @@ export const ExternalReviewerPortal: React.FC = () => {
         {/* Invitation Acceptance / Conflict Declaration if still INVITED */}
         {portalData.assignment_status === 'INVITED' && (
           <Card className="p-6 border-warning/60 space-y-4">
-            <h2 className="text-lg font-bold text-warning flex items-center gap-2">
+            <h2 className="text-h2 text-warning flex items-center gap-2">
               <AlertTriangle className="w-5 h-5" />
               <span>تأكيد قبول التحكيم والإفصاح عن تضارب المصالح</span>
             </h2>
-            <p className="text-sm text-secondary">
+            <p className="text-body-sm text-secondary">
               يرجى الإقرار بعدم وجود تضارب في المصالح مع مؤلفي أو موضوع هذه المخطوطة العلمية قبل البدء بالتحكيم.
             </p>
             <div className="space-y-2">
@@ -373,7 +373,7 @@ export const ExternalReviewerPortal: React.FC = () => {
           <div className="space-y-6">
             <Card className="p-6 space-y-6">
               <div className="flex items-center justify-between border-b border-subtle pb-3">
-                <h2 className="text-lg font-bold text-ink flex items-center gap-2">
+                <h2 className="text-h2 text-ink flex items-center gap-2">
                   <ListChecks className="w-5 h-5 text-success" />
                   <span>معايير نموذج التحكيم الأكاديمي ({portalData.rubric.name_ar})</span>
                 </h2>
@@ -397,7 +397,7 @@ export const ExternalReviewerPortal: React.FC = () => {
                         الوزن النسبي: {criterion.weight * 100}%
                       </span>
                     </div>
-                    {criterion.desc_ar && <p className="text-xs text-muted leading-relaxed">{criterion.desc_ar}</p>}
+                    {criterion.desc_ar && <p className="text-caption text-muted">{criterion.desc_ar}</p>}
                     
                     {/* Score Selector */}
                     <div className="flex items-center gap-2 pt-2">

@@ -338,14 +338,14 @@ export const ReviewerDashboard: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold text-ink m-0">
+            <h2 className="text-h2 text-ink m-0">
               {isAr ? 'منظومة التحكيم العلمي ومراجعة الأقران' : 'Academic Peer Review System'}
             </h2>
             <span className="text-xs px-3 py-1 rounded-full bg-[var(--ds-primary-soft)] text-ink font-semibold border border-[var(--ds-primary)]/20">
               {isAr ? 'إصدار مؤسسي معتمد' : 'Enterprise Verified'}
             </span>
           </div>
-          <p className="text-sm text-secondary mt-1">
+          <p className="text-body-sm text-secondary mt-1">
             {isAr 
               ? 'إدارة لجان التحكيم، مراجعة المخطوطات العلمية، وضمان معايير النزاهة الأكاديمية والتعمية المزدوجة' 
               : 'Manage peer review rounds, referee academic manuscripts, and ensure double-blind integrity'}
@@ -398,7 +398,7 @@ export const ReviewerDashboard: React.FC = () => {
           {/* Left Sidebar: Assignments List */}
           <div className="lg:col-span-4 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-bold text-[var(--ds-text-primary)] flex items-center gap-2">
+              <h2 className="text-h2 text-[var(--ds-text-primary)] flex items-center gap-2">
                 <ListChecks className="w-4 h-4 text-success" />
                 <span>{isAr ? 'قائمة المهام المسندة' : 'Assigned Manuscripts'}</span>
               </h2>
@@ -479,7 +479,7 @@ export const ReviewerDashboard: React.FC = () => {
                 {/* Manuscript Card */}
                 <Card className="p-6 space-y-4">
                   <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-3">
-                    <h3 className="text-base font-bold text-[var(--ds-text-primary)] flex items-center gap-2">
+                    <h3 className="text-h3 text-[var(--ds-text-primary)] flex items-center gap-2">
                       <FileText className="w-5 h-5 text-success" />
                       <span>{activeCaseDetails.title_ar}</span>
                     </h3>
@@ -488,7 +488,7 @@ export const ReviewerDashboard: React.FC = () => {
                     </span>
                   </div>
                   {activeCaseDetails.abstract_ar && (
-                    <p className="text-sm text-[var(--ds-text-secondary)] bg-[var(--ds-surface-sunken)] p-4 rounded-xl leading-relaxed">
+                    <p className="text-body-sm text-[var(--ds-text-secondary)] bg-[var(--ds-surface-sunken)] p-4 rounded-xl">
                       {activeCaseDetails.abstract_ar}
                     </p>
                   )}
@@ -497,11 +497,11 @@ export const ReviewerDashboard: React.FC = () => {
                 {/* Invitation Action if INVITED */}
                 {selectedAssignment.status === 'INVITED' && (
                   <Card className="p-6 bg-warning/5 border-warning/20 space-y-4">
-                    <h3 className="text-base font-bold text-warning flex items-center gap-2">
+                    <h3 className="text-h3 text-warning flex items-center gap-2">
                       <AlertTriangle className="w-5 h-5" />
                       <span>{isAr ? 'دعوة تحكيم جديدة — يرجى تأكيد القبول أو الاعتذار' : 'New Review Invitation'}</span>
                     </h3>
-                    <p className="text-sm text-[var(--ds-text-secondary)]">
+                    <p className="text-body-sm text-[var(--ds-text-secondary)]">
                       {isAr ? 'يرجى مراجعة ملخص البحث أعلاه وتأكيد خلو التحكيم من أي تضارب للمصالح قبل البدء.' : 'Please confirm acceptance and absence of conflict of interest.'}
                     </p>
                     <div className="flex gap-3 pt-2">
@@ -520,7 +520,7 @@ export const ReviewerDashboard: React.FC = () => {
                 {selectedAssignment.status !== 'INVITED' && rubric && (
                   <Card className="p-6 space-y-6">
                     <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-3">
-                      <h3 className="text-base font-bold text-[var(--ds-text-primary)] flex items-center gap-2">
+                      <h3 className="text-h3 text-[var(--ds-text-primary)] flex items-center gap-2">
                         <ListChecks className="w-5 h-5 text-success" />
                         <span>{rubric.name_ar}</span>
                       </h3>
@@ -544,7 +544,7 @@ export const ReviewerDashboard: React.FC = () => {
                               {criterion.weight * 100}%
                             </span>
                           </div>
-                          {criterion.desc_ar && <p className="text-xs text-[var(--ds-text-muted)]">{criterion.desc_ar}</p>}
+                          {criterion.desc_ar && <p className="text-caption text-[var(--ds-text-muted)]">{criterion.desc_ar}</p>}
 
                           {/* Score Selector */}
                           <div className="flex items-center gap-2 pt-2">
@@ -686,11 +686,11 @@ export const ReviewerDashboard: React.FC = () => {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-[var(--ds-text-primary)] flex items-center gap-2">
+              <h2 className="text-h2 text-[var(--ds-text-primary)] flex items-center gap-2">
                 <Layers className="w-5 h-5 text-success" />
                 <span>{isAr ? 'ملفات التحكيم العلمي والمخطوطات قيد المراجعة' : 'Editorial Peer Review Cases'}</span>
               </h2>
-              <p className="text-xs text-[var(--ds-text-muted)] mt-0.5">
+              <p className="text-caption text-[var(--ds-text-muted)] mt-0.5">
                 {isAr ? 'متابعة جولات التحكيم، توزيع المحكمين، وتسجيل القرارات الأكاديمية النهائية' : 'Oversee rounds, reviewer assignments, and record human decisions'}
               </p>
             </div>
@@ -720,7 +720,7 @@ export const ReviewerDashboard: React.FC = () => {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <span className="text-xs font-mono text-[var(--ds-text-muted)]">{c.id}</span>
-                      <h3 className="text-base font-bold text-[var(--ds-text-primary)] mt-1">{c.title_ar}</h3>
+                      <h3 className="text-h3 text-[var(--ds-text-primary)] mt-1">{c.title_ar}</h3>
                     </div>
                     <span className={`text-xs px-2.5 py-1 rounded-full font-bold ${
                       c.status === 'DECIDED' ? 'bg-[var(--ds-success-soft)] text-success border border-success/20' :
@@ -847,7 +847,7 @@ export const ReviewerDashboard: React.FC = () => {
               className="w-full p-3 rounded-xl bg-[var(--ds-surface-sunken)] border border-[var(--ds-border-subtle)] text-sm text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
             />
             {newCaseTitleError && (
-              <p id="new-case-title-error" role="alert" className="text-xs text-danger mt-1">
+              <p id="new-case-title-error" role="alert" className="text-caption text-danger mt-1">
                 {newCaseTitleError}
               </p>
             )}
@@ -900,7 +900,7 @@ export const ReviewerDashboard: React.FC = () => {
         }
       >
         <div className="space-y-3 text-start">
-          <p className="text-xs text-[var(--ds-text-muted)] flex items-center gap-2">
+          <p className="text-caption text-[var(--ds-text-muted)] flex items-center gap-2">
             <Award className="w-4 h-4 text-success flex-shrink-0" />
             <span>{isAr ? 'وفقاً لمبدأ الحوكمة الأكاديمية (Human-in-the-Loop)، هذا القرار يصدر حصرياً من قبل عضو اللجنة البشري.' : 'Human-in-the-loop editorial decision.'}</span>
           </p>
@@ -946,7 +946,7 @@ export const ReviewerDashboard: React.FC = () => {
               rows={4}
             />
             {editorialNotesError && (
-              <p id="editorial-notes-error" role="alert" className="text-xs text-danger mt-1">
+              <p id="editorial-notes-error" role="alert" className="text-caption text-danger mt-1">
                 {editorialNotesError}
               </p>
             )}

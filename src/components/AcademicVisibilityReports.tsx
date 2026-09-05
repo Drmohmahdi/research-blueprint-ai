@@ -162,8 +162,8 @@ export const AcademicVisibilityReports: React.FC = () => {
               {isAr ? 'تقرير الانتشار الأكاديمي' : 'Academic Visibility Report'}
             </span>
           </div>
-          <h2 className="text-xl md:text-2xl font-extrabold text-[var(--ds-text-primary)] m-0">{displayName}</h2>
-          <p className="text-xs text-[var(--ds-text-muted)] m-0">{new Date().toLocaleDateString(isAr ? 'ar' : 'en')}</p>
+          <h2 className="text-h2 text-[var(--ds-text-primary)] m-0">{displayName}</h2>
+          <p className="text-caption text-[var(--ds-text-muted)] m-0">{new Date().toLocaleDateString(isAr ? 'ar' : 'en')}</p>
         </div>
         <div className="flex items-center gap-2 print:hidden">
           <button
@@ -219,7 +219,7 @@ export const AcademicVisibilityReports: React.FC = () => {
         {/* Channels breakdown */}
         <div className="lg:col-span-5 space-y-6">
           <Card className="p-5 space-y-3">
-            <h3 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center gap-2">
+            <h3 className="text-h3 text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center gap-2">
               <Globe className="text-path-identity" size={16} />
               <span>{isAr ? 'حالة قنوات الهوية' : 'Identity Channel Status'}</span>
             </h3>
@@ -249,7 +249,7 @@ export const AcademicVisibilityReports: React.FC = () => {
           </Card>
 
           <Card className="p-5 space-y-3">
-            <h3 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0">
+            <h3 className="text-h3 text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0">
               {isAr ? 'الأصول حسب النوع' : 'Assets by Type'}
             </h3>
             {Object.keys(byType).length === 0 ? (
@@ -280,7 +280,7 @@ export const AcademicVisibilityReports: React.FC = () => {
           </Card>
 
           <Card className="p-5 space-y-3">
-            <h3 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0">
+            <h3 className="text-h3 text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0">
               {isAr ? 'الأصول حسب حالة النشر' : 'Assets by Publication Status'}
             </h3>
             {Object.keys(byStatus).length === 0 ? (
@@ -305,7 +305,7 @@ export const AcademicVisibilityReports: React.FC = () => {
           </Card>
 
           <Card className="p-5 space-y-3">
-            <h3 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center gap-2">
+            <h3 className="text-h3 text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center gap-2">
               <School className="text-path-identity" size={16} />
               <span>{isAr ? 'الانتماءات الأكاديمية' : 'Academic Affiliations'}</span>
             </h3>
@@ -344,7 +344,7 @@ export const AcademicVisibilityReports: React.FC = () => {
         {/* Publication timeline */}
         <div className="lg:col-span-7">
           <Card className="p-5 space-y-3">
-            <h3 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center gap-2">
+            <h3 className="text-h3 text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center gap-2">
               <Calendar className="text-path-identity" size={16} />
               <span>{isAr ? 'الجدول الزمني للمنشورات' : 'Publication Timeline'}</span>
             </h3>
@@ -360,7 +360,7 @@ export const AcademicVisibilityReports: React.FC = () => {
                 {timeline.map((a) => (
                   <div key={a.id} className="flex items-start justify-between gap-3 p-2.5 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg">
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-[var(--ds-text-primary)] m-0 truncate">
+                      <p className="text-caption font-bold text-[var(--ds-text-primary)] m-0 truncate">
                         {isAr ? (a.title_ar || a.title_en) : (a.title_en || a.title_ar)}
                       </p>
                       <p className="text-[10px] text-[var(--ds-text-muted)] m-0 mt-0.5">

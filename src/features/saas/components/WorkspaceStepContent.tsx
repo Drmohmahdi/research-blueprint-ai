@@ -60,10 +60,10 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
       {/* Step Header */}
       <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-4">
         <div>
-          <h4 className="text-base font-black m-0">
+          <h4 className="text-h4 m-0">
             {language === 'ar' ? stepConfig.titleAr : stepConfig.titleEn}
           </h4>
-          <p className="text-xs text-[var(--ds-text-muted)] font-semibold mt-1 mb-0">
+          <p className="text-caption text-[var(--ds-text-muted)] font-semibold mt-1 mb-0">
             {language === 'ar' ? stepConfig.descriptionAr : stepConfig.descriptionEn}
           </p>
         </div>
@@ -170,7 +170,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
           {activeStep === 'questionsHypotheses' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between gap-3">
-                <p className="m-0 text-xs font-semibold text-[var(--ds-text-secondary)]">
+                <p className="text-caption m-0 font-semibold text-[var(--ds-text-secondary)]">
                   {language === 'ar' ? 'أضف أسئلة الدراسة والفروض هنا داخل مساحة التصميم.' : 'Add research questions and hypotheses here inside the design workspace.'}
                 </p>
                 <Button type="button" size="sm" onClick={() => updateProject({
@@ -179,7 +179,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
                 })}>{language === 'ar' ? 'إضافة سؤال' : 'Add question'}</Button>
               </div>
               {(activeProject.questions || []).length === 0 ? (
-                <p className="text-xs text-[var(--ds-text-muted)]">{language === 'ar' ? 'لا أسئلة بعد.' : 'No questions yet.'}</p>
+                <p className="text-caption text-[var(--ds-text-muted)]">{language === 'ar' ? 'لا أسئلة بعد.' : 'No questions yet.'}</p>
               ) : (activeProject.questions || []).map((question, index) => (
                 <div key={question.id} className="space-y-2 rounded-xl border border-[var(--ds-border-subtle)] p-3">
                   <input
@@ -231,7 +231,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
           {activeStep === 'variables' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between gap-3">
-                <p className="m-0 text-xs font-semibold text-[var(--ds-text-secondary)]">
+                <p className="text-caption m-0 font-semibold text-[var(--ds-text-secondary)]">
                   {language === 'ar' ? 'عرّف متغيرات الدراسة داخل مساحة التصميم.' : 'Define study variables inside the design workspace.'}
                 </p>
                 <Button type="button" size="sm" onClick={() => updateProject({

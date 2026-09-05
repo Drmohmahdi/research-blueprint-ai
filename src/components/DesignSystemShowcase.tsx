@@ -184,22 +184,22 @@ export const DesignSystemShowcase: React.FC = () => {
             <div className="space-y-3 p-6 border border-[var(--ds-border-subtle)] rounded-2xl bg-[var(--ds-surface-primary)]">
               <div>
                 <span className="text-[9px] text-[var(--ds-text-muted)] uppercase block font-bold">IBM Plex Sans Arabic — المعتمد للواجهات</span>
-                <h2 className="font-arabic-plex text-3xl md:text-4xl font-bold m-0 text-[var(--ds-text-primary)]">بصيرة للبحث العلمي</h2>
-                <p className="font-arabic-plex text-sm text-[var(--ds-text-secondary)] mt-2 m-0 leading-relaxed">منهجية أوضح، أرقام أدق، وحروف عربية تناسب المختبر الأكاديمي دون اتساع Noto الوثائقي.</p>
+                <h2 className="text-h2 font-arabic-plex m-0 text-[var(--ds-text-primary)]">بصيرة للبحث العلمي</h2>
+                <p className="text-body-sm font-arabic-plex text-[var(--ds-text-secondary)] mt-2 m-0">منهجية أوضح، أرقام أدق، وحروف عربية تناسب المختبر الأكاديمي دون اتساع Noto الوثائقي.</p>
               </div>
               <div className="pt-2 border-t border-[var(--ds-border-subtle)]">
                 <span className="text-[9px] text-[var(--ds-text-muted)] uppercase block font-bold">Noto Sans Arabic — احتياطي للرموز النادرة</span>
-                <h3 className="font-arabic-noto text-lg md:text-xl font-bold m-0 text-[var(--ds-text-primary)]">مختبر تصميم ومحاكاة البحوث العلمية</h3>
-                <p className="font-arabic-noto text-xs text-[var(--ds-text-secondary)] leading-relaxed m-0 mt-1">أوسع قليلًا وأكثر وثائقية؛ يبقى احتياطيًا بعد المقارنة.</p>
+                <h3 className="text-h3 font-arabic-noto m-0 text-[var(--ds-text-primary)]">مختبر تصميم ومحاكاة البحوث العلمية</h3>
+                <p className="text-caption font-arabic-noto text-[var(--ds-text-secondary)] m-0 mt-1">أوسع قليلًا وأكثر وثائقية؛ يبقى احتياطيًا بعد المقارنة.</p>
               </div>
               <div className="pt-2 border-t border-[var(--ds-border-subtle)] grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <span className="text-[9px] text-[var(--ds-text-muted)] uppercase block font-bold">Inter — English UI</span>
-                  <p className="font-latin-inter text-sm text-[var(--ds-text-primary)] m-0">Precise academic interface 0123456789</p>
+                  <p className="text-body-sm font-latin-inter text-[var(--ds-text-primary)] m-0">Precise academic interface 0123456789</p>
                 </div>
                 <div>
                   <span className="text-[9px] text-[var(--ds-text-muted)] uppercase block font-bold">IBM Plex Sans — fallback</span>
-                  <p className="font-latin-plex text-sm text-[var(--ds-text-primary)] m-0">Institutional companion 0123456789</p>
+                  <p className="text-body-sm font-latin-plex text-[var(--ds-text-primary)] m-0">Institutional companion 0123456789</p>
                 </div>
               </div>
             </div>
@@ -319,7 +319,7 @@ export const DesignSystemShowcase: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card variant="default" className="space-y-2">
                 <Badge variant="simulated">SIMULATED</Badge>
-                <h4 className="text-xs font-extrabold m-0 mt-2">{language === 'ar' ? 'بطاقة محاكاة إرشادية' : 'Interactive Simulation Card'}</h4>
+                <h4 className="text-h4 m-0 mt-2">{language === 'ar' ? 'بطاقة محاكاة إرشادية' : 'Interactive Simulation Card'}</h4>
                 <p className="text-[11px] text-[var(--ds-text-secondary)] leading-relaxed m-0">
                   توضح هذه البطاقة النموذجية البيانات المولدة عشوائياً للسيناريوهات المنهجية.
                 </p>
@@ -327,7 +327,7 @@ export const DesignSystemShowcase: React.FC = () => {
 
               <Card variant="ai-accent" className="space-y-2">
                 <Badge variant="predicted">PREDICTED</Badge>
-                <h4 className="text-xs font-extrabold m-0 mt-2">{language === 'ar' ? 'توصيات الذكاء الاصطناعي' : 'AI Recommendation Context'}</h4>
+                <h4 className="text-h4 m-0 mt-2">{language === 'ar' ? 'توصيات الذكاء الاصطناعي' : 'AI Recommendation Context'}</h4>
                 <p className="text-[11px] text-[var(--ds-text-secondary)] leading-relaxed m-0">
                   يقدر نموذج الإنتاج نسبة نجاح الفرض بمقدار 81% بالنظر إلى المعطيات السابقة.
                 </p>

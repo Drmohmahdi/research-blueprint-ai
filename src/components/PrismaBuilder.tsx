@@ -261,10 +261,10 @@ export const PrismaBuilder: React.FC = () => {
     <div className="space-y-6 max-w-5xl mx-auto">
       <PathPanel accent="var(--ds-path-publication)">
         <div className="space-y-1">
-          <h2 className="text-lg font-black text-ink m-0">
+          <h2 className="text-h2 text-ink m-0">
             {language === 'ar' ? 'مخطط PRISMA لتدفق الدراسات' : 'PRISMA Study Flow Diagram'}
           </h2>
-          <p className="text-xs text-secondary m-0">
+          <p className="text-caption text-secondary m-0">
             {language === 'ar'
               ? 'وثّق أعداد الكشف والاستبعاد والإدراج وفق تقرير المراجعة المنهجية.'
               : 'Document identification, exclusion, and inclusion counts for the systematic review report.'}
@@ -326,7 +326,7 @@ export const PrismaBuilder: React.FC = () => {
         
         {/* Left Side: Numeric inputs */}
         <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-4">
-          <h3 className="text-md font-bold text-[var(--ds-text-primary)] m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
+          <h3 className="text-h3 text-[var(--ds-text-primary)] m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
             {language === 'ar' ? 'بيانات مخطط PRISMA' : 'PRISMA Diagram Counts'}
           </h3>
 
@@ -402,7 +402,7 @@ export const PrismaBuilder: React.FC = () => {
         {/* Right Side: SVG Diagram */}
         <div className="lg:col-span-2 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-4">
           <div className="flex justify-between items-center pb-2 border-b border-[var(--ds-border-subtle)]">
-            <h4 className="text-sm font-bold text-[var(--ds-text-primary)] m-0">
+            <h4 className="text-h4 text-[var(--ds-text-primary)] m-0">
               {language === 'ar' ? 'مخطط التدفق PRISMA 2020 Flow Diagram' : 'PRISMA 2020 Flow Diagram'}
             </h4>
           </div>

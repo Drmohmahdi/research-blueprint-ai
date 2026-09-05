@@ -134,10 +134,10 @@ export const DataInspector: React.FC = () => {
     <div className="space-y-6 max-w-4xl mx-auto">
       <PathPanel accent="var(--ds-path-data)">
         <div className="space-y-1">
-          <h2 className="text-lg font-black text-ink m-0">
+          <h2 className="text-h2 text-ink m-0">
             {language === 'ar' ? 'مدقق وفاحص جودة البيانات الميدانية' : 'Field Data Quality Inspector'}
           </h2>
-          <p className="text-xs text-secondary m-0">
+          <p className="text-caption text-secondary m-0">
             {language === 'ar'
               ? 'افحص القيم المفقودة والمتطرفة وسلامة الفروض الإحصائية قبل التحليل الفعلي.'
               : 'Inspect missing values, outliers, and test assumptions before analysis.'}
@@ -148,10 +148,10 @@ export const DataInspector: React.FC = () => {
       <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-6 shadow-sm space-y-4 text-center">
         <Database size={40} className="text-[var(--ds-primary)] mx-auto" />
         <div>
-          <h3 className="text-md font-bold text-[var(--ds-text-primary)] m-0">
+          <h3 className="text-h3 text-[var(--ds-text-primary)] m-0">
             {language === 'ar' ? 'رفع ملف البيانات' : 'Upload a data file'}
           </h3>
-          <p className="text-xs text-[var(--ds-text-secondary)] mt-1 max-w-lg mx-auto">
+          <p className="text-caption text-[var(--ds-text-secondary)] mt-1 max-w-lg mx-auto">
             {language === 'ar'
               ? 'ارفع ملف درجات الطلاب أو الاستبانة (CSV/XLSX) لفحص الجودة قبل التحليل.'
               : 'Upload student scores or survey files (CSV/XLSX) to inspect quality before analysis.'}
@@ -194,7 +194,7 @@ export const DataInspector: React.FC = () => {
         </div>
 
         {selectedFile && (
-          <p className="text-xs text-[var(--ds-text-secondary)] m-0" data-testid="selected-data-file">
+          <p className="text-caption text-[var(--ds-text-secondary)] m-0" data-testid="selected-data-file">
             {language === 'ar' ? 'الملف المحدد:' : 'Selected file:'} {selectedFile.name}
           </p>
         )}
@@ -210,7 +210,7 @@ export const DataInspector: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Quality Rating */}
           <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-4 flex flex-col items-center justify-center">
-            <h4 className="text-xs font-bold text-[var(--ds-text-muted)] uppercase tracking-wider block text-center">
+            <h4 className="text-h4 text-[var(--ds-text-muted)] uppercase block text-center">
               {language === 'ar' ? 'مؤشر جودة البيانات الفعلي' : 'Actual Data Quality Score'}
             </h4>
             <div className="w-20 h-20 rounded-full border-4 flex flex-col items-center justify-center" style={{ borderColor: `${qualityTone}33` }}>
@@ -238,7 +238,7 @@ export const DataInspector: React.FC = () => {
 
           {/* Detailed Checks */}
           <div className="lg:col-span-2 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-4">
-            <h4 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
+            <h4 className="text-h4 text-[var(--ds-text-primary)] m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
               {language === 'ar' ? 'تقرير الفحص المنهجي للبيانات' : 'Data Integrity Audit Report'}
             </h4>
 

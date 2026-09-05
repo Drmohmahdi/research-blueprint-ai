@@ -38,9 +38,9 @@ export const GraduateStudiesDashboard: React.FC = () => {
   return (
     <section className="mx-auto max-w-[1440px] min-w-0 space-y-5 pb-16" aria-labelledby="gs-title">
       <PathPanel accent="var(--ds-path-research)">
-        <p className="m-0 text-xs font-black text-[var(--ds-primary)]">BASEERAH · GRADUATE STUDIES</p>
-        <h2 id="gs-title" className="m-0 mt-2 text-2xl font-black md:text-4xl">{ar ? 'عمليات الدراسات العليا' : 'Graduate Studies operations'}</h2>
-        <p className="mt-2 max-w-3xl text-sm text-[var(--ds-text-secondary)]">{ar ? 'لوحة تشغيلية تجميعية: لا ملاحظات مشرف خاصة، ولا تقارير مناقش سرية، ولا فصول غير منشورة.' : 'An operational aggregate board: no private supervisor notes, confidential examiner reports, or unpublished chapters.'}</p>
+        <p className="text-caption m-0 font-black text-[var(--ds-primary)]">BASEERAH · GRADUATE STUDIES</p>
+        <h2 id="gs-title" className="text-h2 m-0 mt-2">{ar ? 'عمليات الدراسات العليا' : 'Graduate Studies operations'}</h2>
+        <p className="text-body-sm mt-2 max-w-3xl text-[var(--ds-text-secondary)]">{ar ? 'لوحة تشغيلية تجميعية: لا ملاحظات مشرف خاصة، ولا تقارير مناقش سرية، ولا فصول غير منشورة.' : 'An operational aggregate board: no private supervisor notes, confidential examiner reports, or unpublished chapters.'}</p>
       </PathPanel>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {metrics.map(([label, value]) => (
@@ -48,7 +48,7 @@ export const GraduateStudiesDashboard: React.FC = () => {
         ))}
       </div>
       <Card>
-        <h3 className="mt-0 text-lg font-black">{ar ? 'توزيع المراحل' : 'Stage distribution'}</h3>
+        <h3 className="text-h3 mt-0">{ar ? 'توزيع المراحل' : 'Stage distribution'}</h3>
         <ul className="space-y-2 p-0">{Object.entries(summary.stage_distribution || {}).map(([stage, count]) => <li key={stage} className="list-none text-sm font-bold">{stage}: <span className="ds-numeric">{String(count)}</span></li>)}</ul>
       </Card>
     </section>

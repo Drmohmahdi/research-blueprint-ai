@@ -306,10 +306,10 @@ export const AcademicVisibilityDashboard: React.FC = () => {
               {isAr ? 'الهوية الرقمية والانتشار الأكاديمي للباحثين' : 'Academic Identity & Visibility Suite'}
             </span>
           </div>
-          <h2 className="text-xl md:text-2xl font-extrabold text-[var(--ds-text-primary)] m-0">
+          <h2 className="text-h2 text-[var(--ds-text-primary)] m-0">
             {headerName}
           </h2>
-          <p className="text-sm text-[var(--ds-text-secondary)] max-w-2xl m-0 leading-relaxed">
+          <p className="text-body-sm text-[var(--ds-text-secondary)] max-w-2xl m-0">
             {isAr
               ? 'ابنِ حضورك الرقمي المتسق، ووحد صياغة اسمك العلمي، وراجع اتساق ملفاتك على Scopus و Google Scholar لتعظيم الاستشهادات.'
               : 'Build a consistent digital footprint, unify your academic name formats, and audit profiles on Scopus and Google Scholar to optimize citation tracking.'}
@@ -358,7 +358,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
           {/* Identity audit */}
           <Card id="visibility-audit" className="p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-2">
-              <h3 className="text-xs font-black text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
+              <h3 className="text-h3 text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
                 <User className="text-path-identity" size={16} />
                 <span>{isAr ? 'تدقيق الاتساق والاسم الأكاديمي' : 'Academic Name Consistency Audit'}</span>
               </h3>
@@ -434,11 +434,11 @@ export const AcademicVisibilityDashboard: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <span className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase block mb-1">{isAr ? 'الاسم المفضّل (عربي)' : 'Preferred Name (Arabic)'}</span>
-                  <p className="text-xs font-bold text-[var(--ds-text-primary)] m-0">{profile.preferred_name_ar || '—'}</p>
+                  <p className="text-caption font-bold text-[var(--ds-text-primary)] m-0">{profile.preferred_name_ar || '—'}</p>
                 </div>
                 <div>
                   <span className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase block mb-1">{isAr ? 'الاسم المفضل (إنجليزي)' : 'Preferred Name (English)'}</span>
-                  <p className="text-xs font-bold text-[var(--ds-text-primary)] m-0">{profile.preferred_name_en || '—'}</p>
+                  <p className="text-caption font-bold text-[var(--ds-text-primary)] m-0">{profile.preferred_name_en || '—'}</p>
                 </div>
                 <div className="sm:col-span-2">
                   <div className="flex items-center justify-between mb-1">
@@ -450,7 +450,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                       </div>
                     )}
                   </div>
-                  <p className="text-xs font-bold text-[var(--ds-text-primary)] m-0">
+                  <p className="text-caption font-bold text-[var(--ds-text-primary)] m-0">
                     {profile.name_variants_json.length > 0 ? profile.name_variants_json.join('، ') : (isAr ? 'لا توجد صيغ مسجّلة بعد.' : 'No variants recorded yet.')}
                   </p>
                 </div>
@@ -461,7 +461,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
           {/* Institution & affiliations, read-only summary from the unified profile */}
           <Card className="p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-2">
-              <h3 className="text-xs font-black text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
+              <h3 className="text-h3 text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
                 <School className="text-path-identity" size={16} />
                 <span>{isAr ? 'المؤسسة والانتماء الأكاديمي' : 'Institution & Affiliation'}</span>
               </h3>
@@ -531,7 +531,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
           {/* Real bio & keywords, sourced from the unified profile */}
           <Card className="p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-2">
-              <h3 className="text-xs font-black text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
+              <h3 className="text-h3 text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
                 <Sparkles className="text-path-identity" size={16} />
                 <span>{isAr ? 'السيرة والكلمات المفتاحية للنشر' : 'Publishing Bio & Keywords'}</span>
               </h3>
@@ -566,7 +566,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                         <span>{copiedKey === 'short' ? (isAr ? 'تم النسخ!' : 'Copied!') : (isAr ? 'نسخ' : 'Copy')}</span>
                       </button>
                     </div>
-                    <p className="text-xs font-bold text-[var(--ds-text-secondary)] m-0 leading-relaxed">{isAr ? (profile.short_bio_ar || profile.short_bio_en) : (profile.short_bio_en || profile.short_bio_ar)}</p>
+                    <p className="text-caption font-bold text-[var(--ds-text-secondary)] m-0">{isAr ? (profile.short_bio_ar || profile.short_bio_en) : (profile.short_bio_en || profile.short_bio_ar)}</p>
                   </div>
                 )}
 
@@ -584,7 +584,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                         <span>{copiedKey === 'full' ? (isAr ? 'تم النسخ!' : 'Copied!') : (isAr ? 'نسخ' : 'Copy')}</span>
                       </button>
                     </div>
-                    <p className="text-xs font-bold text-[var(--ds-text-secondary)] m-0 leading-relaxed">{isAr ? (profile.full_bio_ar || profile.full_bio_en) : (profile.full_bio_en || profile.full_bio_ar)}</p>
+                    <p className="text-caption font-bold text-[var(--ds-text-secondary)] m-0">{isAr ? (profile.full_bio_ar || profile.full_bio_en) : (profile.full_bio_en || profile.full_bio_ar)}</p>
                   </div>
                 )}
 
@@ -602,7 +602,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                         <span>{copiedKey === 'kw' ? (isAr ? 'تم النسخ!' : 'Copied!') : (isAr ? 'نسخ' : 'Copy')}</span>
                       </button>
                     </div>
-                    <p className="text-xs font-bold text-[var(--ds-text-secondary)] m-0 leading-relaxed font-mono">{isAr ? (keywordsAr || keywordsEn) : (keywordsEn || keywordsAr)}</p>
+                    <p className="text-caption font-bold text-[var(--ds-text-secondary)] m-0 font-mono">{isAr ? (keywordsAr || keywordsEn) : (keywordsEn || keywordsAr)}</p>
                   </div>
                 )}
               </div>
@@ -615,7 +615,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
 
           {/* Channel list, backed by real AcademicIdentifier rows */}
           <Card className="p-5 space-y-4">
-            <h3 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center gap-2">
+            <h3 className="text-h3 text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center gap-2">
               <Globe className="text-path-identity" size={16} />
               <span>{isAr ? 'قنوات وملفات الهوية العلمية' : 'Academic Identity Channels'}</span>
             </h3>
@@ -803,14 +803,14 @@ export const AcademicVisibilityDashboard: React.FC = () => {
 
           {/* Reputation plan, computed live from real profile completeness */}
           <Card id="visibility-plan" className="p-5 space-y-4">
-            <h3 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center gap-2">
+            <h3 className="text-h3 text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center gap-2">
               <CheckSquare className="text-path-identity" size={16} />
               <span>{isAr ? 'خطة بناء السمعة الأكاديمية' : 'Academic Reputation Plan'}</span>
             </h3>
 
             <div className="space-y-3">
               {tasks.filter(t => !t.done).length === 0 ? (
-                <p className="text-xs font-bold text-success m-0 text-center py-3">
+                <p className="text-caption font-bold text-success m-0 text-center py-3">
                   {isAr ? 'ملفك مكتمل — لا مهام متبقية حاليًا.' : 'Your profile is complete — no tasks remaining.'}
                 </p>
               ) : (
@@ -832,7 +832,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                       className="mt-0.5 h-4 w-4 shrink-0 rounded border-[var(--ds-border-default)] text-[var(--ds-primary)] focus:ring-[var(--ds-primary)] cursor-pointer"
                     />
                     <div className="flex-1 space-y-1">
-                      <p className="text-xs font-bold leading-normal m-0">
+                      <p className="text-caption font-bold m-0">
                         {isAr ? task.textAr : task.textEn}
                       </p>
                       <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded border inline-block ${

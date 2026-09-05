@@ -255,12 +255,12 @@ export const Login: React.FC = () => {
               <span className="px-2.5 py-1 rounded-md text-[9px] font-black bg-[var(--ds-accent-gold-soft)] border border-[var(--ds-accent-gold)]/25 text-[var(--ds-accent-gold)] tracking-wider uppercase">
                 {language === 'ar' ? 'الجودة الأكاديمية السعودية' : 'Saudi Academic Premium'}
               </span>
-              <h1 className="text-2xl font-black leading-tight text-ink m-0">
+              <h1 className="text-h1 text-ink m-0">
                 {language === 'ar' 
                   ? 'المختبر الأكاديمي الذكي للبحث العلمي' 
                   : 'The Intelligent Academic Research Lab'}
               </h1>
-              <p className="text-xs text-secondary leading-relaxed font-semibold">
+              <p className="text-caption text-secondary font-semibold">
                 {language === 'ar'
                   ? 'بوابة متكاملة لتصميم الدراسات، التحليل الإحصائي التلقائي، محاكاة السيناريوهات، المراجعة والتحكيم وعزل البيانات.'
                   : 'An all-in-one portal for designing studies, automated statistics, outcome forecasting, peer review, and secure isolation.'}
@@ -312,7 +312,7 @@ export const Login: React.FC = () => {
             
             {/* Header info */}
             <div className="space-y-1.5 text-center lg:text-right">
-              <h2 className="text-xl md:text-2xl font-black text-ink m-0 tracking-wide">
+              <h2 className="text-h2 text-ink m-0">
                 {authMode === 'login' 
                   ? (language === 'ar' ? 'مرحباً بك مجدداً في بصيرة' : 'Welcome Back to Baseerah')
                   : authMode === 'forgot'
@@ -321,7 +321,7 @@ export const Login: React.FC = () => {
                   ? (language === 'ar' ? 'كلمة مرور جديدة' : 'Choose a new password')
                   : (language === 'ar' ? 'إنشاء حساب جديد بالمنصة' : 'Join Baseerah Platform')}
               </h2>
-              <p className="text-xs text-[var(--ds-text-muted)] font-bold leading-normal">
+              <p className="text-caption text-[var(--ds-text-muted)] font-bold">
                 {authMode === 'login'
                   ? (language === 'ar' ? 'قم بتسجيل الدخول للبدء بمراجعة أو تعديل أبحاثك.' : 'Sign in to access your research workspace.')
                   : authMode === 'forgot'
@@ -383,7 +383,7 @@ export const Login: React.FC = () => {
                           )}
                         </div>
                         <div className="mt-4">
-                          <h4 className="text-xs font-black text-ink m-0">
+                          <h4 className="text-h4 text-ink m-0">
                             {language === 'ar' ? roleItem.titleAr : roleItem.titleEn}
                           </h4>
                           <p className="text-[9px] text-[var(--ds-text-muted)] font-bold leading-normal mt-1 mb-0 line-clamp-2">

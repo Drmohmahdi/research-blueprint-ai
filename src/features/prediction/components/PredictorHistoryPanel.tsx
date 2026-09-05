@@ -21,7 +21,7 @@ export const PredictorHistoryPanel: React.FC<PredictorHistoryPanelProps> = ({ en
 
   return (
     <Card className="space-y-3">
-      <h4 className="text-xs font-extrabold text-[var(--ds-text-primary)] m-0 flex items-center gap-1.5">
+      <h4 className="text-h4 text-[var(--ds-text-primary)] m-0 flex items-center gap-1.5">
         <History size={14} className="text-[var(--ds-primary)]" />
         {language === 'ar' ? 'سجل تشغيلات التنبؤ' : 'Forecast Run History'}
       </h4>

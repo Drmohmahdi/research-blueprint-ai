@@ -83,9 +83,9 @@ export const ResearchOfficeOperations: React.FC<ResearchOfficeOperationsProps> =
         <div className="flex items-start gap-3">
           <div className="p-3 rounded-xl bg-[var(--ds-primary-soft)] text-[var(--ds-primary)]"><Building2 size={24} /></div>
           <div>
-            <p className="m-0 text-xs font-black text-[var(--ds-primary)]">BASEERAH · RESEARCH OFFICE</p>
-            <h2 className="text-base font-bold text-[var(--ds-text-primary)] m-0 mt-1">{t('عمليات مكتب البحث', 'Research Office Operations')}</h2>
-            <p className="text-xs text-[var(--ds-text-secondary)] mt-1">
+            <p className="text-caption m-0 font-black text-[var(--ds-primary)]">BASEERAH · RESEARCH OFFICE</p>
+            <h2 className="text-h2 text-[var(--ds-text-primary)] m-0 mt-1">{t('عمليات مكتب البحث', 'Research Office Operations')}</h2>
+            <p className="text-caption text-[var(--ds-text-secondary)] mt-1">
               {t('نظرة تجميعية أولاً — لا يعرض هذا العرض محتوى بحثي خام.', 'Aggregate-first view — raw research content is never shown here.')}
             </p>
           </div>
@@ -109,9 +109,9 @@ export const ResearchOfficeOperations: React.FC<ResearchOfficeOperationsProps> =
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl p-4 space-y-2" data-testid="office-readiness">
-          <h3 className="text-xs font-bold text-[var(--ds-text-secondary)] uppercase tracking-wider">{t('توزيع الجاهزية', 'Readiness distribution')}</h3>
+          <h3 className="text-h3 text-[var(--ds-text-secondary)] uppercase">{t('توزيع الجاهزية', 'Readiness distribution')}</h3>
           {Object.keys(readiness).length === 0 ? (
-            <p className="text-xs text-[var(--ds-text-secondary)]">{t('لا بيانات', 'No data')}</p>
+            <p className="text-caption text-[var(--ds-text-secondary)]">{t('لا بيانات', 'No data')}</p>
           ) : (
             Object.entries(readiness).map(([k, v]) => (
               <div key={k} className="flex items-center justify-between text-xs">
@@ -123,7 +123,7 @@ export const ResearchOfficeOperations: React.FC<ResearchOfficeOperationsProps> =
         </div>
 
         <div className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl p-4 space-y-2" data-testid="office-types">
-          <h3 className="text-xs font-bold text-[var(--ds-text-secondary)] uppercase tracking-wider">{t('توزيع أنواع الأبحاث', 'Research-type distribution')}</h3>
+          <h3 className="text-h3 text-[var(--ds-text-secondary)] uppercase">{t('توزيع أنواع الأبحاث', 'Research-type distribution')}</h3>
           {Object.entries(types).map(([k, v]) => (
             <div key={k} className="flex items-center justify-between text-xs">
               <span className="font-semibold text-[var(--ds-text-primary)]">{k}</span>
@@ -133,7 +133,7 @@ export const ResearchOfficeOperations: React.FC<ResearchOfficeOperationsProps> =
         </div>
 
         <div className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl p-4 space-y-2" data-testid="office-blockers">
-          <h3 className="text-xs font-bold text-[var(--ds-text-secondary)] uppercase tracking-wider">{t('توزيع العوائق', 'Blocker distribution')}</h3>
+          <h3 className="text-h3 text-[var(--ds-text-secondary)] uppercase">{t('توزيع العوائق', 'Blocker distribution')}</h3>
           {Object.entries(blockers).map(([k, v]) => (
             <div key={k} className="flex items-center justify-between text-xs">
               <span className="font-semibold text-[var(--ds-text-primary)]">{k} {t('عوائق', 'blocker(s)')}</span>
@@ -144,7 +144,7 @@ export const ResearchOfficeOperations: React.FC<ResearchOfficeOperationsProps> =
       </div>
 
       <div className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl p-4" data-testid="office-project-list">
-        <h3 className="text-xs font-bold text-[var(--ds-text-secondary)] uppercase tracking-wider mb-2">{t('ملخص المشاريع (بدون محتوى خام)', 'Project summary (no raw content)')}</h3>
+        <h3 className="text-h3 text-[var(--ds-text-secondary)] uppercase mb-2">{t('ملخص المشاريع (بدون محتوى خام)', 'Project summary (no raw content)')}</h3>
         <table className="w-full text-xs">
           <thead>
             <tr className="text-left border-b border-[var(--ds-border-subtle)]">

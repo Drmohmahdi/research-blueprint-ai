@@ -89,10 +89,10 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
     <div className="space-y-8">
       <PathPanel accent="var(--ds-path-identity)">
         <div className="space-y-1">
-          <h2 className="text-lg font-black text-ink m-0">
+          <h2 className="text-h2 text-ink m-0">
             {language === 'ar' ? 'الاشتراك والفوترة' : 'Subscription & Billing'}
           </h2>
-          <p className="text-xs text-secondary m-0">
+          <p className="text-caption text-secondary m-0">
             {language === 'ar'
               ? 'راجع الخطة الحالية والاستخدام والفواتير دون مغادرة مساحة العمل.'
               : 'Review the current plan, usage, and invoices without leaving the workspace.'}
@@ -131,7 +131,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
                 <CreditCard size={20} />
               </div>
               <div>
-                <h4 className="text-base font-black m-0">{activePlan ? activePlan.name : (quota.plan_name || 'Free Plan')}</h4>
+                <h4 className="text-h4 m-0">{activePlan ? activePlan.name : (quota.plan_name || 'Free Plan')}</h4>
                 <div className="text-[10px] text-[var(--ds-text-muted)] font-semibold mt-0.5">
                   {activeSub?.status === 'ACTIVE' 
                     ? (language === 'ar' ? 'استحقاقات الخطة نشطة' : 'Plan entitlements active') 
@@ -202,7 +202,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
 
       {/* Available Subscriptions Tier Matrix */}
       <div>
-        <h3 className="text-sm font-black mb-6 uppercase tracking-widest text-[var(--ds-text-muted)]">
+        <h3 className="text-h3 mb-6 uppercase text-[var(--ds-text-muted)]">
           {language === 'ar' ? 'خطط وباقات الاستخدام المتاحة' : 'Available Subscription Tiers'}
         </h3>
         
@@ -227,7 +227,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
 
                 <div className="space-y-5">
                   <div>
-                    <h4 className="text-base font-black m-0">{plan.name}</h4>
+                    <h4 className="text-h4 m-0">{plan.name}</h4>
                     <p className="text-[10px] text-[var(--ds-text-muted)] font-semibold mt-1 leading-relaxed">
                       {plan.description}
                     </p>
@@ -286,7 +286,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
       {/* Invoice Billing History Table */}
       {invoices.length > 0 && (
         <div>
-          <h3 className="text-sm font-black mb-4 uppercase tracking-widest text-[var(--ds-text-muted)]">
+          <h3 className="text-h3 mb-4 uppercase text-[var(--ds-text-muted)]">
             {language === 'ar' ? 'سجل الفواتير والمدفوعات' : 'Billing & Invoice History'}
           </h3>
           <Card className="border-[var(--ds-border-subtle)] rounded-2xl overflow-hidden bg-[var(--ds-surface-primary)]">

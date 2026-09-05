@@ -73,13 +73,13 @@ export const MarketingLeadsPanel: React.FC<{ language: string }> = ({ language }
   };
 
   if (loading) {
-    return <p className="text-xs font-bold text-[var(--ds-text-muted)]">{isAr ? 'جارِ تحميل الطلبات...' : 'Loading leads...'}</p>;
+    return <p className="text-caption font-bold text-[var(--ds-text-muted)]">{isAr ? 'جارِ تحميل الطلبات...' : 'Loading leads...'}</p>;
   }
 
   if (leads.length === 0) {
     return (
       <Card className="p-6">
-        <p className="m-0 text-sm font-bold text-[var(--ds-text-secondary)]">
+        <p className="text-body-sm m-0 font-bold text-[var(--ds-text-secondary)]">
           {isAr ? 'لا توجد طلبات تواصل بعد. ستظهر هنا بعد إرسال نموذج الموقع.' : 'No inquiries yet. They appear here after the marketing form is submitted.'}
         </p>
       </Card>
@@ -97,9 +97,9 @@ export const MarketingLeadsPanel: React.FC<{ language: string }> = ({ language }
         <Card key={lead.id} className="p-4 space-y-2">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="m-0 text-sm font-black">{lead.name}</p>
-              <p className="m-0 mt-1 text-xs font-bold text-[var(--ds-text-muted)]" dir="ltr">{lead.email}</p>
-              {lead.organization && <p className="m-0 text-xs text-[var(--ds-text-secondary)]">{lead.organization}</p>}
+              <p className="text-body-sm m-0 font-black">{lead.name}</p>
+              <p className="text-caption m-0 mt-1 font-bold text-[var(--ds-text-muted)]" dir="ltr">{lead.email}</p>
+              {lead.organization && <p className="text-caption m-0 text-[var(--ds-text-secondary)]">{lead.organization}</p>}
             </div>
             <select
               className="text-xs font-bold rounded-xl border border-[var(--ds-border-default)] bg-[var(--ds-surface-secondary)] px-3 py-2"
@@ -115,7 +115,7 @@ export const MarketingLeadsPanel: React.FC<{ language: string }> = ({ language }
           <p className="m-0 text-[11px] font-semibold text-[var(--ds-text-muted)]">
             {lead.intent} · {lead.source_path || '—'} · {new Date(lead.created_at).toLocaleString(isAr ? 'ar-SA' : 'en-GB')}
           </p>
-          {lead.message && <p className="m-0 text-xs leading-relaxed text-[var(--ds-text-secondary)]">{lead.message}</p>}
+          {lead.message && <p className="text-caption m-0 text-[var(--ds-text-secondary)]">{lead.message}</p>}
           <label className="block space-y-1">
             <span className="text-[10px] font-bold text-[var(--ds-text-muted)]">{isAr ? 'ملاحظة المتابعة' : 'Follow-up note'}</span>
             <textarea

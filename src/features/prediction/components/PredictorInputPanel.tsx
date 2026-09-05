@@ -62,7 +62,7 @@ export const PredictorInputPanel: React.FC<PredictorInputPanelProps> = ({ engine
       {/* Readiness Index Card */}
       <Card variant="ai-accent" className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-[var(--ds-text-primary)] flex items-center gap-2 m-0">
+          <h3 className="text-h3 text-[var(--ds-text-primary)] flex items-center gap-2 m-0">
             <Gauge size={16} className="text-[var(--ds-primary)]" />
             {language === 'ar' ? 'جاهزية التنبؤ للمشروع' : 'Prediction Readiness Score'}
           </h3>
@@ -91,7 +91,7 @@ export const PredictorInputPanel: React.FC<PredictorInputPanelProps> = ({ engine
             <span className="text-base font-black">{readiness?.readinessScore}%</span>
           </div>
           <div className="space-y-1">
-            <p className="text-xs text-[var(--ds-text-secondary)] m-0 leading-snug">
+            <p className="text-caption text-[var(--ds-text-secondary)] m-0">
               {language === 'ar' ? 'نسبة استيفاء شروط الدقة الإحصائية ونزاهة خط الأساس.' : 'Integrity status of research design and pre-registration details.'}
             </p>
           </div>
@@ -116,7 +116,7 @@ export const PredictorInputPanel: React.FC<PredictorInputPanelProps> = ({ engine
 
       {/* Configuration Form */}
       <Card className="space-y-5">
-        <h3 className="text-sm font-black m-0 border-b border-[var(--ds-border-subtle)] pb-2 flex items-center gap-1.5">
+        <h3 className="text-h3 m-0 border-b border-[var(--ds-border-subtle)] pb-2 flex items-center gap-1.5">
           <Zap size={15} className="text-[var(--ds-primary)]" />
           {language === 'ar' ? 'إعدادات ومصادر المحاكاة' : 'Simulator Setup & Sources'}
         </h3>
@@ -323,7 +323,7 @@ export const PredictorInputPanel: React.FC<PredictorInputPanelProps> = ({ engine
           {loadingPredict ? (language === 'ar' ? 'جاري المحاكاة والاحتمال...' : 'Running Bayesian Update...') : (language === 'ar' ? 'محاكاة تقدير النتائج والاحتمال' : 'Run Outcome Forecast')}
         </Button>
         {predictionError && (
-          <p role="alert" aria-live="polite" className="text-xs font-bold text-[var(--ds-danger)] m-0">
+          <p role="alert" aria-live="polite" className="text-caption font-bold text-[var(--ds-danger)] m-0">
             {predictionError}
           </p>
         )}

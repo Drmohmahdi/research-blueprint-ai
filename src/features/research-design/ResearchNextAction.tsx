@@ -49,7 +49,7 @@ export const ResearchNextAction: React.FC<ResearchNextActionProps> = ({
           </ul>
         </div>
       ) : (
-        <p className="text-xs text-[var(--ds-text-secondary)]">
+        <p className="text-caption text-[var(--ds-text-secondary)]">
           {isAr
             ? 'تم استيفاء المدخلات واكتمال قواعد الخطوة الحالية بنجاح. يمكنك الانتقال للخطوة التالية.'
             : 'Step requirements are met. You can proceed to the next step.'}

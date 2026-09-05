@@ -96,7 +96,7 @@ export const Modal: React.FC<ModalProps> = ({
         <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={titleId} className={`relative w-full transform rounded-2xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] p-6 text-start align-middle shadow-[var(--ds-shadow-overlay)] ds-transition ${sizeClasses[size]}`}>
           {/* Header */}
           <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-4 mb-4">
-            <h3 id={titleId} className="text-sm font-extrabold text-[var(--ds-text-primary)] m-0">
+            <h3 id={titleId} className="text-h3 text-[var(--ds-text-primary)] m-0">
               {title}
             </h3>
             <IconButton 
@@ -212,7 +212,7 @@ export const Drawer: React.FC<DrawerProps> = ({
             <div className="space-y-6 flex-1 flex flex-col overflow-y-auto no-scrollbar">
               {/* Header */}
               <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-4">
-                <h3 id={titleId} className="text-sm font-extrabold text-[var(--ds-text-primary)] m-0">
+                <h3 id={titleId} className="text-h3 text-[var(--ds-text-primary)] m-0">
                   {title}
                 </h3>
                 <IconButton 

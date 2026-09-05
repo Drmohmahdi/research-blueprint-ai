@@ -103,10 +103,10 @@ export const ExportPanel: React.FC = () => {
             <FileText size={24} />
           </div>
           <div>
-            <h2 className="text-xl font-black text-ink m-0">
+            <h2 className="text-h2 text-ink m-0">
               {isAr ? 'محرك التقارير والتصدير الأكاديمي المؤسسي' : 'Institutional Academic Export & Reporting Engine'}
             </h2>
-            <p className="text-xs text-secondary m-0 mt-1">
+            <p className="text-caption text-secondary m-0 mt-1">
               {isAr
                 ? 'تصدير وثائق وتقارير أكاديمية محكمة بصيغ (PDF, DOCX, JSON) مع الحفاظ على النزاهة الرقمية والخصوصية وعزل المؤسسات'
                 : 'Generate verified academic reports in PDF, DOCX, and JSON with digital integrity, role-based redaction, and multi-tenant isolation'}
@@ -118,7 +118,7 @@ export const ExportPanel: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Form: Export Configuration */}
         <Card className="p-6 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl space-y-5 lg:col-span-2">
-          <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)] flex items-center justify-between">
+          <h3 className="text-h3 text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)] flex items-center justify-between">
             <span>{isAr ? 'إعدادات وثيقة التقرير' : 'Report Document Configuration'}</span>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--ds-surface-secondary)] text-secondary font-mono">
               Phase 05 Engine
@@ -268,12 +268,12 @@ export const ExportPanel: React.FC = () => {
         <Card className="p-6 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl space-y-4">
           <div className="flex items-center gap-2 pb-3 border-b border-[var(--ds-border-subtle)]">
             <ShieldCheck size={18} className="text-path-publication" />
-            <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0">
+            <h3 className="text-h3 text-[var(--ds-text-primary)] m-0">
               {isAr ? 'التحقق من نزاهة الوثائق' : 'Document Verification'}
             </h3>
           </div>
 
-          <p className="text-xs text-[var(--ds-text-secondary)] leading-relaxed">
+          <p className="text-caption text-[var(--ds-text-secondary)]">
             {isAr
               ? 'تتيح هذه الأداة التحقق من صحة ومطابقة أي وثيقة أكاديمية صادرة عبر رمز التحقق المشفر المرفق بالتقرير.'
               : 'Verify the authenticity and integrity of any issued academic document using its verification code.'}

@@ -113,9 +113,9 @@ export const PublicResearcherProfile: React.FC = () => {
               {isAr ? 'الملف الأكاديمي العام' : 'Public Academic Profile'}
             </span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold m-0">{displayName}</h1>
+          <h1 className="text-h1 m-0">{displayName}</h1>
           {(profile.academic_title || profile.current_rank) && (
-            <p className="text-sm text-secondary font-bold m-0">
+            <p className="text-body-sm text-secondary font-bold m-0">
               {[profile.academic_title, profile.current_rank].filter(Boolean).join(' — ')}
             </p>
           )}
@@ -126,7 +126,7 @@ export const PublicResearcherProfile: React.FC = () => {
             </div>
           )}
           {profile.public_email && (
-            <p className="text-xs text-[var(--ds-text-muted)] m-0">{profile.public_email}</p>
+            <p className="text-caption text-[var(--ds-text-muted)] m-0">{profile.public_email}</p>
           )}
         </div>
         </div>
@@ -134,11 +134,11 @@ export const PublicResearcherProfile: React.FC = () => {
 
       {/* Bio */}
       {bio && (
-        <p className="text-sm leading-relaxed text-[var(--ds-text-secondary)]">{bio}</p>
+        <p className="text-body-sm text-[var(--ds-text-secondary)]">{bio}</p>
       )}
 
       {keywords && (
-        <p className="text-xs font-mono text-[var(--ds-text-muted)]">{keywords}</p>
+        <p className="text-caption font-mono text-[var(--ds-text-muted)]">{keywords}</p>
       )}
 
       {/* Channels */}
@@ -162,7 +162,7 @@ export const PublicResearcherProfile: React.FC = () => {
       {/* Affiliations */}
       {affiliations.length > 0 && (
         <div className="space-y-2">
-          <h2 className="text-xs font-black text-[var(--ds-text-muted)] uppercase tracking-wide">
+          <h2 className="text-h2 text-[var(--ds-text-muted)] uppercase">
             {isAr ? 'الانتماءات الأكاديمية' : 'Affiliations'}
           </h2>
           <div className="space-y-1.5">
@@ -183,7 +183,7 @@ export const PublicResearcherProfile: React.FC = () => {
       {/* Scholarly assets */}
       {assets.length > 0 && (
         <div className="space-y-2">
-          <h2 className="text-xs font-black text-[var(--ds-text-muted)] uppercase tracking-wide">
+          <h2 className="text-h2 text-[var(--ds-text-muted)] uppercase">
             {isAr ? 'الأصول العلمية' : 'Publications & Works'}
           </h2>
           <div className="space-y-2">
@@ -194,7 +194,7 @@ export const PublicResearcherProfile: React.FC = () => {
                     <span className="inline-block mb-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-[var(--ds-information-soft)] text-[var(--ds-information)] border border-info/20">
                       {ASSET_TYPE_LABELS[a.asset_type] ? (isAr ? ASSET_TYPE_LABELS[a.asset_type].ar : ASSET_TYPE_LABELS[a.asset_type].en) : a.asset_type}
                     </span>
-                    <p className="text-sm font-bold m-0">{isAr ? (a.title_ar || a.title_en) : (a.title_en || a.title_ar)}</p>
+                    <p className="text-body-sm font-bold m-0">{isAr ? (a.title_ar || a.title_en) : (a.title_en || a.title_ar)}</p>
                     <p className="text-[11px] text-[var(--ds-text-muted)] m-0 mt-0.5 flex items-center gap-1.5 flex-wrap">
                       {a.publication_date && (
                         <span className="flex items-center gap-1"><Calendar size={11} />{a.publication_date}</span>
@@ -224,7 +224,7 @@ export const PublicResearcherProfile: React.FC = () => {
         {isAr ? 'مدعوم من منصة بصيرة للبحث العلمي' : 'Powered by Baseerah Research Platform'}
       </p>
       <div className="text-center space-y-2">
-        <p className="m-0 text-xs font-bold text-[var(--ds-text-secondary)]">
+        <p className="text-caption m-0 font-bold text-[var(--ds-text-secondary)]">
           {isAr ? 'ابنِ ملفك الأكاديمي الموحّد على بصيرة — مجانًا.' : 'Build your unified academic profile on Baseerah — free.'}
         </p>
         <a href="/login?mode=register" className="text-xs font-black text-[var(--ds-primary-bright)]">

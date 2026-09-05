@@ -282,10 +282,10 @@ export const PromotionDashboard: React.FC = () => {
               {isAr ? 'الترقيات الأكاديمية لأعضاء هيئة التدريس' : 'Academic Faculty Promotion Hub'}
             </span>
           </div>
-          <h2 className="text-xl md:text-2xl font-extrabold text-[var(--ds-text-primary)] m-0">
+          <h2 className="text-h2 text-[var(--ds-text-primary)] m-0">
             {isAr ? 'بصيرة للترقيات الأكاديمية' : 'Baseerah Academic Promotion Engine'}
           </h2>
-          <p className="text-sm text-[var(--ds-text-secondary)] max-w-2xl m-0 leading-relaxed">
+          <p className="text-body-sm text-[var(--ds-text-secondary)] max-w-2xl m-0">
             {isAr
               ? `ملف الترقية خاضع لـ: ${activePolicy?.name_ar || 'اللائحة المعتمدة'} (الإصدار v${activePolicy?.version || 1})`
               : `Promotion Dossier evaluated under: ${activePolicy?.name_en || 'Active Bylaws'} (v${activePolicy?.version || 1})`}
@@ -326,10 +326,10 @@ export const PromotionDashboard: React.FC = () => {
             <Briefcase size={24} />
           </div>
           <div className="space-y-1">
-            <h3 className="text-base font-extrabold text-[var(--ds-text-primary)] m-0">
+            <h3 className="text-h3 text-[var(--ds-text-primary)] m-0">
               {isAr ? 'لم يتم فتح ملف ترقية أكاديمية بعد' : 'No Promotion Application Initialized Yet'}
             </h3>
-            <p className="text-xs text-[var(--ds-text-secondary)] max-w-md mx-auto">
+            <p className="text-caption text-[var(--ds-text-secondary)] max-w-md mx-auto">
               {isAr
                 ? 'ابدأ الآن بفتح ملف الترقية لرتبتك المستهدفة وربط أبحاثك المعتمدة لاحتساب الجاهزية والنقاط آلياً وفق اللائحة.'
                 : 'Start your promotion dossier for your target rank and link verified research assets to evaluate readiness under active bylaws.'}
@@ -403,7 +403,7 @@ export const PromotionDashboard: React.FC = () => {
           {/* Criteria Checklist from Rules Engine */}
           <Card id="promotion-regulations" className="p-5 space-y-4">
             <div className="flex justify-between items-center border-b border-[var(--ds-border-subtle)] pb-2">
-              <h3 className="text-xs font-black text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
+              <h3 className="text-h3 text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
                 <FileCheck className="text-warning" size={16} />
                 <span>{isAr ? 'بنود ومعايير اللائحة المؤسسية' : 'Institutional Promotion Criteria'}</span>
               </h3>
@@ -505,7 +505,7 @@ export const PromotionDashboard: React.FC = () => {
           
           {/* Selected Evidence List */}
           <Card className="p-5 space-y-4">
-            <h3 className="text-xs font-black text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center justify-between">
+            <h3 className="text-h3 text-[var(--ds-text-primary)] border-b border-[var(--ds-border-subtle)] pb-2 m-0 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <BookOpen className="text-warning" size={16} />
                 <span>{isAr ? 'الأبحاث المدرجة بملف الترقية' : 'Dossier Evidence Publications'}</span>
@@ -571,7 +571,7 @@ export const PromotionDashboard: React.FC = () => {
           {/* Link Scholarly Asset to Dossier */}
           {application?.status === 'DRAFT' && (
             <Card className="p-5 space-y-4">
-              <h4 className="text-xs font-black text-[var(--ds-text-primary)] m-0">
+              <h4 className="text-h4 text-[var(--ds-text-primary)] m-0">
                 {isAr ? 'إدراج بحث من الإنتاج العلمي الموثق' : 'Select Paper from Scholarly Assets'}
               </h4>
               
@@ -621,8 +621,8 @@ export const PromotionDashboard: React.FC = () => {
       </div>
 
       <Card className="p-5 space-y-4">
-        <h3 className="m-0 text-sm font-black">{isAr ? 'لجنة المراجعة البشرية' : 'Human review committee'}</h3>
-        <p className="m-0 text-xs text-[var(--ds-text-muted)]">{isAr ? 'تعيين اللجنة إجراء إداري. قرار الاستحقاق النهائي بشري ولا يُستبدل بدرجة الجاهزية.' : 'Committee assignment is administrative. The final eligibility decision remains human and is never replaced by the readiness score.'}</p>
+        <h3 className="text-h3 m-0">{isAr ? 'لجنة المراجعة البشرية' : 'Human review committee'}</h3>
+        <p className="text-caption m-0 text-[var(--ds-text-muted)]">{isAr ? 'تعيين اللجنة إجراء إداري. قرار الاستحقاق النهائي بشري ولا يُستبدل بدرجة الجاهزية.' : 'Committee assignment is administrative. The final eligibility decision remains human and is never replaced by the readiness score.'}</p>
         {(application?.committee_assignments || []).filter(item => item.status === 'ACTIVE').map(item => (
           <div key={item.id} className="rounded-xl bg-[var(--ds-surface-secondary)] p-3 text-xs font-bold">{item.user_id}</div>
         ))}
@@ -651,10 +651,10 @@ export const PromotionDashboard: React.FC = () => {
 
       {queue.length > 0 && (
         <Card className="p-5 space-y-4">
-          <h3 className="m-0 text-sm font-black">{isAr ? 'ملفات معيّنة لمراجعتك' : 'Dossiers assigned to you'}</h3>
+          <h3 className="text-h3 m-0">{isAr ? 'ملفات معيّنة لمراجعتك' : 'Dossiers assigned to you'}</h3>
           {queue.map(item => (
             <article key={item.id} className="rounded-xl border border-[var(--ds-border-subtle)] p-4 space-y-3">
-              <p className="m-0 text-sm font-bold">{item.target_rank} · {item.status}</p>
+              <p className="text-body-sm m-0 font-bold">{item.target_rank} · {item.status}</p>
               {(item.status === 'SUBMITTED' || item.status === 'UNDER_REVIEW') && (
                 <form className="space-y-2" onSubmit={async (event) => {
                   event.preventDefault();

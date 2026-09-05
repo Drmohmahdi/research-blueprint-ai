@@ -140,10 +140,10 @@ export const ResearchDecisionCenter: React.FC = () => {
               <Sparkles size={14} />
               {language === 'ar' ? 'تشغيل البحث' : 'Research Operations'}
             </div>
-            <h3 className="m-0 text-xl font-black text-ink">
+            <h3 className="text-h3 m-0 text-ink">
               {language === 'ar' ? 'مركز قرارات البحث' : 'Research Decision Center'}
             </h3>
-            <p className="m-0 text-sm text-secondary">
+            <p className="text-body-sm m-0 text-secondary">
               {language === 'ar'
                 ? 'رتّب العوائق المنهجية ثم افتح موضع التصحيح المناسب لكل قرار.'
                 : 'Prioritize methodological blockers, then open the right place to resolve each decision.'}
@@ -165,10 +165,10 @@ export const ResearchDecisionCenter: React.FC = () => {
         <div className="flex items-center gap-2">
           <GitBranch size={18} className="text-[var(--ds-primary)]" />
           <div>
-            <h3 className="m-0 text-base font-black text-[var(--ds-text-primary)]">
+            <h3 className="text-h3 m-0 text-[var(--ds-text-primary)]">
               {language === 'ar' ? 'خريطة اعتماد التصميم' : 'Design Dependency Map'}
             </h3>
-            <p className="m-0 text-xs text-[var(--ds-text-secondary)]">
+            <p className="text-caption m-0 text-[var(--ds-text-secondary)]">
               {language === 'ar' ? 'اكتمال كل عنصر يفتح العنصر الذي يليه.' : 'Each completed element enables the next design decision.'}
             </p>
           </div>
@@ -195,10 +195,10 @@ export const ResearchDecisionCenter: React.FC = () => {
       <section className="space-y-3">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h3 className="m-0 text-lg font-black text-[var(--ds-text-primary)]">
+            <h3 className="text-h3 m-0 text-[var(--ds-text-primary)]">
               {language === 'ar' ? 'قرارات تحتاج إلى إجراء' : 'Decisions Requiring Action'}
             </h3>
-            <p className="m-0 text-xs text-[var(--ds-text-secondary)]">
+            <p className="text-caption m-0 text-[var(--ds-text-secondary)]">
               {blockers.length === 0
                 ? (language === 'ar' ? 'لا توجد عوائق حرجة أو تحذيرات حالياً.' : 'No critical blockers or warnings are currently open.')
                 : (language === 'ar' ? `${blockers.length} عنصر يحتاج مراجعة قبل الانتقال.` : `${blockers.length} items need review before progressing.`)}
@@ -230,7 +230,7 @@ export const ResearchDecisionCenter: React.FC = () => {
                   </span>
                   <div className="flex-1 min-w-0">
                     <span className="text-[10px] font-black text-[var(--ds-text-muted)]">{language === 'ar' ? style.labelAr : style.labelEn}</span>
-                    <p className="m-0 mt-1 text-sm font-semibold text-[var(--ds-text-primary)] leading-6">
+                    <p className="text-body-sm m-0 mt-1 font-semibold text-[var(--ds-text-primary)]">
                       {language === 'ar' ? issue.textAr : issue.textEn}
                     </p>
                   </div>

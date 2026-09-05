@@ -46,10 +46,10 @@ export const GuidedFlowSidebar: React.FC = () => {
     <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl p-4 shadow-sm space-y-4">
       {/* Path title */}
       <div className="pb-3 border-b border-[var(--ds-border-subtle)]">
-        <h4 className="text-xs font-black text-path-research m-0 uppercase tracking-wider">
+        <h4 className="text-h4 text-path-research m-0 uppercase">
           {language === 'ar' ? 'المسار البحثي' : 'Research Path'}
         </h4>
-        <p className="text-sm font-bold text-[var(--ds-text-primary)] m-0 mt-1">
+        <p className="text-body-sm font-bold text-[var(--ds-text-primary)] m-0 mt-1">
           {language === 'ar' ? activePath.titleAr : activePath.titleEn}
         </p>
       </div>

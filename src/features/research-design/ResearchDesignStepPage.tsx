@@ -60,7 +60,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
     case 'IDEA_EXPLORATION':
       return (
         <div className="space-y-4 max-w-2xl">
-          <h3 className="text-sm font-bold text-[var(--ds-text-primary)]">
+          <h3 className="text-h3 text-[var(--ds-text-primary)]">
             {isAr ? '1. استكشاف الفكرة البحثية والمجال' : '1. Idea & Domain Exploration'}
           </h3>
           <div className="space-y-3 text-xs">
@@ -101,7 +101,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
     case 'TITLE_ANALYSIS':
       return (
         <div className="space-y-4">
-          <h3 className="text-sm font-bold text-[var(--ds-text-primary)]">
+          <h3 className="text-h3 text-[var(--ds-text-primary)]">
             {isAr ? '2. أداة تحليل وتفكيك العنوان' : '2. Title Analysis'}
           </h3>
           <TitleAnalyzer />
@@ -111,7 +111,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
     case 'PROBLEM_AND_GAP':
       return (
         <div className="space-y-4 max-w-2xl">
-          <h3 className="text-sm font-bold text-[var(--ds-text-primary)]">
+          <h3 className="text-h3 text-[var(--ds-text-primary)]">
             {isAr ? '3. صياغة المشكلة والفجوة البحثية' : '3. Define Problem & Gap'}
           </h3>
           <div className="space-y-3 text-xs">
@@ -140,7 +140,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
     case 'OBJECTIVES':
       return (
         <div className="space-y-4 max-w-2xl">
-          <h3 className="text-sm font-bold text-[var(--ds-text-primary)]">
+          <h3 className="text-h3 text-[var(--ds-text-primary)]">
             {isAr ? '4. تحديد أهداف الدراسة' : '4. Study Objectives'}
           </h3>
           <div className="space-y-3 text-xs">
@@ -172,12 +172,12 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
     case 'QUESTIONS_AND_HYPOTHESES':
       return (
         <div className="space-y-4">
-          <h3 className="text-sm font-bold text-[var(--ds-text-primary)]">
+          <h3 className="text-h3 text-[var(--ds-text-primary)]">
             {isAr ? '5. مصفوفة الأسئلة والفرضيات البحثية' : '5. Questions & Hypotheses'}
           </h3>
           <div className="bg-[var(--ds-surface-secondary)] p-4 rounded-xl border border-[var(--ds-border-subtle)] space-y-4 text-xs">
             <div>
-              <h4 className="font-bold text-ink mb-2">{isAr ? 'أسئلة الدراسة المفتوحة:' : 'Research Questions:'}</h4>
+              <h4 className="text-h4 text-ink mb-2">{isAr ? 'أسئلة الدراسة المفتوحة:' : 'Research Questions:'}</h4>
               {project.questions?.length ? (
                 <ul className="list-decimal list-inside space-y-1 text-[var(--ds-text-secondary)]">
                   {project.questions.map((q) => (
@@ -189,7 +189,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
               )}
             </div>
             <div className="border-t border-[var(--ds-border-subtle)] pt-3">
-              <h4 className="font-bold text-ink mb-2">{isAr ? 'الفرضيات الإحصائية المقابلة:' : 'Corresponding Hypotheses:'}</h4>
+              <h4 className="text-h4 text-ink mb-2">{isAr ? 'الفرضيات الإحصائية المقابلة:' : 'Corresponding Hypotheses:'}</h4>
               {project.hypotheses?.length ? (
                 <ul className="list-disc list-inside space-y-1 text-[var(--ds-text-secondary)]">
                   {project.hypotheses.map((h) => (
@@ -207,7 +207,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
     case 'VARIABLES':
       return (
         <div className="space-y-4">
-          <h3 className="text-sm font-bold text-[var(--ds-text-primary)]">
+          <h3 className="text-h3 text-[var(--ds-text-primary)]">
             {isAr ? '6. محددات وتعريف المتغيرات' : '6. Variables Definition'}
           </h3>
           <ModelBuilder />
@@ -217,7 +217,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
     case 'CONCEPTUAL_MODEL':
       return (
         <div className="space-y-4">
-          <h3 className="text-sm font-bold text-[var(--ds-text-primary)]">
+          <h3 className="text-h3 text-[var(--ds-text-primary)]">
             {isAr ? '7. تصميم النموذج المفاهيمي' : '7. Conceptual Model Builder'}
           </h3>
           <ModelBuilder />
@@ -227,7 +227,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
     case 'METHODOLOGY_AND_DESIGN':
       return (
         <div className="space-y-4 max-w-2xl text-xs">
-          <h3 className="text-sm font-bold text-[var(--ds-text-primary)]">
+          <h3 className="text-h3 text-[var(--ds-text-primary)]">
             {isAr ? '8. اختيار المنهج والتصميم البحثي' : '8. Methodology & Research Design'}
           </h3>
           <div className="space-y-3">
@@ -260,7 +260,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
     case 'POPULATION_AND_SAMPLE':
       return (
         <div className="space-y-4">
-          <h3 className="text-sm font-bold text-[var(--ds-text-primary)]">
+          <h3 className="text-h3 text-[var(--ds-text-primary)]">
             {isAr ? '9. مجتمع الدراسة وحاسبة العينة' : '9. Population & Sample Size Calculator'}
           </h3>
           <SampleSizeCalc />
@@ -270,7 +270,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
     case 'MEASUREMENT_INSTRUMENTS':
       return (
         <div className="space-y-4 max-w-2xl text-xs">
-          <h3 className="text-sm font-bold text-[var(--ds-text-primary)]">
+          <h3 className="text-h3 text-[var(--ds-text-primary)]">
             {isAr ? '10. خطة أدوات القياس والاختبارات' : '10. Measurement Instruments Plan'}
           </h3>
           <div className="bg-[var(--ds-surface-secondary)] p-4 rounded-xl border border-[var(--ds-border-subtle)] space-y-3">
@@ -293,7 +293,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
     case 'ANALYSIS_PLAN':
       return (
         <div className="space-y-4 max-w-2xl text-xs">
-          <h3 className="text-sm font-bold text-[var(--ds-text-primary)]">
+          <h3 className="text-h3 text-[var(--ds-text-primary)]">
             {isAr ? '11. خطة التحليل الإحصائي المقترحة' : '11. Statistical Analysis Plan'}
           </h3>
           <div className="bg-[var(--ds-surface-secondary)] p-4 rounded-xl border border-[var(--ds-border-subtle)] space-y-3">
@@ -315,7 +315,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
     case 'LITERATURE_EVIDENCE':
       return (
         <div className="space-y-4">
-          <h3 className="text-sm font-bold text-[var(--ds-text-primary)]">
+          <h3 className="text-h3 text-[var(--ds-text-primary)]">
             {isAr ? '12. تجميع أدلة وحجم أثر الدراسات السابقة' : '12. Literature Evidence Synthesis'}
           </h3>
           <LiteratureSynthesizer />
@@ -325,7 +325,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
     case 'SIMULATION':
       return (
         <div className="space-y-4">
-          <h3 className="text-sm font-bold text-[var(--ds-text-primary)]">
+          <h3 className="text-h3 text-[var(--ds-text-primary)]">
             {isAr ? '13. مختبر محاكاة البيانات الاصطناعية' : '13. Simulation Lab'}
           </h3>
           <SimulationLab />
@@ -335,7 +335,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
     case 'PREDICTION':
       return (
         <div className="space-y-4">
-          <h3 className="text-sm font-bold text-[var(--ds-text-primary)]">
+          <h3 className="text-h3 text-[var(--ds-text-primary)]">
             {isAr ? '14. محرك التنبؤ العلمي والتوقع الإحصائي' : '14. Scientific Prediction Engine'}
           </h3>
           <ResearchOutcomePredictor />
@@ -345,7 +345,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
     case 'CONSISTENCY_VALIDATION':
       return (
         <div className="space-y-4">
-          <h3 className="text-sm font-bold text-[var(--ds-text-primary)]">
+          <h3 className="text-h3 text-[var(--ds-text-primary)]">
             {isAr ? '15. فحص الاتساق والصدق الداخلي' : '15. Consistency Checker'}
           </h3>
           <ConsistencyChecker />
@@ -355,7 +355,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
     case 'ETHICS_AND_FEASIBILITY':
       return (
         <div className="space-y-4 max-w-2xl text-xs">
-          <h3 className="text-sm font-bold text-[var(--ds-text-primary)]">
+          <h3 className="text-h3 text-[var(--ds-text-primary)]">
             {isAr ? '16. الأخلاقيات والجدوى الإجرائية' : '16. Ethics & Feasibility'}
           </h3>
           <div className="bg-[var(--ds-surface-secondary)] p-4 rounded-xl border border-[var(--ds-border-subtle)] space-y-3">
@@ -374,7 +374,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
     case 'PRE_REGISTRATION':
       return (
         <div className="space-y-4">
-          <h3 className="text-sm font-bold text-[var(--ds-text-primary)]">
+          <h3 className="text-h3 text-[var(--ds-text-primary)]">
             {isAr ? '17. التسجيل المسبق وتجميد التصميم' : '17. Pre-Registration'}
           </h3>
           <PreRegistration />
@@ -384,7 +384,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
     case 'FINAL_RESEARCH_PLAN':
       return (
         <div className="space-y-4">
-          <h3 className="text-sm font-bold text-[var(--ds-text-primary)]">
+          <h3 className="text-h3 text-[var(--ds-text-primary)]">
             {isAr ? '18. خطة البحث النهائية المكتملة' : '18. Final Research Plan'}
           </h3>
           <ResearchOutputsCenter project={project} language={language} />

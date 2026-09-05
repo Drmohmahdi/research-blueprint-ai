@@ -125,7 +125,7 @@ export const ResearchOutputsCenter: React.FC<ResearchOutputsCenterProps> = ({ pr
         <div className="md:col-span-2 space-y-3">
           <div className="flex items-center justify-between gap-2 border-b border-[var(--ds-border-subtle)] pb-2">
             <div>
-              <h4 className="text-xs font-bold text-[var(--ds-text-primary)]">
+              <h4 className="text-h4 text-[var(--ds-text-primary)]">
                 {isAr ? activeReport.nameAr : activeReport.nameEn}
               </h4>
               <p className="text-[10px] text-[var(--ds-text-secondary)] mt-0.5">

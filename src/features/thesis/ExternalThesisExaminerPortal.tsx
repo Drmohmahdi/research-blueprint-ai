@@ -83,8 +83,8 @@ export const ExternalThesisExaminerPortal: React.FC = () => {
           <div className="flex items-center gap-3">
             <GraduationCap className="h-9 w-9 text-path-review" />
             <div>
-              <p className="text-xs font-black text-path-review m-0">BASEERAH · RESTRICTED EXTERNAL EXAMINATION</p>
-              <h1 className="text-2xl font-black m-0">{ar ? 'مناقشة الرسالة المعيَّنة' : 'Assigned thesis examination'}</h1>
+              <p className="text-caption font-black text-path-review m-0">BASEERAH · RESTRICTED EXTERNAL EXAMINATION</p>
+              <h1 className="text-h1 m-0">{ar ? 'مناقشة الرسالة المعيَّنة' : 'Assigned thesis examination'}</h1>
             </div>
           </div>
           <Button type="button" variant="outline" iconBefore={<Globe size={14} />} onClick={() => {
@@ -93,18 +93,18 @@ export const ExternalThesisExaminerPortal: React.FC = () => {
             localStorage.setItem('rb_lang', next);
           }}>{language === 'ar' ? 'English' : 'العربية'}</Button>
           </div>
-          <p className="mt-4 text-sm text-secondary m-0">
+          <p className="text-body-sm mt-4 text-secondary m-0">
             {ar ? 'يمكنك الوصول فقط إلى النسخة المجمّدة المعيَّنة لهذه المناقشة. مساحات الطالب الحالية وتقارير الآخرين غير متاحة.' : 'You can access only the frozen thesis version assigned to this examination. Current student workspaces and other reports are not available.'}
           </p>
         </PathPanel>
 
         <section className="rounded-2xl border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] p-6">
-          <h2 className="text-xl font-black m-0">{data.thesis.title_en || data.thesis.title_ar || 'Frozen thesis'}</h2>
-          <p className="mt-2 font-mono text-xs text-[var(--ds-text-muted)]">Fingerprint: {data.thesis_fingerprint}</p>
-            <p className="mt-3 text-sm m-0">Assignment: {data.assignment.status} · Due: {data.assignment.due_at || 'Not specified'}</p>
-          {data.instructions && <p className="mt-3 text-sm">{data.instructions}</p>}
+          <h2 className="text-h2 m-0">{data.thesis.title_en || data.thesis.title_ar || 'Frozen thesis'}</h2>
+          <p className="text-caption mt-2 font-mono text-[var(--ds-text-muted)]">Fingerprint: {data.thesis_fingerprint}</p>
+            <p className="text-body-sm mt-3 m-0">Assignment: {data.assignment.status} · Due: {data.assignment.due_at || 'Not specified'}</p>
+          {data.instructions && <p className="text-body-sm mt-3">{data.instructions}</p>}
           <section className="mt-4 rounded-xl bg-[var(--ds-surface-secondary)] p-4" aria-labelledby="rubric-title">
-            <h2 id="rubric-title" className="m-0 text-sm font-black">Evaluation rubric</h2>
+            <h2 id="rubric-title" className="text-h2 m-0">Evaluation rubric</h2>
             <ul className="mb-0 mt-2 space-y-1 p-0 text-sm">
               <li className="list-none">Scientific contribution</li>
               <li className="list-none">Methodology integrity</li>
@@ -127,7 +127,7 @@ export const ExternalThesisExaminerPortal: React.FC = () => {
 
         {data.assignment.status === 'ACCEPTED' && (
           <section className="rounded-2xl border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] p-6">
-            <h2 className="font-black m-0">Examiner report</h2>
+            <h2 className="text-h2 m-0">Examiner report</h2>
             <label className="mt-4 block text-sm font-bold">
               General assessment
               <textarea
@@ -175,7 +175,7 @@ export const ExternalThesisExaminerPortal: React.FC = () => {
         )}
 
         {data.own_report?.status === 'SUBMITTED' && (
-          <p className="rounded-xl bg-[var(--ds-success-soft)] p-4 text-sm font-bold text-success m-0">
+          <p className="text-body-sm rounded-xl bg-[var(--ds-success-soft)] p-4 font-bold text-success m-0">
             Report submitted and locked at {data.own_report.submitted_at}.
           </p>
         )}

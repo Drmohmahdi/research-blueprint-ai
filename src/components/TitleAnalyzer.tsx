@@ -160,10 +160,10 @@ export const TitleAnalyzer: React.FC = () => {
             <Sparkles size={12} />
             <span>{language === 'ar' ? 'أداة الاستكشاف المنهجي' : 'Methodological Analyzer'}</span>
           </div>
-          <h3 className="text-lg font-black text-[var(--ds-text-primary)] m-0">
+          <h3 className="text-h3 text-[var(--ds-text-primary)] m-0">
             {language === 'ar' ? 'محلل عنوان البحث العلمي الذكي' : 'Smart Title Analyzer'}
           </h3>
-          <p className="text-xs text-[var(--ds-text-secondary)] m-0 leading-relaxed">
+          <p className="text-caption text-[var(--ds-text-secondary)] m-0">
             {language === 'ar'
               ? 'أدخل عنوان بحثك المقترح ليقوم محلل بصيرة الذكي بتفكيكه واستخراج المنهج العلمي الملائم والمتغيرات المستقلة والتابعة.'
               : 'Enter your research title and let Baseerah parse the scientific methodology and variables.'}
@@ -217,7 +217,7 @@ export const TitleAnalyzer: React.FC = () => {
           {/* Main variables breakdown */}
           <div className="lg:col-span-2 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-6 shadow-sm space-y-5">
             <div className="flex justify-between items-center border-b border-[var(--ds-border-subtle)] pb-3">
-              <h4 className="text-sm font-black text-[var(--ds-text-primary)] m-0">
+              <h4 className="text-h4 text-[var(--ds-text-primary)] m-0">
                 {getTranslation(language, 'analysisResult')}
               </h4>
               <span className="text-xs text-ink font-black ds-numeric" dir="ltr">
@@ -320,7 +320,7 @@ export const TitleAnalyzer: React.FC = () => {
             {/* Ambiguities */}
             {result.ambiguities.length > 0 && (
               <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-3">
-                <h4 className="text-xs font-black text-warning flex items-center gap-1.5 m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
+                <h4 className="text-h4 text-warning flex items-center gap-1.5 m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
                   <AlertTriangle size={14} />
                   <span>{getTranslation(language, 'ambiguityAlert')}</span>
                 </h4>
@@ -339,7 +339,7 @@ export const TitleAnalyzer: React.FC = () => {
             {/* Follow-up Questions */}
             {result.followUpQuestions.length > 0 && (
               <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-3">
-                <h4 className="text-xs font-black text-ink flex items-center gap-1.5 m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
+                <h4 className="text-h4 text-ink flex items-center gap-1.5 m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
                   <HelpCircle size={14} />
                   <span>{getTranslation(language, 'followupQ')}</span>
                 </h4>

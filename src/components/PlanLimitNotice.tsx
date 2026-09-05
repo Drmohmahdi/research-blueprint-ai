@@ -12,7 +12,7 @@ export const PlanLimitNotice: React.FC<{ language: string; className?: string }>
   }, []);
   return (
     <div role="alert" className={`rounded-2xl border border-[var(--ds-accent-gold)]/35 bg-[var(--ds-accent-gold-soft)] p-4 space-y-3 ${className}`}>
-      <p className="m-0 text-sm font-bold text-[var(--ds-text-primary)]">
+      <p className="text-body-sm m-0 font-bold text-[var(--ds-text-primary)]">
         {ar
           ? 'وصلت إلى حد باقتك الحالية. يمكنك المتابعة بعد الترقية من الفوترة.'
           : 'You reached your current plan limit. Upgrade from billing to continue.'}

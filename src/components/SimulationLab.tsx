@@ -126,10 +126,10 @@ export const SimulationLab: React.FC = () => {
     <div className="space-y-6 max-w-5xl mx-auto pb-16">
       <PathPanel accent="var(--ds-path-data)">
         <div className="space-y-1">
-          <h2 className="text-lg font-black text-ink m-0">
+          <h2 className="text-h2 text-ink m-0">
             {language === 'ar' ? 'مختبر المحاكاة الإحصائية' : 'Statistical Simulation Lab'}
           </h2>
-          <p className="text-xs text-secondary m-0">
+          <p className="text-caption text-secondary m-0">
             {language === 'ar'
               ? 'جرّب سيناريوهات الأثر قبل التنفيذ الميداني، مع تثبيت البذرة لإعادة الإنتاج.'
               : 'Test outcome scenarios before field execution, with a fixed seed for reproducibility.'}
@@ -142,7 +142,7 @@ export const SimulationLab: React.FC = () => {
         {/* Left Side: Parameters input form */}
         <div className="lg:col-span-1 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-4">
           <div className="space-y-1">
-            <h3 className="text-sm font-black text-[var(--ds-text-primary)] m-0 flex items-center gap-1.5">
+            <h3 className="text-h3 text-[var(--ds-text-primary)] m-0 flex items-center gap-1.5">
               <Sliders size={16} className="text-[var(--ds-primary)]" />
               <span>{language === 'ar' ? 'معلمات المحاكاة' : 'Simulation Parameters'}</span>
             </h3>
@@ -274,7 +274,7 @@ export const SimulationLab: React.FC = () => {
               <span>{loading ? (language === 'ar' ? 'جاري المحاكاة...' : 'Simulating...') : getTranslation(language, 'simulateBtn')}</span>
             </Button>
             {errorMessage && (
-              <p role="alert" className="text-xs font-bold text-[var(--ds-danger)]" aria-live="polite">
+              <p role="alert" className="text-caption font-bold text-[var(--ds-danger)]" aria-live="polite">
                 {errorMessage}
               </p>
             )}
@@ -288,7 +288,7 @@ export const SimulationLab: React.FC = () => {
               {/* Simulation metrics overview */}
               <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-4">
                 <div className="flex justify-between items-center pb-3 border-b border-[var(--ds-border-subtle)]">
-                  <h4 className="text-sm font-black text-[var(--ds-text-primary)] m-0 flex items-center gap-1.5">
+                  <h4 className="text-h4 text-[var(--ds-text-primary)] m-0 flex items-center gap-1.5">
                     <Sparkles size={16} className="text-[var(--ds-primary)]" />
                     <span>{language === 'ar' ? 'ملخص مخرجات محاكاة مونت كارلو' : 'Monte Carlo Simulation Summary'}</span>
                   </h4>
@@ -338,7 +338,7 @@ export const SimulationLab: React.FC = () => {
               <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-4">
                 <div className="flex items-center gap-1.5 pb-2 border-b border-[var(--ds-border-subtle)]">
                   <TrendingUp size={14} className="text-[var(--ds-primary)]" />
-                  <h4 className="text-[10px] font-black text-[var(--ds-text-secondary)] uppercase tracking-wider m-0">
+                  <h4 className="text-h4 text-[10px] text-[var(--ds-text-secondary)] uppercase m-0">
                     {language === 'ar' ? 'المقارنة الإحصائية للمجموعات (قبل التدخل وبعده)' : 'Statistical Group Comparison (Pre vs Post)'}
                   </h4>
                 </div>
@@ -363,7 +363,7 @@ export const SimulationLab: React.FC = () => {
 
               {/* Simulated Dataset Table Preview */}
               <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-3">
-                <h4 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
+                <h4 className="text-h4 text-[var(--ds-text-primary)] m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
                   {language === 'ar' ? 'عينة الطلاب المحاكاة (جدول البيانات)' : 'Simulated Students Sample Dataset'}
                 </h4>
 

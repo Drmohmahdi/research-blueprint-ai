@@ -219,7 +219,7 @@ export const UnifiedProfileEditor: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <div className="w-12 h-12 rounded-full border-4 border-[var(--ds-primary)] border-t-transparent motion-safe:animate-spin"></div>
-        <p className="text-[var(--ds-text-secondary)] text-sm font-semibold">
+        <p className="text-body-sm text-[var(--ds-text-secondary)] font-semibold">
           {language === 'ar' ? 'جاري تحميل الملف الأكاديمي الموحد...' : 'Loading Unified Academic Profile...'}
         </p>
       </div>
@@ -274,11 +274,11 @@ export const UnifiedProfileEditor: React.FC = () => {
       <PathPanel accent="var(--ds-path-identity)">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h2 className="text-2xl font-bold flex items-center gap-2 m-0 text-ink">
+            <h2 className="text-h2 flex items-center gap-2 m-0 text-ink">
               <Award className="w-7 h-7 text-path-identity" />
               <span>{t.title}</span>
             </h2>
-            <p className="text-xs text-secondary mt-1">{t.desc}</p>
+            <p className="text-caption text-secondary mt-1">{t.desc}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             {user?.username && (
@@ -318,7 +318,7 @@ export const UnifiedProfileEditor: React.FC = () => {
           
           {/* Completeness Card */}
           <div className={`border p-6 rounded-2xl ${scoreBg} transition-all`}>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--ds-text-secondary)] mb-4 flex items-center gap-1.5">
+            <h3 className="text-h3 uppercase text-[var(--ds-text-secondary)] mb-4 flex items-center gap-1.5">
               <Sparkles className="w-4 h-4 text-path-identity" />
               <span>{t.completeness}</span>
             </h3>
@@ -353,7 +353,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                 <span className="text-xs font-semibold text-[var(--ds-text-secondary)]">
                   {language === 'ar' ? 'نقاط القوة الأكاديمية للملف' : 'Academic profile strength points'}
                 </span>
-                <p className="text-xs text-[var(--ds-text-secondary)] mt-1.5 leading-relaxed">
+                <p className="text-caption text-[var(--ds-text-secondary)] mt-1.5">
                   {score >= 80 
                     ? (language === 'ar' ? 'ملفك الأكاديمي جاهز بنسبة ممتازة ويدعم النشر والترقيات بفعالية.' : 'Your academic profile is ready and supports promotions & publishing effectively.') 
                     : (language === 'ar' ? 'أكمل المعرفات المهنية مثل ORCID والانتماءات لزيادة نقاط اكتمال الملف.' : 'Complete professional identifiers like ORCID and affiliations to boost completion points.')
@@ -438,7 +438,7 @@ export const UnifiedProfileEditor: React.FC = () => {
             
             {activeTab === 'general' && (
               <div className="space-y-4">
-                <h2 className="text-sm font-bold border-b border-[var(--ds-border-subtle)] pb-2 text-ink">
+                <h2 className="text-h2 border-b border-[var(--ds-border-subtle)] pb-2 text-ink">
                   {language === 'ar' ? 'البيانات الشخصية والمهنية العامة' : 'General Personal & Professional Data'}
                 </h2>
 
@@ -628,7 +628,7 @@ export const UnifiedProfileEditor: React.FC = () => {
             {activeTab === 'identifiers' && (
               <div className="space-y-4">
                 <div className="flex justify-between items-center border-b border-[var(--ds-border-subtle)] pb-2">
-                  <h2 className="text-sm font-bold text-ink">
+                  <h2 className="text-h2 text-ink">
                     {language === 'ar' ? 'المعرفات والقنوات الأكاديمية' : 'Academic Identifiers & Channels'}
                   </h2>
                   <button
@@ -751,7 +751,7 @@ export const UnifiedProfileEditor: React.FC = () => {
             {activeTab === 'affiliations' && (
               <div className="space-y-4">
                 <div className="flex justify-between items-center border-b border-[var(--ds-border-subtle)] pb-2">
-                  <h2 className="text-sm font-bold text-ink">
+                  <h2 className="text-h2 text-ink">
                     {language === 'ar' ? 'تاريخ الانتماءات الأكاديمية والشهادات' : 'Academic Affiliations & Degrees'}
                   </h2>
                   <button

@@ -552,7 +552,7 @@ export const MarketingSite: React.FC = () => {
               <Sparkles size={12} />
               <span>{isAr ? 'منصة سعودية لدورة البحث العلمي — ليست مولّد أوراق' : 'Saudi research-operations platform — not a paper generator'}</span>
             </div>
-            <h1 className="text-4xl sm:text-6xl font-black leading-tight tracking-tight m-0">
+            <h1 className="text-h1 m-0">
               {isAr ? (
                 <>
                   <span className="baseerah-gradient-text">من التصميم إلى الاعتماد</span>
@@ -567,7 +567,7 @@ export const MarketingSite: React.FC = () => {
                 </>
               )}
             </h1>
-            <p className="max-w-2xl mx-auto mt-6 text-sm sm:text-base text-[var(--ds-text-secondary)] leading-relaxed font-medium">
+            <p className="text-body-sm max-w-2xl mx-auto mt-6 sm:text-base text-[var(--ds-text-secondary)] font-medium">
               {isAr
                 ? 'بصيرة تجمع تصميم الدراسة، الإحصاء، الأدبيات، التحكيم مزدوج التعمية، الترقيات، والرسائل الجامعية. القرار يبقى بشريًا، والبيانات معزولة لكل مؤسسة، والواجهة عربية وإنجليزية.'
                 : 'Baseerah unifies study design, statistics, literature, double-blind review, promotions, and thesis operations. Humans decide, each institution stays isolated, and Arabic and English are first-class.'}
@@ -610,7 +610,7 @@ export const MarketingSite: React.FC = () => {
                   ? (isAr ? NAV.find((item) => item.to === page)?.ar : NAV.find((item) => item.to === page)?.en)
                   : ''}
             </p>
-            <h1 className="text-3xl sm:text-4xl font-black mt-2 m-0">{pageHeading}</h1>
+            <h1 className="text-h1 mt-2 m-0">{pageHeading}</h1>
           </div>
         </section>
       )}
@@ -649,7 +649,7 @@ export const MarketingSite: React.FC = () => {
                 : 'Baseerah is an academic operations platform for colleges, graduate studies offices, and promotion committees. It is not a paper generator, and the institutional plan is not activated by card checkout on the site.'}
             </p>
             <div className="space-y-2">
-              <h2 className="text-lg font-black text-[var(--ds-text-primary)] m-0">{isAr ? 'لمن هذا العرض' : 'Who this is for'}</h2>
+              <h2 className="text-h2 text-[var(--ds-text-primary)] m-0">{isAr ? 'لمن هذا العرض' : 'Who this is for'}</h2>
               <ul className="m-0 ps-5 space-y-1">
                 <li>{isAr ? 'عمادة الدراسات العليا: مسارات الرسالة، المناقشة، والممتحنون الخارجيون داخل عزل مؤسسي.' : 'Graduate studies: thesis paths, defense, and external examiners inside tenant isolation.'}</li>
                 <li>{isAr ? 'الكليات والمجموعات البحثية: مساحة مشتركة بحدود أعضاء ومشاريع دون خلط بيانات الجهات.' : 'Colleges and research groups: a shared workspace with member and project limits, without mixing tenant data.'}</li>
@@ -657,7 +657,7 @@ export const MarketingSite: React.FC = () => {
               </ul>
             </div>
             <div className="space-y-2">
-              <h2 className="text-lg font-black text-[var(--ds-text-primary)] m-0">{isAr ? 'ما الذي يُجرَّب بمعزل حقيقي' : 'What a real isolated trial includes'}</h2>
+              <h2 className="text-h2 text-[var(--ds-text-primary)] m-0">{isAr ? 'ما الذي يُجرَّب بمعزل حقيقي' : 'What a real isolated trial includes'}</h2>
               <p>
                 {isAr
                   ? 'بعد طلب العرض نفتح مؤسسة مستقلة ببياناتها الخاصة: حسابات أدوار (مالك، مشرف، باحث، مشاهد)، مشروع رسالة أو دراسة واحد، ومسار تحكيم أو ترقية حسب حاجة الجهة. لا تُخلط بيانات التجربة مع أي مستأجر آخر.'
@@ -665,7 +665,7 @@ export const MarketingSite: React.FC = () => {
               </p>
             </div>
             <div className="space-y-2">
-              <h2 className="text-lg font-black text-[var(--ds-text-primary)] m-0">{isAr ? 'التسعير المؤسسي' : 'Institutional pricing'}</h2>
+              <h2 className="text-h2 text-[var(--ds-text-primary)] m-0">{isAr ? 'التسعير المؤسسي' : 'Institutional pricing'}</h2>
               <p>
                 {isAr
                   ? 'باقة المؤسسات: 999 ر.س شهريًا أو 9990 ر.س سنويًا (شهرين مجانًا على السنوي). الاشتراك عبر طلب عرض ومتابعة يدوية — ليس دفعًا ذاتيًا بالبطاقة اليوم.'
@@ -673,7 +673,7 @@ export const MarketingSite: React.FC = () => {
               </p>
             </div>
             <div className="space-y-2">
-              <h2 className="text-lg font-black text-[var(--ds-text-primary)] m-0">{isAr ? 'الخطوة التالية' : 'Next step'}</h2>
+              <h2 className="text-h2 text-[var(--ds-text-primary)] m-0">{isAr ? 'الخطوة التالية' : 'Next step'}</h2>
               <p>
                 {isAr
                   ? 'أرسل طلبًا من صفحة التواصل، أو راسل info@ehaastore.com. نرد بمسار تجريبي معزول ثم عرض للكلية أو العمادة.'
@@ -690,15 +690,15 @@ export const MarketingSite: React.FC = () => {
             {showHome && (
               <div className="text-center mb-12">
                 <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold)]">{isAr ? 'لمن؟' : 'Who it is for'}</span>
-                <h2 className="text-2xl sm:text-4xl font-black mt-2 m-0">{isAr ? 'حل واحد، مسارات حسب الدور' : 'One platform, role-based paths'}</h2>
+                <h2 className="text-h2 mt-2 m-0">{isAr ? 'حل واحد، مسارات حسب الدور' : 'One platform, role-based paths'}</h2>
               </div>
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {SOLUTIONS.map((item) => (
                 <div key={item.href + item.titleEn} className="rounded-3xl border border-[var(--ds-border-subtle)] bg-white/[0.03] p-6 flex flex-col">
                   <div className="h-10 w-10 rounded-xl bg-[var(--ds-primary-soft)] text-[var(--ds-primary-bright)] flex items-center justify-center mb-4">{item.icon}</div>
-                  <h3 className="text-sm font-black m-0">{isAr ? item.titleAr : item.titleEn}</h3>
-                  <p className="text-xs text-[var(--ds-text-muted)] leading-relaxed font-medium mt-2 flex-1">{isAr ? item.descAr : item.descEn}</p>
+                  <h3 className="text-h3 m-0">{isAr ? item.titleAr : item.titleEn}</h3>
+                  <p className="text-caption text-[var(--ds-text-muted)] font-medium mt-2 flex-1">{isAr ? item.descAr : item.descEn}</p>
                   <Link to={item.href} className="mt-4 text-xs font-black text-[var(--ds-primary-bright)] no-underline">
                     {isAr ? item.ctaAr : item.ctaEn} →
                   </Link>
@@ -715,15 +715,15 @@ export const MarketingSite: React.FC = () => {
             {showHome && (
               <div className="text-center mb-12">
                 <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold)]">{isAr ? 'المميزات' : 'Features'}</span>
-                <h2 className="text-2xl sm:text-4xl font-black mt-2 m-0">{isAr ? 'ماذا يُحل داخل المنصة' : 'What gets solved in-product'}</h2>
+                <h2 className="text-h2 mt-2 m-0">{isAr ? 'ماذا يُحل داخل المنصة' : 'What gets solved in-product'}</h2>
               </div>
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {FEATURES.map((feature) => (
                 <div key={feature.titleEn} className="rounded-3xl border border-[var(--ds-border-subtle)] bg-white/[0.03] p-6">
                   <div className="h-11 w-11 rounded-2xl bg-[var(--ds-primary-soft)] text-[var(--ds-primary-bright)] flex items-center justify-center mb-4">{feature.icon}</div>
-                  <h3 className="text-sm font-black m-0">{isAr ? feature.titleAr : feature.titleEn}</h3>
-                  <p className="text-xs text-[var(--ds-text-muted)] leading-relaxed font-medium mt-2">{isAr ? feature.descAr : feature.descEn}</p>
+                  <h3 className="text-h3 m-0">{isAr ? feature.titleAr : feature.titleEn}</h3>
+                  <p className="text-caption text-[var(--ds-text-muted)] font-medium mt-2">{isAr ? feature.descAr : feature.descEn}</p>
                 </div>
               ))}
             </div>
@@ -737,7 +737,7 @@ export const MarketingSite: React.FC = () => {
             {showHome && (
               <div className="text-center mb-12">
                 <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold)]">{isAr ? 'كيف تعمل' : 'How it works'}</span>
-                <h2 className="text-2xl sm:text-4xl font-black mt-2 m-0">{isAr ? 'أربع خطوات بعد التسجيل' : 'Four steps after signup'}</h2>
+                <h2 className="text-h2 mt-2 m-0">{isAr ? 'أربع خطوات بعد التسجيل' : 'Four steps after signup'}</h2>
               </div>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -745,8 +745,8 @@ export const MarketingSite: React.FC = () => {
                 <div key={step.step} className="relative rounded-3xl border border-[var(--ds-border-subtle)] bg-white/[0.03] p-6">
                   <div className="absolute top-4 end-4 text-3xl font-black text-white/5">{step.step}</div>
                   <div className="h-10 w-10 rounded-xl bg-[var(--ds-accent-gold-soft)] text-[var(--ds-accent-gold)] flex items-center justify-center mb-4">{step.icon}</div>
-                  <h3 className="text-sm font-black m-0">{isAr ? step.titleAr : step.titleEn}</h3>
-                  <p className="text-xs text-[var(--ds-text-muted)] font-medium leading-relaxed mt-2">{isAr ? step.descAr : step.descEn}</p>
+                  <h3 className="text-h3 m-0">{isAr ? step.titleAr : step.titleEn}</h3>
+                  <p className="text-caption text-[var(--ds-text-muted)] font-medium mt-2">{isAr ? step.descAr : step.descEn}</p>
                 </div>
               ))}
             </div>
@@ -761,10 +761,10 @@ export const MarketingSite: React.FC = () => {
               {showHome && (
                 <>
                   <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold)]">{isAr ? 'الباقات' : 'Pricing'}</span>
-                  <h2 className="text-2xl sm:text-4xl font-black mt-2 m-0">{isAr ? 'ابدأ مجانًا. ادفع عندما يكبر الفريق.' : 'Start free. Pay when the team grows.'}</h2>
+                  <h2 className="text-h2 mt-2 m-0">{isAr ? 'ابدأ مجانًا. ادفع عندما يكبر الفريق.' : 'Start free. Pay when the team grows.'}</h2>
                 </>
               )}
-              <p className="text-xs text-[var(--ds-text-muted)] font-semibold mt-3 max-w-xl mx-auto">
+              <p className="text-caption text-[var(--ds-text-muted)] font-semibold mt-3 max-w-xl mx-auto">
                 {isAr
                   ? 'الأسعار بالريال السعودي. الاشتراك السنوي يوفّر شهرين. الباقات المدفوعة تُفعَّل من داخل الحساب؛ ابدأ مجانًا اليوم.'
                   : 'Prices in SAR. Annual billing saves two months. Paid plans activate from inside the account; start free today.'}
@@ -806,7 +806,7 @@ export const MarketingSite: React.FC = () => {
                         {isAr ? 'الأكثر ملاءمة للفرق' : 'Best for teams'}
                       </div>
                     )}
-                    <h3 className="text-sm font-black m-0">{isAr ? plan.nameAr : plan.nameEn}</h3>
+                    <h3 className="text-h3 m-0">{isAr ? plan.nameAr : plan.nameEn}</h3>
                     <p className="text-[10px] font-bold text-[var(--ds-text-muted)] mt-1 m-0">{isAr ? plan.audienceAr : plan.audienceEn}</p>
                     <div className="flex items-baseline gap-1.5 mt-3">
                       <span className="text-3xl font-black text-white">{formatSar(price, isAr)}</span>
@@ -850,7 +850,7 @@ export const MarketingSite: React.FC = () => {
             {showHome && (
               <div className="text-center mb-10">
                 <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold)]">{isAr ? 'الأسئلة الشائعة' : 'FAQ'}</span>
-                <h2 className="text-2xl sm:text-3xl font-black mt-2 m-0">{isAr ? 'قبل أن تنشئ الحساب' : 'Before you create an account'}</h2>
+                <h2 className="text-h2 mt-2 m-0">{isAr ? 'قبل أن تنشئ الحساب' : 'Before you create an account'}</h2>
               </div>
             )}
             <div className="space-y-3">
@@ -884,15 +884,15 @@ export const MarketingSite: React.FC = () => {
               {showHome && (
                 <>
                   <span className="text-[10px] font-black uppercase tracking-widest text-[var(--ds-accent-gold)]">{isAr ? 'الخطوة التالية' : 'Next step'}</span>
-                  <h2 className="text-2xl sm:text-3xl font-black mt-2 m-0">{isAr ? 'باحث؟ ابدأ. جامعة؟ اطلب عرضًا.' : 'Researcher? Start. University? Book a demo.'}</h2>
+                  <h2 className="text-h2 mt-2 m-0">{isAr ? 'باحث؟ ابدأ. جامعة؟ اطلب عرضًا.' : 'Researcher? Start. University? Book a demo.'}</h2>
                 </>
               )}
-              <p className="text-xs text-[var(--ds-text-muted)] font-semibold mt-3 leading-relaxed">
+              <p className="text-caption text-[var(--ds-text-muted)] font-semibold mt-3">
                 {isAr
                   ? 'للباحث: أنشئ حسابًا مجانيًا خلال دقائق. للكلية أو العمادة: اترك بياناتك وسنعود إليك بمسار مؤسسي.'
                   : 'Researchers can create a free account in minutes. Colleges and graduate offices can leave details for an institutional conversation.'}
               </p>
-              <p className="text-xs font-bold mt-3 m-0">
+              <p className="text-caption font-bold mt-3 m-0">
                 <Link to="/institutional" className="text-[var(--ds-primary-bright)] no-underline">
                   {isAr ? 'اقرأ الموجز التشغيلي للجامعة (قابل للطباعة)' : 'Read the printable university brief'}
                 </Link>
@@ -911,7 +911,7 @@ export const MarketingSite: React.FC = () => {
               </div>
             </div>
             <div className="rounded-3xl border border-[var(--ds-border-subtle)] bg-white/[0.03] p-6">
-              <h3 className="text-sm font-black m-0 mb-4">{isAr ? 'نموذج طلب تواصل' : 'Contact form'}</h3>
+              <h3 className="text-h3 m-0 mb-4">{isAr ? 'نموذج طلب تواصل' : 'Contact form'}</h3>
               <LeadForm isAr={isAr} defaultIntent={defaultIntent} compact={showHome} />
             </div>
           </div>

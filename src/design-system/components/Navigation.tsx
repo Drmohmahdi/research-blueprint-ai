@@ -197,13 +197,13 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             <p className="m-0 text-[10px] font-bold uppercase tracking-widest text-[var(--ds-text-muted)]">{eyebrow}</p>
           )}
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-xl md:text-2xl font-black text-[var(--ds-text-primary)] m-0 leading-tight">
+            <h2 className="text-h2 text-[var(--ds-text-primary)] m-0">
               {title}
             </h2>
             {status}
           </div>
           {description && (
-            <p className="text-xs text-[var(--ds-text-muted)] leading-relaxed m-0">
+            <p className="text-caption text-[var(--ds-text-muted)] m-0">
               {description}
             </p>
           )}
@@ -245,7 +245,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
   return (
     <div className={`flex items-center justify-between gap-4 border-b border-[var(--ds-border-subtle)] pb-3 ${className}`}>
       <div className="space-y-0.5">
-        <h3 className="text-sm font-extrabold text-[var(--ds-text-primary)] m-0">
+        <h3 className="text-h3 text-[var(--ds-text-primary)] m-0">
           {title}
         </h3>
         {subtitle && (

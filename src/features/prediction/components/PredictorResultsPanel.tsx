@@ -104,7 +104,7 @@ export const PredictorResultsPanel: React.FC<PredictorResultsPanelProps> = ({ en
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Attrition/Completion & Fidelity Info Cards */}
         <Card className="space-y-4">
-          <h4 className="text-xs font-bold text-[var(--ds-text-primary)] m-0 flex items-center gap-1.5">
+          <h4 className="text-h4 text-[var(--ds-text-primary)] m-0 flex items-center gap-1.5">
             <Activity size={15} className="text-[var(--ds-primary)]" />
             {language === 'ar' ? 'توقعات البقاء والالتزام بالتدخل' : 'Retention & Fidelity Projections'}
           </h4>
@@ -135,7 +135,7 @@ export const PredictorResultsPanel: React.FC<PredictorResultsPanelProps> = ({ en
         <Card variant={getNestedForecast('risk')?.riskLevel === 'HIGH' ? 'danger' : 'default'} className="space-y-4">
           <div className="flex items-center gap-2">
             <ShieldAlert size={18} className={getNestedForecast('risk')?.riskLevel === 'HIGH' ? 'text-[var(--ds-danger)]' : 'text-[var(--ds-primary)]'} />
-            <h4 className="text-xs font-bold text-[var(--ds-text-primary)] m-0">
+            <h4 className="text-h4 text-[var(--ds-text-primary)] m-0">
               {language === 'ar' ? 'مستوى المخاطر المنهجية للدراسة' : 'Methodological Risk Audit'}
             </h4>
           </div>
@@ -165,7 +165,7 @@ export const PredictorResultsPanel: React.FC<PredictorResultsPanelProps> = ({ en
       {/* Publication Readiness Index Panel */}
       {getNestedForecast('readiness') && (
         <Card className="space-y-4">
-          <h4 className="text-xs font-bold text-[var(--ds-text-primary)] m-0 flex items-center gap-1.5">
+          <h4 className="text-h4 text-[var(--ds-text-primary)] m-0 flex items-center gap-1.5">
             <FileCheck size={16} className="text-[var(--ds-success)]" />
             {language === 'ar' ? 'جاهزية الملف والبيانات للنشر الدولي' : 'Publication Readiness Scorecard'}
           </h4>
@@ -194,7 +194,7 @@ export const PredictorResultsPanel: React.FC<PredictorResultsPanelProps> = ({ en
 
       {/* Scenarios benchmarking */}
       <Card className="space-y-4">
-        <h3 className="text-sm font-black text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
+        <h3 className="text-h3 text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
           <GitBranch size={16} className="text-[var(--ds-primary)]" />
           {language === 'ar' ? 'محاكاة السيناريوهات الخمسة (Scenario Workbench)' : 'Scenario Workbench Benchmarks'}
         </h3>
@@ -236,7 +236,7 @@ export const PredictorResultsPanel: React.FC<PredictorResultsPanelProps> = ({ en
       {/* Actionable Recommendations Panel */}
       {selectedRun.recommendations && selectedRun.recommendations.length > 0 && (
         <Card variant="ai-accent" className="space-y-4">
-          <h4 className="text-xs font-extrabold text-[var(--ds-text-primary)] m-0 flex items-center gap-1.5">
+          <h4 className="text-h4 text-[var(--ds-text-primary)] m-0 flex items-center gap-1.5">
             <Sparkles size={16} className="text-[var(--ds-primary)]" />
             {language === 'ar' ? 'توصيات تشغيلية مدعومة بالذكاء الاصطناعي لمنع الفشل المنهجي' : 'AI-Driven Operational & Methodological Recommendations'}
           </h4>
@@ -263,7 +263,7 @@ export const PredictorResultsPanel: React.FC<PredictorResultsPanelProps> = ({ en
 
       {/* Predicted vs Observed */}
       <Card className="space-y-4">
-        <h3 className="text-sm font-black text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
+        <h3 className="text-h3 text-[var(--ds-text-primary)] m-0 flex items-center gap-2">
           <LineChart size={16} className="text-[var(--ds-primary)]" />
           {language === 'ar' ? 'تقييم المطابقة: المتوقع بايزياً مقابل المرصود الفعلي' : 'Evaluation: Predicted vs Observed Outcomes'}
         </h3>
@@ -322,7 +322,7 @@ export const PredictorResultsPanel: React.FC<PredictorResultsPanelProps> = ({ en
             {language === 'ar' ? 'تسجيل وتقييم المطابقة الإحصائية' : 'Validate Observed Outcome'}
           </Button>
           {comparisonError && (
-            <p role="alert" aria-live="polite" className="text-xs font-bold text-[var(--ds-danger)] m-0">
+            <p role="alert" aria-live="polite" className="text-caption font-bold text-[var(--ds-danger)] m-0">
               {comparisonError}
             </p>
           )}

@@ -110,10 +110,10 @@ export const ThesisOperationsCenter: React.FC = () => {
     return (
       <section className="mx-auto max-w-[720px] min-w-0 space-y-5 overflow-x-clip pb-16" aria-labelledby="thesis-register-title">
         <PathPanel accent="var(--ds-path-research)">
-          <p className="m-0 text-xs font-black text-[var(--ds-primary)]">BASEERAH · THESIS OPERATIONS</p>
-          <h2 id="thesis-register-title" className="m-0 mt-2 text-2xl font-black md:text-4xl">{ar ? 'تسجيل الرسالة العلمية' : 'Register the thesis'}</h2>
-          <p className="mt-2 text-sm font-bold">{ar ? activeProject.titleAr : activeProject.titleEn}</p>
-          <p className="mt-1 text-sm text-[var(--ds-text-secondary)]">{ar ? 'لا توجد رسالة مرتبطة بهذا المشروع بعد. سجّلها لفتح الفصول والاجتماعات والملاحظات.' : 'No thesis is linked to this project yet. Register it to open chapters, meetings, and feedback.'}</p>
+          <p className="text-caption m-0 font-black text-[var(--ds-primary)]">BASEERAH · THESIS OPERATIONS</p>
+          <h2 id="thesis-register-title" className="text-h2 m-0 mt-2">{ar ? 'تسجيل الرسالة العلمية' : 'Register the thesis'}</h2>
+          <p className="text-body-sm mt-2 font-bold">{ar ? activeProject.titleAr : activeProject.titleEn}</p>
+          <p className="text-body-sm mt-1 text-[var(--ds-text-secondary)]">{ar ? 'لا توجد رسالة مرتبطة بهذا المشروع بعد. سجّلها لفتح الفصول والاجتماعات والملاحظات.' : 'No thesis is linked to this project yet. Register it to open chapters, meetings, and feedback.'}</p>
         </PathPanel>
         <Card>
           <form className="space-y-4" onSubmit={event => {
@@ -147,7 +147,7 @@ export const ThesisOperationsCenter: React.FC = () => {
                 <option value="CONCEPTUAL">{ar ? 'مفهومي' : 'Conceptual'}</option>
               </select>
             </label>
-            {registerError ? <p role="alert" className="m-0 text-sm font-bold text-[var(--ds-danger)]">{registerError}</p> : null}
+            {registerError ? <p role="alert" className="text-body-sm m-0 font-bold text-[var(--ds-danger)]">{registerError}</p> : null}
             <div className="flex flex-wrap gap-2">
               <Button type="submit" disabled={busy || programName.trim().length < 2}>{ar ? 'تسجيل الرسالة' : 'Register thesis'}</Button>
               <Button type="button" variant="outline" onClick={() => navigate(ROUTES.PATHS)}>{ar ? 'تغيير المسار' : 'Change path'}</Button>
@@ -174,10 +174,10 @@ export const ThesisOperationsCenter: React.FC = () => {
   return (
     <section className="mx-auto max-w-[1440px] min-w-0 space-y-5 overflow-x-clip pb-16" aria-labelledby="thesis-ops-title">
       <PathPanel accent="var(--ds-path-research)">
-        <p className="m-0 text-xs font-black text-[var(--ds-primary)]">BASEERAH · THESIS OPERATIONS</p>
-        <h2 id="thesis-ops-title" className="m-0 mt-2 text-2xl font-black md:text-4xl">{ar ? 'تشغيل الرسالة العلمية' : 'Thesis operations'}</h2>
-        <p className="mt-2 text-sm font-bold">{center.thesis.title_ar} · {center.thesis.title_en}</p>
-        <p className="mt-1 text-sm text-[var(--ds-text-secondary)]">{center.thesis.degree_type} · {center.thesis.current_stage} · {center.thesis.status}</p>
+        <p className="text-caption m-0 font-black text-[var(--ds-primary)]">BASEERAH · THESIS OPERATIONS</p>
+        <h2 id="thesis-ops-title" className="text-h2 m-0 mt-2">{ar ? 'تشغيل الرسالة العلمية' : 'Thesis operations'}</h2>
+        <p className="text-body-sm mt-2 font-bold">{center.thesis.title_ar} · {center.thesis.title_en}</p>
+        <p className="text-body-sm mt-1 text-[var(--ds-text-secondary)]">{center.thesis.degree_type} · {center.thesis.current_stage} · {center.thesis.status}</p>
       </PathPanel>
       <div className="grid gap-3 sm:grid-cols-3">
         <Card padding="sm"><span className="block text-xs text-[var(--ds-text-secondary)]">{ar ? 'جاهزية المناقشة' : 'Defense readiness'}</span><strong className="text-2xl ds-numeric text-ink">{center.defense_readiness.score}%</strong></Card>
@@ -191,7 +191,7 @@ export const ThesisOperationsCenter: React.FC = () => {
       </div>
       {tab === 'supervision' && (
         <Card>
-          <h3 className="mt-0 text-lg font-black">{ar ? 'لجنة الإشراف' : 'Supervision'}</h3>
+          <h3 className="text-h3 mt-0">{ar ? 'لجنة الإشراف' : 'Supervision'}</h3>
           {(center.supervisors || []).length === 0 ? (
             <EmptyState bare title={ar ? 'لا مشرف معيّن بعد' : 'No supervisor assigned'} description={ar ? 'عيّن مشرفًا من أعضاء المؤسسة لفتح اعتماد الفصول والاجتماعات.' : 'Assign a supervisor from the organization to unlock chapter approval and meetings.'} />
           ) : (center.supervisors || []).map((item: any) => (
@@ -218,14 +218,14 @@ export const ThesisOperationsCenter: React.FC = () => {
                 ))}
               </select>
             </label>
-            {supervisorError ? <p role="alert" className="m-0 text-sm font-bold text-[var(--ds-danger)]">{supervisorError}</p> : null}
+            {supervisorError ? <p role="alert" className="text-body-sm m-0 font-bold text-[var(--ds-danger)]">{supervisorError}</p> : null}
             <Button type="submit" disabled={busy || !supervisorUserId}>{ar ? 'تعيين مشرف' : 'Assign supervisor'}</Button>
           </form>
         </Card>
       )}
       {tab === 'overview' && (
         <Card>
-          <h3 className="mt-0 text-lg font-black">{ar ? 'الفصول' : 'Chapters'}</h3>
+          <h3 className="text-h3 mt-0">{ar ? 'الفصول' : 'Chapters'}</h3>
           {(center.chapters || []).length === 0 ? (
             <EmptyState bare title={ar ? 'لا فصول بعد' : 'No chapters yet'} description={ar ? 'ستظهر فصول الرسالة هنا بعد إنشاء السجل الأكاديمي.' : 'Thesis chapters appear here after the academic record is created.'} />
           ) : (center.chapters || []).map((chapter: any) => {
@@ -262,7 +262,7 @@ export const ThesisOperationsCenter: React.FC = () => {
       )}
       {tab === 'committee' && (
         <Card>
-          <div className="mb-3 flex items-center gap-2"><ShieldCheck size={18} /><h3 className="m-0 text-lg font-black">{ar ? 'لجنة المناقشة' : 'Examination committee'}</h3></div>
+          <div className="mb-3 flex items-center gap-2"><ShieldCheck size={18} /><h3 className="text-h3 m-0">{ar ? 'لجنة المناقشة' : 'Examination committee'}</h3></div>
           {committee.length === 0 ? <EmptyState bare title={ar ? 'لا أعضاء بعد' : 'No members yet'} description={ar ? 'عيّن الأعضاء وفق سياسة المؤسسة ثم أكمل الإفصاح ومراجعة تضارب المصالح بشريًا.' : 'Appoint members according to policy, then complete disclosure and a human COI review.'} /> : committee.map(member => (
             <article key={member.id} className="mb-3 rounded-xl bg-[var(--ds-surface-secondary)] p-3 text-sm">
               <p className="m-0 font-bold">{member.role} · {member.external_name || member.user_id}</p>
@@ -288,7 +288,7 @@ export const ThesisOperationsCenter: React.FC = () => {
       )}
       {tab === 'meetings' && (
         <Card>
-          <h3 className="mt-0 text-lg font-black">{ar ? 'اجتماعات الإشراف' : 'Supervision meetings'}</h3>
+          <h3 className="text-h3 mt-0">{ar ? 'اجتماعات الإشراف' : 'Supervision meetings'}</h3>
           {(center.meetings || []).length === 0 ? <EmptyState bare title={ar ? 'لا اجتماعات مسجّلة' : 'No meetings recorded'} description={ar ? 'سجّل اجتماع إشراف بموعد وجدول أعمال.' : 'Record a supervision meeting with a time and agenda.'} /> : (center.meetings || []).map((meeting: any) => (
             <article key={meeting.id} className="mb-3 rounded-xl bg-[var(--ds-surface-secondary)] p-3 text-sm">
               <p className="m-0 font-bold">{meeting.scheduled_at} · {meeting.status}</p>
@@ -312,7 +312,7 @@ export const ThesisOperationsCenter: React.FC = () => {
       )}
       {tab === 'feedback' && (
         <Card>
-          <h3 className="mt-0 text-lg font-black">{ar ? 'ملاحظات المشرف على الفصول' : 'Supervisor chapter feedback'}</h3>
+          <h3 className="text-h3 mt-0">{ar ? 'ملاحظات المشرف على الفصول' : 'Supervisor chapter feedback'}</h3>
           {feedback.length === 0 ? <EmptyState bare title={ar ? 'لا ملاحظات بعد' : 'No feedback yet'} description={ar ? 'أضف ملاحظة على أحدث نسخة فصل لمراجعة علمية محددة.' : 'Add a note on the latest chapter version for a specific academic review.'} /> : feedback.map((item: any) => (
             <article key={item.id} className="mb-3 rounded-xl bg-[var(--ds-surface-secondary)] p-3 text-sm">
               <p className="m-0 font-bold">{item.category} · {item.severity} · {item.resolution_status}</p>
@@ -346,11 +346,11 @@ export const ThesisOperationsCenter: React.FC = () => {
       )}
       {tab === 'corrections' && (
         <Card>
-          <div className="mb-3 flex items-center gap-2"><ListChecks size={18} /><h3 className="m-0 text-lg font-black">{ar ? 'استوديو التصحيحات' : 'Corrections studio'}</h3></div>
+          <div className="mb-3 flex items-center gap-2"><ListChecks size={18} /><h3 className="text-h3 m-0">{ar ? 'استوديو التصحيحات' : 'Corrections studio'}</h3></div>
           {corrections.length === 0 ? <EmptyState bare title={ar ? 'لا توجد تصحيحات' : 'No corrections'} description={ar ? 'ستظهر التصحيحات بعد قرار المناقشة ولا تُغلق ذاتيًا للتصحيحات الكبرى.' : 'Corrections appear after a defense decision. Major items cannot be self-resolved.'} /> : corrections.map(item => (
             <article key={item.id} className="mb-3 rounded-xl border border-[var(--ds-border-subtle)] p-4">
-              <p className="m-0 text-sm font-bold">{item.correction_type} · {item.status}{item.due_at ? ` · ${item.due_at}` : ''}</p>
-              <p className="mt-2 text-sm">{item.description}</p>
+              <p className="text-body-sm m-0 font-bold">{item.correction_type} · {item.status}{item.due_at ? ` · ${item.due_at}` : ''}</p>
+              <p className="text-body-sm mt-2">{item.description}</p>
               {item.status === 'OPEN' && (
                 <form className="mt-3 space-y-2" onSubmit={event => { event.preventDefault(); if (!latestChapter?.approved_version_id) return; setBusy(true); apiRespondThesisCorrection(thesisId, item.id, { response_text: responseText, evidence_version_id: latestChapter.approved_version_id }).then(() => reload(thesisId)).finally(() => setBusy(false)); }}>
                   <label className="block text-sm font-bold">{ar ? 'رد الطالب مع وصف التغيير' : 'Student response and change description'}<textarea className={fieldClass} value={responseText} onChange={e => setResponseText(e.target.value)} required rows={3} /></label>
@@ -370,9 +370,9 @@ export const ThesisOperationsCenter: React.FC = () => {
       )}
       {tab === 'final' && (
         <Card>
-          <div className="mb-3 flex items-center gap-2"><FileText size={18} /><h3 className="m-0 text-lg font-black">{ar ? 'النسخة النهائية والاعتماد' : 'Final version and approval'}</h3></div>
-          <p className="text-sm leading-7 text-[var(--ds-text-secondary)]">{ar ? 'الاعتماد النهائي منفصل عن قرار المناقشة. النسخة المعتمدة مجمّدة ولا تُستبدل بصامت.' : 'Final approval is separate from the defense decision. The approved version is frozen and is never silently replaced.'}</p>
-          <p className="text-sm font-bold">{ar ? 'معرف النسخة النهائية:' : 'Final version id:'} {center.thesis.final_version_id || (ar ? 'غير مجمّدة بعد' : 'Not frozen yet')}</p>
+          <div className="mb-3 flex items-center gap-2"><FileText size={18} /><h3 className="text-h3 m-0">{ar ? 'النسخة النهائية والاعتماد' : 'Final version and approval'}</h3></div>
+          <p className="text-body-sm text-[var(--ds-text-secondary)]">{ar ? 'الاعتماد النهائي منفصل عن قرار المناقشة. النسخة المعتمدة مجمّدة ولا تُستبدل بصامت.' : 'Final approval is separate from the defense decision. The approved version is frozen and is never silently replaced.'}</p>
+          <p className="text-body-sm font-bold">{ar ? 'معرف النسخة النهائية:' : 'Final version id:'} {center.thesis.final_version_id || (ar ? 'غير مجمّدة بعد' : 'Not frozen yet')}</p>
           {decidedRound && !center.thesis.final_version_id && <Button className="mt-4" disabled={busy} onClick={() => { setBusy(true); apiFreezeThesisFinal(thesisId, decidedRound.id, { frozen: true }).then(() => reload(thesisId)).finally(() => setBusy(false)); }}>{ar ? 'تجميد النسخة النهائية' : 'Freeze final approved version'}</Button>}
           {center.thesis.final_version_id && <Button className="mt-4" disabled={busy} onClick={() => { setBusy(true); apiApproveThesisFinal(thesisId, center.thesis.final_version_id).then(() => reload(thesisId)).finally(() => setBusy(false)); }}>{ar ? 'اعتماد الدراسات العليا' : 'Graduate Studies final approval'}</Button>}
         </Card>

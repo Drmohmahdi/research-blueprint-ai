@@ -240,10 +240,10 @@ const deleteEdge = (id: string) => {
       <PathPanel accent="var(--ds-path-research)">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="space-y-1">
-            <h3 className="text-lg font-bold text-ink m-0">
+            <h3 className="text-h3 text-ink m-0">
               {language === 'ar' ? 'مصمم النموذج المفاهيمي التفاعلي' : 'Interactive Conceptual Model Designer'}
             </h3>
-            <p className="text-xs text-secondary m-0">
+            <p className="text-caption text-secondary m-0">
               {language === 'ar'
                 ? 'اسحب الصناديق لترتيب المتغيرات، وأضف روابط المسار الممثلة للفرضيات.'
                 : 'Drag boxes to rearrange variables and add path lines representing hypotheses.'}
@@ -422,7 +422,7 @@ const deleteEdge = (id: string) => {
         {nodes.length === 0 && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-[var(--ds-text-muted)]">
             <GitFork size={32} className="opacity-30" />
-            <p className="text-xs font-semibold opacity-50">
+            <p className="text-caption font-semibold opacity-50">
               {language === 'ar' ? 'أضف متغيرات للمشروع لتظهر هنا تلقائياً' : 'Add variables to the project to visualize them here'}
             </p>
           </div>
@@ -432,7 +432,7 @@ const deleteEdge = (id: string) => {
       {/* Edges / paths list */}
       {edges.length > 0 && (
         <Card className="p-5 space-y-3">
-          <h4 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
+          <h4 className="text-h4 text-[var(--ds-text-primary)] m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
             {language === 'ar' ? 'قائمة الفرضيات والمسارات المعرفة بالمشروع' : 'Hypotheses & Defined Path Lines'}
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

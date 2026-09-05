@@ -148,10 +148,10 @@ export const ConsistencyChecker: React.FC = () => {
             <SearchCheck size={12} />
             <span>{language === 'ar' ? 'فحص الاتساق المنهجي' : 'Methodological Alignment'}</span>
           </div>
-          <h3 className="text-xl font-black text-[var(--ds-text-primary)] m-0">
+          <h3 className="text-h3 text-[var(--ds-text-primary)] m-0">
             {getTranslation(language, 'consistency')}
           </h3>
-          <p className="text-xs text-[var(--ds-text-secondary)] m-0 leading-relaxed max-w-xl">
+          <p className="text-caption text-[var(--ds-text-secondary)] m-0 max-w-xl">
             {language === 'ar'
               ? 'مؤشر سلامة وتكامل دراسة البحث من الناحية المنهجية والإحصائية، ويضمن التوافق بين العنوان، الفروض، العينات، والتحليل.'
               : 'Index of research study integrity and methodological alignment. Ensures title, design, and samples align.'}
@@ -184,8 +184,8 @@ export const ConsistencyChecker: React.FC = () => {
         <div className="bg-[var(--ds-success-soft)] border border-[var(--ds-success)]/25 text-[var(--ds-success)] rounded-lg p-6 flex items-center gap-4 shadow-sm">
           <CheckCircle2 size={32} className="shrink-0" />
           <div>
-            <h4 className="text-sm font-black m-0 mb-1">{getTranslation(language, 'auditPassed')}</h4>
-            <p className="text-xs md:text-sm m-0 leading-relaxed">
+            <h4 className="text-h4 m-0 mb-1">{getTranslation(language, 'auditPassed')}</h4>
+            <p className="text-caption md:text-sm m-0">
               {language === 'ar'
                 ? 'تم فحص جميع معايير الاتساق ولم يتم العثور على أي خلل منهجي.'
                 : 'All consistency checks passed! The alignment between title, variables, design, and analysis is solid.'}
@@ -221,11 +221,11 @@ export const ConsistencyChecker: React.FC = () => {
       <Card className="p-6 border border-[var(--ds-primary)]/20 bg-[var(--ds-surface-primary)] shadow-sm space-y-4">
         <div className="flex items-center gap-2">
           <Sparkles className="text-[var(--ds-primary)]" size={20} />
-          <h4 className="text-sm font-black text-[var(--ds-text-primary)] m-0">
+          <h4 className="text-h4 text-[var(--ds-text-primary)] m-0">
             {language === 'ar' ? 'مستشار بصيرة للاتساق المنهجي الذكي' : 'Baseerah Methodological AI Consultant'}
           </h4>
         </div>
-        <p className="text-xs text-[var(--ds-text-secondary)] m-0 leading-relaxed">
+        <p className="text-caption text-[var(--ds-text-secondary)] m-0">
           {language === 'ar'
             ? 'بناءً على المعايير الإحصائية والعلمية للعنوان والمتغيرات المدخلة، يقدم مستشار بصيرة توصيات عملية لضمان قوة البحث المنهجية.'
             : 'Based on the scientific criteria of your title and variables, Baseerah recommends the following actions to ensure robustness:'}

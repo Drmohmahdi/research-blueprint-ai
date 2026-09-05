@@ -296,7 +296,7 @@ export const PortalGateway: React.FC = () => {
       )}
       {intendedPlan && intendedPlan !== 'FREE' && (
         <div className="rounded-2xl border border-[var(--ds-accent-gold)]/30 bg-[var(--ds-accent-gold-soft)] p-4 flex flex-wrap items-center justify-between gap-3">
-          <p className="m-0 text-sm font-bold text-[var(--ds-text-primary)]">
+          <p className="text-body-sm m-0 font-bold text-[var(--ds-text-primary)]">
             {isAr
               ? `اخترت باقة ${intendedPlan} عند التسجيل. اطلب الترقية من الفوترة داخل المؤسسة.`
               : `You selected ${intendedPlan} at signup. Request the upgrade from billing.`}
@@ -316,10 +316,10 @@ export const PortalGateway: React.FC = () => {
               <p className="m-0 text-[10px] font-bold uppercase tracking-widest text-[var(--ds-accent-gold)]">
                 {isAr ? 'مركز القيادة الأكاديمية' : 'Academic Command Center'}
               </p>
-              <h2 className="text-2xl md:text-3xl font-black text-[var(--ds-text-primary)] m-0 leading-tight">
+              <h2 className="text-h2 text-[var(--ds-text-primary)] m-0">
                 {isAr ? 'مرحباً بك في منظومة بصيرة' : 'Welcome to Baseerah'}
               </h2>
-              <p className="text-sm text-[var(--ds-text-secondary)] font-medium m-0 leading-relaxed">
+              <p className="text-body-sm text-[var(--ds-text-secondary)] font-medium m-0">
                 {isAr
                   ? 'اختر المسار الأكاديمي التالي. الهوية واحدة، والتمييز باللون محدود على الأيقونة والحالة.'
                   : 'Choose the next academic path. One identity, with color used only as a quiet accent.'}
@@ -353,7 +353,7 @@ export const PortalGateway: React.FC = () => {
               <p className="m-0 text-[10px] font-bold uppercase tracking-widest text-[var(--ds-primary)]">
                 {isAr ? 'الإجراء الأكاديمي التالي' : 'Next academic action'}
               </p>
-              <p className="m-0 mt-1 text-xs font-semibold text-[var(--ds-text-primary)]">
+              <p className="text-caption m-0 mt-1 font-semibold text-[var(--ds-text-primary)]">
                 {isAr
                   ? `اكتمال الملف ${completeness}% · ${openActions} إجراءات مفتوحة · ${projects.length} مشروعات`
                   : `Profile ${completeness}% · ${openActions} open actions · ${projects.length} projects`}
@@ -389,7 +389,7 @@ export const PortalGateway: React.FC = () => {
                     <div className="p-2.5 rounded-lg shrink-0" style={{ background: 'color-mix(in srgb, var(--path-accent) 14%, transparent)', color: m.accent }}>
                     <Icon size={20} className="stroke-[2]" />
                     </div>
-                    <h2 className="text-base font-extrabold text-[var(--ds-text-primary)] m-0 leading-snug">
+                    <h2 className="text-h2 text-[var(--ds-text-primary)] m-0">
                       {isAr ? m.titleAr : m.titleEn}
                     </h2>
                   </div>
@@ -398,7 +398,7 @@ export const PortalGateway: React.FC = () => {
                   </span>
                 </div>
 
-                <p className="text-xs text-[var(--ds-text-secondary)] font-medium leading-relaxed m-0 min-h-12">
+                <p className="text-caption text-[var(--ds-text-secondary)] font-medium m-0 min-h-12">
                   {isAr ? m.descAr : m.descEn}
                 </p>
 

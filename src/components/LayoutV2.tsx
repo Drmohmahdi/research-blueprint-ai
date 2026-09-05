@@ -642,7 +642,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
                   <span>{language === 'ar' ? 'المشروع النشط' : 'Active project'}</span>
                   <span>{activeProjectCompletion}%</span>
                 </div>
-                <p className="m-0 text-xs font-bold text-[var(--ds-text-primary)] line-clamp-2">
+                <p className="text-caption m-0 font-bold text-[var(--ds-text-primary)] line-clamp-2">
                   {language === 'ar' ? activeProject.titleAr : activeProject.titleEn}
                 </p>
                 <div className="h-1.5 overflow-hidden rounded-full bg-[var(--ds-surface-tertiary)]" role="progressbar" aria-label={language === 'ar' ? 'اكتمال المشروع' : 'Project completion'} aria-valuemin={0} aria-valuemax={100} aria-valuenow={activeProjectCompletion}>
@@ -803,7 +803,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
               <div className="text-[10px] font-extrabold text-[var(--ds-text-muted)] uppercase tracking-widest">
                 {getBreadcrumbs()}
               </div>
-              <h1 className="break-words text-lg min-[380px]:text-xl md:text-2xl font-black text-[var(--ds-text-primary)] m-0">
+              <h1 className="text-h1 break-words text-[var(--ds-text-primary)] m-0">
                 {activeProject ? (language === 'ar' ? activeProject.titleAr : activeProject.titleEn) : 'بصيرة'}
               </h1>
             </div>
@@ -889,7 +889,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
               {language === 'ar' ? 'ب' : 'B'}
             </div>
             <div>
-              <p className="m-0 text-xs font-black text-[var(--ds-text-primary)]">{getTranslation(language, 'title')}</p>
+              <p className="text-caption m-0 font-black text-[var(--ds-text-primary)]">{getTranslation(language, 'title')}</p>
               <p className="m-0 mt-0.5 text-[10px] text-[var(--ds-text-muted)]">{language === 'ar' ? 'بيئة أكاديمية موثوقة لصناعة بحث أفضل' : 'A trusted academic environment for better research'}</p>
             </div>
           </div>

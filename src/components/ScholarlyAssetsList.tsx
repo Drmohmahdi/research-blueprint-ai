@@ -336,11 +336,11 @@ export const ScholarlyAssetsList: React.FC = () => {
       <PathPanel accent="var(--ds-path-identity)">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2 m-0 text-ink">
+          <h2 className="text-h2 flex items-center gap-2 m-0 text-ink">
             <Layers className="w-7 h-7 text-path-identity" />
             <span>{t.title}</span>
           </h2>
-          <p className="text-xs text-secondary mt-1">{t.desc}</p>
+          <p className="text-caption text-secondary mt-1">{t.desc}</p>
         </div>
         
         <button
@@ -404,7 +404,7 @@ export const ScholarlyAssetsList: React.FC = () => {
       {loading ? (
         <div className="flex flex-col items-center justify-center min-h-[40vh] gap-4">
           <div className="w-12 h-12 rounded-full border-4 border-[var(--ds-primary)] border-t-transparent motion-safe:animate-spin"></div>
-          <p className="text-[var(--ds-text-secondary)] text-sm font-semibold">
+          <p className="text-body-sm text-[var(--ds-text-secondary)] font-semibold">
             {language === 'ar' ? 'جاري تحميل الأصول العلمية...' : 'Loading Scholarly Assets...'}
           </p>
         </div>
@@ -459,11 +459,11 @@ export const ScholarlyAssetsList: React.FC = () => {
 
                 {/* Titles */}
                 <div>
-                  <h3 className="text-sm font-bold text-[var(--ds-text-primary)] leading-snug">
+                  <h3 className="text-h3 text-[var(--ds-text-primary)]">
                     {language === 'ar' ? (asset.title_ar || asset.title_en) : (asset.title_en || asset.title_ar)}
                   </h3>
                   {asset.title_ar && asset.title_en && (
-                    <p className="text-xs text-[var(--ds-text-secondary)] font-medium mt-1">
+                    <p className="text-caption text-[var(--ds-text-secondary)] font-medium mt-1">
                       {language === 'ar' ? asset.title_en : asset.title_ar}
                     </p>
                   )}
@@ -550,7 +550,7 @@ export const ScholarlyAssetsList: React.FC = () => {
           <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-[var(--ds-shadow-overlay)] p-6 space-y-6 dir-auto" style={{ direction: language === 'ar' ? 'rtl' : 'ltr' }}>
             
             <div className="flex justify-between items-center border-b border-[var(--ds-border-subtle)] pb-3">
-              <h3 className="text-base font-black flex items-center gap-2">
+              <h3 className="text-h3 flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-path-identity" />
                 <span>{editingAssetId ? t.modalTitleEdit : t.modalTitleAdd}</span>
               </h3>
@@ -721,7 +721,7 @@ export const ScholarlyAssetsList: React.FC = () => {
 
               {/* CRediT contributors form section */}
               <div className="space-y-3 pt-3 border-t border-[var(--ds-border-subtle)]">
-                <h4 className="text-xs font-bold text-ink">{t.contributors}</h4>
+                <h4 className="text-h4 text-ink">{t.contributors}</h4>
                 
                 {/* List of currently added contributors */}
                 <div className="flex flex-wrap gap-2">

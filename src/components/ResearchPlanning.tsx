@@ -105,10 +105,10 @@ export const ResearchPlanning: React.FC = () => {
             <ClipboardList size={20} />
           </span>
           <div>
-            <h3 className="m-0 text-xl font-black text-ink">
+            <h3 className="text-h3 m-0 text-ink">
               {language === 'ar' ? 'خطة البحث' : 'Research Plan'}
             </h3>
-            <p className="m-0 mt-1 text-sm text-secondary">
+            <p className="text-body-sm m-0 mt-1 text-secondary">
               {language === 'ar'
                 ? 'وثّق الأهداف والمعالم الزمنية والاعتبارات الأخلاقية قبل التسجيل المسبق والتنفيذ.'
                 : 'Document objectives, milestones, and ethical considerations before preregistration and execution.'}
@@ -123,7 +123,7 @@ export const ResearchPlanning: React.FC = () => {
         <Card padding="lg" className="space-y-5">
           <div className="flex items-center gap-2 text-[var(--ds-primary)]">
             <BookOpenCheck size={18} />
-            <h3 className="m-0 text-base font-black text-[var(--ds-text-primary)]">
+            <h3 className="text-h3 m-0 text-[var(--ds-text-primary)]">
               {language === 'ar' ? 'أهداف الدراسة' : 'Study Objectives'}
             </h3>
           </div>
@@ -141,7 +141,7 @@ export const ResearchPlanning: React.FC = () => {
         <Card padding="lg" className="space-y-5">
           <div className="flex items-center gap-2 text-[var(--ds-primary)]">
             <CalendarDays size={18} />
-            <h3 className="m-0 text-base font-black text-[var(--ds-text-primary)]">
+            <h3 className="text-h3 m-0 text-[var(--ds-text-primary)]">
               {language === 'ar' ? 'الجدول الزمني والمعالم' : 'Timeline and Milestones'}
             </h3>
           </div>
@@ -160,7 +160,7 @@ export const ResearchPlanning: React.FC = () => {
       <Card padding="lg" className="space-y-4">
         <div className="flex items-center gap-2 text-[var(--ds-primary)]">
           <ShieldCheck size={18} />
-          <h3 className="m-0 text-base font-black text-[var(--ds-text-primary)]">
+          <h3 className="text-h3 m-0 text-[var(--ds-text-primary)]">
             {language === 'ar' ? 'الاعتبارات الأخلاقية والجدوى' : 'Ethics and Feasibility'}
           </h3>
         </div>
@@ -212,10 +212,10 @@ export const ResearchPlanning: React.FC = () => {
       <Card padding="lg" className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h3 className="m-0 text-base font-black text-[var(--ds-text-primary)]">
+            <h3 className="text-h3 m-0 text-[var(--ds-text-primary)]">
               {language === 'ar' ? 'قاموس البيانات' : 'Data Dictionary'}
             </h3>
-            <p className="m-0 mt-1 text-xs text-[var(--ds-text-secondary)]">
+            <p className="text-caption m-0 mt-1 text-[var(--ds-text-secondary)]">
               {language === 'ar' ? 'عرض مشتق من متغيرات المشروع المعتمدة.' : 'A view derived from the project’s approved variables.'}
             </p>
           </div>

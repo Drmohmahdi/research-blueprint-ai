@@ -118,10 +118,10 @@ export const ResearchProgressDashboard: React.FC = () => {
       <PathPanel accent="var(--ds-path-research)">
         <div className="flex justify-between items-start">
           <div>
-            <h2 className="text-2xl md:text-3xl font-black text-ink m-0 mb-2">
+            <h2 className="text-h2 text-ink m-0 mb-2">
               {language === 'ar' ? 'لوحة تحليلات البحث' : 'Research Analytics'}
             </h2>
-            <p className="text-sm font-semibold text-secondary m-0">
+            <p className="text-body-sm font-semibold text-secondary m-0">
               {language === 'ar'
                 ? `${activeProject.titleAr || activeProject.titleEn || 'مشروع بدون عنوان'}`
                 : `${activeProject.titleEn || activeProject.titleAr || 'Untitled project'}`}
@@ -170,7 +170,7 @@ export const ResearchProgressDashboard: React.FC = () => {
 
           {/* Phase breakdown */}
           <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl p-5 shadow-sm">
-            <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 mb-4">
+            <h3 className="text-h3 text-[var(--ds-text-primary)] m-0 mb-4">
               {language === 'ar' ? 'تفاصيل المراحل' : 'Phase Details'}
             </h3>
             <div className="space-y-3">
@@ -213,7 +213,7 @@ export const ResearchProgressDashboard: React.FC = () => {
         {/* Right Column: Project-derived readiness */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl p-6 shadow-sm">
-            <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 mb-6">
+            <h3 className="text-h3 text-[var(--ds-text-primary)] m-0 mb-6">
               {language === 'ar' ? 'جاهزية المشروع الفعلية' : 'Actual Project Readiness'}
             </h3>
             <div className="space-y-5">
@@ -236,7 +236,7 @@ export const ResearchProgressDashboard: React.FC = () => {
           </div>
 
           <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl p-6 shadow-sm">
-            <h3 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 mb-6">
+            <h3 className="text-h3 text-[var(--ds-text-primary)] m-0 mb-6">
               {language === 'ar' ? 'سلامة البروتوكول' : 'Protocol Integrity'}
             </h3>
             <p className={`m-0 text-sm font-semibold ${protocolStatus === 'verified' ? 'text-success' : protocolStatus === 'checking' ? 'text-warning' : 'text-danger'}`}>

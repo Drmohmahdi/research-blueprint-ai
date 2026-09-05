@@ -254,10 +254,10 @@ export const FieldMonitoring: React.FC = () => {
     <div className="space-y-6 max-w-4xl mx-auto">
       <PathPanel accent="var(--ds-path-data)">
         <div className="space-y-1">
-          <h2 className="text-lg font-black text-ink m-0">
+          <h2 className="text-h2 text-ink m-0">
             {language === 'ar' ? 'المتابعة الميدانية وجمع البيانات' : 'Field Monitoring & Data Collection'}
           </h2>
-          <p className="text-xs text-secondary m-0">
+          <p className="text-caption text-secondary m-0">
             {language === 'ar'
               ? 'وثّق التجنيد والجلسات والامتثال للبروتوكول المسجل قبل التحليل.'
               : 'Record enrollment, sessions, and protocol compliance before analysis.'}
@@ -266,7 +266,7 @@ export const FieldMonitoring: React.FC = () => {
       </PathPanel>
       {protocolStatus !== 'verified' ? (
         <div role="alert" className="bg-[var(--ds-warning-soft)] border border-[var(--ds-warning)]/25 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex items-start gap-3"><AlertTriangle size={18} className="shrink-0 text-[var(--ds-warning)] mt-0.5" /><div><h3 className="m-0 text-sm font-bold text-[var(--ds-text-primary)]">{language === 'ar' ? 'التنفيذ الميداني متوقف حتى التحقق من البروتوكول' : 'Field recording paused pending protocol verification'}</h3><p className="m-0 mt-1 text-xs leading-5 text-[var(--ds-text-secondary)]">{protocolStatus === 'missing' ? (language === 'ar' ? 'سجّل البروتوكول مسبقاً قبل توثيق التجنيد أو جلسات التنفيذ.' : 'Preregister the protocol before recording enrollment or field sessions.') : protocolStatus === 'mismatch' ? (language === 'ar' ? 'تغيرت الخطة بعد آخر تسجيل؛ سجّل مراجعة بروتوكول جديدة قبل متابعة التنفيذ.' : 'The plan changed after the latest registration; register a revised protocol before continuing execution.') : (language === 'ar' ? 'جارٍ التحقق من سلامة البروتوكول. ستُتاح الكتابة عند اكتمال التحقق.' : 'Protocol integrity is being verified. Recording will be enabled when verification completes.')}</p></div></div>
+          <div className="flex items-start gap-3"><AlertTriangle size={18} className="shrink-0 text-[var(--ds-warning)] mt-0.5" /><div><h3 className="text-h3 m-0 text-[var(--ds-text-primary)]">{language === 'ar' ? 'التنفيذ الميداني متوقف حتى التحقق من البروتوكول' : 'Field recording paused pending protocol verification'}</h3><p className="text-caption m-0 mt-1 text-[var(--ds-text-secondary)]">{protocolStatus === 'missing' ? (language === 'ar' ? 'سجّل البروتوكول مسبقاً قبل توثيق التجنيد أو جلسات التنفيذ.' : 'Preregister the protocol before recording enrollment or field sessions.') : protocolStatus === 'mismatch' ? (language === 'ar' ? 'تغيرت الخطة بعد آخر تسجيل؛ سجّل مراجعة بروتوكول جديدة قبل متابعة التنفيذ.' : 'The plan changed after the latest registration; register a revised protocol before continuing execution.') : (language === 'ar' ? 'جارٍ التحقق من سلامة البروتوكول. ستُتاح الكتابة عند اكتمال التحقق.' : 'Protocol integrity is being verified. Recording will be enabled when verification completes.')}</p></div></div>
           {protocolStatus !== 'checking' && <Button type="button" variant="outline" size="sm" onClick={() => navigate(ROUTES.PRE_REGISTRATION)}>{language === 'ar' ? 'فتح التسجيل المسبق' : 'Open Preregistration'}</Button>}
         </div>
       ) : (
@@ -279,7 +279,7 @@ export const FieldMonitoring: React.FC = () => {
             <Users size={16} className="text-[var(--ds-primary)]" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-2xl font-black text-ink ds-numeric m-0">
+            <h3 className="text-h3 text-ink ds-numeric m-0">
               {enrolled} / {target}
             </h3>
             <div className="w-full bg-[var(--ds-surface-secondary)] h-2 rounded-full mt-2">
@@ -307,7 +307,7 @@ export const FieldMonitoring: React.FC = () => {
             <ClipboardCheck size={16} className="text-[var(--ds-success)]" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-2xl font-black text-[var(--ds-success)] ds-numeric m-0">{fidelityScore}%</h3>
+            <h3 className="text-h3 text-[var(--ds-success)] ds-numeric m-0">{fidelityScore}%</h3>
             <span className="text-[10px] text-[var(--ds-text-muted)] font-medium block">
               {language === 'ar' ? 'قياس مدى الالتزام ببروتوكول التجربة' : 'Measurement of experimental adherence'}
             </span>
@@ -320,7 +320,7 @@ export const FieldMonitoring: React.FC = () => {
             <Activity size={16} className="text-[var(--ds-warning)]" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-2xl font-black text-[var(--ds-warning)] ds-numeric m-0">{attritionRate.toFixed(0)}%</h3>
+            <h3 className="text-h3 text-[var(--ds-warning)] ds-numeric m-0">{attritionRate.toFixed(0)}%</h3>
             <span className="text-[10px] text-[var(--ds-text-muted)] font-medium block">
               {language === 'ar' ? 'النسبة المعتمدة في الخطة' : 'Adherence rate in plan'}
             </span>
@@ -331,14 +331,14 @@ export const FieldMonitoring: React.FC = () => {
       <div className={`${!hasCurrentProtocolSessions || latestNeedsFollowUp ? 'bg-[var(--ds-warning-soft)] border-[var(--ds-warning)]/25' : 'bg-[var(--ds-success-soft)] border-[var(--ds-success)]/25'} rounded-lg p-4 flex items-start gap-3`}>
         {!hasCurrentProtocolSessions || latestNeedsFollowUp ? <AlertTriangle size={18} className="text-[var(--ds-warning)] mt-0.5 shrink-0" /> : <CheckCircle2 size={18} className="text-[var(--ds-success)] mt-0.5 shrink-0" />}
         <div className="space-y-1">
-          <h4 className="m-0 text-sm font-bold text-[var(--ds-text-primary)]">
+          <h4 className="text-h4 m-0 text-[var(--ds-text-primary)]">
             {!hasCurrentProtocolSessions
               ? (language === 'ar' ? 'بانتظار توثيق التنفيذ' : 'Awaiting documented execution')
               : latestNeedsFollowUp
               ? (language === 'ar' ? 'إجراء ميداني مقترح' : 'Suggested Field Action')
               : (language === 'ar' ? 'حالة التنفيذ مستقرة' : 'Implementation is on track')}
           </h4>
-          <p className="m-0 text-xs leading-6 text-[var(--ds-text-secondary)]">
+          <p className="text-caption m-0 text-[var(--ds-text-secondary)]">
             {!latestSession
               ? (language === 'ar' ? 'لا توجد جلسات تنفيذ موثقة تحت بصمة البروتوكول الحالية بعد.' : 'No field sessions have been documented under the current protocol fingerprint yet.')
               : latestNeedsFollowUp
@@ -351,7 +351,7 @@ export const FieldMonitoring: React.FC = () => {
       </div>
 
       <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-4">
-        <h4 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
+        <h4 className="text-h4 text-[var(--ds-text-primary)] m-0 pb-2 border-b border-[var(--ds-border-subtle)]">
           {language === 'ar' ? 'سجل متابعة تطبيق الجلسات التدريبية' : 'Session Fidelity Log Sheets'}
         </h4>
 
@@ -415,7 +415,7 @@ export const FieldMonitoring: React.FC = () => {
           <Button type="submit" variant="secondary" size="sm" iconBefore={<Plus size={14} />}>
             {language === 'ar' ? 'إضافة إلى سجل التنفيذ' : 'Add to monitoring log'}
           </Button>
-          {formError && <p role="alert" className="text-xs font-semibold text-danger bg-danger/10 border border-danger rounded-md p-2 m-0">{formError}</p>}
+          {formError && <p role="alert" className="text-caption font-semibold text-danger bg-danger/10 border border-danger rounded-md p-2 m-0">{formError}</p>}
         </form>
       </div>
     </div>

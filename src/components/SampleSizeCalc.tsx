@@ -166,8 +166,8 @@ export const SampleSizeCalc: React.FC = () => {
     <div className="space-y-6 max-w-4xl mx-auto pb-16">
       <PathPanel accent="var(--ds-path-data)">
         <div className="space-y-1">
-          <h2 className="text-lg font-black text-ink m-0">{getTranslation(language, 'sampleCalc')}</h2>
-          <p className="text-xs text-secondary m-0">
+          <h2 className="text-h2 text-ink m-0">{getTranslation(language, 'sampleCalc')}</h2>
+          <p className="text-caption text-secondary m-0">
             {language === 'ar'
               ? 'احسب حجم العينة المقبول علمياً وفق نوع الاختبار والقوة الإحصائية ومعدل الفقد.'
               : 'Calculate a scientifically acceptable sample size from test type, power, and attrition.'}
@@ -187,7 +187,7 @@ export const SampleSizeCalc: React.FC = () => {
         {/* Left Parameter Settings Block */}
         <div className="lg:col-span-1 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl p-5 shadow-sm space-y-4">
           <div className="space-y-1">
-            <h3 className="text-sm font-black text-[var(--ds-text-primary)] m-0">
+            <h3 className="text-h3 text-[var(--ds-text-primary)] m-0">
               {language === 'ar' ? 'معايير حجم العينة' : 'Sample Size Criteria'}
             </h3>
             <p className="text-[10px] text-[var(--ds-text-muted)] font-medium m-0">
@@ -362,7 +362,7 @@ export const SampleSizeCalc: React.FC = () => {
             </div>
 
             <div className="p-4 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl text-xs space-y-3">
-              <h4 className="font-black text-[var(--ds-text-primary)] flex items-center gap-1.5 m-0 text-[11px]">
+              <h4 className="text-h4 text-[var(--ds-text-primary)] flex items-center gap-1.5 m-0 text-[11px]">
                 <Info size={14} className="text-secondary" />
                 <span>{language === 'ar' ? 'تفاصيل التخصيص للمجموعات' : 'Group Allocation Details'}</span>
               </h4>
@@ -410,7 +410,7 @@ export const SampleSizeCalc: React.FC = () => {
             <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl p-5 shadow-sm space-y-4">
               <div className="flex items-center gap-1.5">
                 <TrendingUp size={14} className="text-path-data" />
-                <h4 className="text-[10px] font-black text-[var(--ds-text-secondary)] uppercase tracking-wider m-0">
+                <h4 className="text-h4 text-[10px] text-[var(--ds-text-secondary)] uppercase m-0">
                   {getTranslation(language, 'powerCurve')}
                 </h4>
               </div>
@@ -459,10 +459,10 @@ export const SampleSizeCalc: React.FC = () => {
           {/* Sensitivity Analysis Card */}
           {testType !== 'descriptive_survey' && (
             <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl p-5 shadow-sm space-y-4">
-              <h4 className="text-[10px] font-black text-[var(--ds-text-secondary)] uppercase tracking-wider m-0">
+              <h4 className="text-h4 text-[10px] text-[var(--ds-text-secondary)] uppercase m-0">
                 {language === 'ar' ? 'تحليل الحساسية للمتغيرات الدخيلة' : 'Sensitivity & Confounder Analysis'}
               </h4>
-              <p className="text-xs text-[var(--ds-text-secondary)] leading-relaxed m-0">
+              <p className="text-caption text-[var(--ds-text-secondary)] m-0">
                 {language === 'ar' 
                   ? 'يقوم هذا النموذج بمحاكاة متى يمكن لمتغير دخيل لم يتم قياسه (Unmeasured Confounder) أن يُلغي الدلالة الإحصائية للنتائج:' 
                   : 'This model simulates the threshold at which an unmeasured confounding variable cancels out the statistical significance of your treatment:'}

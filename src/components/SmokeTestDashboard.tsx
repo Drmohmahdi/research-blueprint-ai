@@ -354,10 +354,10 @@ export const SmokeTestDashboard: React.FC = () => {
       <PathPanel accent="var(--ds-path-identity)">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-ink m-0">
+          <h2 className="text-h2 text-ink m-0">
             {language === 'ar' ? 'لوحة فحوصات الدخان والجاهزية (Smoke Tests)' : 'Baseline Diagnostics & Smoke Tests'}
           </h2>
-          <p className="text-xs text-muted m-0 mt-1">
+          <p className="text-caption text-muted m-0 mt-1">
             {language === 'ar' 
               ? 'أداة الفحص الذاتي لتأكيد عمل الوظائف المنهجية وتكامل الواجهات مع قاعدة البيانات والمحاكيات المحلية.' 
               : 'Diagnostic engine confirming frontend framework routes, rule engines, local storage, and statistic fallbacks.'}
@@ -391,7 +391,7 @@ export const SmokeTestDashboard: React.FC = () => {
               </div>
               <div className="space-y-1 flex-1">
                 <div className="flex justify-between items-center">
-                  <h4 className="text-xs font-bold text-ink m-0">
+                  <h4 className="text-h4 text-ink m-0">
                     {language === 'ar' ? tc.nameAr : tc.nameEn}
                   </h4>
                   <span className={`text-[10px] font-bold ${
@@ -417,7 +417,7 @@ export const SmokeTestDashboard: React.FC = () => {
 
         {/* Log Viewer */}
         <div className="lg:col-span-1 bg-canvas text-secondary p-4 rounded-xl border border-subtle flex flex-col h-[520px]">
-          <h3 className="text-xs font-bold text-muted m-0 pb-3 border-b border-subtle flex items-center gap-1.5">
+          <h3 className="text-h3 text-muted m-0 pb-3 border-b border-subtle flex items-center gap-1.5">
             <Database size={14} />
             {language === 'ar' ? 'سجل تشغيل الفحوصات' : 'Diagnostic Log Terminal'}
           </h3>

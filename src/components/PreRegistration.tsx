@@ -122,10 +122,10 @@ export const PreRegistration: React.FC = () => {
       <PathPanel accent="var(--ds-path-research)">
         <div className="flex justify-between items-start gap-4">
           <div className="space-y-1">
-            <h3 className="text-lg font-bold text-ink m-0">
+            <h3 className="text-h3 text-ink m-0">
               {language === 'ar' ? 'التسجيل المسبق للبروتوكول البحثي (Preregistration)' : 'Study Preregistration'}
             </h3>
-            <p className="text-xs text-secondary m-0">
+            <p className="text-caption text-secondary m-0">
               {language === 'ar'
                 ? 'وثّق فرضياتك وخطة التحليل إلكترونياً قبل البدء في جمع البيانات لمنع التحيز وحماية مصداقية البحث.'
                 : 'Document hypotheses and analysis plans before data collection to prevent bias and ensure scientific credibility.'}
@@ -173,19 +173,19 @@ export const PreRegistration: React.FC = () => {
             </div>
             {integrity === 'mismatch' && (
               <div className="border-t border-[var(--ds-danger)]/20 pt-3 space-y-3">
-                <p className="m-0 text-xs text-[var(--ds-text-secondary)]">
+                <p className="text-caption m-0 text-[var(--ds-text-secondary)]">
                   {language === 'ar' ? 'حُفظت التعديلات بعد آخر تسجيل. سجّل مراجعة جديدة للحفاظ على سجل البروتوكولات السابق.' : 'Changes were saved after the latest registration. Register a new revision to preserve the earlier protocol record.'}
                 </p>
                 <Button onClick={handleLockPreReg} disabled={loading || missingRequirements.length > 0} loading={loading} variant="primary" size="sm">
                   {language === 'ar' ? 'تسجيل مراجعة جديدة للبروتوكول' : 'Register Revised Protocol'}
                 </Button>
-                {missingRequirements.length > 0 && <p className="m-0 text-xs font-semibold text-[var(--ds-warning)]">{language === 'ar' ? 'لا يمكن تسجيل المراجعة حتى تكتمل المتطلبات الأساسية.' : 'Complete the core requirements before registering this revision.'}</p>}
+                {missingRequirements.length > 0 && <p className="text-caption m-0 font-semibold text-[var(--ds-warning)]">{language === 'ar' ? 'لا يمكن تسجيل المراجعة حتى تكتمل المتطلبات الأساسية.' : 'Complete the core requirements before registering this revision.'}</p>}
               </div>
             )}
           </div>
         ) : (
           <div className="p-4 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg space-y-4 text-center">
-            <p className="text-[var(--ds-text-secondary)] text-xs max-w-xl mx-auto leading-relaxed">
+            <p className="text-caption text-[var(--ds-text-secondary)] max-w-xl mx-auto">
               {language === 'ar'
                 ? 'سيقوم النظام بتجميع الأهداف، والفرضيات، والمتغيرات، وحجم العينة، وخطة التحليل المسجلة وتجميدها في نسخة غير قابلة للتعديل للحفظ والتوثيق الأكاديمي.'
                 : 'The system will compile all hypotheses, variables, required sample size, and analysis tests into a locked, non-editable registry copy for academic archival.'}
@@ -232,7 +232,7 @@ export const PreRegistration: React.FC = () => {
 
       {/* History log mockup */}
       <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-5 shadow-sm space-y-4">
-        <h4 className="text-sm font-bold text-[var(--ds-text-primary)] m-0 pb-2 border-b border-[var(--ds-border-subtle)] flex items-center gap-1.5">
+        <h4 className="text-h4 text-[var(--ds-text-primary)] m-0 pb-2 border-b border-[var(--ds-border-subtle)] flex items-center gap-1.5">
           <History size={16} className="text-[var(--ds-text-muted)]" />
           <span>{language === 'ar' ? 'سجل إصدارات الخطة والتدقيق' : 'Protocol Revision & Audit Trail'}</span>
         </h4>

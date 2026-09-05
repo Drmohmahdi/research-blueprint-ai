@@ -141,11 +141,11 @@ export const GroupComparisonChart: React.FC<GroupComparisonChartProps> = ({
     <div className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-xl p-6 shadow-sm flex flex-col space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h3 className="text-lg font-bold text-[var(--ds-text-primary)] flex items-center gap-2">
+          <h3 className="text-h3 text-[var(--ds-text-primary)] flex items-center gap-2">
             <Activity className="w-5 h-5 text-path-data" />
             {simulationData ? t.simData : t.noSimData}
           </h3>
-          <p className="text-sm text-[var(--ds-text-secondary)] mt-1">
+          <p className="text-body-sm text-[var(--ds-text-secondary)] mt-1">
             {simulationData ? t.insightText : t.runSim}
           </p>
         </div>
@@ -243,28 +243,28 @@ export const GroupComparisonChart: React.FC<GroupComparisonChartProps> = ({
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2 border-t border-[var(--ds-border-subtle)] pt-6">
         <div className="bg-[var(--ds-surface-secondary)] p-3 rounded-lg border border-[var(--ds-border-subtle)]">
-          <p className="text-xs text-[var(--ds-text-secondary)] mb-1">{t.dTitle}</p>
+          <p className="text-caption text-[var(--ds-text-secondary)] mb-1">{t.dTitle}</p>
           <div className="flex items-end gap-2">
             <span className="text-xl font-bold text-[var(--ds-text-primary)]">{stats.cohensD.toFixed(2)}</span>
             <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold mb-1 ${effectSize.color}`}>{effectSize.label}</span>
           </div>
         </div>
         <div className="bg-[var(--ds-surface-secondary)] p-3 rounded-lg border border-[var(--ds-border-subtle)]">
-          <p className="text-xs text-[var(--ds-text-secondary)] mb-1">{t.powerTitle}</p>
+          <p className="text-caption text-[var(--ds-text-secondary)] mb-1">{t.powerTitle}</p>
           <div className="flex items-end gap-2">
             <span className="text-xl font-bold text-ink ds-numeric">{(stats.power * 100).toFixed(0)}%</span>
             <span className="text-[10px] font-bold text-secondary mb-1">{stats.power >= 0.8 ? (isArabic ? 'كافٍ' : 'adequate') : (isArabic ? 'منخفض' : 'low')}</span>
           </div>
         </div>
         <div className="bg-[var(--ds-surface-secondary)] p-3 rounded-lg border border-[var(--ds-border-subtle)]">
-          <p className="text-xs text-[var(--ds-text-secondary)] mb-1">{t.pTitle}</p>
+          <p className="text-caption text-[var(--ds-text-secondary)] mb-1">{t.pTitle}</p>
           <span className="text-xl font-bold text-ink ds-numeric" dir="ltr">
             {stats.pValue < 0.001 ? 'p < 0.001' : `p = ${stats.pValue.toFixed(3)}`}
           </span>
           <span className="ms-1 text-[10px] font-bold text-secondary">{stats.pValue < 0.05 ? (isArabic ? 'دال' : 'sig.') : (isArabic ? 'غير دال' : 'n.s.')}</span>
         </div>
         <div className="bg-[var(--ds-surface-secondary)] p-3 rounded-lg border border-[var(--ds-border-subtle)]">
-          <p className="text-xs text-[var(--ds-text-secondary)] mb-1">{t.gainTitle}</p>
+          <p className="text-caption text-[var(--ds-text-secondary)] mb-1">{t.gainTitle}</p>
           <span className="text-xl font-bold text-ink ds-numeric" dir="ltr">
             +{Math.max(stats.trGain, stats.conGain).toFixed(1)}
           </span>

@@ -49,7 +49,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ langua
             <Shield size={20} />
           </div>
           <div>
-            <h3 className="text-base font-black m-0 text-ink">
+            <h3 className="text-h3 m-0 text-ink">
               {language === 'ar' ? 'سجل الرقابة الأمنية والعمليات (Audit Logs)' : 'Security Audit Trail & Logs'}
             </h3>
             <p className="text-[10px] text-[var(--ds-text-muted)] font-semibold mt-1 m-0">

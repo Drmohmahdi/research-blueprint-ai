@@ -198,10 +198,10 @@ export const MethodologyChat: React.FC = () => {
             <Brain size={22} className="text-ai" />
           </div>
           <div>
-            <h2 className="text-lg font-extrabold text-ink m-0">
+            <h2 className="text-h2 text-ink m-0">
               {isAr ? 'مساعد المنهجية الذكي' : 'Methodology Assistant'}
             </h2>
-            <p className="text-xs text-secondary m-0">
+            <p className="text-caption text-secondary m-0">
               {isAr ? 'اسألني عن تصميم دراستك، الاختبارات الإحصائية، أو أي سؤال منهجي' : 'Ask about study design, statistical tests, or any methodology question'}
             </p>
           </div>
