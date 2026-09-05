@@ -821,5 +821,21 @@ with SessionLocal() as db:
         db.commit()
     print("e2e_seed: academic identity fixtures created", flush=True)
 
+# Thesis registration: without this, /app/research/thesis shows the
+# registration gate instead of the Thesis Operations dashboard, since a
+# thesis must be registered against a project before its command center
+# renders (see app.routers.thesis_workflow.register_thesis_for_project).
+from app.models import ThesisRecord  # noqa: E402
+from app.services.thesis_workflow import ensure_active_policy, create_thesis  # noqa: E402
+
+with SessionLocal() as db:
+    existing_thesis = db.query(ThesisRecord).filter(ThesisRecord.project_id == "e2e-project").first()
+    if not existing_thesis:
+        project = db.get(ResearchProject, "e2e-project")
+        policy = ensure_active_policy(db, "e2e-org", "MASTERS", "e2e-researcher-user")
+        create_thesis(db, project, policy, "e2e-researcher-user", "E2E Master's Program", "e2e-researcher-user", "EMPIRICAL")
+        db.commit()
+    print("e2e_seed: thesis registration fixture created", flush=True)
+
 engine.dispose()
 print("E2E database prepared with deterministic non-production fixtures", flush=True)

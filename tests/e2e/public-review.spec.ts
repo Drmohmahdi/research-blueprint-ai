@@ -12,7 +12,7 @@ test('@critical @a11y external reviewer route stays outside the app shell and fa
 
 test('@critical @a11y external thesis examiner route is isolated and fails safely', async ({ page }) => {
   await page.goto('/thesis-examination/invalid-e2e-token');
-  await expect(page.getByRole('heading', { name: 'Invitation unavailable' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'الدعوة غير متاحة' })).toBeVisible();
   await expect(page.getByRole('navigation')).toHaveCount(0);
   await expect(page.locator('main')).toHaveCount(1);
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();

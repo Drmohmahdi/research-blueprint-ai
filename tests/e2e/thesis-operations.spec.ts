@@ -5,7 +5,7 @@ import { login } from './helpers';
 test('@critical External Thesis Examiner portal stays outside the app shell', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/thesis-examination/invalid-e2e-token');
-  await expect(page.getByRole('heading', { name: /Invitation unavailable|Assigned thesis examination/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Invitation unavailable|Assigned thesis examination|الدعوة غير متاحة|مناقشة الرسالة المعيَّنة/ })).toBeVisible();
   await expect(page.getByRole('navigation')).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
