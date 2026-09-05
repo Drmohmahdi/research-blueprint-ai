@@ -88,7 +88,7 @@ export const SupervisorPanel: React.FC = () => {
             {language === 'ar' ? 'ملاحظات المشرف' : 'Supervisor Comments'}
           </span>
           {unresolvedCount > 0 && (
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-danger/10 text-danger">
+            <span className="px-2 py-0.5 rounded-full text-caption font-black bg-danger/10 text-danger">
               {unresolvedCount}
             </span>
           )}
@@ -111,7 +111,7 @@ export const SupervisorPanel: React.FC = () => {
             <select
               value={newPriority}
               onChange={e => setNewPriority(e.target.value)}
-              className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-2 py-1 text-[10px] font-bold text-[var(--ds-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
+              className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-2 py-1 text-caption font-bold text-[var(--ds-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
             >
               <option value="LOW">{language === 'ar' ? 'منخفض' : 'Low'}</option>
               <option value="NORMAL">{language === 'ar' ? 'عادي' : 'Normal'}</option>
@@ -131,7 +131,7 @@ export const SupervisorPanel: React.FC = () => {
           <div className="flex items-center gap-2">
             <label className="flex items-center gap-1.5 cursor-pointer">
               <input type="checkbox" checked={filterResolved} onChange={() => setFilterResolved(!filterResolved)} className="h-4 w-4 rounded border-[var(--ds-border-default)] text-[var(--ds-primary)] focus:ring-[var(--ds-primary)] cursor-pointer" />
-              <span className="text-[10px] text-[var(--ds-text-muted)] font-semibold">
+              <span className="text-caption text-[var(--ds-text-muted)] font-semibold">
                 {language === 'ar' ? 'إظهار المحلولة' : 'Show resolved'}
               </span>
             </label>
@@ -169,7 +169,7 @@ export const SupervisorPanel: React.FC = () => {
                       </button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 text-[9px] text-[var(--ds-text-muted)]">
+                  <div className="flex items-center gap-2 text-caption text-[var(--ds-text-muted)]">
                     <span>{c.authorUsername}</span>
                     <span>•</span>
                     <span>{new Date(c.createdAt).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US')}</span>

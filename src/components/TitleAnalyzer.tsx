@@ -192,7 +192,7 @@ export const TitleAnalyzer: React.FC = () => {
 
           {/* Interactive Title Presets */}
           <div className="space-y-1.5 pt-2 border-t border-[var(--ds-border-subtle)]">
-            <span className="text-[10px] text-[var(--ds-text-muted)] font-black uppercase tracking-wider block">
+            <span className="text-caption text-[var(--ds-text-muted)] font-black uppercase tracking-wider block">
               {language === 'ar' ? 'أمثلة وعناوين استرشادية جاهزة للتجربة:' : 'Sample Title Presets to Try:'}
             </span>
             <div className="flex flex-wrap gap-2">
@@ -200,7 +200,7 @@ export const TitleAnalyzer: React.FC = () => {
                 <button
                   key={idx}
                   onClick={() => handlePresetClick(language === 'ar' ? preset.ar : preset.en)}
-                  className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] border border-[var(--ds-border-subtle)] hover:bg-[var(--ds-primary-soft)] hover:border-[var(--ds-primary)]/30 transition-all cursor-pointer text-right max-w-full truncate"
+                  className="px-3 py-1.5 rounded-lg text-caption font-bold bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] border border-[var(--ds-border-subtle)] hover:bg-[var(--ds-primary-soft)] hover:border-[var(--ds-primary)]/30 transition-all cursor-pointer text-right max-w-full truncate"
                 >
                   {language === 'ar' ? preset.ar : preset.en}
                 </button>
@@ -239,7 +239,7 @@ export const TitleAnalyzer: React.FC = () => {
             <div className="space-y-4">
               {/* Methodology */}
               <div className="p-3.5 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg space-y-1.5">
-                <span className="text-[10px] font-black text-path-research uppercase tracking-wider block">
+                <span className="text-caption font-black text-path-research uppercase tracking-wider block">
                   {getTranslation(language, 'suggestedMethodology')}
                 </span>
                 <span className="text-xs font-black text-[var(--ds-text-primary)]">
@@ -252,12 +252,12 @@ export const TitleAnalyzer: React.FC = () => {
               {/* Variables */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="p-3.5 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg space-y-2">
-                  <span className="text-[10px] font-black text-[var(--ds-text-secondary)] uppercase tracking-wider block">
+                  <span className="text-caption font-black text-[var(--ds-text-secondary)] uppercase tracking-wider block">
                     {getTranslation(language, 'independentVar')}
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {result.independentVariables.map((v, i) => (
-                      <span key={i} className="text-[10px] font-bold bg-[var(--ds-surface-primary)] text-ink border border-[var(--ds-border-subtle)] px-2 py-1 rounded-md">
+                      <span key={i} className="text-caption font-bold bg-[var(--ds-surface-primary)] text-ink border border-[var(--ds-border-subtle)] px-2 py-1 rounded-md">
                         {v}
                       </span>
                     ))}
@@ -265,12 +265,12 @@ export const TitleAnalyzer: React.FC = () => {
                 </div>
 
                 <div className="p-3.5 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg space-y-2">
-                  <span className="text-[10px] font-black text-[var(--ds-text-secondary)] uppercase tracking-wider block">
+                  <span className="text-caption font-black text-[var(--ds-text-secondary)] uppercase tracking-wider block">
                     {getTranslation(language, 'dependentVar')}
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {result.dependentVariables.map((v, i) => (
-                      <span key={i} className="text-[10px] font-bold bg-[var(--ds-surface-primary)] text-success border border-success/20 px-2 py-1 rounded-md">
+                      <span key={i} className="text-caption font-bold bg-[var(--ds-surface-primary)] text-success border border-success/20 px-2 py-1 rounded-md">
                         {v}
                       </span>
                     ))}
@@ -281,7 +281,7 @@ export const TitleAnalyzer: React.FC = () => {
               {/* Population & Context */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="p-3.5 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg space-y-1">
-                  <span className="text-[10px] font-black text-[var(--ds-text-secondary)] uppercase tracking-wider block">
+                  <span className="text-caption font-black text-[var(--ds-text-secondary)] uppercase tracking-wider block">
                     {getTranslation(language, 'targetPopulation')}
                   </span>
                   <span className="text-xs font-bold text-[var(--ds-text-primary)] block">
@@ -290,7 +290,7 @@ export const TitleAnalyzer: React.FC = () => {
                 </div>
 
                 <div className="p-3.5 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg space-y-1">
-                  <span className="text-[10px] font-black text-[var(--ds-text-secondary)] uppercase tracking-wider block">
+                  <span className="text-caption font-black text-[var(--ds-text-secondary)] uppercase tracking-wider block">
                     {getTranslation(language, 'studyContext')}
                   </span>
                   <span className="text-xs font-bold text-[var(--ds-text-primary)] block">

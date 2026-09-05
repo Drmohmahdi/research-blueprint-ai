@@ -249,7 +249,7 @@ export const PromotionDashboard: React.FC = () => {
             </span>
           )}
           {application?.status && (
-            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+            <span className={`px-2.5 py-0.5 rounded-full text-caption font-black uppercase tracking-wider ${
               application.status === 'SUBMITTED' ? 'bg-[var(--ds-information-soft)] text-[var(--ds-information)] border border-info/20' :
               application.status === 'UNDER_REVIEW' ? 'bg-warning/10 text-warning border border-warning/20' :
               application.status === 'COMPLETED' ? 'bg-[var(--ds-success-soft)] text-success border border-success/20' :
@@ -278,7 +278,7 @@ export const PromotionDashboard: React.FC = () => {
         <div className="space-y-2">
           <div className="flex items-center gap-2 mb-1">
             <Briefcase size={20} className="text-warning" />
-            <span className="text-[10px] font-black text-warning uppercase tracking-widest">
+            <span className="text-caption font-black text-warning uppercase tracking-widest">
               {isAr ? 'الترقيات الأكاديمية لأعضاء هيئة التدريس' : 'Academic Faculty Promotion Hub'}
             </span>
           </div>
@@ -354,7 +354,7 @@ export const PromotionDashboard: React.FC = () => {
             
             {/* Readiness Gauge */}
             <Card className="p-6 flex flex-col items-center justify-center gap-4 text-center border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)]">
-              <span className="text-[10px] font-black text-[var(--ds-text-muted)] uppercase tracking-widest">
+              <span className="text-caption font-black text-[var(--ds-text-muted)] uppercase tracking-widest">
                 {isAr ? 'جاهزية ملف التقديم' : 'Portfolio Readiness'}
               </span>
               
@@ -372,7 +372,7 @@ export const PromotionDashboard: React.FC = () => {
                   <span className={`text-2xl font-black ds-numeric ${readinessScore >= 100 ? 'text-success' : 'text-warning'}`}>
                     {readinessScore}%
                   </span>
-                  <span className="text-[9px] text-[var(--ds-text-muted)] font-bold ds-numeric">
+                  <span className="text-caption text-[var(--ds-text-muted)] font-bold ds-numeric">
                     {evaluation?.criteria_results.filter(c => c.status === 'SATISFIED').length || 0} / {evaluation?.criteria_results.length || activePolicy?.criteria.length || 4}
                   </span>
                 </div>
@@ -381,7 +381,7 @@ export const PromotionDashboard: React.FC = () => {
 
             {/* Points Summary */}
             <Card className="p-6 flex flex-col items-center justify-center gap-4 text-center border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)]">
-              <span className="text-[10px] font-black text-[var(--ds-text-muted)] uppercase tracking-widest">
+              <span className="text-caption font-black text-[var(--ds-text-muted)] uppercase tracking-widest">
                 {isAr ? 'نقاط الإنتاج العلمي' : 'Research Points Earned'}
               </span>
               
@@ -430,17 +430,17 @@ export const PromotionDashboard: React.FC = () => {
                         {isAr ? item.title_ar : item.title_en}
                       </span>
                       {item.status === 'SATISFIED' ? (
-                        <div className="flex items-center gap-1 text-[10px] font-bold text-success bg-[var(--ds-success-soft)] border border-success/20 px-2 py-0.5 rounded-lg">
+                        <div className="flex items-center gap-1 text-caption font-bold text-success bg-[var(--ds-success-soft)] border border-success/20 px-2 py-0.5 rounded-lg">
                           <CheckCircle2 size={13} className="text-success shrink-0" />
                           <span>{isAr ? 'مستوفى' : 'Satisfied'}</span>
                         </div>
                       ) : item.status === 'PARTIALLY_SATISFIED' ? (
-                        <div className="flex items-center gap-1 text-[10px] font-bold text-warning bg-warning/10 border border-warning/20 px-2 py-0.5 rounded-lg">
+                        <div className="flex items-center gap-1 text-caption font-bold text-warning bg-warning/10 border border-warning/20 px-2 py-0.5 rounded-lg">
                           <AlertTriangle size={13} className="shrink-0 text-warning" />
                           <span>{isAr ? 'مستوفى جزئياً' : 'Partial'}</span>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-1 text-[10px] font-bold text-danger bg-danger/10 border border-danger/20 px-2 py-0.5 rounded-lg">
+                        <div className="flex items-center gap-1 text-caption font-bold text-danger bg-danger/10 border border-danger/20 px-2 py-0.5 rounded-lg">
                           <AlertTriangle size={13} className="shrink-0 text-danger" />
                           <span>{isAr ? 'مستند أو شرط ناقص' : 'Missing Requirement'}</span>
                         </div>
@@ -455,7 +455,7 @@ export const PromotionDashboard: React.FC = () => {
                 activePolicy?.criteria.map(crit => (
                   <div key={crit.id} className="p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl flex items-center justify-between">
                     <span className="text-xs font-bold text-[var(--ds-text-secondary)]">{isAr ? crit.title_ar : crit.title_en}</span>
-                    <span className="text-[10px] text-[var(--ds-text-muted)] font-bold">{isAr ? 'قيد التقييم' : 'Evaluating'}</span>
+                    <span className="text-caption text-[var(--ds-text-muted)] font-bold">{isAr ? 'قيد التقييم' : 'Evaluating'}</span>
                   </div>
                 ))
               )}
@@ -478,7 +478,7 @@ export const PromotionDashboard: React.FC = () => {
 
             {/* Submission Action */}
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <p className="text-[10px] text-[var(--ds-text-muted)] m-0">
+              <p className="text-caption text-[var(--ds-text-muted)] m-0">
                 {isAr
                   ? 'هذا التقييم استرشادي لدعم القرار؛ القرار النهائي معقود للجنة الأكاديمية.'
                   : 'Advisory readiness evaluation only; final determination is made by the academic committee.'}
@@ -510,7 +510,7 @@ export const PromotionDashboard: React.FC = () => {
                 <BookOpen className="text-warning" size={16} />
                 <span>{isAr ? 'الأبحاث المدرجة بملف الترقية' : 'Dossier Evidence Publications'}</span>
               </div>
-              <span className="text-[10px] font-bold text-[var(--ds-text-muted)]">
+              <span className="text-caption font-bold text-[var(--ds-text-muted)]">
                 ({application?.evidence_selections.length || 0}) {isAr ? 'أبحاث' : 'papers'}
               </span>
             </h3>
@@ -542,7 +542,7 @@ export const PromotionDashboard: React.FC = () => {
                           {title}
                         </span>
                         <div className="flex items-center gap-1.5 shrink-0">
-                          <span className="bg-warning/10 text-warning dark:text-warning px-2 py-0.5 rounded-md border border-warning/20 text-[9px] font-bold">
+                          <span className="bg-warning/10 text-warning dark:text-warning px-2 py-0.5 rounded-md border border-warning/20 text-caption font-bold">
                             +{ev.calculated_points.toFixed(1)} {isAr ? 'نقطة' : 'pts'}
                           </span>
                           {application.status === 'DRAFT' && (
@@ -557,7 +557,7 @@ export const PromotionDashboard: React.FC = () => {
                           )}
                         </div>
                       </div>
-                      <div className="flex justify-between text-[9px] text-[var(--ds-text-muted)] font-semibold">
+                      <div className="flex justify-between text-caption text-[var(--ds-text-muted)] font-semibold">
                         <span>{journal} ({rank})</span>
                         <span className="uppercase">{role}</span>
                       </div>
@@ -577,7 +577,7 @@ export const PromotionDashboard: React.FC = () => {
               
               <form onSubmit={handleAddEvidence} className="space-y-3">
                 <div className="flex flex-col space-y-1">
-                  <label htmlFor="promotion-evidence-select" className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">
+                  <label htmlFor="promotion-evidence-select" className="text-caption text-[var(--ds-text-muted)] font-black uppercase">
                     {isAr ? 'اختر الورقة العلمية من رصيدك الأكاديمي:' : 'Choose Paper from Verified Profile:'}
                   </label>
 

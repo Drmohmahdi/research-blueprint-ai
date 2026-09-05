@@ -128,12 +128,12 @@ export const ResearchOutputsCenter: React.FC<ResearchOutputsCenterProps> = ({ pr
               <h4 className="text-h4 text-[var(--ds-text-primary)]">
                 {isAr ? activeReport.nameAr : activeReport.nameEn}
               </h4>
-              <p className="text-[10px] text-[var(--ds-text-secondary)] mt-0.5">
+              <p className="text-caption text-[var(--ds-text-secondary)] mt-0.5">
                 {isAr ? activeReport.descriptionAr : reportDescriptionEn(activeReport)}
               </p>
             </div>
             {/* Format Toggles */}
-            <div className="flex bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded p-0.5 text-[10px] font-bold">
+            <div className="flex bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded p-0.5 text-caption font-bold">
               {['HTML', 'MARKDOWN', 'JSON'].map((fmt) => (
                 <button
                   key={fmt}

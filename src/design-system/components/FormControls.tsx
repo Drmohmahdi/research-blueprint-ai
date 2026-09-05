@@ -40,9 +40,9 @@ export const Input: React.FC<InputProps> = ({
       : 'border-[var(--ds-border-default)] focus-visible:ring-[var(--ds-primary)]/30';
 
   return (
-    <div className="flex flex-col gap-1.5 w-full text-xs">
+    <div className="flex flex-col gap-1.5 w-full text-body-sm">
       {label && (
-        <label htmlFor={inputId} className="font-bold text-[var(--ds-text-secondary)] flex items-center gap-1 select-none">
+        <label htmlFor={inputId} className="text-label text-[var(--ds-text-secondary)] flex items-center gap-1 select-none">
           {label}
           {requiredIndicator && <span className="text-[var(--ds-danger)]">*</span>}
         </label>
@@ -50,7 +50,7 @@ export const Input: React.FC<InputProps> = ({
       
       <div className="relative w-full">
         {prefixIcon && (
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[var(--ds-text-muted)]">
+          <div className="absolute inset-y-0 inset-inline-start-0 ps-3 flex items-center pointer-events-none text-[var(--ds-text-muted)]">
             {prefixIcon}
           </div>
         )}
@@ -63,19 +63,19 @@ export const Input: React.FC<InputProps> = ({
           aria-describedby={(error || helperText) ? helpId : undefined}
           aria-busy={loading || undefined}
           required={props.required || requiredIndicator}
-          className={`w-full bg-[var(--ds-surface-primary)] border rounded-xl px-3.5 py-2.5 text-xs text-[var(--ds-text-primary)] placeholder-[var(--ds-text-muted)] transition-all focus:outline-none focus-visible:ring-4 disabled:opacity-50 disabled:cursor-not-allowed ${prefixIcon ? 'pl-9' : ''} ${suffixIcon || loading ? 'pr-9' : ''} ${stateClass} ${className}`}
+          className={`w-full bg-[var(--ds-surface-primary)] border rounded-xl px-3.5 py-2.5 text-body-sm text-[var(--ds-text-primary)] placeholder-[var(--ds-text-muted)] transition-all focus:outline-none focus-visible:ring-4 disabled:opacity-50 disabled:cursor-not-allowed ${prefixIcon ? 'ps-9' : ''} ${suffixIcon || loading ? 'pe-9' : ''} ${stateClass} ${className}`}
           {...props}
         />
 
         {(suffixIcon || loading) && (
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-[var(--ds-text-muted)]">
+          <div className="absolute inset-y-0 inset-inline-end-0 pe-3 flex items-center text-[var(--ds-text-muted)]">
             {loading ? <Loader2 className="motion-safe:animate-spin text-[var(--ds-primary)]" size={16} /> : suffixIcon}
           </div>
         )}
       </div>
 
-      {error && <span id={helpId} role="alert" className="text-[10px] font-semibold text-[var(--ds-danger)]">{error}</span>}
-      {!error && helperText && <span id={helpId} className="text-[10px] text-[var(--ds-text-muted)]">{helperText}</span>}
+      {error && <span id={helpId} role="alert" className="text-caption font-semibold text-[var(--ds-danger)]">{error}</span>}
+      {!error && helperText && <span id={helpId} className="text-caption text-[var(--ds-text-muted)]">{helperText}</span>}
     </div>
   );
 };
@@ -105,9 +105,9 @@ export const Textarea: React.FC<TextareaProps> = ({
       : 'border-[var(--ds-border-default)] focus-visible:ring-[var(--ds-primary)]/30';
 
   return (
-    <div className="flex flex-col gap-1.5 w-full text-xs">
+    <div className="flex flex-col gap-1.5 w-full text-body-sm">
       {label && (
-        <label htmlFor={inputId} className="font-bold text-[var(--ds-text-secondary)] flex items-center gap-1 select-none">
+        <label htmlFor={inputId} className="text-label text-[var(--ds-text-secondary)] flex items-center gap-1 select-none">
           {label}
           {requiredIndicator && <span className="text-[var(--ds-danger)]">*</span>}
         </label>
@@ -120,12 +120,12 @@ export const Textarea: React.FC<TextareaProps> = ({
         aria-describedby={(error || helperText) ? helpId : undefined}
         aria-busy={loading || undefined}
         required={props.required || requiredIndicator}
-        className={`w-full bg-[var(--ds-surface-primary)] border rounded-xl px-3.5 py-2.5 text-xs text-[var(--ds-text-primary)] placeholder-[var(--ds-text-muted)] transition-all focus:outline-none focus-visible:ring-4 disabled:opacity-50 disabled:cursor-not-allowed ${stateClass} ${className}`}
+        className={`w-full bg-[var(--ds-surface-primary)] border rounded-xl px-3.5 py-2.5 text-body-sm text-[var(--ds-text-primary)] placeholder-[var(--ds-text-muted)] transition-all focus:outline-none focus-visible:ring-4 disabled:opacity-50 disabled:cursor-not-allowed ${stateClass} ${className}`}
         {...props}
       />
 
-      {error && <span id={helpId} role="alert" className="text-[10px] font-semibold text-[var(--ds-danger)]">{error}</span>}
-      {!error && helperText && <span id={helpId} className="text-[10px] text-[var(--ds-text-muted)]">{helperText}</span>}
+      {error && <span id={helpId} role="alert" className="text-caption font-semibold text-[var(--ds-danger)]">{error}</span>}
+      {!error && helperText && <span id={helpId} className="text-caption text-[var(--ds-text-muted)]">{helperText}</span>}
     </div>
   );
 };
@@ -157,9 +157,9 @@ export const Select: React.FC<SelectProps> = ({
       : 'border-[var(--ds-border-default)] focus-visible:ring-[var(--ds-primary)]/30';
 
   return (
-    <div className="flex flex-col gap-1.5 w-full text-xs">
+    <div className="flex flex-col gap-1.5 w-full text-body-sm">
       {label && (
-        <label htmlFor={inputId} className="font-bold text-[var(--ds-text-secondary)] flex items-center gap-1 select-none">
+        <label htmlFor={inputId} className="text-label text-[var(--ds-text-secondary)] flex items-center gap-1 select-none">
           {label}
           {requiredIndicator && <span className="text-[var(--ds-danger)]">*</span>}
         </label>
@@ -171,7 +171,7 @@ export const Select: React.FC<SelectProps> = ({
         aria-invalid={error ? true : undefined}
         aria-describedby={(error || helperText) ? helpId : undefined}
         required={props.required || requiredIndicator}
-        className={`w-full bg-[var(--ds-surface-primary)] border rounded-xl px-3 py-2.5 text-xs font-semibold text-[var(--ds-text-primary)] transition-all focus:outline-none focus-visible:ring-4 disabled:opacity-50 disabled:cursor-not-allowed ${stateClass} ${className}`}
+        className={`w-full bg-[var(--ds-surface-primary)] border rounded-xl px-3 py-2.5 text-body-sm font-semibold text-[var(--ds-text-primary)] transition-all focus:outline-none focus-visible:ring-4 disabled:opacity-50 disabled:cursor-not-allowed ${stateClass} ${className}`}
         {...props}
       >
         {options.map((opt) => (
@@ -179,8 +179,8 @@ export const Select: React.FC<SelectProps> = ({
         ))}
       </select>
 
-      {error && <span id={helpId} role="alert" className="text-[10px] font-semibold text-[var(--ds-danger)]">{error}</span>}
-      {!error && helperText && <span id={helpId} className="text-[10px] text-[var(--ds-text-muted)]">{helperText}</span>}
+      {error && <span id={helpId} role="alert" className="text-caption font-semibold text-[var(--ds-danger)]">{error}</span>}
+      {!error && helperText && <span id={helpId} className="text-caption text-[var(--ds-text-muted)]">{helperText}</span>}
     </div>
   );
 };
@@ -201,7 +201,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   const checkId = id || generatedId;
 
   return (
-    <div className="flex items-start gap-2.5 text-xs select-none">
+    <div className="flex items-start gap-2.5 text-body-sm select-none">
       <input
         type="checkbox"
         id={checkId}
@@ -212,7 +212,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
         <label htmlFor={checkId} className="font-bold text-[var(--ds-text-primary)] cursor-pointer">
           {label}
         </label>
-        {helperText && <span className="text-[10px] text-[var(--ds-text-muted)]">{helperText}</span>}
+        {helperText && <span className="text-caption text-[var(--ds-text-muted)]">{helperText}</span>}
       </div>
     </div>
   );
@@ -234,7 +234,7 @@ export const Radio: React.FC<RadioProps> = ({
   const radioId = id || generatedId;
 
   return (
-    <div className="flex items-start gap-2.5 text-xs select-none">
+    <div className="flex items-start gap-2.5 text-body-sm select-none">
       <input
         type="radio"
         id={radioId}
@@ -245,7 +245,7 @@ export const Radio: React.FC<RadioProps> = ({
         <label htmlFor={radioId} className="font-bold text-[var(--ds-text-primary)] cursor-pointer">
           {label}
         </label>
-        {helperText && <span className="text-[10px] text-[var(--ds-text-muted)]">{helperText}</span>}
+        {helperText && <span className="text-caption text-[var(--ds-text-muted)]">{helperText}</span>}
       </div>
     </div>
   );
@@ -266,7 +266,7 @@ export const Switch: React.FC<SwitchProps> = ({
   ...props
 }) => {
   return (
-    <label className={`flex items-center justify-between gap-3 text-xs font-bold text-[var(--ds-text-primary)] select-none cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}>
+    <label className={`flex items-center justify-between gap-3 text-label text-[var(--ds-text-primary)] select-none cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}>
       <span>{label}</span>
       <div className="relative">
         <input
@@ -277,7 +277,7 @@ export const Switch: React.FC<SwitchProps> = ({
           className="sr-only peer"
           {...props}
         />
-        <div className="w-9 h-5 bg-[var(--ds-background-subtle)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[var(--ds-border-default)] after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--ds-primary)] ds-transition" />
+        <div className="w-9 h-5 bg-[var(--ds-background-subtle)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:inset-inline-start-[2px] after:bg-white after:border-[var(--ds-border-default)] after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--ds-primary)] ds-transition" />
       </div>
     </label>
   );

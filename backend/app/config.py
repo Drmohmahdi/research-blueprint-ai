@@ -42,6 +42,21 @@ class Settings:
     SMTP_FROM: str = os.getenv("SMTP_FROM", "").strip()
     SMTP_USE_TLS: bool = os.getenv("SMTP_USE_TLS", "true").lower() in ("1", "true", "yes")
 
+    @property
+    def expose_dev_secrets(self) -> bool:
+        """Return raw reset/verify/invite tokens only in tests or when opted in.
+
+        Staging and local servers no longer leak tokens just because
+        ENVIRONMENT != production. Set EXPOSE_AUTH_TOKENS=1 for local
+        flows that have no SMTP.
+        """
+        import sys
+        if os.getenv("TESTING") == "True" or "pytest" in sys.modules:
+            return True
+        if self.ENVIRONMENT == "production":
+            return False
+        return os.getenv("EXPOSE_AUTH_TOKENS", "").lower() in ("1", "true", "yes")
+
     def validate_production(self) -> None:
         if self.ENVIRONMENT != "production":
             return

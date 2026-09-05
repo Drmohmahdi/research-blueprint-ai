@@ -8,6 +8,9 @@ import { PublicResearcherProfile } from './components/PublicResearcherProfile';
 import { MarketingSite } from './marketing/MarketingSite';
 import { TermsOfService } from './marketing/TermsOfService';
 import { PrivacyPolicy } from './marketing/PrivacyPolicy';
+import { PublicNotFound } from './marketing/PublicNotFound';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { isWorkspacePath } from './router/routes';
 
 const ExternalReviewerPortal = lazy(() => import('./features/review-portal/ExternalReviewerPortal').then(module => ({ default: module.ExternalReviewerPortal })));
 const ExternalThesisExaminerPortal = lazy(() => import('./features/thesis/ExternalThesisExaminerPortal'));
@@ -16,9 +19,11 @@ const ExternalThesisExaminerPortal = lazy(() => import('./features/thesis/Extern
 const App: React.FC = () => {
   return (
     <BrowserRouter>
-      <ProjectProvider>
-        <AppContent />
-      </ProjectProvider>
+      <ErrorBoundary>
+        <ProjectProvider>
+          <AppContent />
+        </ProjectProvider>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 };
@@ -45,6 +50,8 @@ const AppContent: React.FC = () => {
       <Route path="/institutional" element={<MarketingSite />} />
       <Route path="/terms" element={<TermsOfService />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/register" element={<Navigate to="/login?mode=register" replace />} />
+      <Route path="/signup" element={<Navigate to="/login?mode=register" replace />} />
       <Route path="/login" element={user && !hasPasswordResetToken ? <Navigate to="/app" replace /> : <Login />} />
       <Route path="/researcher/:username" element={<PublicResearcherProfile />} />
       <Route
@@ -61,8 +68,10 @@ const AppContent: React.FC = () => {
             <LayoutV2>
               <AppRouter />
             </LayoutV2>
-          ) : (
+          ) : isWorkspacePath(location.pathname) ? (
             <Login />
+          ) : (
+            <PublicNotFound />
           )
         }
       />

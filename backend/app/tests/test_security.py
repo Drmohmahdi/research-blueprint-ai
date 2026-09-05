@@ -111,6 +111,24 @@ def test_password_strength_validation(client):
     assert resp4.status_code == 200
 
 
+def test_register_rejects_invalid_username_and_email(client):
+    bad_username = client.post("/api/auth/register", json={
+        "username": "bad user!",
+        "password": "SecurePassword123",
+        "email": "valid@example.com",
+        "role": "Researcher",
+    })
+    assert bad_username.status_code == 422
+
+    bad_email = client.post("/api/auth/register", json={
+        "username": "valid_user_99",
+        "password": "SecurePassword123",
+        "email": "not-an-email",
+        "role": "Researcher",
+    })
+    assert bad_email.status_code == 422
+
+
 def test_public_registration_rejects_organization_admin_role(client):
     resp = client.post("/api/auth/register", json={
         "username": "org_admin_self_serve",

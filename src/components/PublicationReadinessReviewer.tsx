@@ -271,7 +271,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
         <div className="space-y-2">
           <div className="flex items-center gap-2 mb-1">
             <UserCheck size={20} className="text-path-publication" />
-            <span className="text-[10px] font-black text-path-publication uppercase tracking-widest">
+            <span className="text-caption font-black text-path-publication uppercase tracking-widest">
               {language === 'ar' ? 'تحكيم متعدد الأبعاد' : 'Multi-Dimensional Peer Review'}
             </span>
           </div>
@@ -326,7 +326,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Index gauge */}
                 <Card className="p-6 flex flex-col items-center justify-center gap-4 text-center border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)]">
-                  <span className="text-[10px] font-black text-[var(--ds-text-muted)] uppercase tracking-widest">
+                  <span className="text-caption font-black text-[var(--ds-text-muted)] uppercase tracking-widest">
                     {language === 'ar' ? 'مؤشر الجاهزية الإجمالي' : 'Overall Readiness Index'}
                   </span>
                   
@@ -345,17 +345,17 @@ export const PublicationReadinessReviewer: React.FC = () => {
                       <span className={`text-2xl font-black ds-numeric ${scoreColor(reviewResult.overallIndex)}`}>
                         {reviewResult.overallIndex}
                       </span>
-                      <span className="text-[9px] text-[var(--ds-text-muted)] font-bold">/100</span>
+                      <span className="text-caption text-[var(--ds-text-muted)] font-bold">/100</span>
                     </div>
                   </div>
-                  <span className="text-[9px] font-bold text-[var(--ds-text-muted)] uppercase tracking-wider">
+                  <span className="text-caption font-bold text-[var(--ds-text-muted)] uppercase tracking-wider">
                     [ PREDICTED_DATA ]
                   </span>
                 </Card>
 
                 {/* Decision badge */}
                 <Card className="p-6 flex flex-col items-center justify-center gap-3 text-center border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)]">
-                  <span className="text-[10px] font-black text-[var(--ds-text-muted)] uppercase tracking-widest">
+                  <span className="text-caption font-black text-[var(--ds-text-muted)] uppercase tracking-widest">
                     {language === 'ar' ? 'قرار التحكيم المتوقع' : 'Predicted Review Decision'}
                   </span>
                   <div className={`px-4 py-2.5 rounded-xl border font-black text-xs ${decisionStyles[reviewResult.decision]}`}>
@@ -366,7 +366,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
 
               {/* Dimension summary mini-bars */}
               <Card className="p-5 border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] space-y-4">
-                <span className="text-[10px] font-black text-[var(--ds-text-muted)] uppercase tracking-widest block mb-1">
+                <span className="text-caption font-black text-[var(--ds-text-muted)] uppercase tracking-widest block mb-1">
                   {language === 'ar' ? 'ملخص درجات الأبعاد المنهجية' : 'Dimension Summary'}
                 </span>
                 <div className="space-y-3.5">
@@ -374,7 +374,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
                     const Icon = dim.icon;
                     return (
                       <div key={dim.id} className="space-y-1">
-                        <div className="flex items-center justify-between text-[10px] font-bold">
+                        <div className="flex items-center justify-between text-caption font-bold">
                           <div className="flex items-center gap-1.5 text-[var(--ds-text-secondary)]">
                             <Icon size={12} className="text-path-publication" />
                             <span>{language === 'ar' ? dim.labelAr : dim.labelEn}</span>
@@ -399,7 +399,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
               <Card className="p-6 border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] shadow-[var(--ds-shadow-layered)] space-y-4 sticky top-6">
                 <div className="flex items-center gap-1.5 pb-2 border-b border-[var(--ds-border-subtle)]">
                   <TrendingUp size={14} className="text-path-publication" />
-                  <h4 className="text-h4 text-[10px] text-[var(--ds-text-secondary)] uppercase m-0">
+                  <h4 className="text-h4 text-caption text-[var(--ds-text-secondary)] uppercase m-0">
                     {language === 'ar' ? 'بصمة الجاهزية خماسية الأبعاد' : '5D Readiness Assessment Web'}
                   </h4>
                 </div>
@@ -428,7 +428,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
                   </ResponsiveContainer>
                 </div>
                 
-                <div className="p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl text-[10px] text-[var(--ds-text-muted)] leading-relaxed font-semibold">
+                <div className="p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl text-caption text-[var(--ds-text-muted)] leading-relaxed font-semibold">
                   {language === 'ar'
                     ? 'يمثل مخطط الرادار بصمة جودة بحثك. كلما اتسعت المساحة المظللة واقتربت من الأطراف، زادت احتمالية القبول الأكاديمي المباشر وتفادي الرفض المكتبي.'
                     : 'The radar chart represents your study quality footprint. A larger shaded area closer to the edges indicates higher peer review acceptance rates.'}
@@ -468,7 +468,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
                         <div className="text-xs font-black text-[var(--ds-text-primary)]">
                           {language === 'ar' ? dim.labelAr : dim.labelEn}
                         </div>
-                        <div className="text-[9px] text-[var(--ds-text-muted)] font-semibold mt-0.5">
+                        <div className="text-caption text-[var(--ds-text-muted)] font-semibold mt-0.5">
                           {language === 'ar' ? `وزن البُعد: ${Math.round(dim.weight * 100)}%` : `Weight: ${Math.round(dim.weight * 100)}%`}
                         </div>
                       </div>
@@ -497,7 +497,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
 
                       {dim.majorComments.length > 0 && (
                         <div className="space-y-2">
-                          <span className="text-[9px] font-black text-danger uppercase tracking-wider flex items-center gap-1.5">
+                          <span className="text-caption font-black text-danger uppercase tracking-wider flex items-center gap-1.5">
                             <ShieldAlert size={13} />
                             {language === 'ar' ? 'ملاحظات جوهرية (Major Comments)' : 'Major Comments'}
                           </span>
@@ -511,7 +511,7 @@ export const PublicationReadinessReviewer: React.FC = () => {
 
                       {dim.minorComments.length > 0 && (
                         <div className="space-y-2">
-                          <span className="text-[9px] font-black text-[var(--ds-information)] uppercase tracking-wider flex items-center gap-1.5">
+                          <span className="text-caption font-black text-[var(--ds-information)] uppercase tracking-wider flex items-center gap-1.5">
                             <CheckCircle2 size={13} />
                             {language === 'ar' ? 'توصيات تحسينية (Minor Comments)' : 'Minor / Improvement Comments'}
                           </span>

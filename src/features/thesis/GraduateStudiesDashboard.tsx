@@ -16,7 +16,7 @@ export const GraduateStudiesDashboard: React.FC = () => {
     apiThesisGraduateOperations().then(row => { if (row == null) setDenied(true); else setSummary(row); }).catch(() => setDenied(true));
   }, []);
 
-  if (denied) return <EmptyState illustration={<Building2 size={40} />} title={ar ? 'عمليات الدراسات العليا غير متاحة' : 'Graduate Studies operations unavailable'} description={ar ? 'هذه اللوحة تجميعية ولا تكشف الملاحظات السرية أو محتوى الفصول غير المنشور.' : 'This board is aggregate-first and never reveals confidential notes or unpublished chapters.'} />;
+  if (denied) return <EmptyState illustration={<Building2 size={40} />} title={ar ? 'عمليات الدراسات العليا غير متاحة' : 'Graduate Studies operations unavailable'} description={ar ? 'هذه اللوحة لعمادة الدراسات العليا وتعرض أرقامًا تجميعية فقط. اطلب الصلاحية من مسؤول المؤسسة إن كان هذا دورك.' : 'This board is for graduate-studies offices and shows aggregates only. Ask your organization admin for access if this is your role.'} />;
   if (!summary) return <div role="status" className="p-8 text-sm font-bold">{ar ? 'جاري التحميل…' : 'Loading…'}</div>;
 
   const metrics = [
@@ -38,9 +38,9 @@ export const GraduateStudiesDashboard: React.FC = () => {
   return (
     <section className="mx-auto max-w-[1440px] min-w-0 space-y-5 pb-16" aria-labelledby="gs-title">
       <PathPanel accent="var(--ds-path-research)">
-        <p className="text-caption m-0 font-black text-[var(--ds-primary)]">BASEERAH · GRADUATE STUDIES</p>
+        <p className="text-caption m-0 font-black text-[var(--ds-primary)]">{ar ? 'بصيرة · الدراسات العليا' : 'Baseerah · Graduate studies'}</p>
         <h2 id="gs-title" className="text-h2 m-0 mt-2">{ar ? 'عمليات الدراسات العليا' : 'Graduate Studies operations'}</h2>
-        <p className="text-body-sm mt-2 max-w-3xl text-[var(--ds-text-secondary)]">{ar ? 'لوحة تشغيلية تجميعية: لا ملاحظات مشرف خاصة، ولا تقارير مناقش سرية، ولا فصول غير منشورة.' : 'An operational aggregate board: no private supervisor notes, confidential examiner reports, or unpublished chapters.'}</p>
+        <p className="text-body-sm mt-2 max-w-3xl text-[var(--ds-text-secondary)]">{ar ? 'لوحة لعمادة الدراسات العليا: أرقام تجميعية فقط — بلا ملاحظات مشرف خاصة أو تقارير مناقش أو فصول غير منشورة.' : 'A graduate-office board: aggregates only — no private supervisor notes, confidential examiner reports, or unpublished chapters.'}</p>
       </PathPanel>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {metrics.map(([label, value]) => (

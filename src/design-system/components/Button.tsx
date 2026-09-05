@@ -22,21 +22,21 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props
 }) => {
-  const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-lg ds-transition border border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-primary-soft)] disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer';
+  const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-lg ds-transition border border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-primary-soft)] disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer active:translate-y-px';
   
   const variantStyles = {
-    primary: 'bg-[var(--ds-action-fill)] hover:bg-[var(--ds-action-fill-hover)] text-[var(--ds-on-action)] shadow-sm active:brightness-95',
+    primary: 'bg-[var(--ds-action-fill)] hover:bg-[var(--ds-action-fill-hover)] hover:shadow-[var(--ds-shadow-glow)] text-[var(--ds-on-action)] shadow-sm active:brightness-95',
     secondary: 'bg-[var(--ds-surface-tertiary)] hover:bg-[var(--ds-background-subtle)] text-[var(--ds-text-primary)] border-[var(--ds-border-subtle)] active:brightness-95',
     outline: 'border-[var(--ds-border-default)] hover:border-[var(--ds-border-strong)] hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-primary)] active:brightness-95',
     ghost: 'hover:bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-secondary)] hover:text-[var(--ds-text-primary)]',
-    danger: 'bg-[var(--ds-danger)] hover:brightness-95 text-white shadow-sm active:brightness-95',
-    success: 'bg-[var(--ds-success-soft)] hover:brightness-95 text-[var(--ds-success)] border-[var(--ds-success)]/20 shadow-sm active:brightness-95',
+    danger: 'bg-[var(--ds-danger)] hover:bg-[color-mix(in_srgb,var(--ds-danger)_86%,#000)] text-white shadow-sm active:brightness-95',
+    success: 'bg-[var(--ds-success-soft)] hover:bg-[color-mix(in_srgb,var(--ds-success-soft)_72%,var(--ds-success))] text-[var(--ds-success)] border-[var(--ds-success)]/20 shadow-sm active:brightness-95',
   };
 
   const sizeStyles = {
-    sm: 'px-3 py-1.5 text-xs gap-1.5 min-h-[36px]',
-    md: 'px-4.5 py-2.5 text-sm gap-2 min-h-[44px]',
-    lg: 'px-6 py-3.5 text-base gap-2.5 min-h-[50px]',
+    sm: 'px-3 py-1.5 text-label gap-1.5 min-h-[36px]',
+    md: 'px-4.5 py-2.5 text-body-sm gap-2 min-h-[44px]',
+    lg: 'px-6 py-3.5 text-body gap-2.5 min-h-[50px]',
   };
 
   const widthStyles = fullWidth ? 'w-full' : '';
@@ -77,15 +77,15 @@ export const IconButton: React.FC<IconButtonProps> = ({
   disabled,
   ...props
 }) => {
-  const baseStyles = 'inline-flex items-center justify-center rounded-lg ds-transition border border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-primary-soft)] disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer';
+  const baseStyles = 'inline-flex items-center justify-center rounded-lg ds-transition border border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ds-primary-soft)] disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer active:translate-y-px';
 
   const variantStyles = {
     primary: 'bg-[var(--ds-action-fill)] hover:bg-[var(--ds-action-fill-hover)] text-[var(--ds-on-action)] shadow-sm active:brightness-95',
     secondary: 'bg-[var(--ds-surface-tertiary)] hover:bg-[var(--ds-background-subtle)] text-[var(--ds-text-primary)] border-[var(--ds-border-subtle)] active:brightness-95',
     outline: 'border-[var(--ds-border-default)] hover:border-[var(--ds-border-strong)] hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-primary)] active:brightness-95',
     ghost: 'hover:bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-secondary)] hover:text-[var(--ds-text-primary)]',
-    danger: 'bg-[var(--ds-danger)] hover:brightness-95 text-white shadow-sm active:brightness-95',
-    success: 'bg-[var(--ds-success-soft)] hover:brightness-95 text-[var(--ds-success)] border-[var(--ds-success)]/20 shadow-sm active:brightness-95',
+    danger: 'bg-[var(--ds-danger)] hover:bg-[color-mix(in_srgb,var(--ds-danger)_86%,#000)] text-white shadow-sm active:brightness-95',
+    success: 'bg-[var(--ds-success-soft)] hover:bg-[color-mix(in_srgb,var(--ds-success-soft)_72%,var(--ds-success))] text-[var(--ds-success)] border-[var(--ds-success)]/20 shadow-sm active:brightness-95',
   };
 
   const sizeStyles = {

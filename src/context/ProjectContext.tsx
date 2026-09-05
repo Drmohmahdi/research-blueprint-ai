@@ -28,11 +28,13 @@ import {
   apiLogout,
   apiRegister,
   apiGetMe,
+  apiGetFeatureFlags,
   setApiAuthToken,
   setApiActiveOrgId,
   apiUpdateProjectWorkflowProfile
 } from '../utils/api';
 import { FUNNEL_EVENTS, track } from '../utils/analytics';
+import { applyFeatureFlagOverrides } from '../utils/featureFlags';
 
 export interface AuthUser {
   id?: string;
@@ -295,6 +297,13 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
     root.setAttribute('dir', language === 'ar' ? 'rtl' : 'ltr');
     root.setAttribute('lang', language);
   }, [language]);
+
+  useEffect(() => {
+    if (!isSecureMode || !user) return;
+    void apiGetFeatureFlags().then((flags) => {
+      if (flags) applyFeatureFlagOverrides(flags);
+    });
+  }, [isSecureMode, user?.id]);
 
   // Synchronize with FastAPI backend on startup if Secure Research Mode is enabled
   useEffect(() => {

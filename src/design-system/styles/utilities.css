@@ -1,7 +1,123 @@
 .ds-focus-ring:focus-visible {
   outline: 3px solid var(--ds-focus-ring);
-  outline-offset: 2px;
+  outline-offset: 3px;
   box-shadow: var(--ds-shadow-glow);
+}
+
+.ds-shell {
+  width: 100%;
+  max-width: var(--ds-shell-max);
+  margin-inline: auto;
+}
+
+.ds-app-shell {
+  width: 100%;
+  max-width: var(--ds-app-max);
+  margin-inline: auto;
+}
+
+.ds-measure {
+  width: 100%;
+  max-width: var(--ds-measure);
+}
+
+@media (min-width: 1440px) {
+  .ds-shell {
+    max-width: min(86rem, calc(100vw - 5rem));
+  }
+}
+
+@media (min-width: 1920px) {
+  .ds-shell {
+    max-width: var(--ds-shell-max-wide);
+  }
+}
+
+@media (min-width: 2560px) {
+  .ds-shell {
+    max-width: var(--ds-shell-max-wide);
+  }
+}
+
+.ds-hover-lift {
+  transition:
+    transform var(--ds-duration) var(--ds-ease),
+    box-shadow var(--ds-duration) var(--ds-ease),
+    border-color var(--ds-duration) var(--ds-ease);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ds-hover-lift:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.ds-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ds-nav-underline {
+  position: relative;
+}
+
+.ds-nav-underline[aria-current="page"]::after,
+.ds-nav-underline.ds-nav-current::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: -0.4rem;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--ds-primary-bright);
+}
+
+@keyframes ds-slide-in-left {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes ds-slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes ds-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-slide-in,
+.animate-slide-in-left {
+  animation: ds-slide-in-left var(--ds-duration-moderate) var(--ds-ease-enter);
+}
+
+.animate-slide-in-right {
+  animation: ds-slide-in-right var(--ds-duration-moderate) var(--ds-ease-enter);
+}
+
+[dir="rtl"] .animate-slide-in {
+  animation-name: ds-slide-in-right;
+}
+
+.animate-fade-in {
+  animation: ds-fade-in var(--ds-duration) var(--ds-ease);
+}
+
+@keyframes ds-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.animate-shake {
+  animation: ds-shake 300ms var(--ds-ease);
+}
+
+.ds-edge-fade-x {
+  mask-image: linear-gradient(to right, transparent, #000 12px, #000 calc(100% - 12px), transparent);
 }
 
 .ds-skip-link {
@@ -92,10 +208,19 @@
 }
 
 .baseerah-gradient-text {
+  color: var(--ds-primary-bright);
   background: linear-gradient(120deg, var(--ds-primary-bright), var(--ds-accent-gold));
   -webkit-background-clip: text;
   background-clip: text;
-  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+@media (forced-colors: active) {
+  .baseerah-gradient-text {
+    background: none;
+    -webkit-text-fill-color: unset;
+    color: var(--ds-text-primary);
+  }
 }
 
 .baseerah-glass {
@@ -113,7 +238,7 @@
   --ds-border-default: rgba(248, 247, 243, 0.14);
   --ds-text-primary: #F8F7F3;
   --ds-text-secondary: #C5CBD6;
-  --ds-text-muted: #8B95A5;
+  --ds-text-muted: #A3ABB8;
   --ds-text-disabled: #6A7383;
   --ds-primary: #6BB894;
   --ds-primary-hover: #8FCBAD;
@@ -140,6 +265,12 @@
     radial-gradient(ellipse 50% 40% at 82% -4%, var(--ds-aurora-emerald), transparent 70%),
     radial-gradient(ellipse 40% 32% at 8% 18%, var(--ds-aurora-gold), transparent 68%),
     radial-gradient(ellipse 46% 36% at 50% 100%, var(--ds-aurora-navy), transparent 72%);
+  min-width: 0;
+}
+
+.baseerah-marketing section,
+.baseerah-marketing article {
+  min-width: 0;
 }
 
 .baseerah-knowledge {

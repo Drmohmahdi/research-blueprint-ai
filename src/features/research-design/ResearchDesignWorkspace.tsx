@@ -12,6 +12,8 @@ import { ResearchRiskPanel } from './ResearchRiskPanel';
 import { ResearchPredictionPanel } from './ResearchPredictionPanel';
 import { ResearchCommentsPanel } from './ResearchCommentsPanel';
 import { EmptyActiveProject } from '../../components/EmptyActiveProject';
+import { ROUTES } from '../../router/routes';
+import { useFeatureFlag } from '../../utils/featureFlags';
 
 export const ResearchDesignWorkspace: React.FC = () => {
   const { projectId, stepId } = useParams<{ projectId: string; stepId?: string }>();
@@ -27,6 +29,8 @@ export const ResearchDesignWorkspace: React.FC = () => {
 
   const [activeStepId, setActiveStepId] = useState<ResearchStepId>('IDEA_EXPLORATION');
   const [isGuidedMode, setIsGuidedMode] = useState<boolean>(true);
+  const showPredictionInsights = useFeatureFlag('PREDICTION_INSIGHTS_IN_PATH');
+  const showSupervisorComments = useFeatureFlag('SUPERVISOR_COMMENTS_IN_PATH');
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [stepCommentsCounts, setStepCommentsCounts] = useState<Record<string, number>>({});
 
@@ -130,7 +134,7 @@ export const ResearchDesignWorkspace: React.FC = () => {
         setIsGuidedMode={setIsGuidedMode}
         isSaving={isSaving}
         onSave={handleSaveWorkspace}
-        onBack={() => navigate('/')}
+        onBack={() => navigate(ROUTES.PORTAL)}
         activeStepTitle={language === 'ar' ? activeStepConfig.titleAr : activeStepConfig.titleEn}
       />
 
@@ -183,21 +187,23 @@ export const ResearchDesignWorkspace: React.FC = () => {
               {/* Methodological Risk Check */}
               <ResearchRiskPanel project={activeProject} language={language} />
 
-              {/* Prediction Engine Widget */}
-              <ResearchPredictionPanel project={activeProject} language={language} />
+              {showPredictionInsights && (
+                <ResearchPredictionPanel project={activeProject} language={language} />
+              )}
 
-              {/* Supervisor Comments Panel specific to step */}
-              <ResearchCommentsPanel
-                projectId={activeProject.id}
-                activeStepId={activeStepId}
-                language={language}
-                onCommentsCountChange={(count) => {
-                  setStepCommentsCounts(prev => ({
-                    ...prev,
-                    [activeStepId]: count
-                  }));
-                }}
-              />
+              {showSupervisorComments && (
+                <ResearchCommentsPanel
+                  projectId={activeProject.id}
+                  activeStepId={activeStepId}
+                  language={language}
+                  onCommentsCountChange={(count) => {
+                    setStepCommentsCounts(prev => ({
+                      ...prev,
+                      [activeStepId]: count
+                    }));
+                  }}
+                />
+              )}
             </div>
           </div>
         </div>

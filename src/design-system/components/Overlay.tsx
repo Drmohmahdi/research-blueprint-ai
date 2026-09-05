@@ -86,14 +86,14 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-screen items-center justify-center p-4 text-center">
+      <div className="flex min-h-screen items-center justify-center p-4">
         {/* Overlay backdrop */}
         <div 
-          className="fixed inset-0 bg-[var(--ds-surface-overlay)] transition-opacity"
+          className="fixed inset-0 bg-[var(--ds-surface-overlay)] animate-fade-in"
           onClick={onClose}
         />
 
-        <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={titleId} className={`relative w-full transform rounded-2xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] p-6 text-start align-middle shadow-[var(--ds-shadow-overlay)] ds-transition ${sizeClasses[size]}`}>
+        <div ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={titleId} className={`relative w-full max-h-[min(92vh,52rem)] overflow-y-auto transform rounded-2xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] p-4 sm:p-6 text-start align-middle shadow-[var(--ds-shadow-overlay)] ds-transition animate-fade-in ${sizeClasses[size]}`}>
           {/* Header */}
           <div className="flex items-center justify-between border-b border-[var(--ds-border-subtle)] pb-4 mb-4">
             <h3 id={titleId} className="text-h3 text-[var(--ds-text-primary)] m-0">
@@ -109,13 +109,13 @@ export const Modal: React.FC<ModalProps> = ({
           </div>
 
           {/* Body */}
-          <div className="text-xs text-[var(--ds-text-secondary)] leading-relaxed min-h-[60px]">
+          <div className="text-body-sm text-[var(--ds-text-secondary)] min-h-[60px]">
             {children}
           </div>
 
           {/* Footer */}
           {footerActions && (
-            <div className="flex justify-end gap-3 border-t border-[var(--ds-border-subtle)] pt-4 mt-4">
+            <div className="flex flex-wrap justify-end gap-3 border-t border-[var(--ds-border-subtle)] pt-4 mt-4">
               {footerActions}
             </div>
           )}
@@ -194,7 +194,7 @@ export const Drawer: React.FC<DrawerProps> = ({
 
   if (!isOpen) return null;
 
-  const placementClass = placement === 'left' ? 'left-0' : 'right-0';
+  const placementClass = placement === 'left' ? 'inset-inline-start-0' : 'inset-inline-end-0';
   const animClass = placement === 'left' ? 'animate-slide-in-left' : 'animate-slide-in-right';
 
   return (
@@ -207,7 +207,7 @@ export const Drawer: React.FC<DrawerProps> = ({
         />
 
         <div className={`absolute inset-y-0 ${placementClass} flex max-w-full`}>
-          <div ref={drawerRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={titleId} className={`w-screen max-w-md transform bg-[var(--ds-surface-primary)] ${placement === 'left' ? 'border-r' : 'border-l'} border-[var(--ds-border-subtle)] p-6 shadow-[var(--ds-shadow-overlay)] flex flex-col justify-between ${animClass}`}>
+          <div ref={drawerRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby={titleId} className={`w-screen max-w-[min(28rem,100vw)] transform bg-[var(--ds-surface-primary)] ${placement === 'left' ? 'border-inline-end' : 'border-inline-start'} border-[var(--ds-border-subtle)] p-4 sm:p-6 shadow-[var(--ds-shadow-overlay)] flex flex-col justify-between ${animClass}`}>
             
             <div className="space-y-6 flex-1 flex flex-col overflow-y-auto no-scrollbar">
               {/* Header */}
@@ -225,14 +225,14 @@ export const Drawer: React.FC<DrawerProps> = ({
               </div>
 
               {/* Body */}
-              <div className="text-xs text-[var(--ds-text-secondary)] leading-relaxed flex-1">
+              <div className="text-body-sm text-[var(--ds-text-secondary)] flex-1">
                 {children}
               </div>
             </div>
 
             {/* Footer */}
             {footerActions && (
-              <div className="border-t border-[var(--ds-border-subtle)] pt-4 mt-6 flex justify-end gap-3">
+              <div className="border-t border-[var(--ds-border-subtle)] pt-4 mt-6 flex flex-wrap justify-end gap-3">
                 {footerActions}
               </div>
             )}

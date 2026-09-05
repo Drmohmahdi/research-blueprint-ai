@@ -1,10 +1,12 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, Link } from 'react-router-dom';
 import { ROUTES } from './routes';
+import { useProject } from '../context/ProjectContext';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { SkeletonGrid } from '../components/SkeletonCard';
 import { AdminGuard } from '../components/AdminGuard';
 import { PermissionGuard } from '../components/PermissionGuard';
+import { useFeatureFlag } from '../utils/featureFlags';
 
 // ── Lazy-loaded components ────────────────────────────────────────────────────
 const PortalGateway             = lazy(() => import('../components/PortalGateway').then(m => ({ default: m.PortalGateway })));
@@ -35,6 +37,12 @@ const ExportPanel                 = lazy(() => import('../features/report-export
 const SmokeTestDashboard        = lazy(() => import('../components/SmokeTestDashboard').then(m => ({ default: m.SmokeTestDashboard })));
 const ThesisOperationsCenter    = lazy(() => import('../features/thesis/ThesisOperationsCenter'));
 const GraduateStudiesDashboard  = lazy(() => import('../features/thesis/GraduateStudiesDashboard'));
+
+const FlaggedExportPanel: React.FC = () => {
+  const enabled = useFeatureFlag('PATH_REPORT_EXPORT');
+  if (!enabled) return <Navigate to={ROUTES.LIFECYCLE} replace />;
+  return <ExportPanel />;
+};
 
 const DesignSystemUnavailable: React.FC = () => (
   <div className="p-6">
@@ -103,8 +111,6 @@ const SafeRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </ErrorBoundary>
 );
 
-import { useProject } from '../context/ProjectContext';
-
 const WizardToDesign: React.FC = () => {
   const { activeProject } = useProject();
   if (activeProject?.id) {
@@ -151,7 +157,7 @@ export const AppRouter: React.FC = () => {
       {/* Publishing Module Routes */}
       <Route path={ROUTES.PUBLISHING}       element={<SafeRoute><PublicationCommandCenter /></SafeRoute>} />
       <Route path={ROUTES.REVIEW_SIM}       element={<SafeRoute><PublicationReadinessReviewer /></SafeRoute>} />
-      <Route path={ROUTES.EXPORT}           element={<SafeRoute><ExportPanel /></SafeRoute>} />
+      <Route path={ROUTES.EXPORT}           element={<SafeRoute><FlaggedExportPanel /></SafeRoute>} />
 
       {/* Peer Review Module Routes */}
       <Route path={ROUTES.PEER_REVIEW}             element={<SafeRoute><ReviewerDashboard /></SafeRoute>} />

@@ -271,7 +271,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                 {language === 'ar' ? 'الإشعارات الأكاديمية' : 'Academic Notifications'}
               </h2>
               {unreadCount > 0 && (
-                <span className="px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-[var(--ds-danger-soft)] text-[var(--ds-danger)]">
+                <span className="px-2 py-0.5 text-caption font-extrabold rounded-full bg-[var(--ds-danger-soft)] text-[var(--ds-danger)]">
                   {unreadCount} {language === 'ar' ? 'جديد' : 'new'}
                 </span>
               )}
@@ -328,7 +328,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                         <div className="text-xs font-bold text-[var(--ds-text-primary)]">
                           {getCategoryLabel(pref.category)}
                         </div>
-                        <div className="text-[10px] text-[var(--ds-text-muted)]">
+                        <div className="text-caption text-[var(--ds-text-muted)]">
                           {pref.category === 'PROMOTION' || pref.category === 'PEER_REVIEW'
                             ? (language === 'ar' ? 'إشعارات الإجراءات المؤسسية' : 'Institutional workflow notices')
                             : (language === 'ar' ? 'تحديثات المشاريع والتعليقات' : 'Project workspace updates')}
@@ -484,7 +484,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                             <h4 className={`text-xs m-0 truncate ${isUnread ? 'font-black text-[var(--ds-text-primary)]' : 'font-bold text-[var(--ds-text-secondary)]'}`}>
                               {language === 'ar' ? notif.title_ar : notif.title_en}
                             </h4>
-                            <span className="text-[10px] font-semibold text-[var(--ds-text-muted)] shrink-0">
+                            <span className="text-caption font-semibold text-[var(--ds-text-muted)] shrink-0">
                               {formatRelativeTime(notif.created_at)}
                             </span>
                           </div>
@@ -494,7 +494,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                           </p>
 
                           <div className="mt-2 flex items-center justify-between">
-                            <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-1.5 py-0.5 rounded-md bg-[var(--ds-surface-secondary)] text-[var(--ds-text-muted)]">
+                            <span className="inline-flex items-center gap-1 text-caption font-extrabold px-1.5 py-0.5 rounded-md bg-[var(--ds-surface-secondary)] text-[var(--ds-text-muted)]">
                               {getCategoryLabel(notif.category)}
                             </span>
 
@@ -535,7 +535,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
 
               {/* Footer */}
               <div className="p-2.5 border-t border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)]/30 text-center">
-                <span className="text-[10px] font-bold text-[var(--ds-text-muted)]">
+                <span className="text-caption font-bold text-[var(--ds-text-muted)]">
                   {language === 'ar' ? 'منصة بصيرة — محرك الإشعارات والأحداث الموثوقة' : 'Baseerah Suite — Reliable Academic Events Engine'}
                 </span>
               </div>

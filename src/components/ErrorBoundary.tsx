@@ -54,13 +54,13 @@ export class ErrorBoundary extends React.Component<Props, State> {
           </h2>
           <p className="text-body-sm text-[var(--ds-text-secondary)] m-0 max-w-md">
             {isAr
-              ? 'تعذّر تحميل هذا القسم. يمكنك المحاولة مرة أخرى أو العودة للوحة الرئيسية.'
-              : 'This section failed to load. You can try again or return to the dashboard.'}
+              ? 'تعذّر تحميل هذا القسم. أعد المحاولة أو عد إلى مساحة العمل. إن تكرر الخطأ، أرسل وصف الخطوة الأخيرة إلى الدعم.'
+              : 'This section failed to load. Try again or return to the workspace. If it repeats, send support the last step you took.'}
           </p>
 
           {/* Show error details in development */}
           {import.meta.env.DEV && error && (
-            <pre className="mt-3 p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl text-[10px] text-danger font-mono text-right overflow-x-auto max-w-xl mx-auto">
+            <pre className="mt-3 p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl text-caption text-danger font-mono text-right overflow-x-auto max-w-xl mx-auto">
               {error.message}
             </pre>
           )}
@@ -78,7 +78,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
             onClick={() => { window.location.href = '/app'; }}
             className="px-4 py-2 rounded-xl border border-[var(--ds-border-subtle)] text-[var(--ds-text-secondary)] text-sm font-bold cursor-pointer hover:bg-[var(--ds-surface-secondary)] transition-colors"
           >
-            {isAr ? 'الرئيسية' : 'Dashboard'}
+            {isAr ? 'مساحة العمل' : 'Workspace'}
           </button>
         </div>
       </div>

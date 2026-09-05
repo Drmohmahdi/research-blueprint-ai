@@ -45,13 +45,13 @@ export const WorkspaceRiskPanel: React.FC<WorkspaceRiskPanelProps> = ({ engine }
         <span>{language === 'ar' ? 'مؤشرات الأخطار والعيوب' : 'Methodology Risks'}</span>
       </h5>
       {warnings.length === 0 ? (
-        <div className="text-[10px] text-muted font-bold">
+        <div className="text-caption text-muted font-bold">
           {language === 'ar' ? 'لا توجد تحذيرات منهجية حالياً. التصميم متسق ✓' : 'No methodological risks detected. Design aligned ✓'}
         </div>
       ) : (
         <div className="space-y-2">
           {warnings.map((warn, i) => (
-            <div key={i} className="p-2.5 bg-warning/10 border border-warning/20 text-warning rounded-xl text-[10px] font-bold leading-relaxed">
+            <div key={i} className="p-2.5 bg-warning/10 border border-warning/20 text-warning rounded-xl text-caption font-bold leading-relaxed">
               {warn}
             </div>
           ))}

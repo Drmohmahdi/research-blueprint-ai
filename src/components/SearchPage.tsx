@@ -299,12 +299,12 @@ export const SearchPage: React.FC = () => {
               className="w-full text-start rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] p-4 hover:border-[var(--ds-primary-soft)] hover:shadow-sm transition-shadow cursor-pointer"
             >
               <div className="flex items-center gap-2 mb-1.5">
-                <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] text-[10px] font-black">
+                <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] text-caption font-black">
                   {DOMAIN_ICONS[item.domain]}
                   <span>{isAr ? (DOMAIN_LABELS[item.domain]?.ar ?? item.domain) : (DOMAIN_LABELS[item.domain]?.en ?? item.domain)}</span>
                 </span>
                 {item.status && (
-                  <span className="px-2 py-0.5 rounded-full bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-muted)] text-[10px] font-bold">
+                  <span className="px-2 py-0.5 rounded-full bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-muted)] text-caption font-bold">
                     {item.status}
                   </span>
                 )}

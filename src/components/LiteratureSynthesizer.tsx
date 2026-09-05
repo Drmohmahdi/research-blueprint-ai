@@ -510,7 +510,7 @@ export const LiteratureSynthesizer: React.FC = () => {
             </p>
           )}
           {fileError && <div role="alert" className="text-xs font-semibold text-danger bg-danger/10 border border-danger rounded-md p-2">{fileError}</div>}
-          <p className="text-[10px] text-[var(--ds-text-muted)] m-0">
+          <p className="text-caption text-[var(--ds-text-muted)] m-0">
             {language === 'ar' ? 'اختيار PDF مرجع للمراجعة؛ أدخل بيانات الدراسة يدوياً إلى أن تتوفر خدمة استخراج فعلية.' : 'The PDF is retained as a review reference; enter study data manually until extraction is available.'}
           </p>
         </div>
@@ -569,7 +569,7 @@ export const LiteratureSynthesizer: React.FC = () => {
           { label: language === 'ar' ? 'عدم التجانس I²' : 'Heterogeneity I²', value: validStudies.length > 1 ? `${heterogeneityI2.toFixed(0)}%` : '—' }
         ].map((item) => (
           <div key={item.label} className="rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] p-4 text-center shadow-sm">
-            <div className="text-[10px] font-bold text-[var(--ds-text-muted)]">{item.label}</div>
+            <div className="text-caption font-bold text-[var(--ds-text-muted)]">{item.label}</div>
             <div className="mt-1 text-lg font-black text-ink ds-numeric">{item.value}</div>
           </div>
         ))}
@@ -598,10 +598,10 @@ export const LiteratureSynthesizer: React.FC = () => {
                   <span>{study.author} ({study.year})</span>
                   <div className="flex items-center gap-2 shrink-0">
                     {study.source !== 'manual' && (
-                      <span className="text-[10px] font-semibold uppercase tracking-wide text-[var(--ds-text-muted)]">{study.source}</span>
+                      <span className="text-caption font-semibold uppercase tracking-wide text-[var(--ds-text-muted)]">{study.source}</span>
                     )}
                     {isBibliographicOnly(study) ? (
-                      <span className="text-[10px] font-semibold text-[var(--ds-warning)]">{language === 'ar' ? 'ببليوغرافي فقط' : 'Bibliographic only'}</span>
+                      <span className="text-caption font-semibold text-[var(--ds-warning)]">{language === 'ar' ? 'ببليوغرافي فقط' : 'Bibliographic only'}</span>
                     ) : (
                       <span>d = {study.effectSize}</span>
                     )}
@@ -617,7 +617,7 @@ export const LiteratureSynthesizer: React.FC = () => {
                 </div>
                 {isBibliographicOnly(study) ? (
                   <form className="grid grid-cols-2 gap-2 pt-1" onSubmit={event => { event.preventDefault(); void handleCompleteEvidence(study); }}>
-                    <p className="col-span-2 m-0 text-[10px] text-[var(--ds-text-muted)]">
+                    <p className="col-span-2 m-0 text-caption text-[var(--ds-text-muted)]">
                       {language === 'ar' ? 'أدخل حجم العينة والأثر وفاصل الثقة لإدراج المرجع في مخطط الغابة.' : 'Enter sample size, effect, and confidence interval to include this reference in the forest plot.'}
                     </p>
                     <input type="number" min="2" step="1" required placeholder="N" aria-label={language === 'ar' ? 'حجم العينة' : 'Sample size'} value={evidenceDrafts[study.id]?.sampleSize ?? ''} onChange={event => setEvidenceDrafts(current => ({ ...current, [study.id]: { sampleSize: event.target.value, effectSize: current[study.id]?.effectSize ?? '', ciLower: current[study.id]?.ciLower ?? '', ciUpper: current[study.id]?.ciUpper ?? '' } }))} className="rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-2 py-1.5 text-xs" />
@@ -627,7 +627,7 @@ export const LiteratureSynthesizer: React.FC = () => {
                     <Button type="submit" variant="secondary" size="sm" className="col-span-2">{language === 'ar' ? 'إدخال في التحليل التلوي' : 'Include in meta-analysis'}</Button>
                   </form>
                 ) : (
-                  <div className="flex justify-between text-[var(--ds-text-muted)] text-[10px]">
+                  <div className="flex justify-between text-[var(--ds-text-muted)] text-caption">
                     <span>N = {study.sampleSize}</span>
                     <span>95% CI: [{study.ciLower}, {study.ciUpper}]</span>
                   </div>
@@ -715,7 +715,7 @@ export const LiteratureSynthesizer: React.FC = () => {
           )}
         </div>
       </div>
-      {validStudies.length > 0 && <p className="text-[10px] text-[var(--ds-text-muted)] text-center m-0">
+      {validStudies.length > 0 && <p className="text-caption text-[var(--ds-text-muted)] text-center m-0">
         {language === 'ar'
           ? 'الأثر المجمع محسوب بأوزان عكس التباين من فواصل الدراسات؛ يظل تقديراً أولياً ويتطلب مراجعة نموذج التأثيرات قبل اعتماده.'
           : 'The pooled effect uses inverse-variance weights from study CIs; it is preliminary and requires model review before adoption.'}

@@ -36,9 +36,11 @@ def get_analytics_overview(
 
     # Historical progress from real audit events in this organization, not a synthetic trend.
     now = datetime.datetime.now(datetime.UTC)
+    cutoff = (now - datetime.timedelta(days=180)).isoformat()
     logs = db.query(models.AuditLog).filter(
-        models.AuditLog.organizationId == context.organization.id
-    ).all()
+        models.AuditLog.organizationId == context.organization.id,
+        models.AuditLog.timestamp >= cutoff,
+    ).limit(5000).all()
     history = []
     for i in range(5, -1, -1):
         month_date = now - datetime.timedelta(days=i * 30)

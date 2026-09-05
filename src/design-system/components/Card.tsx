@@ -16,15 +16,15 @@ export const Card: React.FC<CardProps> = ({
 
   const paddingStyles = {
     none: 'p-0',
-    sm: 'p-4',
-    md: 'p-6',
-    lg: 'p-8',
+    sm: 'p-3 sm:p-4',
+    md: 'p-4 sm:p-6',
+    lg: 'p-5 sm:p-8',
   };
 
   const variantStyles = {
     default: 'border-[var(--ds-border-subtle)]',
-    elevated: 'border-[var(--ds-border-subtle)] shadow-[var(--ds-shadow-layered)]',
-    interactive: 'border-[var(--ds-border-subtle)] hover:border-[var(--ds-primary)]/35 hover:shadow-[var(--ds-shadow-md)] cursor-pointer',
+    elevated: 'border-[var(--ds-border-default)] shadow-[var(--ds-shadow-md)]',
+    interactive: 'ds-hover-lift border-[var(--ds-border-subtle)] hover:border-[var(--ds-primary)]/35 hover:shadow-[var(--ds-shadow-md)] focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--ds-focus-ring)] cursor-pointer',
     selected: 'border-[var(--ds-primary)] ring-1 ring-[var(--ds-primary-soft)] bg-[var(--ds-primary-soft)]',
     warning: 'border-[var(--ds-warning)]/30 bg-[var(--ds-warning-soft)]',
     danger: 'border-[var(--ds-danger)]/30 bg-[var(--ds-danger-soft)]',

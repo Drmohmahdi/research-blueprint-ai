@@ -25,16 +25,16 @@ export const Tabs: React.FC<TabsProps> = ({
   className = ''
 }) => {
   return (
-    <div className={`flex border-b border-[var(--ds-border-subtle)] gap-4 overflow-x-auto no-scrollbar ${className}`}>
+    <div className={`flex border-b border-[var(--ds-border-subtle)] gap-4 overflow-x-auto no-scrollbar ds-edge-fade-x ${className}`}>
       {items.map((item) => {
         const isActive = activeId === item.id;
         return (
           <button
             key={item.id}
             onClick={() => onChange(item.id)}
-            className={`flex items-center gap-2 py-3 px-1 border-b-2 text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+            className={`flex items-center gap-2 py-3 px-1 border-b-2 text-label transition-all cursor-pointer whitespace-nowrap ${
               isActive 
-                ? 'border-[var(--ds-primary)] text-[var(--ds-primary)] font-extrabold'
+                ? 'border-[var(--ds-primary)] text-[var(--ds-primary)]'
                 : 'border-transparent text-[var(--ds-text-secondary)] hover:text-[var(--ds-text-primary)] hover:border-[var(--ds-border-default)]'
             }`}
           >
@@ -103,11 +103,11 @@ export const Stepper: React.FC<StepperProps> = ({
             <button
               onClick={() => onStepClick && !isLocked && onStepClick(step.id)}
               disabled={isLocked || !onStepClick}
-              className={`flex items-center gap-2.5 text-xs font-semibold select-none text-start disabled:cursor-not-allowed ${
+              className={`flex items-center gap-2.5 text-body-sm font-semibold select-none text-start disabled:cursor-not-allowed ${
                 isCurrent ? 'text-[var(--ds-text-primary)] font-bold' : 'text-[var(--ds-text-secondary)]'
               }`}
             >
-              <div className={`h-6 w-6 rounded-full border flex items-center justify-center text-[10px] font-black shrink-0 ${badgeColor}`}>
+              <div className={`h-6 w-6 rounded-full border flex items-center justify-center text-caption font-bold shrink-0 ${badgeColor}`}>
                 {isCompleted ? <CheckCircle2 size={12} /> : needsReview ? <AlertTriangle size={12} /> : idx + 1}
               </div>
               <span className="truncate">{step.label}</span>
@@ -144,7 +144,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
   const ArrowIcon = language === 'ar' ? ChevronLeft : ChevronRight;
 
   return (
-    <nav className={`flex items-center gap-1.5 text-[11px] font-bold text-[var(--ds-text-secondary)] ${className}`}>
+    <nav className={`flex items-center gap-1.5 text-label text-[var(--ds-text-secondary)] ${className}`}>
       {items.map((item, idx) => (
         <React.Fragment key={idx}>
           {item.onClick ? (
@@ -155,7 +155,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
               {item.label}
             </button>
           ) : (
-            <span className="text-[var(--ds-text-primary)] font-extrabold">{item.label}</span>
+            <span className="text-[var(--ds-text-primary)] font-bold">{item.label}</span>
           )}
           {idx < items.length - 1 && (
             <ArrowIcon size={12} className="text-[var(--ds-text-muted)]" />
@@ -194,7 +194,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="space-y-1">
           {eyebrow && (
-            <p className="m-0 text-[10px] font-bold uppercase tracking-widest text-[var(--ds-text-muted)]">{eyebrow}</p>
+            <p className="m-0 text-overline text-[var(--ds-text-muted)]">{eyebrow}</p>
           )}
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-h2 text-[var(--ds-text-primary)] m-0">
@@ -203,7 +203,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             {status}
           </div>
           {description && (
-            <p className="text-caption text-[var(--ds-text-muted)] m-0">
+            <p className="text-body-sm text-[var(--ds-text-muted)] m-0">
               {description}
             </p>
           )}
@@ -249,7 +249,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
           {title}
         </h3>
         {subtitle && (
-          <p className="text-[10px] text-[var(--ds-text-muted)] m-0">
+          <p className="text-caption text-[var(--ds-text-muted)] m-0">
             {subtitle}
           </p>
         )}
@@ -279,9 +279,9 @@ export const Table: React.FC<TableProps> = ({
 }) => {
   return (
     <div className={`w-full overflow-x-auto border border-[var(--ds-border-subtle)] rounded-lg bg-[var(--ds-surface-primary)] ${className}`}>
-      <table className="w-full text-xs text-start border-collapse">
+      <table className="w-full text-body-sm text-start border-collapse">
         <thead>
-          <tr className="border-b border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] text-[10px] text-[var(--ds-text-muted)] uppercase font-extrabold">
+          <tr className="border-b border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] text-overline text-[var(--ds-text-muted)]">
             {headers.map((h, idx) => (
               <th key={idx} className="p-3 text-start font-bold">{h}</th>
             ))}

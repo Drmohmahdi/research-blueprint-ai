@@ -19,6 +19,7 @@ import { Button } from '../design-system/components/Button';
 import { Input } from '../design-system/components/FormControls';
 import { apiForgotPassword, apiResetPassword, apiVerifyEmail } from '../utils/api';
 import { rememberIntendedPlan } from '../marketing/funnel';
+import { PublicFooter } from '../marketing/PublicChrome';
 import { FUNNEL_EVENTS, track } from '../utils/analytics';
 
 const PLAN_DISPLAY_NAMES: Record<string, { ar: string; en: string }> = {
@@ -103,8 +104,8 @@ export const Login: React.FC = () => {
           if (result.reset_token) {
             setSuccessMsg(
               language === 'ar'
-                ? 'إن وُجد الحساب، صُدر رمز إعادة التعيين. استخدم الرمز الظاهر في بيئة التطوير.'
-                : 'If the account exists, a reset token was issued. Use the development token shown below.'
+                ? 'إن وُجد الحساب، صُدر رمز إعادة التعيين. انسخ الرمز الظاهر أدناه وأدخله في الخطوة التالية.'
+                : 'If the account exists, a reset code was issued. Copy the code below and enter it in the next step.'
             );
             setResetToken(result.reset_token);
             setAuthMode('reset');
@@ -206,7 +207,10 @@ export const Login: React.FC = () => {
   ];
 
   return (
-    <div className="baseerah-marketing min-h-screen w-full relative flex items-center justify-center overflow-hidden font-sans select-none px-4 py-12">
+    <div className="baseerah-marketing min-h-screen w-full relative flex flex-col overflow-x-hidden font-sans">
+      <a className="ds-skip-link" href="#main-content">
+        {language === 'ar' ? 'تخطَّ إلى المحتوى الرئيسي' : 'Skip to main content'}
+      </a>
       
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-[30%] -right-[20%] w-[80vw] h-[80vw] rounded-full bg-[var(--ds-aurora-emerald)] blur-[120px]" />
@@ -215,7 +219,7 @@ export const Login: React.FC = () => {
       </div>
 
       {/* ── Top Floating Toggles ── */}
-      <div className="absolute top-6 left-6 right-6 z-20 flex justify-between items-center max-w-6xl mx-auto">
+      <div className="absolute top-4 inset-x-4 z-20 flex justify-between items-center max-w-6xl mx-auto gap-2">
         {/* Brand Name Logo */}
         <Link to="/" className="flex items-center gap-2 no-underline text-inherit">
           <div className="p-2 rounded-xl bg-[var(--ds-primary-soft)] border border-[var(--ds-primary)]/25 text-[var(--ds-primary-bright)]">
@@ -231,7 +235,7 @@ export const Login: React.FC = () => {
           {/* Language Toggle */}
           <button
             onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] hover:bg-[var(--ds-surface-secondary)] text-xs font-bold text-[var(--ds-text-secondary)] ds-transition cursor-pointer shadow-sm"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 min-h-[36px] rounded-xl border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] hover:bg-[var(--ds-surface-secondary)] text-caption font-bold text-[var(--ds-text-secondary)] ds-transition cursor-pointer shadow-sm"
           >
             <Globe size={14} className="text-[var(--ds-primary-bright)]" />
             <span>{language === 'ar' ? 'English' : 'العربية'}</span>
@@ -241,7 +245,7 @@ export const Login: React.FC = () => {
           <button
             onClick={toggleTheme}
             aria-label={theme === 'dark' ? (language === 'ar' ? 'تفعيل الوضع الفاتح' : 'Use light theme') : (language === 'ar' ? 'تفعيل الوضع الداكن' : 'Use dark theme')}
-            className="p-2 rounded-xl border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] ds-transition cursor-pointer shadow-sm"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] ds-transition cursor-pointer shadow-sm"
           >
             {theme === 'dark' ? <Sun size={14} className="text-[var(--ds-accent-gold-text)]" /> : <Moon size={14} className="text-[var(--ds-navy-elevated)]" />}
           </button>
@@ -249,7 +253,7 @@ export const Login: React.FC = () => {
       </div>
 
       {/* ── Login Glassmorphism Box ── */}
-      <main className="w-full max-w-4xl z-10 space-y-6 animate-fade-in">
+      <main id="main-content" tabIndex={-1} className="w-full max-w-4xl z-10 flex-1 mx-auto px-4 py-24 space-y-6 animate-fade-in">
         
         {/* Main Content Layout */}
         <Card className="bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] shadow-[var(--ds-shadow-layered)] rounded-[32px] overflow-hidden grid grid-cols-1 lg:grid-cols-12">
@@ -258,18 +262,18 @@ export const Login: React.FC = () => {
             <span aria-hidden className="absolute inset-y-0 start-0 w-1 bg-[var(--ds-primary)]" />
             
             <div className="space-y-4 relative z-10 ps-2">
-              <span className="px-2.5 py-1 rounded-md text-[9px] font-black bg-[var(--ds-accent-gold-soft)] border border-[var(--ds-accent-gold)]/25 text-[var(--ds-accent-gold-text)] tracking-wider uppercase">
-                {language === 'ar' ? 'الجودة الأكاديمية السعودية' : 'Saudi Academic Premium'}
+              <span className="px-2.5 py-1 rounded-md text-caption font-bold bg-[var(--ds-accent-gold-soft)] border border-[var(--ds-accent-gold)]/25 text-[var(--ds-accent-gold-text)] tracking-wider uppercase">
+                {language === 'ar' ? 'منصة دورة البحث العلمي' : 'Research lifecycle platform'}
               </span>
-              <h1 className="text-h1 text-ink m-0">
+              <p className="text-h1 text-ink m-0">
                 {language === 'ar' 
-                  ? 'المختبر الأكاديمي الذكي للبحث العلمي' 
-                  : 'The Intelligent Academic Research Lab'}
-              </h1>
-              <p className="text-caption text-secondary font-semibold">
+                  ? 'من التصميم إلى الاعتماد في مساحة واحدة' 
+                  : 'From study design to clearance — in one workspace'}
+              </p>
+              <p className="text-body-sm text-secondary">
                 {language === 'ar'
-                  ? 'بوابة متكاملة لتصميم الدراسات، التحليل الإحصائي التلقائي، محاكاة السيناريوهات، المراجعة والتحكيم وعزل البيانات.'
-                  : 'An all-in-one portal for designing studies, automated statistics, outcome forecasting, peer review, and secure isolation.'}
+                  ? 'صمّم الدراسة، حلّل البيانات، أدر التحكيم والترقية والرسالة. القرار يبقى بشريًا، والبيانات معزولة لكل مؤسسة.'
+                  : 'Design the study, analyze data, and run review, promotion, and thesis work. Humans decide; each institution stays isolated.'}
               </p>
             </div>
 
@@ -308,7 +312,7 @@ export const Login: React.FC = () => {
               </svg>
             </div>
 
-            <div className="text-[10px] text-secondary font-bold border-t border-[var(--ds-border-subtle)] pt-4">
+            <div className="text-caption text-secondary font-semibold border-t border-[var(--ds-border-subtle)] pt-4">
               {language === 'ar' ? 'منصة بصيرة © ٢٠٢٦ حقوق الطبع محفوظة.' : 'Baseerah © 2026. All rights reserved.'}
             </div>
           </div>
@@ -317,24 +321,24 @@ export const Login: React.FC = () => {
           <div className="lg:col-span-7 p-6 md:p-8 flex flex-col justify-between space-y-6">
             
             {/* Header info */}
-            <div className="space-y-1.5 text-center lg:text-right">
-              <h2 className="text-h2 text-ink m-0">
+            <div className="space-y-1.5 text-center lg:text-start">
+              <h1 className="text-h2 text-ink m-0">
                 {authMode === 'login' 
                   ? (language === 'ar' ? 'مرحباً بك مجدداً في بصيرة' : 'Welcome Back to Baseerah')
                   : authMode === 'forgot'
                   ? (language === 'ar' ? 'استعادة كلمة المرور' : 'Reset your password')
                   : authMode === 'reset'
                   ? (language === 'ar' ? 'كلمة مرور جديدة' : 'Choose a new password')
-                  : (language === 'ar' ? 'إنشاء حساب جديد بالمنصة' : 'Join Baseerah Platform')}
-              </h2>
-              <p className="text-caption text-[var(--ds-text-muted)] font-bold">
+                  : (language === 'ar' ? 'أنشئ حسابك المجاني على بصيرة' : 'Create your free Baseerah account')}
+              </h1>
+              <p className="text-body-sm text-[var(--ds-text-muted)]">
                 {authMode === 'login'
-                  ? (language === 'ar' ? 'قم بتسجيل الدخول للبدء بمراجعة أو تعديل أبحاثك.' : 'Sign in to access your research workspace.')
+                  ? (language === 'ar' ? 'ادخل إلى مشاريعك، ملفك الأكاديمي، ومسار البحث الحالي.' : 'Open your projects, academic profile, and current research path.')
                   : authMode === 'forgot'
-                  ? (language === 'ar' ? 'أدخل بريد الحساب. إن وُجد سيُصدر رمز إعادة التعيين.' : 'Enter the account email. If it exists, a reset token will be issued.')
+                  ? (language === 'ar' ? 'أدخل بريد الحساب. إن وُجد سنرسل تعليمات إعادة التعيين.' : 'Enter the account email. If it exists, we will send reset instructions.')
                   : authMode === 'reset'
-                  ? (language === 'ar' ? 'أدخل الرمز وكلمة المرور الجديدة.' : 'Enter the token and a new password.')
-                  : (language === 'ar' ? 'اختر نوع حسابك العلمي واملأ البيانات للتسجيل.' : 'Choose your academic account type and enter details.')}
+                  ? (language === 'ar' ? 'أدخل الرمز الذي وصلك وكلمة المرور الجديدة.' : 'Enter the code you received and a new password.')
+                  : (language === 'ar' ? 'مجاني لثلاثة مشاريع. اختر دورك ثم ابدأ أول مسار بحثي بعد التسجيل.' : 'Free for three projects. Choose your role, then start your first research path after signup.')}
               </p>
             </div>
 
@@ -362,9 +366,14 @@ export const Login: React.FC = () => {
               </p>
             )}
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-[var(--ds-text-muted)] uppercase tracking-widest block">
+                <label className="text-caption font-bold text-[var(--ds-text-muted)] uppercase tracking-wider block">
                   {language === 'ar' ? 'حدد نوع حسابك الأكاديمي' : 'Select Academic Account Type'}
                 </label>
+                <p className="text-caption text-[var(--ds-text-muted)] m-0">
+                  {language === 'ar'
+                    ? 'الدور يضبط الأدوات الظاهرة أولًا. يمكنك لاحقًا الانضمام إلى مؤسسة أو تغيير الصلاحيات.'
+                    : 'Your role sets the tools you see first. You can join an organization or change permissions later.'}
+                </p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   {rolesConfig.map((roleItem) => {
                     const RoleIcon = roleItem.icon;
@@ -392,7 +401,7 @@ export const Login: React.FC = () => {
                           <h4 className="text-h4 text-ink m-0">
                             {language === 'ar' ? roleItem.titleAr : roleItem.titleEn}
                           </h4>
-                          <p className="text-[9px] text-[var(--ds-text-muted)] font-bold leading-normal mt-1 mb-0 line-clamp-2">
+                          <p className="text-caption text-[var(--ds-text-muted)] font-bold leading-normal mt-1 mb-0 line-clamp-2">
                             {language === 'ar' ? roleItem.descAr : roleItem.descEn}
                           </p>
                         </div>
@@ -456,7 +465,7 @@ export const Login: React.FC = () => {
                 {authMode === 'login' ? (language === 'ar' ? 'تسجيل الدخول' : 'Sign In')
                   : authMode === 'forgot' ? (language === 'ar' ? 'طلب إعادة التعيين' : 'Request reset')
                   : authMode === 'reset' ? (language === 'ar' ? 'حفظ كلمة المرور' : 'Save password')
-                  : (language === 'ar' ? 'تسجيل الحساب' : 'Create Account')}
+                  : (language === 'ar' ? 'إنشاء الحساب المجاني' : 'Create free account')}
               </Button>
             </form>
 
@@ -481,7 +490,7 @@ export const Login: React.FC = () => {
                 className="text-[var(--ds-primary-bright)] hover:text-[var(--ds-accent-gold-text)] hover:underline text-xs font-black bg-transparent border-none cursor-pointer"
               >
                 {authMode === 'login'
-                  ? (language === 'ar' ? 'لا تملك حساباً؟ أنشئ حساباً أكاديمياً الآن' : 'Do not have an account? Sign up')
+                  ? (language === 'ar' ? 'ليس لديك حساب؟ ابدأ مجانًا' : 'No account? Start free')
                   : (language === 'ar' ? 'العودة لتسجيل الدخول' : 'Back to sign in')}
               </button>
             </div>
@@ -489,26 +498,7 @@ export const Login: React.FC = () => {
           </div>
         </Card>
       </main>
-
-      {/* Styled Animations Injected */}
-      <style>{`
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-4px); }
-          75% { transform: translateX(4px); }
-        }
-        .animate-shake {
-          animation: shake 0.3s ease-in-out;
-        }
-        .animate-fade-in {
-          animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(12px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
-
+      <PublicFooter isAr={language === 'ar'} />
     </div>
   );
 };

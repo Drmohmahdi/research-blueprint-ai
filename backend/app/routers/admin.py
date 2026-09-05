@@ -5,6 +5,7 @@ Persistent platform settings, feature flags, and system status — all guarded
 by the global admin role (SYSTEMADMIN/ADMIN/SUPERADMIN/DEVELOPER).
 """
 import datetime
+import re
 import secrets
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -101,6 +102,20 @@ SETTING_DEFAULT_META = {
     "platform.announcement_en": {"value_type": "string", "description_ar": "إعلان المنصة (إنجليزي)", "description_en": "Platform announcement (English)"},
     "platform.maintenance_mode": {"value_type": "bool", "description_ar": "وضع الصيانة", "description_en": "Maintenance mode"},
 }
+_FEATURE_FLAG_KEY = re.compile(r"^feature_flag\.[A-Z][A-Z0-9_]{0,63}$")
+_CONTACT_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+def _is_allowed_setting_key(key: str) -> bool:
+    return key in SETTING_DEFAULT_META or bool(_FEATURE_FLAG_KEY.match(key))
+
+
+def _extract_feature_flags(settings: Dict[str, Any]) -> Dict[str, bool]:
+    flags: Dict[str, bool] = {}
+    for key, value in settings.items():
+        if key.startswith("feature_flag."):
+            flags[key[len("feature_flag."):]] = bool(value)
+    return flags
 
 
 def _load_settings(db: Session) -> Dict[str, Any]:
@@ -171,17 +186,26 @@ def get_admin_settings(
     _ensure_defaults(db)
     settings = _load_settings(db)
     meta = _load_settings_meta(db)
-    # Extract feature flags (keys starting with "feature_flag.")
-    feature_flags = {}
-    for k, v in settings.items():
-        if k.startswith("feature_flag."):
-            flag_name = k[len("feature_flag."):]
-            feature_flags[flag_name] = bool(v) if isinstance(v, bool) else v
     return PlatformSettingsResponse(
         settings=settings,
         settings_meta=meta,
-        feature_flags=feature_flags,
+        feature_flags=_extract_feature_flags(settings),
     )
+
+
+class FeatureFlagsResponse(BaseModel):
+    feature_flags: Dict[str, bool]
+
+
+@router.get("/feature-flags", response_model=FeatureFlagsResponse)
+def get_runtime_feature_flags(
+    db: Session = Depends(get_db),
+    context: TenantContext = Depends(get_tenant_context),
+):
+    """Any signed-in member can read flags so Admin Center toggles apply platform-wide."""
+    if context.user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required")
+    return FeatureFlagsResponse(feature_flags=_extract_feature_flags(_load_settings(db)))
 
 
 @router.put("/settings", response_model=PlatformSettingsResponse)
@@ -191,6 +215,15 @@ def update_admin_settings(
     context: TenantContext = Depends(get_tenant_context),
 ):
     _require_global_admin(context)
+    unknown = [key for key in req.settings if not _is_allowed_setting_key(key)]
+    if unknown:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unknown settings are not allowed: {', '.join(sorted(unknown))}",
+        )
+    contact_email = req.settings.get("platform.contact_email")
+    if isinstance(contact_email, str) and contact_email and not _CONTACT_EMAIL_RE.match(contact_email.strip()):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid contact email")
     now = datetime.datetime.now(datetime.UTC).isoformat()
     for key, value in req.settings.items():
         meta = SETTING_DEFAULT_META.get(key, {"value_type": "string"})
@@ -236,7 +269,8 @@ def get_system_status(
         db_status = "ready"
     except Exception:
         pass
-    storage_ready = bool(__import__("os").getenv("STORAGE_ROOT", "storage_files"))
+    from ..services.storage import storage_readiness
+    storage_ready = storage_readiness() == "ready"
     from ..services.ai import GovernedAIService
     ai_status = GovernedAIService.status()
     ai_provider = ai_status["provider_status"]

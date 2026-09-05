@@ -1,5 +1,4 @@
 import logging
-import os
 import time
 import uuid
 
@@ -178,11 +177,11 @@ def ready(request: Request):
     try:
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
-        storage_ready = bool(os.getenv("STORAGE_ROOT", "storage_files"))
+        from .services.storage import storage_readiness
         return {
             "status": "ready",
             "database": "ready",
-            "storage": "ready" if storage_ready else "not_ready",
+            "storage": storage_readiness(),
             "ai_live_provider": "configured" if settings.GEMINI_API_KEY else "not_configured",
             "payment_live_provider": "not_configured",
             "email_live_provider": "configured" if settings.SMTP_HOST else "not_configured",

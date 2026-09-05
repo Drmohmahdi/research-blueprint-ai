@@ -52,7 +52,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ langua
             <h3 className="text-h3 m-0 text-ink">
               {language === 'ar' ? 'سجل الرقابة الأمنية والعمليات (Audit Logs)' : 'Security Audit Trail & Logs'}
             </h3>
-            <p className="text-[10px] text-[var(--ds-text-muted)] font-semibold mt-1 m-0">
+            <p className="text-caption text-[var(--ds-text-muted)] font-semibold mt-1 m-0">
               {language === 'ar' ? 'مراقبة فورية لجميع التعديلات والوصول لبيانات المشاريع الاستخبارية.' : 'Real-time telemetry tracking compliance updates and access logs.'}
             </p>
           </div>
@@ -124,7 +124,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ langua
                       {isExpanded && (
                         <tr className="bg-[var(--ds-surface-secondary)]/50">
                           <td colSpan={5} className="px-6 py-4">
-                            <div className="p-4 bg-canvas text-success rounded-2xl border border-subtle text-[10px] font-mono leading-relaxed overflow-x-auto max-h-[200px] no-scrollbar">
+                            <div className="p-4 bg-canvas text-success rounded-2xl border border-subtle text-caption font-mono leading-relaxed overflow-x-auto max-h-[200px] no-scrollbar">
                               <pre className="m-0 whitespace-pre-wrap">{JSON.stringify(log.details || {}, null, 2)}</pre>
                             </div>
                           </td>

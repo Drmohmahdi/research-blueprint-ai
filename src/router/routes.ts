@@ -8,7 +8,11 @@ export const ROUTES = {
   MARKETING_FAQ:     '/faq',
   MARKETING_ABOUT:   '/about',
   MARKETING_CONTACT: '/contact',
+  MARKETING_INSTITUTIONAL: '/institutional',
+  MARKETING_TERMS:   '/terms',
+  MARKETING_PRIVACY: '/privacy',
   LOGIN:             '/login',
+  REGISTER:          '/login?mode=register',
 
   // Portal Gateway
   PORTAL:            '/app',
@@ -167,6 +171,13 @@ export const PATH_TO_VIEW: Record<string, string> = Object.fromEntries(
 );
 
 /** Resolve the shell view id for exact paths and parameterized academic routes. */
+const WORKSPACE_PREFIXES = ['/app', '/saas', '/admin', '/organizations', '/system'] as const;
+
+/** Authenticated shell paths. Unknown public URLs must not fall through to Login. */
+export function isWorkspacePath(pathname: string): boolean {
+  return WORKSPACE_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+}
+
 export function viewFromPathname(pathname: string): string {
   if (PATH_TO_VIEW[pathname]) return PATH_TO_VIEW[pathname];
   if (/^\/app\/research\/projects\/[^/]+\/design/.test(pathname)) return 'newStudyDesign';

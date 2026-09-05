@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useProject } from '../../context/ProjectContext';
 import { RESEARCH_PATHS_CONFIG } from '../../config/researchPathsConfig';
-import { VIEW_TO_PATH } from '../../router/routes';
+import { ROUTES, VIEW_TO_PATH } from '../../router/routes';
 import { CheckCircle2, ArrowRight, ArrowLeft } from 'lucide-react';
 
 export const GuidedFlowSidebar: React.FC = () => {
@@ -64,7 +64,7 @@ export const GuidedFlowSidebar: React.FC = () => {
           return (
             <button
               key={stepId}
-              onClick={() => navigate(VIEW_TO_PATH[stepId] ?? '/')}
+              onClick={() => navigate(VIEW_TO_PATH[stepId] ?? ROUTES.PORTAL)}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                 isCurrent
                   ? 'bg-[var(--ds-primary-soft)] text-ink border border-[var(--ds-primary)]/20'
@@ -101,7 +101,7 @@ export const GuidedFlowSidebar: React.FC = () => {
         <button
           onClick={() => {
             if (currentStepIdx > 0) {
-              navigate(VIEW_TO_PATH[activePath.orderedSteps[currentStepIdx - 1]] ?? '/');
+              navigate(VIEW_TO_PATH[activePath.orderedSteps[currentStepIdx - 1]] ?? ROUTES.PORTAL);
             }
           }}
           disabled={currentStepIdx <= 0}
@@ -113,7 +113,7 @@ export const GuidedFlowSidebar: React.FC = () => {
         <button
           onClick={() => {
             if (currentStepIdx < activePath.orderedSteps.length - 1) {
-              navigate(VIEW_TO_PATH[activePath.orderedSteps[currentStepIdx + 1]] ?? '/');
+              navigate(VIEW_TO_PATH[activePath.orderedSteps[currentStepIdx + 1]] ?? ROUTES.PORTAL);
             }
           }}
           disabled={currentStepIdx >= activePath.orderedSteps.length - 1}
@@ -126,7 +126,7 @@ export const GuidedFlowSidebar: React.FC = () => {
 
       {/* Progress bar */}
       <div className="space-y-1">
-        <div className="flex justify-between text-[9px] font-bold text-[var(--ds-text-muted)]">
+        <div className="flex justify-between text-caption font-bold text-[var(--ds-text-muted)]">
           <span>{language === 'ar' ? 'التقدم' : 'Progress'}</span>
           <span className="ds-numeric">{Math.round((completedSteps.filter(s => activePath.orderedSteps.includes(s)).length / activePath.orderedSteps.length) * 100)}%</span>
         </div>

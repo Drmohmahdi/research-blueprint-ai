@@ -12,7 +12,7 @@ import hashlib
 import os
 from typing import Optional
 
-from ..rate_limit import limiter, is_testing
+from ..rate_limit import limiter
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -164,7 +164,7 @@ def register(request: Request, params: UserRegister, db: Session = Depends(get_d
 
     from ..services.rbac import build_access_profile
     profile = build_access_profile(db, user, None)
-    if is_testing or settings.ENVIRONMENT != "production":
+    if settings.expose_dev_secrets:
         profile["verification_token"] = raw_verify
     return profile
 
@@ -233,26 +233,29 @@ def logout(
     session_token: Optional[str] = Cookie(None),
     db: Session = Depends(get_db)
 ):
-    token = session_token
-    if not token and authorization and authorization.startswith("Bearer "):
-        token = authorization.split(" ")[1]
-        
-    if token:
+    tokens: list[str] = []
+    if isinstance(session_token, str) and session_token:
+        tokens.append(session_token)
+    if authorization and authorization.startswith("Bearer "):
+        bearer = authorization.split(" ", 1)[1].strip()
+        if bearer and bearer not in tokens:
+            tokens.append(bearer)
+
+    for token in tokens:
         session = db.query(UserSession).filter(UserSession.token == token).first()
-        if session:
-            # Audit logout
-            audit = AuditLog(
-                id=secrets.token_hex(8),
-                userId=session.userId,
-                action="LOGOUT",
-                details="Logged out successfully",
-                timestamp=datetime.datetime.now(datetime.UTC).isoformat()
-            )
-            db.add(audit)
-            db.delete(session)
-            db.commit()
-            
-    # Clear cookie
+        if not session:
+            continue
+        db.add(AuditLog(
+            id=secrets.token_hex(8),
+            userId=session.userId,
+            action="LOGOUT",
+            details="Logged out successfully",
+            timestamp=datetime.datetime.now(datetime.UTC).isoformat()
+        ))
+        db.delete(session)
+    if tokens:
+        db.commit()
+
     response.delete_cookie(
         "session_token",
         path="/",
@@ -329,7 +332,7 @@ def forgot_password(request: Request, params: PasswordForgotRequest, db: Session
         timestamp=now.isoformat(),
     ))
     db.commit()
-    if is_testing or settings.ENVIRONMENT != "production":
+    if settings.expose_dev_secrets:
         payload["reset_token"] = raw
     return payload
 
@@ -417,7 +420,7 @@ def resend_verification(
     ))
     db.commit()
     payload = {"ok": True, "email_verified": False}
-    if is_testing or settings.ENVIRONMENT != "production":
+    if settings.expose_dev_secrets:
         payload["verification_token"] = raw
     return payload
 

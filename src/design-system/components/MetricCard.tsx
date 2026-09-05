@@ -26,21 +26,21 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   className = ''
 }) => {
   return (
-    <Card className={`relative space-y-4 ${className}`} variant="elevated">
-      <div className="flex justify-between items-start">
-        <div className="space-y-1.5">
+    <Card className={`relative min-w-0 space-y-4 ${className}`} variant="elevated">
+      <div className="flex justify-between items-start gap-3">
+        <div className="min-w-0 space-y-1.5">
           <div className="flex items-center gap-1.5">
-            <span className="text-xs font-semibold text-[var(--ds-text-secondary)]">{label}</span>
+            <span className="text-label text-[var(--ds-text-secondary)]">{label}</span>
             {tooltipText && (
               <div className="relative group cursor-help">
                 <HelpCircle size={13} className="text-[var(--ds-text-muted)]" />
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block z-50 bg-[var(--ds-navy)] text-white text-[10px] p-2 rounded-xl border border-white/10 leading-normal">
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block z-50 bg-[var(--ds-navy)] text-white text-caption p-2 rounded-xl border border-white/10">
                   {tooltipText}
                 </div>
               </div>
             )}
           </div>
-          <div className="text-2xl font-black text-ink ds-numeric">{metric}</div>
+          <div className="text-metric text-ink break-words">{metric}</div>
         </div>
 
         {icon && (
@@ -51,7 +51,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
       </div>
 
       {(description || trend) && (
-        <div className="flex items-center justify-between pt-1 border-t border-[var(--ds-border-subtle)] text-[11px]">
+        <div className="flex items-center justify-between pt-1 border-t border-[var(--ds-border-subtle)] text-caption">
           <span className="text-[var(--ds-text-muted)] truncate">{description}</span>
           
           {trend && (

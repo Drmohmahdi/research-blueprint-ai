@@ -130,6 +130,45 @@
 
   --ds-font-arabic: "IBM Plex Sans Arabic", system-ui, sans-serif;
   --ds-font-latin: Inter, system-ui, sans-serif;
+  --ds-font-sans: var(--ds-font-arabic);
+  --ds-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --ds-type-display: clamp(1.75rem, 1.45rem + 1.5vw, 2.5rem);
+  --ds-type-display-leading: 1.25;
+  --ds-type-h1: clamp(1.5rem, 1.3rem + 1vw, 2rem);
+  --ds-type-h1-leading: 1.28;
+  --ds-type-h2: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+  --ds-type-h2-leading: 1.32;
+  --ds-type-h3: 1.125rem;
+  --ds-type-h3-leading: 1.4;
+  --ds-type-h4: 1.0625rem;
+  --ds-type-h4-leading: 1.42;
+  --ds-type-body-lg: 1rem;
+  --ds-type-body-lg-leading: 1.7;
+  --ds-type-body: 0.9375rem;
+  --ds-type-body-leading: 1.65;
+  --ds-type-body-sm: 0.875rem;
+  --ds-type-body-sm-leading: 1.5;
+  --ds-type-label: 0.8125rem;
+  --ds-type-label-leading: 1.35;
+  --ds-type-caption: 0.75rem;
+  --ds-type-caption-leading: 1.4;
+  --ds-type-tracking-display: -0.022em;
+  --ds-type-tracking-heading: -0.016em;
+  --ds-type-tracking-body: -0.01em;
+  --ds-type-tracking-label: 0.01em;
+  --ds-type-stack: 0.7em;
+  --ds-type-weight-regular: 400;
+  --ds-type-weight-medium: 500;
+  --ds-type-weight-semibold: 600;
+  --ds-type-weight-bold: 700;
+
+  --ds-shell-max: 80rem;
+  --ds-shell-max-wide: 90rem;
+  --ds-app-max: 112.5rem;
+  --ds-measure: 42rem;
+  --ds-header-height: 4.5rem;
+  --ds-page-gutter: clamp(1rem, 0.6rem + 1.4vw, 2.5rem);
 }
 
 .dark {
@@ -188,8 +227,8 @@
 
   --ds-success: #5CB87A;
   --ds-success-soft: rgba(92, 184, 122, 0.16);
-  --ds-warning: #D4B46A;
-  --ds-warning-soft: rgba(212, 180, 106, 0.16);
+  --ds-warning: #E0893A;
+  --ds-warning-soft: rgba(224, 137, 58, 0.16);
   --ds-danger: #E07A72;
   --ds-danger-soft: rgba(224, 122, 114, 0.16);
   --ds-information: #58AEB0;
@@ -213,6 +252,11 @@
   --ds-aurora-gold: rgba(212, 180, 106, 0.08);
   --ds-aurora-navy: rgba(26, 63, 92, 0.35);
 
+  --ds-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.28);
+  --ds-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.32);
+  --ds-shadow-md: 0 8px 20px -10px rgba(0, 0, 0, 0.5);
+  --ds-shadow-lg: 0 22px 44px -24px rgba(0, 0, 0, 0.62);
+  --ds-shadow-overlay: 0 28px 56px -22px rgba(0, 0, 0, 0.7);
   --ds-shadow-layered: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 22px 48px -28px rgba(0, 0, 0, 0.55);
   --ds-shadow-glow: 0 10px 32px -12px rgba(107, 184, 148, 0.35);
 }

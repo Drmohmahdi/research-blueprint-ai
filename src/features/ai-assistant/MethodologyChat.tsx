@@ -227,7 +227,7 @@ export const MethodologyChat: React.FC = () => {
                   <button
                     key={i}
                     onClick={() => { setInput(s); }}
-                    className="px-3 py-1.5 rounded-xl bg-ai/5 border border-ai/15 text-[10px] font-bold text-[var(--ds-text-primary)] hover:bg-ai/10 transition-colors cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-ai/5 border border-ai/15 text-caption font-bold text-[var(--ds-text-primary)] hover:bg-ai/10 transition-colors cursor-pointer"
                   >
                     {s}
                   </button>
@@ -256,7 +256,7 @@ export const MethodologyChat: React.FC = () => {
 
                 {/* Source display */}
                 {msg.role === 'assistant' && msg.sources && msg.sources.length > 0 && (
-                  <div className="px-3 py-2 rounded-lg bg-[var(--ds-surface-tertiary)] text-[10px] space-y-1">
+                  <div className="px-3 py-2 rounded-lg bg-[var(--ds-surface-tertiary)] text-caption space-y-1">
                     <div className="font-bold text-[var(--ds-text-muted)] flex items-center gap-1">
                       <FileText size={10} />
                       <span>{isAr ? 'المصادر المستخدمة' : 'Sources used'}</span>
@@ -271,7 +271,7 @@ export const MethodologyChat: React.FC = () => {
 
                 {/* Integrity notice */}
                 {msg.role === 'assistant' && msg.aiGenerated && (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-warning/5 border border-warning/15 text-[9px] font-bold text-warning">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-warning/5 border border-warning/15 text-caption font-bold text-warning">
                     <AlertTriangle size={10} />
                     <span>{isAr
                       ? 'محتوى منشأ بالذكاء الاصطناعي — يتطلب مراجعة أكاديمية والتحقق من المصادر.'
@@ -282,7 +282,7 @@ export const MethodologyChat: React.FC = () => {
 
                 {/* Provider status */}
                 {msg.role === 'assistant' && !msg.aiGenerated && (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-ai/5 border border-ai/15 text-[9px] font-bold text-[var(--ds-text-primary)]">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-ai/5 border border-ai/15 text-caption font-bold text-[var(--ds-text-primary)]">
                     <CheckCircle2 size={10} />
                     <span>{isAr ? 'محرك القواعد المحلي' : 'Local rule engine'}</span>
                   </div>
@@ -290,7 +290,7 @@ export const MethodologyChat: React.FC = () => {
 
                 {/* Source error */}
                 {msg.role === 'assistant' && msg.sourceError && (
-                  <div className="text-[9px] text-warning font-semibold">
+                  <div className="text-caption text-warning font-semibold">
                     {msg.sourceError}
                   </div>
                 )}

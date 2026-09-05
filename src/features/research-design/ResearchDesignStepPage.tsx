@@ -280,7 +280,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
             {project.variables?.filter(v => v.type === 'dependent').map((v) => (
               <div key={v.id} className="p-2.5 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg">
                 <span className="font-bold block mb-1 text-ink">{v.nameAr}</span>
-                <div className="grid grid-cols-2 gap-2 text-[10px] text-[var(--ds-text-secondary)]">
+                <div className="grid grid-cols-2 gap-2 text-caption text-[var(--ds-text-secondary)]">
                   <span>{isAr ? 'نوع الأداة: اختبار تحصيلي' : 'Instrument: Test'}</span>
                   <span>{isAr ? 'طريقة الصدق: صدق المحتوى والتحكيم' : 'Validity: Content & Panel review'}</span>
                 </div>
@@ -303,7 +303,7 @@ export const ResearchDesignStepPage: React.FC<ResearchDesignStepPageProps> = ({
             {project.hypotheses?.map((h, idx) => (
               <div key={h.id} className="p-2.5 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg flex justify-between items-center">
                 <span>{h.textAr}</span>
-                <span className="px-2 py-0.5 bg-[var(--ds-information-soft)] text-[var(--ds-information)] rounded font-bold text-[10px]">
+                <span className="px-2 py-0.5 bg-[var(--ds-information-soft)] text-[var(--ds-information)] rounded font-bold text-caption">
                   {idx === 0 ? 'ANCOVA' : 'Independent t-test'}
                 </span>
               </div>

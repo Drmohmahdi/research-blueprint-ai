@@ -174,8 +174,9 @@ export const ThesisOperationsCenter: React.FC = () => {
   return (
     <section className="mx-auto max-w-[1440px] min-w-0 space-y-5 overflow-x-clip pb-16" aria-labelledby="thesis-ops-title">
       <PathPanel accent="var(--ds-path-research)">
-        <p className="text-caption m-0 font-black text-[var(--ds-primary)]">BASEERAH · THESIS OPERATIONS</p>
+        <p className="text-caption m-0 font-black text-[var(--ds-primary)]">{ar ? 'بصيرة · تشغيل الرسالة' : 'Baseerah · Thesis'}</p>
         <h2 id="thesis-ops-title" className="text-h2 m-0 mt-2">{ar ? 'تشغيل الرسالة العلمية' : 'Thesis operations'}</h2>
+        <p className="text-body-sm mt-2 text-[var(--ds-text-secondary)]">{ar ? 'إدارة الإشراف والفصول والاجتماعات والتصحيحات حتى الاعتماد النهائي. القرار يبقى للجنة.' : 'Manage supervision, chapters, meetings, and corrections through final clearance. The committee decides.'}</p>
         <p className="text-body-sm mt-2 font-bold">{center.thesis.title_ar} · {center.thesis.title_en}</p>
         <p className="text-body-sm mt-1 text-[var(--ds-text-secondary)]">{center.thesis.degree_type} · {center.thesis.current_stage} · {center.thesis.status}</p>
       </PathPanel>

@@ -302,7 +302,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
           <div className="space-y-2">
           <div className="flex items-center gap-2 mb-1">
             <Globe size={20} className="text-path-identity" />
-            <span className="text-[10px] font-black text-path-identity uppercase tracking-widest">
+            <span className="text-caption font-black text-path-identity uppercase tracking-widest">
               {isAr ? 'الهوية الرقمية والانتشار الأكاديمي للباحثين' : 'Academic Identity & Visibility Suite'}
             </span>
           </div>
@@ -340,7 +340,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
         {/* Real visibility score, from server-computed profile completeness */}
         <div className="p-4 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl flex items-center gap-3 shrink-0">
           <div className="text-right">
-            <span className="text-[9px] text-[var(--ds-text-muted)] font-black block uppercase">{isAr ? 'مؤشر اكتمال الملف' : 'Profile Completeness'}</span>
+            <span className="text-caption text-[var(--ds-text-muted)] font-black block uppercase">{isAr ? 'مؤشر اكتمال الملف' : 'Profile Completeness'}</span>
             <span className="text-2xl font-black text-ink ds-numeric block">{visibilityScore}%</span>
           </div>
           <div className="h-10 w-[1px] bg-[var(--ds-border-subtle)]" />
@@ -365,7 +365,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
               {!editingName && (
                 <button
                   onClick={() => setEditingName(true)}
-                  className="text-[10px] font-black text-action hover:underline cursor-pointer"
+                  className="text-caption font-black text-action hover:underline cursor-pointer"
                 >
                   {isAr ? 'تعديل' : 'Edit'}
                 </button>
@@ -376,7 +376,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
               <div className="space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex flex-col space-y-1">
-                    <label className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">{isAr ? 'الاسم المفضّل (عربي):' : 'Preferred Name (Arabic):'}</label>
+                    <label className="text-caption text-[var(--ds-text-muted)] font-black uppercase">{isAr ? 'الاسم المفضّل (عربي):' : 'Preferred Name (Arabic):'}</label>
                     <input
                       type="text"
                       value={nameDraft.ar}
@@ -385,7 +385,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                     />
                   </div>
                   <div className="flex flex-col space-y-1">
-                    <label className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">{isAr ? 'الاسم المفضل (إنجليزي):' : 'Preferred Name (English):'}</label>
+                    <label className="text-caption text-[var(--ds-text-muted)] font-black uppercase">{isAr ? 'الاسم المفضل (إنجليزي):' : 'Preferred Name (English):'}</label>
                     <input
                       type="text"
                       value={nameDraft.en}
@@ -394,7 +394,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                     />
                   </div>
                   <div className="flex flex-col space-y-1 sm:col-span-2">
-                    <label className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">
+                    <label className="text-caption text-[var(--ds-text-muted)] font-black uppercase">
                       {isAr ? 'الصيغ البديلة لاسمك في المجلات (افصل بفاصلة منقوطة):' : 'Name variants found in journals (semicolon-separated):'}
                     </label>
                     <input
@@ -409,7 +409,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                   <button
                     onClick={saveName}
                     disabled={saving}
-                    className="flex items-center gap-1.5 text-[10px] font-black text-on-action bg-action hover:bg-action-hover disabled:opacity-60 px-3 py-1.5 rounded-lg cursor-pointer"
+                    className="flex items-center gap-1.5 text-caption font-black text-on-action bg-action hover:bg-action-hover disabled:opacity-60 px-3 py-1.5 rounded-lg cursor-pointer"
                   >
                     {saving ? <Loader2 size={12} className="motion-safe:animate-spin" /> : <Check size={12} />}
                     <span>{isAr ? 'حفظ' : 'Save'}</span>
@@ -423,7 +423,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                         variants: (profile.name_variants_json || []).join('؛ '),
                       });
                     }}
-                    className="flex items-center gap-1.5 text-[10px] font-black text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-tertiary)] px-3 py-1.5 rounded-lg cursor-pointer"
+                    className="flex items-center gap-1.5 text-caption font-black text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-tertiary)] px-3 py-1.5 rounded-lg cursor-pointer"
                   >
                     <X size={12} />
                     <span>{isAr ? 'إلغاء' : 'Cancel'}</span>
@@ -433,18 +433,18 @@ export const AcademicVisibilityDashboard: React.FC = () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <span className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase block mb-1">{isAr ? 'الاسم المفضّل (عربي)' : 'Preferred Name (Arabic)'}</span>
+                  <span className="text-caption text-[var(--ds-text-muted)] font-black uppercase block mb-1">{isAr ? 'الاسم المفضّل (عربي)' : 'Preferred Name (Arabic)'}</span>
                   <p className="text-caption font-bold text-[var(--ds-text-primary)] m-0">{profile.preferred_name_ar || '—'}</p>
                 </div>
                 <div>
-                  <span className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase block mb-1">{isAr ? 'الاسم المفضل (إنجليزي)' : 'Preferred Name (English)'}</span>
+                  <span className="text-caption text-[var(--ds-text-muted)] font-black uppercase block mb-1">{isAr ? 'الاسم المفضل (إنجليزي)' : 'Preferred Name (English)'}</span>
                   <p className="text-caption font-bold text-[var(--ds-text-primary)] m-0">{profile.preferred_name_en || '—'}</p>
                 </div>
                 <div className="sm:col-span-2">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">{isAr ? 'الصيغ البديلة المكتشفة' : 'Identified Name Variants'}</span>
+                    <span className="text-caption text-[var(--ds-text-muted)] font-black uppercase">{isAr ? 'الصيغ البديلة المكتشفة' : 'Identified Name Variants'}</span>
                     {profile.name_variants_json.length > 0 && (
-                      <div className="flex items-center gap-1 text-[9px] font-bold text-warning bg-warning/10 border border-warning/20 px-2 py-1 rounded-xl shrink-0">
+                      <div className="flex items-center gap-1 text-caption font-bold text-warning bg-warning/10 border border-warning/20 px-2 py-1 rounded-xl shrink-0">
                         <ShieldAlert size={11} className="shrink-0" />
                         <span>{isAr ? 'خطر تشتت الاستشهاد' : 'Citation Split Risk'}</span>
                       </div>
@@ -467,7 +467,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
               </h3>
               <button
                 onClick={() => navigate(ROUTES.PROFILE_AFFILIATIONS)}
-                className="text-[10px] font-black text-action hover:underline cursor-pointer"
+                className="text-caption font-black text-action hover:underline cursor-pointer"
               >
                 {isAr ? 'إدارة الانتماءات' : 'Manage affiliations'}
               </button>
@@ -518,7 +518,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                       </div>
                     ))}
                     {affiliations.length > 3 && (
-                      <p className="text-[10px] text-[var(--ds-text-muted)] m-0">
+                      <p className="text-caption text-[var(--ds-text-muted)] m-0">
                         {isAr ? `و${affiliations.length - 3} انتماءات أخرى...` : `+${affiliations.length - 3} more...`}
                       </p>
                     )}
@@ -537,7 +537,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
               </h3>
               <button
                 onClick={() => navigate(ROUTES.PROFILE)}
-                className="text-[10px] font-black text-action hover:underline cursor-pointer"
+                className="text-caption font-black text-action hover:underline cursor-pointer"
               >
                 {isAr ? 'تعديل في الملف الكامل' : 'Edit in full profile'}
               </button>
@@ -555,12 +555,12 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                 {hasShortBio && (
                   <div className="p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">
+                      <span className="text-caption text-[var(--ds-text-muted)] font-black uppercase">
                         {isAr ? 'النبذة المختصرة (لـ ORCID / Twitter):' : 'Short Biography (for ORCID / Twitter):'}
                       </span>
                       <button
                         onClick={() => copyToClipboard(isAr ? (profile.short_bio_ar || profile.short_bio_en) : (profile.short_bio_en || profile.short_bio_ar), 'short')}
-                        className="p-1 rounded hover:bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-secondary)] flex items-center gap-1 text-[9px] font-bold cursor-pointer"
+                        className="p-1 rounded hover:bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-secondary)] flex items-center gap-1 text-caption font-bold cursor-pointer"
                       >
                         <Copy size={11} />
                         <span>{copiedKey === 'short' ? (isAr ? 'تم النسخ!' : 'Copied!') : (isAr ? 'نسخ' : 'Copy')}</span>
@@ -573,12 +573,12 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                 {hasFullBio && (
                   <div className="p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">
+                      <span className="text-caption text-[var(--ds-text-muted)] font-black uppercase">
                         {isAr ? 'السيرة الكاملة (لـ ResearchGate / LinkedIn):' : 'Full Biography (for ResearchGate / LinkedIn):'}
                       </span>
                       <button
                         onClick={() => copyToClipboard(isAr ? (profile.full_bio_ar || profile.full_bio_en) : (profile.full_bio_en || profile.full_bio_ar), 'full')}
-                        className="p-1 rounded hover:bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-secondary)] flex items-center gap-1 text-[9px] font-bold cursor-pointer"
+                        className="p-1 rounded hover:bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-secondary)] flex items-center gap-1 text-caption font-bold cursor-pointer"
                       >
                         <Copy size={11} />
                         <span>{copiedKey === 'full' ? (isAr ? 'تم النسخ!' : 'Copied!') : (isAr ? 'نسخ' : 'Copy')}</span>
@@ -591,12 +591,12 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                 {hasKeywords && (
                   <div className="p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase">
+                      <span className="text-caption text-[var(--ds-text-muted)] font-black uppercase">
                         {isAr ? 'الكلمات المفتاحية:' : 'Keywords & Tags:'}
                       </span>
                       <button
                         onClick={() => copyToClipboard(isAr ? (keywordsAr || keywordsEn) : (keywordsEn || keywordsAr), 'kw')}
-                        className="p-1 rounded hover:bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-secondary)] flex items-center gap-1 text-[9px] font-bold cursor-pointer"
+                        className="p-1 rounded hover:bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-secondary)] flex items-center gap-1 text-caption font-bold cursor-pointer"
                       >
                         <Copy size={11} />
                         <span>{copiedKey === 'kw' ? (isAr ? 'تم النسخ!' : 'Copied!') : (isAr ? 'نسخ' : 'Copy')}</span>
@@ -650,7 +650,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                             href={chan.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-[9px] font-black text-action hover:underline flex items-center gap-0.5"
+                            className="text-caption font-black text-action hover:underline flex items-center gap-0.5"
                           >
                             <span>{isAr ? 'زيارة' : 'Visit'}</span>
                             <ExternalLink size={10} />
@@ -658,7 +658,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                         )}
                         <button
                           onClick={() => startEditChannel(chan.type, chan.value, chan.url)}
-                          className="text-[9px] font-black text-[var(--ds-text-muted)] hover:text-action cursor-pointer"
+                          className="text-caption font-black text-[var(--ds-text-muted)] hover:text-action cursor-pointer"
                         >
                           {isAr ? 'تعديل' : 'Edit'}
                         </button>
@@ -666,7 +666,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                     ) : (
                       <button
                         onClick={() => startEditChannel(chan.type)}
-                        className="text-[9px] font-black text-action hover:underline flex items-center gap-0.5 cursor-pointer"
+                        className="text-caption font-black text-action hover:underline flex items-center gap-0.5 cursor-pointer"
                       >
                         <Plus size={11} />
                         <span>{isAr ? 'إضافة' : 'Add'}</span>
@@ -694,14 +694,14 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                         <button
                           onClick={() => saveChannel(chan.type)}
                           disabled={saving || !channelDraft.value.trim()}
-                          className="flex items-center gap-1 text-[9px] font-black text-on-action bg-action hover:bg-action-hover disabled:opacity-50 px-2.5 py-1 rounded-lg cursor-pointer"
+                          className="flex items-center gap-1 text-caption font-black text-on-action bg-action hover:bg-action-hover disabled:opacity-50 px-2.5 py-1 rounded-lg cursor-pointer"
                         >
                           {saving ? <Loader2 size={11} className="motion-safe:animate-spin" /> : <Check size={11} />}
                           <span>{isAr ? 'حفظ' : 'Save'}</span>
                         </button>
                         <button
                           onClick={() => { setEditingChannel(null); setChannelDraft({ value: '', url: '' }); }}
-                          className="flex items-center gap-1 text-[9px] font-black text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-tertiary)] px-2.5 py-1 rounded-lg cursor-pointer"
+                          className="flex items-center gap-1 text-caption font-black text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-tertiary)] px-2.5 py-1 rounded-lg cursor-pointer"
                         >
                           <X size={11} />
                           <span>{isAr ? 'إلغاء' : 'Cancel'}</span>
@@ -709,7 +709,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                       </div>
                     </div>
                   ) : (
-                    <p className="text-[10px] text-[var(--ds-text-muted)] font-medium leading-relaxed m-0">
+                    <p className="text-caption text-[var(--ds-text-muted)] font-medium leading-relaxed m-0">
                       {isAr ? chan.descAr : chan.descEn}
                     </p>
                   )}
@@ -730,7 +730,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       {chan.profile_url && (
-                        <a href={chan.profile_url} target="_blank" rel="noreferrer" className="text-[9px] font-black text-action hover:underline flex items-center gap-0.5">
+                        <a href={chan.profile_url} target="_blank" rel="noreferrer" className="text-caption font-black text-action hover:underline flex items-center gap-0.5">
                           <span>{isAr ? 'زيارة' : 'Visit'}</span>
                           <ExternalLink size={10} />
                         </a>
@@ -744,7 +744,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                       </button>
                     </div>
                   </div>
-                  <p className="text-[10px] text-[var(--ds-text-muted)] font-medium m-0">{chan.identifier_value}</p>
+                  <p className="text-caption text-[var(--ds-text-muted)] font-medium m-0">{chan.identifier_value}</p>
                 </div>
               ))}
             </div>
@@ -776,14 +776,14 @@ export const AcademicVisibilityDashboard: React.FC = () => {
                   <button
                     onClick={saveCustomChannel}
                     disabled={saving || !customChannelDraft.type.trim() || !customChannelDraft.value.trim()}
-                    className="flex items-center gap-1 text-[9px] font-black text-on-action bg-action hover:bg-action-hover disabled:opacity-50 px-2.5 py-1 rounded-lg cursor-pointer"
+                    className="flex items-center gap-1 text-caption font-black text-on-action bg-action hover:bg-action-hover disabled:opacity-50 px-2.5 py-1 rounded-lg cursor-pointer"
                   >
                     {saving ? <Loader2 size={11} className="motion-safe:animate-spin" /> : <Check size={11} />}
                     <span>{isAr ? 'حفظ' : 'Save'}</span>
                   </button>
                   <button
                     onClick={() => { setAddingCustomChannel(false); setCustomChannelDraft({ type: '', value: '', url: '' }); }}
-                    className="flex items-center gap-1 text-[9px] font-black text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-tertiary)] px-2.5 py-1 rounded-lg cursor-pointer"
+                    className="flex items-center gap-1 text-caption font-black text-[var(--ds-text-secondary)] hover:bg-[var(--ds-surface-tertiary)] px-2.5 py-1 rounded-lg cursor-pointer"
                   >
                     <X size={11} />
                     <span>{isAr ? 'إلغاء' : 'Cancel'}</span>
@@ -793,7 +793,7 @@ export const AcademicVisibilityDashboard: React.FC = () => {
             ) : (
               <button
                 onClick={() => setAddingCustomChannel(true)}
-                className="w-full flex items-center justify-center gap-1.5 text-[10px] font-black text-action border border-dashed border-[var(--ds-primary)]/30 hover:bg-[var(--ds-primary-soft)] py-2 rounded-xl cursor-pointer"
+                className="w-full flex items-center justify-center gap-1.5 text-caption font-black text-action border border-dashed border-[var(--ds-primary)]/30 hover:bg-[var(--ds-primary-soft)] py-2 rounded-xl cursor-pointer"
               >
                 <Plus size={12} />
                 <span>{isAr ? 'إضافة قناة أخرى (مثل Academia.edu أو موقعك الشخصي)' : 'Add another channel (e.g. Academia.edu or personal site)'}</span>

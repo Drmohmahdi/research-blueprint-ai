@@ -128,6 +128,24 @@ def test_regular_user_denied_admin_settings():
     assert res2.status_code == 403
 
 
+def test_signed_in_researcher_can_read_feature_flags():
+    db = SessionLocal()
+    suffix = uuid.uuid4().hex[:6]
+    ensure_plans_and_pricing_seeded(db)
+    user, org = create_test_tenant(db, f"flg_{suffix}", f"org-flg-{suffix}", role="RESEARCHER")
+    org_id = org.id
+    db.close()
+    headers = get_auth_headers(f"flg_{suffix}", org_id)
+    res = client.get("/api/admin/feature-flags", headers=headers)
+    assert res.status_code == 200
+    body = res.json()
+    assert "feature_flags" in body
+    assert isinstance(body["feature_flags"], dict)
+    anonymous = TestClient(app)
+    denied = anonymous.get("/api/admin/feature-flags")
+    assert denied.status_code in (401, 403)
+
+
 def test_global_admin_reads_defaults_and_status():
     db = SessionLocal()
     suffix = uuid.uuid4().hex[:6]
@@ -191,6 +209,30 @@ def test_global_admin_updates_settings_and_feature_flags():
     row = db2.query(PlatformSetting).filter(PlatformSetting.key == "platform.maintenance_mode").first()
     assert row is not None
     db2.close()
+
+
+def test_global_admin_rejects_unknown_settings():
+    db = SessionLocal()
+    suffix = uuid.uuid4().hex[:6]
+    ensure_plans_and_pricing_seeded(db)
+    _user, org = create_test_tenant(
+        db, f"adm4_{suffix}", f"org-adm4-{suffix}",
+        role="RESEARCHER", user_role="SystemAdmin"
+    )
+    org_id = org.id
+    db.close()
+    headers = get_auth_headers(f"adm4_{suffix}", org_id)
+
+    res = client.put("/api/admin/settings", json={
+        "settings": {"arbitrary.secret": "injected"}
+    }, headers=headers)
+    assert res.status_code == 400
+    assert "Unknown settings" in res.json()["detail"]
+
+    bad_email = client.put("/api/admin/settings", json={
+        "settings": {"platform.contact_email": "not-an-email"}
+    }, headers=headers)
+    assert bad_email.status_code == 400
 
 
 def test_admin_update_audited():

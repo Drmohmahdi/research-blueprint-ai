@@ -65,11 +65,11 @@ export const SeminarProposalWorkspace: React.FC = () => {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-md text-[9px] font-black bg-[var(--ds-path-publication)]/10 border border-[var(--ds-path-publication)]/25 text-path-publication tracking-wider">
+              <span className="px-2.5 py-0.5 rounded-md text-caption font-black bg-[var(--ds-path-publication)]/10 border border-[var(--ds-path-publication)]/25 text-path-publication tracking-wider">
                 {language === 'ar' ? 'مساحة مراجعة السمينار' : 'SEMINAR PROPOSAL WORKSPACE'}
               </span>
               {isSecureMode && (
-                <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--ds-success-soft)] text-[var(--ds-success)] border border-[var(--ds-success)]/30 text-[9px] font-bold">
+                <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--ds-success-soft)] text-[var(--ds-success)] border border-[var(--ds-success)]/30 text-caption font-bold">
                   <Unlock size={10} />
                   <span>{language === 'ar' ? 'وضع آمن' : 'SECURE'}</span>
                 </div>
@@ -113,7 +113,7 @@ export const SeminarProposalWorkspace: React.FC = () => {
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center text-caption font-black shrink-0 ${
                     isActive ? 'bg-[var(--ds-primary-soft)] text-ink' : isCompleted ? 'bg-[var(--ds-success-soft)] text-success' : 'bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] border border-[var(--ds-border-subtle)]'
                   }`}>
                     {isCompleted ? <Check size={10} /> : idx + 1}

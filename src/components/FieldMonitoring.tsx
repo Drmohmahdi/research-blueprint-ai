@@ -285,11 +285,11 @@ export const FieldMonitoring: React.FC = () => {
             <div className="w-full bg-[var(--ds-surface-secondary)] h-2 rounded-full mt-2">
               <div className="bg-[var(--ds-primary)] h-2 rounded-full transition-all" style={{ width: `${progressPercent}%` }} />
             </div>
-              <span className="text-[10px] text-[var(--ds-text-muted)] font-bold block mt-1 ds-numeric">
+              <span className="text-caption text-[var(--ds-text-muted)] font-bold block mt-1 ds-numeric">
               {progressPercent}% {language === 'ar' ? 'مكتمل' : 'Complete'}
             </span>
             <form onSubmit={handleUpdateEnrollment} noValidate className="flex items-center gap-2 pt-2">
-              <label htmlFor="enrolled-count" className="text-[10px] text-[var(--ds-text-muted)] whitespace-nowrap">
+              <label htmlFor="enrolled-count" className="text-caption text-[var(--ds-text-muted)] whitespace-nowrap">
                 {language === 'ar' ? 'العدد الحالي' : 'Current count'}
               </label>
               <input id="enrolled-count" type="number" min="0" max={target} step="1" value={enrolledDraft} onChange={event => setEnrolledDraft(event.target.value)} className="w-20 rounded-md border border-[var(--ds-border-default)] bg-[var(--ds-surface-primary)] px-2 py-1 text-xs text-[var(--ds-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" />
@@ -297,7 +297,7 @@ export const FieldMonitoring: React.FC = () => {
                 {language === 'ar' ? 'حفظ' : 'Save'}
               </Button>
             </form>
-            {enrollmentError && <p role="alert" className="text-[10px] font-semibold text-danger m-0">{enrollmentError}</p>}
+            {enrollmentError && <p role="alert" className="text-caption font-semibold text-danger m-0">{enrollmentError}</p>}
           </div>
         </div>
 
@@ -308,7 +308,7 @@ export const FieldMonitoring: React.FC = () => {
           </div>
           <div className="space-y-1">
             <h3 className="text-h3 text-[var(--ds-success)] ds-numeric m-0">{fidelityScore}%</h3>
-            <span className="text-[10px] text-[var(--ds-text-muted)] font-medium block">
+            <span className="text-caption text-[var(--ds-text-muted)] font-medium block">
               {language === 'ar' ? 'قياس مدى الالتزام ببروتوكول التجربة' : 'Measurement of experimental adherence'}
             </span>
           </div>
@@ -321,7 +321,7 @@ export const FieldMonitoring: React.FC = () => {
           </div>
           <div className="space-y-1">
             <h3 className="text-h3 text-[var(--ds-warning)] ds-numeric m-0">{attritionRate.toFixed(0)}%</h3>
-            <span className="text-[10px] text-[var(--ds-text-muted)] font-medium block">
+            <span className="text-caption text-[var(--ds-text-muted)] font-medium block">
               {language === 'ar' ? 'النسبة المعتمدة في الخطة' : 'Adherence rate in plan'}
             </span>
           </div>
@@ -385,7 +385,7 @@ export const FieldMonitoring: React.FC = () => {
                     </td>
                     <td className="p-3">
                       <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                        className={`inline-flex items-center rounded-full px-2.5 py-1 text-caption font-bold ${
                           isWarning
                             ? 'bg-[var(--ds-warning-soft)] text-[var(--ds-warning)]'
                             : 'bg-[var(--ds-success-soft)] text-[var(--ds-success)]'

@@ -83,8 +83,8 @@ export const ResearchDesignCommandCenter: React.FC<ResearchDesignCommandCenterPr
     try {
       const res = await apiResearchDesignCommandCenter(projectId);
       setData(res);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load');
+    } catch {
+      setError('load');
     } finally {
       setLoading(false);
     }
@@ -101,8 +101,8 @@ export const ResearchDesignCommandCenter: React.FC<ResearchDesignCommandCenterPr
     try {
       await apiResearchDesignCreateProtocol(projectId);
       await load();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create protocol');
+    } catch {
+      setError('protocol');
     } finally {
       setCreating(false);
     }
@@ -118,8 +118,20 @@ export const ResearchDesignCommandCenter: React.FC<ResearchDesignCommandCenterPr
 
   if (error) {
     return (
-      <div className="p-8 text-[var(--ds-danger)]" role="alert" data-testid="rdcc-error">
-        <AlertTriangle className="inline mr-2" size={18} /> {error}
+      <div className="p-8 space-y-3 text-[var(--ds-danger)]" role="alert" data-testid="rdcc-error">
+        <p className="m-0">
+          <AlertTriangle className="inline mr-2" size={18} />
+          {error === 'protocol'
+            ? t('تعذر إنشاء البروتوكول. أعد المحاولة بعد لحظات.', 'Could not create the protocol. Try again in a moment.')
+            : t('تعذر تحميل ملخص التصميم. تحقق من الاتصال ثم أعد المحاولة.', 'Could not load the design summary. Check your connection and try again.')}
+        </p>
+        <button
+          type="button"
+          onClick={() => void load()}
+          className="px-3 py-1.5 rounded-lg bg-[var(--ds-primary)] text-white text-xs font-bold"
+        >
+          {t('إعادة المحاولة', 'Try again')}
+        </button>
       </div>
     );
   }
@@ -153,6 +165,12 @@ export const ResearchDesignCommandCenter: React.FC<ResearchDesignCommandCenterPr
             <h2 className="text-h2 text-[var(--ds-text-primary)]" data-testid="rdcc-title">
               {isAr ? data.title_ar : data.title_en}
             </h2>
+            <p className="text-body-sm text-[var(--ds-text-secondary)] m-0 mt-1.5">
+              {t(
+                'ملخص جاهزية التصميم والاتساق والبروتوكول. كل مؤشر مستقل، والقرار التالي يبقى بيد الباحث أو المشرف.',
+                'A summary of design readiness, consistency, and protocol. Each indicator is independent; the next decision stays with the researcher or supervisor.',
+              )}
+            </p>
             <div className="flex flex-wrap items-center gap-3 text-xs text-[var(--ds-text-secondary)] mt-1.5 font-medium">
               <span className="flex items-center gap-1"><Building2 size={14} /> {data.research_family ?? '—'}</span>
               <span>•</span>
@@ -207,7 +225,7 @@ export const ResearchDesignCommandCenter: React.FC<ResearchDesignCommandCenterPr
                 <CheckCircle2 size={16} className="text-[var(--ds-primary)]" />
               </div>
               <p className="text-2xl font-black text-[var(--ds-text-primary)]">{ind.completion?.score ?? 0}%</p>
-              <p className="text-[10px] text-[var(--ds-text-secondary)]">{t('نسبة الحقول المعبأة — ليست حكماً منهجياً.', 'Filled-fields ratio — not a methodological verdict.')}</p>
+              <p className="text-caption text-[var(--ds-text-secondary)]">{t('نسبة الحقول المعبأة — ليست حكماً منهجياً.', 'Filled-fields ratio — not a methodological verdict.')}</p>
             </div>
 
             <div className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl p-4 space-y-1" data-testid="ind-coherence">
@@ -216,7 +234,7 @@ export const ResearchDesignCommandCenter: React.FC<ResearchDesignCommandCenterPr
                 <GitBranch size={16} className="text-[var(--ds-primary)]" />
               </div>
               <p className="text-2xl font-black text-[var(--ds-text-primary)]">{coherence.score}%</p>
-              <p className={`text-[10px] font-semibold ${coherence.status === 'COHERENT' ? 'text-[var(--ds-success)]' : 'text-[var(--ds-danger)]'}`}>
+              <p className={`text-caption font-semibold ${coherence.status === 'COHERENT' ? 'text-[var(--ds-success)]' : 'text-[var(--ds-danger)]'}`}>
                 {coherence.status === 'COHERENT' ? t('متسق', 'Coherent') : t('غير متسق', 'Incoherent')}
               </p>
             </div>
@@ -227,10 +245,10 @@ export const ResearchDesignCommandCenter: React.FC<ResearchDesignCommandCenterPr
                 <BarChart3 size={16} className="text-[var(--ds-primary)]" />
               </div>
               <p className="text-2xl font-black text-[var(--ds-text-primary)]">{readiness.score}%</p>
-              <p className={`text-[10px] font-semibold ${readiness.status === 'READY' ? 'text-[var(--ds-success)]' : 'text-[var(--ds-danger)]'}`}>
+              <p className={`text-caption font-semibold ${readiness.status === 'READY' ? 'text-[var(--ds-success)]' : 'text-[var(--ds-danger)]'}`}>
                 {readiness.status === 'READY' ? t('جاهز للتنفيذ', 'READY') : t('غير جاهز', 'NOT READY')}
               </p>
-              <p className="text-[10px] text-[var(--ds-text-secondary)]">
+              <p className="text-caption text-[var(--ds-text-secondary)]">
                 {readiness.blocking_failures ?? 0} {t('بوابة حاسمة فاشلة', 'blocking gate failure(s)')}
               </p>
             </div>
@@ -242,7 +260,7 @@ export const ResearchDesignCommandCenter: React.FC<ResearchDesignCommandCenterPr
               </div>
               <p className="text-body-lg font-black text-[var(--ds-text-primary)]" data-testid="ind-protocol-status">{ind.protocol_status ?? 'NO_PROTOCOL'}</p>
               {ind.protocol_review_due && (
-                <p className="text-[10px] font-semibold text-[var(--ds-warning)]">{t('يتطلب مراجعة', 'REQUIRES REVIEW')}</p>
+                <p className="text-caption font-semibold text-[var(--ds-warning)]">{t('يتطلب مراجعة', 'REQUIRES REVIEW')}</p>
               )}
             </div>
           </div>
@@ -254,7 +272,7 @@ export const ResearchDesignCommandCenter: React.FC<ResearchDesignCommandCenterPr
               <p className="text-caption font-bold text-[var(--ds-text-secondary)]">{t('الإجراء التالي', 'Next Best Research Action')}</p>
               <p className="text-body-sm font-semibold text-[var(--ds-text-primary)]" data-testid="next-action-text">{next.action}</p>
               <p className="text-caption text-[var(--ds-text-secondary)] mt-1">{next.reason}</p>
-              <span className={`inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-bold ${
+              <span className={`inline-block mt-2 px-2 py-0.5 rounded text-caption font-bold ${
                 next.priority === 'BLOCKING' ? 'bg-[var(--ds-surface-secondary)] text-[var(--ds-danger)]' : next.priority === 'HIGH' ? 'bg-[var(--ds-surface-secondary)] text-[var(--ds-warning)]' : 'bg-[var(--ds-surface-secondary)] text-[var(--ds-primary)]'
               }`} data-testid="next-action-priority">{next.priority}</span>
             </div>
@@ -266,7 +284,7 @@ export const ResearchDesignCommandCenter: React.FC<ResearchDesignCommandCenterPr
               {t('العوائق الحرجة', 'Critical Blockers')} ({blockers.length})
             </h4>
             {blockers.length === 0 ? (
-              <p className="text-caption text-[var(--ds-text-secondary)]">{t('لا توجد عوائق حاسمة.', 'No critical blockers.')}</p>
+              <p className="text-caption text-[var(--ds-text-secondary)]">{t('لا توجد عوائق حاسمة. تابع الإجراء التالي أعلاه.', 'No critical blockers. Continue with the next action above.')}</p>
             ) : (
               blockers.map((b, i) => (
                 <div key={i} className="flex items-start gap-2 border border-[var(--ds-danger)] bg-[var(--ds-danger-soft)] rounded-lg p-3" data-testid={`blocker-${i}`}>
@@ -286,7 +304,7 @@ export const ResearchDesignCommandCenter: React.FC<ResearchDesignCommandCenterPr
               {t('نتائج الاتساق', 'Coherence Findings')} ({coherence.findings.length})
             </h4>
             {coherence.findings.length === 0 ? (
-              <p className="text-caption text-[var(--ds-text-secondary)]">{t('لا توجد نتائج سلبية.', 'No negative findings.')}</p>
+              <p className="text-caption text-[var(--ds-text-secondary)]">{t('لا توجد نتائج سلبية في فحص الاتساق حاليًا.', 'No negative consistency findings right now.')}</p>
             ) : (
               coherence.findings.map((f, i) => {
                 const stepId = findingToStep[f.rule ?? ''] ?? null;
@@ -301,7 +319,7 @@ export const ResearchDesignCommandCenter: React.FC<ResearchDesignCommandCenterPr
                     data-testid={`finding-${i}`}
                     aria-label={`${f.rule ?? 'Finding'}: ${f.evidence ?? ''}${stepId ? ` — ${t('افتح المصدر', 'open source')}` : ''}`}
                   >
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold border shrink-0 ${severityColor[f.severity ?? 'ADVISORY'] ?? ''}`}>{f.severity}</span>
+                    <span className={`px-2 py-0.5 rounded text-caption font-bold border shrink-0 ${severityColor[f.severity ?? 'ADVISORY'] ?? ''}`}>{f.severity}</span>
                     <div className="flex-1">
                       <p className="text-caption font-bold text-[var(--ds-text-primary)]">{f.rule}</p>
                       <p className="text-caption text-[var(--ds-text-secondary)]">{f.evidence}</p>
@@ -324,7 +342,7 @@ export const ResearchDesignCommandCenter: React.FC<ResearchDesignCommandCenterPr
                 <div key={i} className="flex items-center gap-2 border border-[var(--ds-border-subtle)] rounded-lg px-3 py-2 bg-[var(--ds-surface-secondary)]">
                   {g.ok ? <CheckCircle2 size={14} className="text-[var(--ds-success)]" /> : <XCircle size={14} className="text-[var(--ds-danger)]" />}
                   <span className="text-[11px] font-semibold text-[var(--ds-text-primary)]">{String(g.title ?? g.code ?? '')}</span>
-                  {g.severity === 'BLOCKING' && !g.ok ? <span className="text-[10px] text-[var(--ds-danger)] font-bold ml-auto">{t('حاسم', 'BLOCKING')}</span> : null}
+                  {g.severity === 'BLOCKING' && !g.ok ? <span className="text-caption text-[var(--ds-danger)] font-bold ml-auto">{t('حاسم', 'BLOCKING')}</span> : null}
                 </div>
               ))}
             </div>
@@ -349,9 +367,9 @@ export const ResearchDesignCommandCenter: React.FC<ResearchDesignCommandCenterPr
             {(map.nodes ?? []).map((n, i) => (
               <li key={i} className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)]">
                 <Circle size={10} className={n.status === 'UNMAPPED' ? 'text-[var(--ds-danger)]' : 'text-[var(--ds-success)]'} />
-                <span className="text-[10px] font-bold text-[var(--ds-text-secondary)] uppercase w-28 shrink-0">{n.type}</span>
+                <span className="text-caption font-bold text-[var(--ds-text-secondary)] uppercase w-28 shrink-0">{n.type}</span>
                 <span className="text-xs font-semibold text-[var(--ds-text-primary)] truncate flex-1">{n.title}</span>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${n.status === 'UNMAPPED' ? 'bg-[var(--ds-surface-secondary)] text-[var(--ds-danger)]' : 'bg-[var(--ds-surface-secondary)] text-[var(--ds-success)]'}`}>
+                <span className={`text-caption font-bold px-2 py-0.5 rounded ${n.status === 'UNMAPPED' ? 'bg-[var(--ds-surface-secondary)] text-[var(--ds-danger)]' : 'bg-[var(--ds-surface-secondary)] text-[var(--ds-success)]'}`}>
                   {n.status === 'UNMAPPED' ? 'UNMAPPED' : 'MAPPED'}
                 </span>
               </li>
@@ -385,7 +403,7 @@ export const ResearchDesignCommandCenter: React.FC<ResearchDesignCommandCenterPr
             </button>
           </div>
           {(data.protocols ?? []).length === 0 ? (
-            <p className="text-caption text-[var(--ds-text-secondary)]">{t('لا يوجد بروتوكول بعد.', 'No protocol yet.')}</p>
+            <p className="text-caption text-[var(--ds-text-secondary)]">{t('لا يوجد بروتوكول بعد. أنشئ بروتوكولًا لتوثيق قرارات التصميم قبل جمع البيانات.', 'No protocol yet. Create one to record design decisions before data collection.')}</p>
           ) : (
             <div className="space-y-2">
               {(data.protocols ?? []).map((p, i) => (
@@ -395,10 +413,10 @@ export const ResearchDesignCommandCenter: React.FC<ResearchDesignCommandCenterPr
                     <p className="text-caption font-bold text-[var(--ds-text-primary)]">
                       {t('الإصدار', 'Version')} v{String(p.version ?? i + 1)}
                     </p>
-                    <p className="text-[10px] text-[var(--ds-text-secondary)] font-mono">{String(p.status ?? '')} • {String(p.fingerprint ?? '').slice(0, 12)}…</p>
+                    <p className="text-caption text-[var(--ds-text-secondary)] font-mono">{String(p.status ?? '')} • {String(p.fingerprint ?? '').slice(0, 12)}…</p>
                   </div>
                   {p.is_current ? (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[var(--ds-surface-secondary)] text-[var(--ds-success)]">{t('الحالي', 'CURRENT')}</span>
+                    <span className="text-caption font-bold px-2 py-0.5 rounded bg-[var(--ds-surface-secondary)] text-[var(--ds-success)]">{t('الحالي', 'CURRENT')}</span>
                   ) : null}
                 </div>
               ))}
@@ -421,10 +439,10 @@ export const ResearchDesignCommandCenter: React.FC<ResearchDesignCommandCenterPr
                   <Users size={16} className="text-[var(--ds-primary)]" />
                   <div className="flex-1">
                     <p className="text-caption font-bold text-[var(--ds-text-primary)]">{String(m.username ?? m.user_id ?? '')}</p>
-                    <p className="text-[10px] text-[var(--ds-text-secondary)]">{String(m.relationship ?? '')}{m.status ? ` • ${String(m.status)}` : ''}</p>
+                    <p className="text-caption text-[var(--ds-text-secondary)]">{String(m.relationship ?? '')}{m.status ? ` • ${String(m.status)}` : ''}</p>
                   </div>
                   {(m.assigned_sections as string[] | undefined)?.length ? (
-                    <span className="text-[10px] text-[var(--ds-text-secondary)]">{t('أقسام مسندة', 'Assigned')}: {(m.assigned_sections as string[]).join(', ')}</span>
+                    <span className="text-caption text-[var(--ds-text-secondary)]">{t('أقسام مسندة', 'Assigned')}: {(m.assigned_sections as string[]).join(', ')}</span>
                   ) : null}
                 </div>
               ))}
@@ -442,10 +460,10 @@ export const ResearchDesignCommandCenter: React.FC<ResearchDesignCommandCenterPr
             <FlaskConical size={16} className="text-[var(--ds-primary)]" />
             <div>
               <p className="text-caption font-bold text-[var(--ds-text-primary)]">{data.methodology?.research_family ?? '—'}</p>
-              <p className="text-[10px] text-[var(--ds-text-secondary)]">
+              <p className="text-caption text-[var(--ds-text-secondary)]">
                 {t('مرشح:', 'Candidates:')} {(data.methodology?.candidate_designs ?? []).join(', ')}
               </p>
-              <p className="text-[10px] text-[var(--ds-text-secondary)]">
+              <p className="text-caption text-[var(--ds-text-secondary)]">
                 {t('المصدر: محرك منهجي حتمي — يحتاج تأكيد الباحث.', 'Source: deterministic methodology engine — requires researcher confirmation.')}
               </p>
             </div>

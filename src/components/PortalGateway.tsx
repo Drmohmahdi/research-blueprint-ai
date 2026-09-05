@@ -18,6 +18,13 @@ import {
 import { ROUTES } from '../router/routes';
 import { readIntendedPlan } from '../marketing/funnel';
 
+const PLAN_LABELS: Record<string, { ar: string; en: string }> = {
+  FREE: { ar: 'المجانية', en: 'Free' },
+  STARTER: { ar: 'الباحث', en: 'Starter' },
+  PROFESSIONAL: { ar: 'الفرق', en: 'Professional' },
+  INSTITUTIONAL: { ar: 'المؤسسات', en: 'Institutional' },
+};
+
 export const PortalGateway: React.FC = () => {
   const { activeProject, language, projects, user } = useProject();
   const navigate = useNavigate();
@@ -252,7 +259,7 @@ export const PortalGateway: React.FC = () => {
     <div className="space-y-8 max-w-6xl mx-auto py-8 px-4 pb-16">
       {(needsEmail || !hasProject || !profileReady) && (
         <div className="rounded-2xl border border-[var(--ds-primary)]/30 bg-[var(--ds-primary-soft)] p-4 space-y-3">
-          <p className="m-0 text-[10px] font-black uppercase tracking-widest text-[var(--ds-primary)]">
+          <p className="m-0 text-caption font-black uppercase tracking-widest text-[var(--ds-primary)]">
             {isAr ? 'أول 15 دقيقة' : 'First 15 minutes'}
           </p>
           <ol className="m-0 p-0 list-none space-y-2 text-sm font-bold text-[var(--ds-text-primary)]">
@@ -268,7 +275,7 @@ export const PortalGateway: React.FC = () => {
               <span>{hasProject ? (isAr ? '2. المشروع جاهز' : '2. Project ready') : (isAr ? '2. أنشئ مشروعك الأول' : '2. Create your first project')}</span>
               {!hasProject && (
                 <Button type="button" size="sm" onClick={() => navigate(ROUTES.PATHS)}>
-                  {isAr ? 'اختيار المسار' : 'Choose a path'}
+                  {isAr ? 'اختيار مسار البحث' : 'Choose a research path'}
                 </Button>
               )}
             </li>
@@ -298,11 +305,11 @@ export const PortalGateway: React.FC = () => {
         <div className="rounded-2xl border border-[var(--ds-accent-gold)]/30 bg-[var(--ds-accent-gold-soft)] p-4 flex flex-wrap items-center justify-between gap-3">
           <p className="text-body-sm m-0 font-bold text-[var(--ds-text-primary)]">
             {isAr
-              ? `اخترت باقة ${intendedPlan} عند التسجيل. اطلب الترقية من الفوترة داخل المؤسسة.`
-              : `You selected ${intendedPlan} at signup. Request the upgrade from billing.`}
+              ? `اخترت باقة ${PLAN_LABELS[intendedPlan]?.ar ?? intendedPlan} عند التسجيل. اطلب الترقية من الفوترة في حسابك.`
+              : `You selected the ${PLAN_LABELS[intendedPlan]?.en ?? intendedPlan} plan at signup. Request the upgrade from billing in your account.`}
           </p>
           <Button type="button" variant="outline" onClick={() => navigate(ROUTES.BILLING)}>
-            {isAr ? 'فتح الفوترة' : 'Open billing'}
+            {isAr ? 'طلب الترقية' : 'Request upgrade'}
           </Button>
         </div>
       )}
@@ -313,16 +320,16 @@ export const PortalGateway: React.FC = () => {
         <div className="relative space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="space-y-2 max-w-2xl">
-              <p className="m-0 text-[10px] font-bold uppercase tracking-widest text-[var(--ds-accent-gold-text)]">
-                {isAr ? 'مركز القيادة الأكاديمية' : 'Academic Command Center'}
+              <p className="m-0 text-caption font-bold uppercase tracking-widest text-[var(--ds-accent-gold-text)]">
+                {isAr ? 'مساحة العمل' : 'Workspace'}
               </p>
               <h2 className="text-h2 text-[var(--ds-text-primary)] m-0">
-                {isAr ? 'مرحباً بك في منظومة بصيرة' : 'Welcome to Baseerah'}
+                {isAr ? 'مرحباً بك في بصيرة' : 'Welcome to Baseerah'}
               </h2>
               <p className="text-body-sm text-[var(--ds-text-secondary)] font-medium m-0">
                 {isAr
-                  ? 'اختر المسار الأكاديمي التالي. الهوية واحدة، والتمييز باللون محدود على الأيقونة والحالة.'
-                  : 'Choose the next academic path. One identity, with color used only as a quiet accent.'}
+                  ? 'اختر الخطوة التالية: مشروع بحثي، ملف أكاديمي، أو مسار التحكيم والترقية. القرار يبقى بشريًا.'
+                  : 'Choose the next step: a research project, your academic profile, or review and promotion. Humans keep the decision.'}
               </p>
             </div>
             <div className="flex gap-2.5">
@@ -341,7 +348,7 @@ export const PortalGateway: React.FC = () => {
                 key={item.label}
                 className="rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] px-4 py-3"
               >
-                <div className="text-[10px] font-bold text-[var(--ds-text-muted)]">{item.label}</div>
+                <div className="text-caption font-bold text-[var(--ds-text-muted)]">{item.label}</div>
                 <div className="mt-1 text-lg font-black text-[var(--ds-text-primary)] ds-numeric">{item.value}</div>
               </div>
             ))}
@@ -350,7 +357,7 @@ export const PortalGateway: React.FC = () => {
           <div className="flex items-start gap-3 rounded-xl border border-[var(--ds-primary)]/20 bg-[var(--ds-primary-soft)] p-4">
             <Activity size={16} className="text-[var(--ds-primary)] shrink-0 mt-0.5" />
             <div>
-              <p className="m-0 text-[10px] font-bold uppercase tracking-widest text-[var(--ds-primary)]">
+              <p className="m-0 text-caption font-bold uppercase tracking-widest text-[var(--ds-primary)]">
                 {isAr ? 'الإجراء الأكاديمي التالي' : 'Next academic action'}
               </p>
               <p className="text-caption m-0 mt-1 font-semibold text-[var(--ds-text-primary)]">
@@ -393,7 +400,7 @@ export const PortalGateway: React.FC = () => {
                       {isAr ? m.titleAr : m.titleEn}
                     </h2>
                   </div>
-                  <span className="shrink-0 rounded-full border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] px-2 py-1 text-[9px] font-black text-[var(--ds-text-muted)]">
+                  <span className="shrink-0 rounded-full border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] px-2 py-1 text-caption font-black text-[var(--ds-text-muted)]">
                     {isAr ? m.statusAr : m.statusEn}
                   </span>
                 </div>
@@ -413,7 +420,7 @@ export const PortalGateway: React.FC = () => {
                       key={idx} 
                       className={`p-2 rounded-lg bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] space-y-0.5 ${idx === 3 ? 'col-span-2' : ''}`}
                     >
-                      <span className="text-[9px] text-[var(--ds-text-muted)] font-bold block truncate">
+                      <span className="text-caption text-[var(--ds-text-muted)] font-bold block truncate">
                         {s.label}
                       </span>
                       <span className="text-xs font-black text-[var(--ds-text-primary)] ds-numeric block truncate">
@@ -429,7 +436,7 @@ export const PortalGateway: React.FC = () => {
                   onClick={() => navigate(m.path)}
                   className="flex items-center gap-1 text-xs"
                 >
-                  <span>{isAr ? 'فتح الإجراء التالي' : 'Open next action'}</span>
+                  <span>{isAr ? `افتح ${m.titleAr}` : `Open ${m.titleEn}`}</span>
                   <ChevronRight size={14} className="rtl:rotate-180 shrink-0" />
                 </Button>
               </div>
@@ -440,10 +447,10 @@ export const PortalGateway: React.FC = () => {
 
       <div className="flex items-start gap-3 p-4 rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] max-w-2xl mx-auto">
         <ShieldCheck size={16} className="text-[var(--ds-primary)] shrink-0 mt-0.5" />
-        <p className="text-[10px] text-[var(--ds-text-secondary)] leading-relaxed m-0 font-medium">
+        <p className="text-caption text-[var(--ds-text-secondary)] leading-relaxed m-0 font-medium">
           {isAr
-            ? 'تعتمد منظومة بصيرة على معمارية الملف الأكاديمي الموحد. أي تعديل في متغيرات البحث العلمي أو الأبحاث المنشورة سينعكس تلقائياً في حسابات نقاط ترقيتك أو فحص جاهزية نشر مخطوطاتك.'
-            : 'Baseerah utilizes a unified academic asset profile. Changes in study variables or publications will automatically update your promotion points and readiness.'}
+            ? 'ملف واحد للأبحاث والمنشورات. أي تحديث ينعكس على جاهزية النشر وحساب شواهد الترقية — دون أن يتخذ النظام قرارًا نيابة عن اللجنة.'
+            : 'One profile for studies and publications. Updates flow into publication readiness and promotion evidence — the committee still decides.'}
         </p>
       </div>
     </div>

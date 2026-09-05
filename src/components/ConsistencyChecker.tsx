@@ -62,7 +62,7 @@ export const ConsistencyChecker: React.FC = () => {
   };
 
   const handleFixIssue = (section: string) => {
-    navigate(SECTION_REDIRECTS[section] || '/');
+    navigate(SECTION_REDIRECTS[section] || ROUTES.PATHS);
   };
 
   const renderIssueGroup = (
@@ -105,7 +105,7 @@ export const ConsistencyChecker: React.FC = () => {
                 size="sm"
                 variant="secondary"
                 onClick={() => handleFixIssue(issue.section)}
-                className="text-[10px] font-bold py-1 px-3 shrink-0 cursor-pointer"
+                className="text-caption font-bold py-1 px-3 shrink-0 cursor-pointer"
               >
                 <span>{actionLabel}</span>
               </Button>
@@ -238,7 +238,7 @@ export const ConsistencyChecker: React.FC = () => {
               <span className="text-[11px] font-black text-[var(--ds-text-primary)]">
                 {language === 'ar' ? 'مواءمة صياغة الفرضيات إحصائياً' : 'Statistical Hypothesis Realignment'}
               </span>
-              <p className="text-[10px] text-[var(--ds-text-secondary)] m-0 leading-relaxed">
+              <p className="text-caption text-[var(--ds-text-secondary)] m-0 leading-relaxed">
                 {language === 'ar' ? hypothesisRecommendation.ar : hypothesisRecommendation.en}
               </p>
             </div>
@@ -250,7 +250,7 @@ export const ConsistencyChecker: React.FC = () => {
               <span className="text-[11px] font-black text-[var(--ds-text-primary)]">
                 {language === 'ar' ? 'ضبط أدوات القياس مع المتغيرات' : 'Align Measurement Instruments'}
               </span>
-              <p className="text-[10px] text-[var(--ds-text-secondary)] m-0 leading-relaxed">
+              <p className="text-caption text-[var(--ds-text-secondary)] m-0 leading-relaxed">
                 {language === 'ar'
                   ? `يرجى التأكد من أن أداة القياس تغطي بدقة أبعاد المتغير التابع: "${dependentVariable?.nameAr || 'المتغير التابع'}" لتفادي تحيز القياس.`
                   : `Ensure that your measurement instrument covers all dimensions of the dependent variable: "${dependentVariable?.nameEn || 'Dependent Variable'}" to avoid measurement bias.`}

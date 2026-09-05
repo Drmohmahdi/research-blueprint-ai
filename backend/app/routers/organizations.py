@@ -283,7 +283,7 @@ def invite_member(
     )
     # Set mock custom attribute for UI token display
     res_dict = res.model_dump()
-    if settings.ENVIRONMENT != "production":
+    if settings.expose_dev_secrets:
         res_dict["token"] = token
     return res_dict
 

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { PathPanel } from '../design-system/components/Navigation';
 import { EmptyState } from '../design-system/components/Feedback';
 import { apiGetPublicProfile, apiGetPublicPhotoUrl } from '../utils/api';
 import { getChannelLabel } from '../config/academicChannels';
+import { PublicFooter, PublicHeader } from '../marketing/PublicChrome';
+import { ROUTES } from '../router/routes';
 import {
   Loader2,
   ShieldAlert,
@@ -44,8 +46,10 @@ export const PublicResearcherProfile: React.FC = () => {
   }, [username]);
 
   const wrap = (children: React.ReactNode) => (
-    <div dir={isAr ? 'rtl' : 'ltr'} className="min-h-screen bg-[var(--ds-background-canvas)] text-[var(--ds-text-primary)]">
-      <div className="max-w-3xl mx-auto px-4 py-10">{children}</div>
+    <div dir={isAr ? 'rtl' : 'ltr'} className="min-h-screen bg-[var(--ds-background-canvas)] text-[var(--ds-text-primary)] flex flex-col">
+      <PublicHeader isAr={isAr} />
+      <div className="max-w-3xl mx-auto px-4 py-10 flex-1 w-full">{children}</div>
+      <PublicFooter isAr={isAr} />
     </div>
   );
 
@@ -60,13 +64,23 @@ export const PublicResearcherProfile: React.FC = () => {
 
   if (notFound || !profile) {
     return wrap(
-      <EmptyState
-        illustration={<ShieldAlert size={32} />}
-        title={isAr ? 'هذا الملف غير متاح' : 'This profile is not available'}
-        description={isAr
-          ? 'قد يكون الرابط غير صحيح، أو أن صاحب الملف لم يجعله عامًا بعد.'
-          : 'The link may be incorrect, or the owner hasn’t made this profile public yet.'}
-      />
+      <div className="space-y-6">
+        <EmptyState
+          illustration={<ShieldAlert size={32} />}
+          title={isAr ? 'هذا الملف غير متاح' : 'This profile is not available'}
+          description={isAr
+            ? 'قد يكون الرابط غير صحيح، أو أن صاحب الملف لم يجعله عامًا بعد.'
+            : 'The link may be incorrect, or the owner hasn’t made this profile public yet.'}
+        />
+        <div className="flex flex-wrap justify-center gap-4">
+          <Link to={ROUTES.MARKETING_HOME} className="text-xs font-black text-[var(--ds-text-secondary)] no-underline hover:text-[var(--ds-primary-bright)]">
+            {isAr ? 'العودة للرئيسية' : 'Back to home'}
+          </Link>
+          <Link to={ROUTES.REGISTER} className="text-xs font-black text-[var(--ds-primary-bright)] no-underline">
+            {isAr ? 'ابدأ مجانًا' : 'Start free'}
+          </Link>
+        </div>
+      </div>
     );
   }
 
@@ -109,7 +123,7 @@ export const PublicResearcherProfile: React.FC = () => {
         <div className="space-y-2 min-w-0">
           <div className="flex items-center gap-2">
             <Globe size={16} className="text-path-identity" />
-            <span className="text-[10px] font-black text-path-identity uppercase tracking-widest">
+            <span className="text-caption font-black text-path-identity uppercase tracking-widest">
               {isAr ? 'الملف الأكاديمي العام' : 'Public Academic Profile'}
             </span>
           </div>
@@ -145,16 +159,25 @@ export const PublicResearcherProfile: React.FC = () => {
       {identifiers.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {identifiers.filter(i => i.identifier_value).map((ident, idx) => (
-            <a
-              key={idx}
-              href={ident.profile_url || '#'}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] hover:border-[var(--ds-path-identity)]/40 text-[var(--ds-text-secondary)]"
-            >
-              <span>{getChannelLabel(ident.identifier_type, isAr)}</span>
-              {ident.profile_url && <ExternalLink size={11} />}
-            </a>
+            ident.profile_url ? (
+              <a
+                key={idx}
+                href={ident.profile_url}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] hover:border-[var(--ds-path-identity)]/40 text-[var(--ds-text-secondary)]"
+              >
+                <span>{getChannelLabel(ident.identifier_type, isAr)}</span>
+                <ExternalLink size={11} />
+              </a>
+            ) : (
+              <span
+                key={idx}
+                className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)]"
+              >
+                {getChannelLabel(ident.identifier_type, isAr)}
+              </span>
+            )
           ))}
         </div>
       )}
@@ -170,7 +193,7 @@ export const PublicResearcherProfile: React.FC = () => {
               <div key={idx} className="flex items-center justify-between text-sm p-2.5 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg">
                 <span className="font-bold">{aff.organization_name}{aff.position_title ? ` — ${aff.position_title}` : ''}</span>
                 {aff.is_current && (
-                  <span className="text-[9px] font-bold text-success bg-[var(--ds-success-soft)] border border-success/20 px-1.5 py-0.5 rounded shrink-0">
+                  <span className="text-caption font-bold text-success bg-[var(--ds-success-soft)] border border-success/20 px-1.5 py-0.5 rounded shrink-0">
                     {isAr ? 'حالي' : 'Current'}
                   </span>
                 )}
@@ -191,7 +214,7 @@ export const PublicResearcherProfile: React.FC = () => {
               <div key={a.id} className="p-3 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <span className="inline-block mb-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-[var(--ds-information-soft)] text-[var(--ds-information)] border border-info/20">
+                    <span className="inline-block mb-1 text-caption font-bold px-1.5 py-0.5 rounded bg-[var(--ds-information-soft)] text-[var(--ds-information)] border border-info/20">
                       {ASSET_TYPE_LABELS[a.asset_type] ? (isAr ? ASSET_TYPE_LABELS[a.asset_type].ar : ASSET_TYPE_LABELS[a.asset_type].en) : a.asset_type}
                     </span>
                     <p className="text-body-sm font-bold m-0">{isAr ? (a.title_ar || a.title_en) : (a.title_en || a.title_ar)}</p>
@@ -220,16 +243,16 @@ export const PublicResearcherProfile: React.FC = () => {
         </div>
       )}
 
-      <p className="text-[10px] text-[var(--ds-text-muted)] text-center pt-6 border-t border-[var(--ds-border-subtle)] space-y-2">
-        {isAr ? 'مدعوم من منصة بصيرة للبحث العلمي' : 'Powered by Baseerah Research Platform'}
+      <p className="text-caption text-[var(--ds-text-muted)] text-center pt-6 border-t border-[var(--ds-border-subtle)] space-y-2">
+        {isAr ? 'مدعوم من بصيرة للبحث العلمي' : 'Powered by Baseerah'}
       </p>
       <div className="text-center space-y-2">
         <p className="text-caption m-0 font-bold text-[var(--ds-text-secondary)]">
           {isAr ? 'ابنِ ملفك الأكاديمي الموحّد على بصيرة — مجانًا.' : 'Build your unified academic profile on Baseerah — free.'}
         </p>
-        <a href="/login?mode=register" className="text-xs font-black text-[var(--ds-primary-bright)]">
-          {isAr ? 'إنشاء حساب' : 'Create an account'}
-        </a>
+        <Link to={ROUTES.REGISTER} className="text-xs font-black text-[var(--ds-primary-bright)] no-underline">
+          {isAr ? 'ابدأ مجانًا' : 'Start free'}
+        </Link>
       </div>
     </div>
   );

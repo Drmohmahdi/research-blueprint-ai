@@ -136,7 +136,7 @@ export const ResearchDecisionCenter: React.FC = () => {
       <PathPanel accent="var(--ds-path-research)">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-wider text-[var(--ds-primary)]">
+            <div className="inline-flex items-center gap-2 text-caption font-black uppercase tracking-wider text-[var(--ds-primary)]">
               <Sparkles size={14} />
               {language === 'ar' ? 'تشغيل البحث' : 'Research Operations'}
             </div>
@@ -151,7 +151,7 @@ export const ResearchDecisionCenter: React.FC = () => {
           </div>
           <div className="min-w-[126px] rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] px-4 py-3 text-center">
             <div className="text-2xl font-black text-ink ds-numeric">{audit.score}/100</div>
-            <div className="text-[10px] font-bold text-[var(--ds-text-muted)]">
+            <div className="text-caption font-bold text-[var(--ds-text-muted)]">
               {language === 'ar' ? 'مؤشر الاتساق' : 'Consistency score'}
             </div>
           </div>
@@ -229,7 +229,7 @@ export const ResearchDecisionCenter: React.FC = () => {
                     <AlertTriangle size={17} />
                   </span>
                   <div className="flex-1 min-w-0">
-                    <span className="text-[10px] font-black text-[var(--ds-text-muted)]">{language === 'ar' ? style.labelAr : style.labelEn}</span>
+                    <span className="text-caption font-black text-[var(--ds-text-muted)]">{language === 'ar' ? style.labelAr : style.labelEn}</span>
                     <p className="text-body-sm m-0 mt-1 font-semibold text-[var(--ds-text-primary)]">
                       {language === 'ar' ? issue.textAr : issue.textEn}
                     </p>

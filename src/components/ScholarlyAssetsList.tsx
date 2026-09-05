@@ -433,24 +433,24 @@ export const ScholarlyAssetsList: React.FC = () => {
               <div className="space-y-2 flex-1">
                 {/* Header indicators */}
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[var(--ds-information-soft)] text-[var(--ds-information)] border border-info/20">
+                  <span className="px-2.5 py-0.5 rounded-full text-caption font-bold bg-[var(--ds-information-soft)] text-[var(--ds-information)] border border-info/20">
                     {getAssetTypeBadgeLabel(asset.asset_type)}
                   </span>
 
                   {asset.lifecycle_status && (
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${getLifecycleStatusColor(asset.lifecycle_status)}`}>
+                    <span className={`px-2.5 py-0.5 rounded-full text-caption font-bold border ${getLifecycleStatusColor(asset.lifecycle_status)}`}>
                       {getLifecycleStatusLabel(asset.lifecycle_status)}
                     </span>
                   )}
 
                   {asset.source_module && (
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] border border-[var(--ds-border-subtle)]">
+                    <span className="px-2 py-0.5 rounded-full text-caption font-bold bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] border border-[var(--ds-border-subtle)]">
                       {language === 'ar' ? `المصدر: ${asset.source_module}` : `Source: ${asset.source_module}`}
                     </span>
                   )}
 
                   {asset.doi && (
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-info/10 text-info border border-info/20 flex items-center gap-1">
+                    <span className="px-2 py-0.5 rounded-full text-caption font-bold bg-info/10 text-info border border-info/20 flex items-center gap-1">
                       <Link className="w-3 h-3" />
                       <span>DOI</span>
                     </span>
@@ -495,7 +495,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                     <span className="text-[var(--ds-text-secondary)] font-semibold">{language === 'ar' ? 'فريق العمل:' : 'Contributors:'}</span>
                     <div className="flex flex-wrap gap-1">
                       {asset.contributors.map((c: any, idx: number) => (
-                        <span key={idx} className="bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] px-2 py-0.5 rounded text-[10px] border border-[var(--ds-border-subtle)] font-medium">
+                        <span key={idx} className="bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] px-2 py-0.5 rounded text-caption border border-[var(--ds-border-subtle)] font-medium">
                           {c.external_name}
                           {c.is_corresponding_author && ' *'}
                         </span>
@@ -726,7 +726,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                 {/* List of currently added contributors */}
                 <div className="flex flex-wrap gap-2">
                   {newAsset.contributors.map((c: any, idx: number) => (
-                    <span key={idx} className="bg-[var(--ds-primary-soft)] border border-[var(--ds-primary)]/20 text-ink px-2.5 py-1 rounded-xl text-[10px] font-bold flex items-center gap-1.5">
+                    <span key={idx} className="bg-[var(--ds-primary-soft)] border border-[var(--ds-primary)]/20 text-ink px-2.5 py-1 rounded-xl text-caption font-bold flex items-center gap-1.5">
                       <span>{c.external_name} ({c.contribution_percentage}%)</span>
                       <button 
                         type="button" 
@@ -743,7 +743,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                 <div className="p-4 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl space-y-3">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">{t.contributorName}</label>
+                      <label className="block text-caption font-bold text-[var(--ds-text-secondary)] mb-1">{t.contributorName}</label>
                       <input
                         type="text"
                         value={contributorForm.external_name}
@@ -752,7 +752,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">{t.contributorOrcid}</label>
+                      <label className="block text-caption font-bold text-[var(--ds-text-secondary)] mb-1">{t.contributorOrcid}</label>
                       <input
                         type="text"
                         value={contributorForm.orcid}
@@ -764,7 +764,7 @@ export const ScholarlyAssetsList: React.FC = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">{t.creditRolesLabel}</label>
+                      <label className="block text-caption font-bold text-[var(--ds-text-secondary)] mb-1">{t.creditRolesLabel}</label>
                       <div className="grid grid-cols-2 gap-1.5 max-h-[120px] overflow-y-auto border border-[var(--ds-border-subtle)] p-2 rounded-lg bg-[var(--ds-surface-primary)]">
                         {CREDIT_ROLES.map((role) => (
                           <div key={role.value} className="flex items-center gap-1.5">
@@ -783,7 +783,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                               }}
                               className="rounded border-[var(--ds-border-subtle)] text-[var(--ds-primary)] focus:ring-[var(--ds-primary-soft)] w-3.5 h-3.5 cursor-pointer"
                             />
-                            <label htmlFor={`role-${role.value}`} className="text-[10px] text-[var(--ds-text-secondary)] cursor-pointer select-none">
+                            <label htmlFor={`role-${role.value}`} className="text-caption text-[var(--ds-text-secondary)] cursor-pointer select-none">
                               {language === 'ar' ? role.labelAr : role.labelEn}
                             </label>
                           </div>
@@ -793,7 +793,7 @@ export const ScholarlyAssetsList: React.FC = () => {
 
                     <div className="space-y-3">
                       <div>
-                        <label className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">نسبة المساهمة (%)</label>
+                        <label className="block text-caption font-bold text-[var(--ds-text-secondary)] mb-1">نسبة المساهمة (%)</label>
                         <input
                           type="number"
                           min="0"
@@ -812,7 +812,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                           onChange={(e) => setContributorForm({ ...contributorForm, is_corresponding_author: e.target.checked })}
                           className="rounded border-[var(--ds-border-subtle)] text-[var(--ds-primary)] focus:ring-[var(--ds-primary-soft)] w-4 h-4 cursor-pointer"
                         />
-                        <label htmlFor="is-corresponding" className="text-[10px] font-bold text-[var(--ds-text-secondary)] cursor-pointer select-none">
+                        <label htmlFor="is-corresponding" className="text-caption font-bold text-[var(--ds-text-secondary)] cursor-pointer select-none">
                           {t.corresponding}
                         </label>
                       </div>
@@ -820,7 +820,7 @@ export const ScholarlyAssetsList: React.FC = () => {
                       <button
                         type="button"
                         onClick={handleAddContributor}
-                        className="w-full py-1.5 bg-action hover:bg-action-hover text-on-action rounded-lg text-[10px] font-bold flex items-center justify-center gap-1 cursor-pointer"
+                        className="w-full py-1.5 bg-action hover:bg-action-hover text-on-action rounded-lg text-caption font-bold flex items-center justify-center gap-1 cursor-pointer"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>{language === 'ar' ? 'أضف المساهم للقائمة' : 'Add Contributor to List'}</span>

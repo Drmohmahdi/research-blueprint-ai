@@ -44,6 +44,7 @@ import {
 import { GuidedFlowSidebar } from '../features/guided-flow/GuidedFlowSidebar';
 import { SupervisorPanel } from '../features/comments/SupervisorPanel';
 import { NotificationCenter } from '../features/notifications/NotificationCenter';
+import { useFeatureFlag } from '../utils/featureFlags';
 
 interface LayoutV2Props {
   children: React.ReactNode;
@@ -67,6 +68,8 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
     const canViewBilling = Boolean(user?.permissions?.includes('billing.view'));
     const canViewAudit = Boolean(user?.permissions?.includes('audit.view'));
     const isPlatformAdmin = Boolean(user?.is_global_admin);
+    const showGuidedResearch = useFeatureFlag('GUIDED_RESEARCH_MODE');
+    const showSupervisorComments = useFeatureFlag('SUPERVISOR_COMMENTS_IN_PATH');
 
   const currentView = viewFromPathname(pathname);
 
@@ -266,7 +269,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
       ];
     }
 
-    if (pathname.startsWith('/app/visibility') || pathname.startsWith('/app/assets')) {
+    if (pathname.startsWith('/app/visibility') || pathname.startsWith('/app/assets') || pathname.startsWith('/app/profile') || pathname.startsWith('/app/search')) {
       return [
         backToPortalItem,
         {
@@ -274,9 +277,11 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
           titleAr: 'الهوية والانتشار',
           titleEn: 'Academic Visibility',
           items: [
+            { id: 'profile', labelAr: 'الملف الأكاديمي', labelEn: 'Academic profile', icon: UserIcon },
             { id: 'visibility', labelAr: 'لوحة الانتشار الأكاديمي', labelEn: 'Visibility Dashboard', icon: Globe },
             { id: 'assets', labelAr: 'الأصول العلمية', labelEn: 'Scholarly Assets', icon: FolderGit2 },
-            { id: 'visibilityReports', labelAr: 'التقارير', labelEn: 'Reports', icon: CheckSquare }
+            { id: 'visibilityReports', labelAr: 'التقارير', labelEn: 'Reports', icon: CheckSquare },
+            { id: 'search', labelAr: 'البحث الأكاديمي', labelEn: 'Academic search', icon: Search }
           ]
         }
       ];
@@ -471,7 +476,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
 
       {/* Premium V2 Header */}
       <header className="baseerah-glass sticky top-0 z-40 w-full h-[4.5rem] border-b border-[var(--ds-border-subtle)] shadow-[var(--ds-shadow-layered)]">
-        <div className="mx-auto flex h-full w-full max-w-[1920px] min-w-0 items-center justify-between gap-1.5 px-2 min-[380px]:px-3 sm:gap-2 sm:px-6 2xl:px-10">
+        <div className="ds-app-shell flex h-full w-full min-w-0 items-center justify-between gap-1.5 px-2 min-[380px]:px-3 sm:gap-2 sm:px-6 2xl:px-12 min-[2560px]:px-16">
           
           {/* Logo & Platform Info */}
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
@@ -479,18 +484,18 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
               ref={mobileMenuButtonRef}
               onClick={() => setMobileMenuOpen(true)}
               aria-label={language === 'ar' ? 'فتح قائمة التنقل' : 'Open navigation menu'}
-              className="lg:hidden p-2 rounded-xl hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)]"
+              className="lg:hidden inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)]"
             >
               <Menu size={20} />
             </button>
-            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[var(--ds-action-fill)] text-on-action font-extrabold shadow-[var(--ds-shadow-glow)] ring-1 ring-[var(--ds-accent-gold)]/25 sm:h-11 sm:w-11 sm:rounded-2xl sm:text-lg">
+            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[var(--ds-action-fill)] text-on-action font-bold shadow-[var(--ds-shadow-glow)] ring-1 ring-[var(--ds-accent-gold)]/25 sm:h-11 sm:w-11 sm:rounded-2xl sm:text-lg">
               {language === 'ar' ? 'ب' : 'B'}
             </div>
             <div className="min-w-0">
-              <div className="max-w-[92px] truncate text-xs font-black leading-tight tracking-tight text-[var(--ds-text-primary)] min-[380px]:max-w-[130px] sm:max-w-[180px] lg:max-w-none sm:text-base">
+              <div className="max-w-[128px] truncate text-xs font-bold leading-tight tracking-tight text-[var(--ds-text-primary)] min-[380px]:max-w-[160px] sm:max-w-[220px] lg:max-w-xl xl:max-w-2xl sm:text-base">
                 {getTranslation(language, 'title')}
               </div>
-              <p className="text-[10px] text-[var(--ds-text-muted)] m-0 mt-1.5 hidden sm:block font-bold">
+              <p className="text-caption text-[var(--ds-text-muted)] m-0 mt-1 hidden sm:block font-semibold">
                 {getTranslation(language, 'subtitle')}
               </p>
             </div>
@@ -499,7 +504,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
           {/* Project Selection Dropdown / Metadata */}
           {pathname !== '/app' && (
             <div className="hidden md:flex min-w-0 max-w-[34vw] items-center gap-3">
-              <span className="text-[10px] font-bold text-[var(--ds-text-muted)] uppercase tracking-wider">
+              <span className="text-caption font-semibold text-[var(--ds-text-muted)] uppercase tracking-wider">
                 {language === 'ar' ? 'المشروع النشط:' : 'Active Project:'}
               </span>
               <select
@@ -534,7 +539,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
 
             {/* Secure mode indicator */}
             {isSecureMode && (
-              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--ds-success-soft)] text-[var(--ds-success)] border border-[var(--ds-success)]/20 text-[10px] font-extrabold">
+              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--ds-success-soft)] text-[var(--ds-success)] border border-[var(--ds-success)]/20 text-caption font-bold">
                 <Unlock size={12} />
                 <span>{language === 'ar' ? 'وضع آمن' : 'SECURE'}</span>
               </div>
@@ -560,7 +565,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
             <button
               onClick={toggleTheme}
               aria-label={theme === 'dark' ? (language === 'ar' ? 'تفعيل الوضع الفاتح' : 'Use light theme') : (language === 'ar' ? 'تفعيل الوضع الداكن' : 'Use dark theme')}
-              className="hidden sm:inline-flex p-2 rounded-xl hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] transition-colors cursor-pointer"
+              className="inline-flex p-2 rounded-xl hover:bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] transition-colors cursor-pointer"
               title={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
@@ -569,13 +574,20 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
             {/* User Profile */}
             {user && (
               <div className="flex items-center gap-1 sm:gap-2 sm:border-r border-[var(--ds-border-subtle)] sm:pr-3 sm:mr-1">
-                <div className="hidden sm:flex h-8 w-8 rounded-full bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] items-center justify-center font-bold text-xs">
-                  <UserIcon size={14} />
-                </div>
-                <div className="hidden xl:block text-start">
-                  <div className="text-xs font-extrabold leading-none">{user.username}</div>
-                  <div className="text-[9px] text-[var(--ds-text-muted)] font-semibold mt-0.5">{user.org_role || user.role}</div>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate(ROUTES.PROFILE)}
+                  aria-label={language === 'ar' ? 'فتح الملف الأكاديمي' : 'Open academic profile'}
+                  className="flex items-center gap-2 rounded-xl hover:bg-[var(--ds-surface-secondary)] px-1 py-1 cursor-pointer"
+                >
+                  <div className="hidden sm:flex h-8 w-8 rounded-full bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] items-center justify-center font-bold text-xs">
+                    <UserIcon size={14} />
+                  </div>
+                  <div className="hidden xl:block text-start">
+                    <div className="text-caption font-bold leading-none">{user.username}</div>
+                    <div className="text-caption text-[var(--ds-text-muted)] font-medium mt-0.5">{user.org_role || user.role}</div>
+                  </div>
+                </button>
                 <button
                   onClick={logout}
                   aria-label={language === 'ar' ? 'تسجيل الخروج' : 'Log out'}
@@ -603,7 +615,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
           {/* Collapse toggle header */}
           <div className="p-4 border-b border-[var(--ds-border-subtle)] flex items-center justify-between">
             {!isCollapsed && (
-              <span className="text-[10px] font-black text-[var(--ds-text-muted)] uppercase tracking-widest">
+              <span className="text-caption font-bold text-[var(--ds-text-muted)] uppercase tracking-wider">
                 {language === 'ar' ? 'التنقل البحثي' : 'Research Navigation'}
               </span>
             )}
@@ -623,7 +635,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
           {!isCollapsed && (
             <div className="px-4 pt-4">
               <label className="relative block">
-                <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--ds-text-muted)]" />
+                <Search size={14} className="absolute inset-inline-end-3 top-1/2 -translate-y-1/2 text-[var(--ds-text-muted)]" />
                 <input
                   value={sidebarSearch}
                   onChange={(event) => setSidebarSearch(event.target.value)}
@@ -638,7 +650,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
           <nav aria-label={language === 'ar' ? 'أقسام المنصة' : 'Platform sections'} className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
             {!isCollapsed && activeProject && pathname.startsWith('/app/research') && (
               <div className="rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] p-3 space-y-2">
-                <div className="flex items-center justify-between gap-2 text-[9px] font-black uppercase tracking-wider text-[var(--ds-text-muted)]">
+                <div className="flex items-center justify-between gap-2 text-caption font-bold uppercase tracking-wider text-[var(--ds-text-muted)]">
                   <span>{language === 'ar' ? 'المشروع النشط' : 'Active project'}</span>
                   <span>{activeProjectCompletion}%</span>
                 </div>
@@ -659,7 +671,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
                   {!isCollapsed && (
                     <button
                       onClick={() => toggleGroup(group.id)}
-                    className="w-full flex items-center justify-between text-[10px] font-black text-[var(--ds-text-muted)] hover:text-[var(--ds-text-secondary)] uppercase tracking-wider py-1 text-start focus:outline-none"
+                    className="w-full flex items-center justify-between text-caption font-bold text-[var(--ds-text-muted)] hover:text-[var(--ds-text-secondary)] uppercase tracking-wider py-1 text-start focus:outline-none"
                     >
                       <span>{language === 'ar' ? group.titleAr : group.titleEn}</span>
                       {isGroupCollapsed ? <ChevronRight size={10} /> : <ChevronDown size={10} />}
@@ -695,7 +707,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
 
                             {/* Collapsed Tooltip overlay */}
                             {isCollapsed && (
-                              <div className="absolute right-full left-auto ml-0 mr-2 transform translate-x-[-10px] hidden group-hover:block z-50 bg-[var(--ds-navy)] text-white text-[10px] py-1.5 px-3 rounded-lg shadow-xl font-bold border border-white/10 whitespace-nowrap">
+                              <div className="absolute inset-inline-end-full me-2 hidden group-hover:block z-50 bg-[var(--ds-navy)] text-white text-caption py-1.5 px-3 rounded-lg shadow-xl font-semibold border border-white/10 whitespace-nowrap">
                                 {language === 'ar' ? item.labelAr : item.labelEn}
                               </div>
                             )}
@@ -713,9 +725,9 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
         {/* Mobile Navigation Drawer Overlay */}
         {mobileMenuOpen && (
           <div className="fixed inset-0 z-50 flex lg:hidden bg-[var(--ds-surface-overlay)]" role="dialog" aria-modal="true" aria-label={language === 'ar' ? 'قائمة التنقل' : 'Navigation menu'}>
-            <div ref={mobileMenuRef} className="w-[min(88vw,320px)] bg-[var(--ds-surface-primary)] h-full flex flex-col animate-slide-in relative border-l border-[var(--ds-border-subtle)]">
+            <div ref={mobileMenuRef} className="w-[min(88vw,320px)] bg-[var(--ds-surface-primary)] h-full flex flex-col animate-slide-in relative border-inline-start border-[var(--ds-border-subtle)]">
               <div className="p-4 border-b border-[var(--ds-border-subtle)] flex justify-between items-center">
-                <span className="text-xs font-black">{language === 'ar' ? 'التنقل البحثي' : 'Research Navigation'}</span>
+                <span className="text-caption font-bold">{language === 'ar' ? 'التنقل البحثي' : 'Research Navigation'}</span>
                 <button 
                   onClick={() => setMobileMenuOpen(false)}
                   aria-label={language === 'ar' ? 'إغلاق قائمة التنقل' : 'Close navigation menu'}
@@ -726,7 +738,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
                 <label className="relative block">
-                  <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--ds-text-muted)]" />
+                  <Search size={14} className="absolute inset-inline-end-3 top-1/2 -translate-y-1/2 text-[var(--ds-text-muted)]" />
                   <input
                     value={sidebarSearch}
                     onChange={(event) => setSidebarSearch(event.target.value)}
@@ -736,7 +748,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
                 </label>
                 {activeProject && pathname.startsWith('/app/research') && (
                   <div className="rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] p-3 space-y-2">
-                    <div className="flex items-center justify-between gap-2 text-[9px] font-black uppercase tracking-wider text-[var(--ds-text-muted)]">
+                    <div className="flex items-center justify-between gap-2 text-caption font-bold uppercase tracking-wider text-[var(--ds-text-muted)]">
                       <span>{language === 'ar' ? 'المشروع النشط' : 'Active project'}</span>
                       <span>{activeProjectCompletion}%</span>
                     </div>
@@ -762,7 +774,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
                 )}
                 {filteredSidebarGroups.map((group) => (
                   <div key={group.id} className="space-y-1.5">
-                    <span className="text-[9px] font-black text-[var(--ds-text-muted)] uppercase tracking-wider block">
+                    <span className="text-caption font-bold text-[var(--ds-text-muted)] uppercase tracking-wider block">
                       {language === 'ar' ? group.titleAr : group.titleEn}
                     </span>
                     {group.items.map((item) => {
@@ -795,12 +807,12 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
         )}
 
         {/* Main Content Workspace */}
-        <main id="main-content" tabIndex={-1} className="min-w-0 flex-1 flex flex-col overflow-y-auto px-3 min-[380px]:px-4 md:px-8 2xl:px-10 py-4 sm:py-6 max-w-[1800px] mx-auto w-full">
+        <main id="main-content" tabIndex={-1} className="ds-app-shell min-w-0 flex-1 flex flex-col overflow-y-auto px-3 min-[380px]:px-4 md:px-8 2xl:px-12 min-[2560px]:px-16 py-4 sm:py-6 w-full">
           
           {/* Breadcrumbs and Context Info */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 min-w-0">
             <div className="min-w-0 space-y-1">
-              <div className="text-[10px] font-extrabold text-[var(--ds-text-muted)] uppercase tracking-widest">
+              <div className="text-caption font-bold text-[var(--ds-text-muted)] uppercase tracking-wider">
                 {getBreadcrumbs()}
               </div>
               <h1 className="text-h1 break-words text-[var(--ds-text-primary)] m-0">
@@ -819,11 +831,11 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
           {/* Research Lifecycle Stepper V2 — Only show inside Research module */}
           {pathname.startsWith('/app/research') && (
             <div className="sticky top-0 z-30 mb-6 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-lg p-4 shadow-[var(--ds-shadow-layered)]">
-              <span className="text-[9px] font-black text-[var(--ds-text-muted)] uppercase tracking-widest block mb-3.5">
+              <span className="text-caption font-bold text-[var(--ds-text-muted)] uppercase tracking-wider block mb-3.5">
                 {language === 'ar' ? 'دورة حياة البحث العلمي النشطة' : 'Active Scientific Research Lifecycle'}
               </span>
               <div
-                className="flex items-center justify-between overflow-x-auto gap-4 py-1 no-scrollbar"
+                className="flex items-center justify-between overflow-x-auto gap-4 py-1 no-scrollbar ds-edge-fade-x"
                 role="region"
                 aria-label="مراحل سير العمل البحثي"
                 tabIndex={0}
@@ -836,7 +848,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
                   return (
                     <div key={idx} className="flex items-center gap-2 shrink-0">
                       <div className="flex flex-col items-center gap-1">
-                        <div className={`h-7 w-7 rounded-full flex items-center justify-center text-xs font-black border ds-transition ${
+                        <div className={`h-7 w-7 rounded-full flex items-center justify-center text-caption font-bold border ds-transition ${
                           isPassed 
                             ? 'bg-[var(--ds-success-soft)] text-[var(--ds-success)] border-[var(--ds-success)]/30' 
                             : isCurrent 
@@ -845,8 +857,8 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
                         }`}>
                           {idx + 1}
                         </div>
-                        <span className={`text-[10px] font-bold ${
-                          isPassed ? 'text-[var(--ds-success)]' : isCurrent ? 'text-ink font-extrabold' : 'text-[var(--ds-text-muted)]'
+                        <span className={`text-caption font-semibold ${
+                          isPassed ? 'text-[var(--ds-success)]' : isCurrent ? 'text-ink font-bold' : 'text-[var(--ds-text-muted)]'
                         }`}>
                           {language === 'ar' ? stage.labelAr : stage.labelEn}
                         </span>
@@ -871,10 +883,10 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
             </div>
 
             {/* Right side: GuidedFlow + Comments (Only show inside Research module) */}
-            {activeProject?.activePathId && pathname.startsWith('/app/research') && (
+            {activeProject?.activePathId && pathname.startsWith('/app/research') && (showGuidedResearch || showSupervisorComments) && (
               <div className="hidden 2xl:flex flex-col gap-4 w-[280px] shrink-0">
-                <GuidedFlowSidebar />
-                <SupervisorPanel />
+                {showGuidedResearch && <GuidedFlowSidebar />}
+                {showSupervisorComments && <SupervisorPanel />}
               </div>
             )}
           </div>
@@ -882,18 +894,18 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
 
       </div>
 
-      <footer className="border-t border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] px-4 py-5 text-[var(--ds-text-secondary)] md:px-8">
-        <div className="mx-auto flex max-w-[1800px] flex-col items-center justify-between gap-3 text-center sm:flex-row sm:text-start">
+      <footer className="border-t border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] px-4 py-5 text-[var(--ds-text-secondary)] md:px-8 min-[2560px]:px-16">
+        <div className="ds-app-shell flex flex-col items-center justify-between gap-3 text-center sm:flex-row sm:text-start">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--ds-action-fill)] text-sm font-black text-on-action shadow-[var(--ds-shadow-glow)]">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--ds-action-fill)] text-sm font-bold text-on-action shadow-[var(--ds-shadow-glow)]">
               {language === 'ar' ? 'ب' : 'B'}
             </div>
             <div>
-              <p className="text-caption m-0 font-black text-[var(--ds-text-primary)]">{getTranslation(language, 'title')}</p>
-              <p className="m-0 mt-0.5 text-[10px] text-[var(--ds-text-muted)]">{language === 'ar' ? 'بيئة أكاديمية موثوقة لصناعة بحث أفضل' : 'A trusted academic environment for better research'}</p>
+              <p className="text-caption m-0 font-bold text-[var(--ds-text-primary)]">{getTranslation(language, 'title')}</p>
+              <p className="m-0 mt-0.5 text-caption text-[var(--ds-text-muted)]">{language === 'ar' ? 'بيئة أكاديمية موثوقة لصناعة بحث أفضل' : 'A trusted academic environment for better research'}</p>
             </div>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[10px] font-bold text-[var(--ds-text-muted)]">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-caption font-semibold text-[var(--ds-text-muted)]">
             <span>{language === 'ar' ? 'الخصوصية أولًا' : 'Privacy first'}</span>
             <span className="text-[var(--ds-border-strong)]">•</span>
             <span>{language === 'ar' ? 'قرارات أكاديمية بمراجعة بشرية' : 'Human-reviewed academic decisions'}</span>

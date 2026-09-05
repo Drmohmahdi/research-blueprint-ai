@@ -182,23 +182,36 @@ export const DesignSystemShowcase: React.FC = () => {
           <section className="space-y-4">
             <SectionHeader title={language === 'ar' ? '2. مقاييس الطباعة والخطوط (Typography)' : '2. Typography Scale'} />
             <div className="space-y-3 p-6 border border-[var(--ds-border-subtle)] rounded-2xl bg-[var(--ds-surface-primary)]">
-              <div>
-                <span className="text-[9px] text-[var(--ds-text-muted)] uppercase block font-bold">IBM Plex Sans Arabic — المعتمد للواجهات</span>
+              <div className="space-y-3">
+                <p className="text-overline text-[var(--ds-text-muted)] m-0">{language === 'ar' ? 'السلم الموحد' : 'Canonical scale'}</p>
+                <p className="text-display m-0">Display — منصة بصيرة</p>
+                <h1 className="text-h1 m-0">H1 — عنوان الصفحة</h1>
+                <h2 className="text-h2 m-0">H2 — قسم رئيسي</h2>
+                <h3 className="text-h3 m-0">H3 — بطاقة أو مجموعة</h3>
+                <h4 className="text-h4 m-0">H4 — عنوان فرعي</h4>
+                <p className="text-body-lg m-0">Body Large — مقدمة تسويقية أو ملخص قرار.</p>
+                <p className="text-body m-0">Body — النص التشغيلي الافتراضي في اللوحات والنماذج.</p>
+                <p className="text-body-sm m-0">Body Small — جداول، قوائم كثيفة، وحقول الإدخال.</p>
+                <p className="text-label m-0">Label — تسميات الحقول والتبويب.</p>
+                <p className="text-caption m-0">Caption — مساعدة، شارات، وتذييل البطاقات.</p>
+              </div>
+              <div className="pt-2 border-t border-[var(--ds-border-subtle)]">
+                <span className="text-overline text-[var(--ds-text-muted)] block">IBM Plex Sans Arabic — المعتمد للواجهات</span>
                 <h2 className="text-h2 font-arabic-plex m-0 text-[var(--ds-text-primary)]">بصيرة للبحث العلمي</h2>
                 <p className="text-body-sm font-arabic-plex text-[var(--ds-text-secondary)] mt-2 m-0">منهجية أوضح، أرقام أدق، وحروف عربية تناسب المختبر الأكاديمي دون اتساع Noto الوثائقي.</p>
               </div>
               <div className="pt-2 border-t border-[var(--ds-border-subtle)]">
-                <span className="text-[9px] text-[var(--ds-text-muted)] uppercase block font-bold">Noto Sans Arabic — احتياطي للرموز النادرة</span>
+                <span className="text-overline text-[var(--ds-text-muted)] block">Noto Sans Arabic — احتياطي للرموز النادرة</span>
                 <h3 className="text-h3 font-arabic-noto m-0 text-[var(--ds-text-primary)]">مختبر تصميم ومحاكاة البحوث العلمية</h3>
                 <p className="text-caption font-arabic-noto text-[var(--ds-text-secondary)] m-0 mt-1">أوسع قليلًا وأكثر وثائقية؛ يبقى احتياطيًا بعد المقارنة.</p>
               </div>
               <div className="pt-2 border-t border-[var(--ds-border-subtle)] grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <span className="text-[9px] text-[var(--ds-text-muted)] uppercase block font-bold">Inter — English UI</span>
+                  <span className="text-overline text-[var(--ds-text-muted)] block">Inter — English UI</span>
                   <p className="text-body-sm font-latin-inter text-[var(--ds-text-primary)] m-0">Precise academic interface 0123456789</p>
                 </div>
                 <div>
-                  <span className="text-[9px] text-[var(--ds-text-muted)] uppercase block font-bold">IBM Plex Sans — fallback</span>
+                  <span className="text-overline text-[var(--ds-text-muted)] block">IBM Plex Sans — fallback</span>
                   <p className="text-body-sm font-latin-plex text-[var(--ds-text-primary)] m-0">Institutional companion 0123456789</p>
                 </div>
               </div>

@@ -184,8 +184,8 @@ export const ResearchPathSelector: React.FC = () => {
       }
       if (!project?.id || project.id === 'demo-1') {
         setStartError(language === 'ar'
-          ? 'تعذر إنشاء مشروع على الخادم. تحقق من تسجيل الدخول ثم أعد المحاولة.'
-          : 'Could not create a server project. Sign in and try again.');
+          ? 'تعذر إنشاء المشروع. تحقق من تسجيل الدخول ثم أعد المحاولة.'
+          : 'Could not create the project. Sign in and try again.');
         return;
       }
 
@@ -212,7 +212,9 @@ export const ResearchPathSelector: React.FC = () => {
         setPlanLimitHit(true);
         setStartError('');
       } else {
-        setStartError(language === 'ar' ? 'تعذر بدء المسار.' : 'Could not start the path.');
+        setStartError(language === 'ar'
+          ? 'تعذر اعتماد المسار. تحقق من تسجيل الدخول وحدود الباقة، ثم أعد المحاولة.'
+          : 'Could not start this path. Check that you are signed in and within plan limits, then try again.');
       }
     } finally {
       setStarting(false);
@@ -277,12 +279,12 @@ export const ResearchPathSelector: React.FC = () => {
             <span>{language === 'ar' ? '\u0645\u0633\u0627\u0631\u0627\u062a \u0627\u0644\u0628\u062d\u062b \u0627\u0644\u0645\u0646\u0647\u062c\u064a\u0629' : 'Methodological Paths'}</span>
           </div>
           <h2 className="text-h2 m-0 text-[var(--ds-text-primary)]">
-            {language === 'ar' ? '\u0627\u062e\u062a\u0631 \u0627\u0644\u0645\u0633\u0627\u0631 \u0627\u0644\u0623\u0646\u0633\u0628 \u0644\u062f\u0631\u0627\u0633\u0629 \u0627\u0644\u064a\u0648\u0645' : 'How can Baseerah assist your study today?'}
+            {language === 'ar' ? 'اختر المسار الأنسب لدراستك اليوم' : 'Choose the path that fits today’s study'}
           </h2>
           <p className="text-body-sm md:text-base text-[var(--ds-text-secondary)] font-medium m-0">
             {language === 'ar'
-              ? '\u0627\u062e\u062a\u0631 \u0645\u0633\u0627\u0631\u0627 \u0645\u0646\u0647\u062c\u064a\u0627 \u0645\u062d\u062f\u062f\u0627 \u0644\u062a\u0631\u062a\u064a\u0628 \u0623\u062f\u0648\u0627\u062a \u0627\u0644\u062a\u0635\u0645\u064a\u0645 \u0648\u0627\u0644\u062a\u062d\u0644\u064a\u0644 \u0648\u0627\u0644\u0645\u062d\u0627\u0643\u0627\u0629 \u0648\u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629 \u0648\u0641\u0642 \u0645\u0631\u062d\u0644\u0629 \u0645\u0634\u0631\u0648\u0639\u0643 \u0627\u0644\u062d\u0627\u0644\u064a\u0629.'
-              : 'Select a research path to orchestrate study design validation, predictive modeling, and publishing audits.'}
+              ? 'اختر مسارًا منهجيًا محددًا لترتيب أدوات التصميم والتحليل والمحاكاة والمراجعة وفق مرحلة مشروعك الحالية.'
+              : 'Pick a method path to order design, analysis, simulation, and review around your current project stage.'}
           </p>
         </div>
       </PathPanel>
@@ -379,7 +381,7 @@ export const ResearchPathSelector: React.FC = () => {
                   </div>
 
                   <div className="pt-3 border-t border-[var(--ds-border-subtle)] space-y-2">
-                    <div className="flex items-center justify-between text-[10px] text-[var(--ds-text-muted)] font-semibold">
+                    <div className="flex items-center justify-between text-caption text-[var(--ds-text-muted)] font-semibold">
                       <span>
                         {language === 'ar'
                           ? `${path.orderedSteps.length} \u0623\u062f\u0648\u0627\u062a \u0645\u0646\u0647\u062c\u064a\u0629`
@@ -416,7 +418,7 @@ export const ResearchPathSelector: React.FC = () => {
                       {language === 'ar' ? selectedPath.titleAr : selectedPath.titleEn}
                     </h3>
                   </div>
-                  <span className="text-[9px] bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] px-2 py-0.5 rounded-full font-black">
+                  <span className="text-caption bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] px-2 py-0.5 rounded-full font-black">
                     {language === 'ar' ? selectedPath.recommendedStageAr : selectedPath.recommendedStageEn}
                   </span>
                 </div>
@@ -428,7 +430,7 @@ export const ResearchPathSelector: React.FC = () => {
               {/* Progress indicator */}
               {activeProject && (
                 <div className="space-y-1.5 p-3 bg-[var(--ds-surface-secondary)] rounded-lg border border-[var(--ds-border-subtle)]">
-                  <div className="flex justify-between text-[10px] font-black text-[var(--ds-text-muted)]">
+                  <div className="flex justify-between text-caption font-black text-[var(--ds-text-muted)]">
                     <span>{language === 'ar' ? '\u0646\u0633\u0628\u0629 \u0625\u0646\u062c\u0627\u0632 \u062e\u0637\u0648\u0627\u062a \u0627\u0644\u0645\u0633\u0627\u0631:' : 'Path Roadmap Completion:'}</span>
                     <span className="ds-numeric">{getCompletedStepsCount(selectedPath)} / {selectedPath.orderedSteps.length}</span>
                   </div>
@@ -438,19 +440,19 @@ export const ResearchPathSelector: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <div className="rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] p-3">
-                  <span className="block text-[9px] font-black text-[var(--ds-text-muted)]">
+                  <span className="block text-caption font-black text-[var(--ds-text-muted)]">
                     {language === 'ar' ? '\u0623\u062f\u0648\u0627\u062a \u0623\u0633\u0627\u0633\u064a\u0629' : 'Primary Tools'}
                   </span>
                   <strong className="mt-1 block text-sm text-ink ds-numeric">{selectedPath.primaryTools.length}</strong>
                 </div>
                 <div className="rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] p-3">
-                  <span className="block text-[9px] font-black text-[var(--ds-text-muted)]">
+                  <span className="block text-caption font-black text-[var(--ds-text-muted)]">
                     {language === 'ar' ? '\u0623\u062f\u0648\u0627\u062a \u0645\u0633\u0627\u0646\u062f\u0629' : 'Supporting Tools'}
                   </span>
                   <strong className="mt-1 block text-sm text-ink ds-numeric">{selectedPath.supportingTools.length}</strong>
                 </div>
                 <div className="rounded-lg border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)] p-3">
-                  <span className="block text-[9px] font-black text-[var(--ds-text-muted)]">
+                  <span className="block text-caption font-black text-[var(--ds-text-muted)]">
                     {language === 'ar' ? '\u0645\u062e\u0631\u062c\u0627\u062a' : 'Outputs'}
                   </span>
                   <strong className="mt-1 block text-sm text-ink ds-numeric">{selectedPath.expectedOutputs.length}</strong>
@@ -495,7 +497,7 @@ export const ResearchPathSelector: React.FC = () => {
                             {language === 'ar' ? stepInfo.ar : stepInfo.en}
                           </button>
                           {isNextStep && (
-                            <span className="inline-flex rounded-full bg-[var(--ds-primary-soft)] px-2 py-0.5 text-[9px] font-black text-ink border border-[var(--ds-primary)]/20">
+                            <span className="inline-flex rounded-full bg-[var(--ds-primary-soft)] px-2 py-0.5 text-caption font-black text-ink border border-[var(--ds-primary)]/20">
                               {language === 'ar' ? '\u0627\u0644\u062e\u0637\u0648\u0629 \u0627\u0644\u062a\u0627\u0644\u064a\u0629' : 'NEXT STEP'}
                             </span>
                           )}
@@ -509,14 +511,14 @@ export const ResearchPathSelector: React.FC = () => {
               {/* Action Buttons */}
               <div className="pt-4 border-t border-[var(--ds-border-subtle)] space-y-2">
                 {!activeProject && (
-                  <p className="text-[10px] text-[var(--ds-text-secondary)] font-bold m-0 text-center">
+                  <p className="text-caption text-[var(--ds-text-secondary)] font-bold m-0 text-center">
                     {language === 'ar'
-                      ? 'لا يوجد مشروع بعد؛ سيُنشأ مشروع على الخادم عند اعتماد المسار.'
-                      : 'No project yet; adopting this path will create a server-saved project.'}
+                      ? 'لا يوجد مشروع بعد. سيُنشأ مشروع في حسابك عند اعتماد هذا المسار.'
+                      : 'No project yet. Starting this path will create a project in your account.'}
                   </p>
                 )}
                 {planLimitHit && <PlanLimitNotice language={language} />}
-                {startError && <p className="text-[10px] text-[var(--ds-danger)] font-bold m-0 text-center" role="alert">{startError}</p>}
+                {startError && <p className="text-caption text-[var(--ds-danger)] font-bold m-0 text-center" role="alert">{startError}</p>}
                 <Button
                   onClick={() => handleStartPath(selectedPath)}
                   variant="primary"
@@ -529,7 +531,7 @@ export const ResearchPathSelector: React.FC = () => {
                       ? (language === 'ar' ? 'جارٍ إنشاء المشروع...' : 'Creating project...')
                       : activeProject?.activePathId === selectedPath.id 
                       ? (language === 'ar' ? '\u0627\u0633\u062a\u0626\u0646\u0627\u0641 \u062e\u0637\u0648\u0627\u062a \u0627\u0644\u0645\u0633\u0627\u0631' : 'Resume Research Path')
-                      : (language === 'ar' ? '\u0627\u0639\u062a\u0645\u0627\u062f \u0648\u0628\u062f\u0621 \u0627\u0644\u0645\u0633\u0627\u0631 \u0627\u0644\u0645\u0646\u0647\u062c\u064a' : 'Adopt & Start Path')}
+                      : (language === 'ar' ? 'ابدأ هذا المسار' : 'Start this path')}
                   </span>
                   {language === 'ar' ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
                 </Button>

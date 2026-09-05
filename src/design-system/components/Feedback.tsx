@@ -23,7 +23,7 @@ export const Badge: React.FC<BadgeProps> = ({
   variant = 'draft',
   className = ''
 }) => {
-  const baseStyles = 'inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold border';
+  const baseStyles = 'inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-caption font-semibold border';
   
   const variantStyles = {
     draft: 'bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-muted)] border-[var(--ds-border-default)]',
@@ -33,7 +33,7 @@ export const Badge: React.FC<BadgeProps> = ({
     warning: 'bg-[var(--ds-warning-soft)] text-[var(--ds-warning)] border-[var(--ds-warning)]/20',
     critical: 'bg-[var(--ds-danger-soft)] text-[var(--ds-danger)] border-[var(--ds-danger)]/20',
     simulated: 'bg-[var(--ds-data-teal-soft)] text-[var(--ds-data-teal)] border-[var(--ds-data-teal)]/20',
-    predicted: 'bg-[var(--ds-navy-soft)] text-[var(--ds-navy-elevated)] dark:text-[var(--ds-text-secondary)] border-[var(--ds-navy-elevated)]/20',
+    predicted: 'bg-[var(--ds-research-blue-soft)] text-[var(--ds-research-blue)] border-[var(--ds-research-blue)]/20',
     observed: 'bg-[var(--ds-success-soft)] text-[var(--ds-success)] border-[var(--ds-success)]/20',
   };
 
@@ -75,7 +75,7 @@ export const Alert: React.FC<AlertProps> = ({
   onClose,
   className = ''
 }) => {
-  const baseStyles = 'p-4 rounded-2xl border flex gap-3 text-xs leading-relaxed';
+  const baseStyles = 'p-4 rounded-2xl border flex gap-3 text-body-sm';
 
   const variantStyles = {
     info: 'bg-[var(--ds-information-soft)] border-[var(--ds-information)]/20 text-[var(--ds-text-primary)]',
@@ -99,11 +99,11 @@ export const Alert: React.FC<AlertProps> = ({
     <div className={`${baseStyles} ${variantStyles[variant]} ${className}`} role="alert">
       {icons[variant]}
       <div className="flex-1 space-y-1">
-        {title && <h5 className="font-extrabold m-0 text-inherit">{title}</h5>}
+        {title && <h5 className="font-bold m-0 text-inherit">{title}</h5>}
         <div className="m-0 text-inherit">{children}</div>
       </div>
       {onClose && (
-        <button type="button" onClick={onClose} aria-label="Close alert" className="text-inherit hover:opacity-75 cursor-pointer ml-auto font-bold">×</button>
+        <button type="button" onClick={onClose} aria-label="Close alert" className="text-inherit hover:opacity-75 cursor-pointer ms-auto font-bold">×</button>
       )}
     </div>
   );
@@ -132,7 +132,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   return (
     <div className={`relative group inline-block ${className}`}>
       {children}
-      <div role="tooltip" className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block group-focus-within:block z-50 bg-[var(--ds-navy)] text-white text-[10px] p-2.5 rounded-xl border border-white/10 leading-normal select-none pointer-events-none">
+      <div role="tooltip" className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 hidden group-hover:block group-focus-within:block z-50 bg-[var(--ds-navy)] text-white text-caption p-2.5 rounded-xl border border-white/10 select-none pointer-events-none">
         {content}
       </div>
     </div>
@@ -215,13 +215,13 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   bare = false,
 }) => {
   return (
-    <div className={`p-8 text-center flex flex-col items-center justify-center gap-4 ${bare ? '' : 'bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl'} ${className}`}>
+    <div className={`p-5 sm:p-8 text-center flex flex-col items-center justify-center gap-4 min-h-[12rem] ${bare ? '' : 'bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl'} ${className}`}>
       {illustration && (
-        <div className="text-[var(--ds-text-disabled)] opacity-80">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--ds-surface-tertiary)] text-[var(--ds-text-muted)]">
           {illustration}
         </div>
       )}
-      <div className="space-y-1.5 max-w-sm">
+      <div className="space-y-1.5 max-w-sm px-1">
         <h4 className="text-h4 text-[var(--ds-text-primary)] m-0">{title}</h4>
         <p className="text-caption text-[var(--ds-text-muted)] m-0">{description}</p>
       </div>

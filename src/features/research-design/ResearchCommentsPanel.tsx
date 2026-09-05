@@ -79,7 +79,7 @@ export const ResearchCommentsPanel: React.FC<ResearchCommentsPanelProps> = ({
           <MessageSquare size={16} />
           <span>{isAr ? 'ملاحظات المشرف الأكاديمي للخطوة' : 'Step Supervisor Comments'}</span>
         </div>
-        <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-[var(--ds-information-soft)] text-[var(--ds-information)]">
+        <span className="px-2 py-0.5 text-caption font-bold rounded bg-[var(--ds-information-soft)] text-[var(--ds-information)]">
           <span className="ds-numeric">{comments.filter(c => !c.resolved).length}</span> {isAr ? 'مفتوحة' : 'Open'}
         </span>
       </div>

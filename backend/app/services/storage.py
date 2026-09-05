@@ -20,6 +20,13 @@ from .tenant_context import GLOBAL_ADMIN_ROLES
 DEFAULT_STORAGE_ROOT = os.getenv("STORAGE_ROOT", "storage_files")
 MAX_FILE_SIZE_BYTES = int(os.getenv("MAX_FILE_SIZE_BYTES", str(50 * 1024 * 1024)))  # 50 MB
 
+
+def storage_readiness() -> str:
+    root = os.path.abspath(os.getenv("STORAGE_ROOT", DEFAULT_STORAGE_ROOT))
+    if os.path.isdir(root) and os.access(root, os.W_OK):
+        return "ready"
+    return "not_ready"
+
 # Strictly blocked extensions (Executable, scripts, active macros, dangerous vectors)
 BLOCKED_EXTENSIONS: Set[str] = {
     ".exe", ".bat", ".cmd", ".ps1", ".sh", ".bash", ".vbs", ".js", ".mjs",

@@ -230,7 +230,7 @@ export const UnifiedProfileEditor: React.FC = () => {
     return (
       <EmptyState
         title={language === 'ar' ? 'تعذر تحميل الملف' : 'Could not load profile'}
-        description={language === 'ar' ? 'فشل تحميل بيانات الملف الأكاديمي.' : 'Failed to load academic profile data.'}
+        description={language === 'ar' ? 'تعذر تحميل الملف الأكاديمي. حدّث الصفحة ثم أعد المحاولة.' : 'Could not load the academic profile. Refresh the page and try again.'}
       />
     );
   }
@@ -634,7 +634,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                   <button
                     type="button"
                     onClick={addIdentifier}
-                    className="px-3 py-1.5 bg-action hover:bg-action-hover text-on-action rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                    className="px-3 py-1.5 bg-action hover:bg-action-hover text-on-action rounded-lg text-caption font-bold flex items-center gap-1 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>{t.addIdent}</span>
@@ -666,7 +666,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                     profile.identifiers.map((ident: any, idx: number) => (
                       <div key={idx} className="p-4 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl flex flex-col md:flex-row gap-3 items-start md:items-center">
                         <div className="w-full md:w-1/4 space-y-1.5">
-                          <label htmlFor={`identifier-type-${idx}`} className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
+                          <label htmlFor={`identifier-type-${idx}`} className="block text-caption font-bold text-[var(--ds-text-secondary)] mb-1">
                             {language === 'ar' ? 'نوع المنصة / المعرف' : 'Channel / Platform Type'}
                           </label>
                           <select
@@ -692,7 +692,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                         </div>
 
                         <div className="w-full md:w-1/4">
-                          <label htmlFor={`identifier-value-${idx}`} className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
+                          <label htmlFor={`identifier-value-${idx}`} className="block text-caption font-bold text-[var(--ds-text-secondary)] mb-1">
                             {language === 'ar' ? 'قيمة المعرف الرقمي' : 'Identifier ID / Value'}
                           </label>
                           <input
@@ -706,7 +706,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                         </div>
 
                         <div className="w-full md:w-1/3">
-                          <label htmlFor={`identifier-url-${idx}`} className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
+                          <label htmlFor={`identifier-url-${idx}`} className="block text-caption font-bold text-[var(--ds-text-secondary)] mb-1">
                             {language === 'ar' ? 'رابط الملف الأكاديمي' : 'Profile Page URL'}
                           </label>
                           <input
@@ -721,8 +721,8 @@ export const UnifiedProfileEditor: React.FC = () => {
 
                         <div className="flex gap-2 items-center self-end md:self-auto mt-2 md:mt-0">
                           <div className="flex flex-col items-center">
-                            <span className="text-[9px] font-semibold text-[var(--ds-text-secondary)]">{language === 'ar' ? 'حالة التحقق' : 'Status'}</span>
-                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold mt-1 ${
+                            <span className="text-caption font-semibold text-[var(--ds-text-secondary)]">{language === 'ar' ? 'حالة التحقق' : 'Status'}</span>
+                            <span className={`px-2 py-0.5 rounded-full text-caption font-bold mt-1 ${
                               ident.status === 'VERIFIED' ? 'bg-[var(--ds-success-soft)] text-success' : 'bg-[var(--ds-information-soft)] text-[var(--ds-information)]'
                             }`}>
                               {ident.status === 'VERIFIED' 
@@ -757,7 +757,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                   <button
                     type="button"
                     onClick={addAffiliation}
-                    className="px-3 py-1.5 bg-action hover:bg-action-hover text-on-action rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                    className="px-3 py-1.5 bg-action hover:bg-action-hover text-on-action rounded-lg text-caption font-bold flex items-center gap-1 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>{t.addAff}</span>
@@ -791,7 +791,7 @@ export const UnifiedProfileEditor: React.FC = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <div>
-                            <label htmlFor={`aff-org-name-${idx}`} className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
+                            <label htmlFor={`aff-org-name-${idx}`} className="block text-caption font-bold text-[var(--ds-text-secondary)] mb-1">
                               {language === 'ar' ? 'الجامعة / المؤسسة' : 'University / Institution'}
                             </label>
                             <input
@@ -806,7 +806,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                           </div>
 
                           <div>
-                            <label htmlFor={`aff-college-${idx}`} className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
+                            <label htmlFor={`aff-college-${idx}`} className="block text-caption font-bold text-[var(--ds-text-secondary)] mb-1">
                               {language === 'ar' ? 'الكلية' : 'College'}
                             </label>
                             <input
@@ -822,7 +822,7 @@ export const UnifiedProfileEditor: React.FC = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                           <div>
-                            <label htmlFor={`aff-department-${idx}`} className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
+                            <label htmlFor={`aff-department-${idx}`} className="block text-caption font-bold text-[var(--ds-text-secondary)] mb-1">
                               {language === 'ar' ? 'القسم الأكاديمي' : 'Department'}
                             </label>
                             <input
@@ -836,7 +836,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                           </div>
 
                           <div>
-                            <label htmlFor={`aff-position-${idx}`} className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
+                            <label htmlFor={`aff-position-${idx}`} className="block text-caption font-bold text-[var(--ds-text-secondary)] mb-1">
                               {language === 'ar' ? 'المسمى الوظيفي' : 'Position Title'}
                             </label>
                             <input
@@ -850,7 +850,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                           </div>
 
                           <div>
-                            <label htmlFor={`aff-rank-${idx}`} className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
+                            <label htmlFor={`aff-rank-${idx}`} className="block text-caption font-bold text-[var(--ds-text-secondary)] mb-1">
                               {language === 'ar' ? 'الرتبة الأكاديمية' : 'Academic Rank'}
                             </label>
                             <input
@@ -865,7 +865,7 @@ export const UnifiedProfileEditor: React.FC = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                           <div>
-                            <label htmlFor={`aff-start-date-${idx}`} className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
+                            <label htmlFor={`aff-start-date-${idx}`} className="block text-caption font-bold text-[var(--ds-text-secondary)] mb-1">
                               {language === 'ar' ? 'تاريخ البدء' : 'Start Date'}
                             </label>
                             <input
@@ -878,7 +878,7 @@ export const UnifiedProfileEditor: React.FC = () => {
                           </div>
 
                           <div>
-                            <label htmlFor={`aff-end-date-${idx}`} className="block text-[10px] font-bold text-[var(--ds-text-secondary)] mb-1">
+                            <label htmlFor={`aff-end-date-${idx}`} className="block text-caption font-bold text-[var(--ds-text-secondary)] mb-1">
                               {language === 'ar' ? 'تاريخ الانتهاء' : 'End Date'}
                             </label>
                             <input
@@ -907,10 +907,10 @@ export const UnifiedProfileEditor: React.FC = () => {
 
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 pt-2">
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-bold text-[var(--ds-text-secondary)]">
+                            <span className="text-caption font-bold text-[var(--ds-text-secondary)]">
                               {language === 'ar' ? 'مستند الإثبات / المرفق:' : 'Evidence Attachment:'}
                             </span>
-                            <span className={`text-[10px] font-medium ${aff.evidence_file_id ? 'text-success' : 'text-[var(--ds-text-muted)]'}`}>
+                            <span className={`text-caption font-medium ${aff.evidence_file_id ? 'text-success' : 'text-[var(--ds-text-muted)]'}`}>
                               {aff.evidence_file_id 
                                 ? (language === 'ar' ? 'تم الرفع بنجاح' : 'Uploaded successfully') 
                                 : (language === 'ar' ? 'لا يوجد ملف إثبات مرفق' : 'No evidence document attached')
@@ -919,8 +919,8 @@ export const UnifiedProfileEditor: React.FC = () => {
                           </div>
 
                           <div className="flex items-center gap-2">
-                            <span className="text-[9px] font-semibold text-[var(--ds-text-secondary)]">{language === 'ar' ? 'التحقق من الانتماء' : 'Verification'}</span>
-                            <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold ${
+                            <span className="text-caption font-semibold text-[var(--ds-text-secondary)]">{language === 'ar' ? 'التحقق من الانتماء' : 'Verification'}</span>
+                            <span className={`px-2.5 py-0.5 rounded-full text-caption font-bold ${
                               aff.verification_status === 'VERIFIED' ? 'bg-[var(--ds-success-soft)] text-success' : 'bg-[var(--ds-information-soft)] text-[var(--ds-information)]'
                             }`}>
                               {aff.verification_status === 'VERIFIED' 

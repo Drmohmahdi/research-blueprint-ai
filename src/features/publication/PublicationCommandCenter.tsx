@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, BookOpen, CheckCircle2, ChevronLeft, FileText, Library, Send, ShieldCheck, Users } from 'lucide-react';
 import { useProject } from '../../context/ProjectContext';
+import { ROUTES } from '../../router/routes';
 import { PathPanel } from '../../design-system/components/Navigation';
 import { EmptyState } from '../../design-system/components/Feedback';
 import { Button } from '../../design-system/components/Button';
@@ -29,6 +31,7 @@ type Center = {
 
 export const PublicationCommandCenter: React.FC = () => {
   const { language, user } = useProject();
+  const navigate = useNavigate();
   const ar = language === 'ar';
   const [assets, setAssets] = useState<any[]>([]);
   const [assetId, setAssetId] = useState('');
@@ -132,7 +135,7 @@ export const PublicationCommandCenter: React.FC = () => {
     <PathPanel accent="var(--ds-path-publication)">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-caption mb-2 font-black text-path-publication">BASEERAH · PUBLICATION INTELLIGENCE</p>
+          <p className="text-caption mb-2 font-black text-path-publication">{ar ? 'بصيرة · ذكاء النشر' : 'Baseerah · Publication'}</p>
           <h2 id="publication-title" className="text-h2 m-0 text-ink">{ar ? 'مركز ذكاء النشر العلمي' : 'Publication Intelligence Command Center'}</h2>
           <p className="text-body-sm mt-2 max-w-3xl text-secondary">{ar ? 'جاهزية المخطوطة وامتثال الإبلاغ وملاءمة المجلات ومسار التقديم—كل مقياس مستقل وقابل للتفسير.' : 'Manuscript readiness, reporting compliance, journal suitability, and submission workflow—kept separate and explainable.'}</p>
         </div>
@@ -145,7 +148,18 @@ export const PublicationCommandCenter: React.FC = () => {
         </select>
       </label>
     </PathPanel>
-    {!assetId && <EmptyState illustration={<FileText size={40} />} title={ar ? 'لا توجد مخطوطة محددة' : 'No manuscript selected'} description={ar ? 'أنشئ مخطوطة من مشروع بحثي أولًا.' : 'Create a manuscript from a research project first.'} />}
+    {!assetId && (
+      <EmptyState
+        illustration={<FileText size={40} />}
+        title={ar ? 'لا توجد مخطوطة محددة' : 'No manuscript selected'}
+        description={ar ? 'أنشئ مخطوطة من مشروع بحثي أولًا، ثم عد إلى هذا المركز لفحص الجاهزية.' : 'Create a manuscript from a research project first, then return here to check readiness.'}
+        actionButton={
+          <Button type="button" size="sm" onClick={() => navigate(ROUTES.ASSETS)}>
+            {ar ? 'سجل الأصول العلمية' : 'Open scholarly assets'}
+          </Button>
+        }
+      />
+    )}
     {center && <>
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label={ar ? 'مؤشرات النشر' : 'Publication indicators'}>{cards.map(({label,value,icon:Icon}) => <article key={label} className="rounded-2xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-primary)] p-5"><Icon className="mb-3 h-5 w-5 text-secondary"/><p className="text-caption font-bold text-[var(--ds-text-muted)]">{label}</p><p className="mt-1 text-xl font-black text-ink ds-numeric">{value}</p></article>)}</section>
       <div className="flex gap-2 overflow-x-auto" role="tablist">
@@ -168,7 +182,7 @@ export const PublicationCommandCenter: React.FC = () => {
           <p className="text-body-sm mt-4 rounded-xl bg-warning/10 p-4 font-bold"><span className="mb-1 block text-xs text-warning">{center.next_best_action.priority}</span>{String(center.next_best_action.code || '')}</p>
           <p className="text-caption mt-4 text-[var(--ds-text-muted)]">{ar ? 'اختيار المجلة والتقديم والنشر قرارات بشرية. درجة الملاءمة لا تمثل احتمال القبول.' : 'Journal selection, submission, and publication remain human decisions. Match never represents acceptance probability.'}</p>
           <button type="button" onClick={() => setShowRequirements((open) => !open)} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--ds-border-default)] p-3 text-sm font-bold">{showRequirements ? (ar ? 'إخفاء تفاصيل المتطلبات' : 'Hide requirement details') : (ar ? 'فتح تفاصيل المتطلبات' : 'Open requirement details')}<ChevronLeft className="h-4 w-4 rtl:rotate-180"/></button>
-          {showRequirements && <ul className="mt-3 space-y-2 p-0">{(center.manuscript_readiness.blocking.length ? center.manuscript_readiness.blocking : [{ code: center.next_best_action.code || 'READY', detail: ar ? 'لا توجد عوائق موثّقة لهذه النسخة.' : 'No documented blockers for this version.' }]).map((item, index) => <li key={`${item.code || index}`} className="list-none rounded-xl bg-[var(--ds-surface-secondary)] p-3 text-xs font-semibold">{String(item.code || item.detail || JSON.stringify(item))}</li>)}</ul>}
+          {showRequirements && <ul className="mt-3 space-y-2 p-0">{(center.manuscript_readiness.blocking.length ? center.manuscript_readiness.blocking : [{ code: center.next_best_action.code || 'READY', detail: ar ? 'لا توجد عوائق موثّقة لهذه النسخة.' : 'No documented blockers for this version.' }]).map((item, index) => <li key={`${item.code || index}`} className="list-none rounded-xl bg-[var(--ds-surface-secondary)] p-3 text-xs font-semibold">{String(item.code || item.detail || (ar ? 'تفاصيل غير متاحة — راجع المخطوطة.' : 'Details unavailable — review the manuscript.'))}</li>)}</ul>}
         </aside>
       </section>
       )}

@@ -1,103 +1,118 @@
 /*
- * Baseerah Typography Scale
- * ─────────────────────────
- * Single source of truth for every text size/weight/line-height in the
- * product. Mirrors the values in ../tokens/typography.ts (kept in sync
- * manually — that file documents the scale for non-CSS consumers; this
- * file is what components actually apply).
- *
- * Display / H1 / H2 use clamp() so they compress smoothly from mobile to
- * ultra-wide without needing per-component sm:/md:/lg: overrides. H3 and
- * below stay static — their range is narrow enough that fluid scaling
- * isn't needed and a fixed size is more predictable inside dense cards
- * and tables.
+ * Baseerah Typography System 2.0
+ * Display → H1 → H2 → H3 → H4 → Body Large → Body → Body Small → Label → Caption
+ * Tokens live on :root in themes.css. Classes and element defaults consume them.
+ * Display / H1 / H2 are fluid (clamp). H3 and below stay fixed so cards and
+ * tables keep a predictable hierarchy on every viewport.
  */
 
-.text-display-xl {
-  font-size: clamp(1.875rem, 1.6rem + 1.2vw, 2.5rem);
-  line-height: 1.3;
-  font-weight: 700;
-  letter-spacing: -0.022em;
-  text-wrap: balance;
-}
-
+.text-display,
+.text-display-xl,
 .text-display-lg {
-  font-size: clamp(1.625rem, 1.4rem + 1vw, 2rem);
-  line-height: 1.25;
-  font-weight: 700;
-  letter-spacing: -0.022em;
+  font-size: var(--ds-type-display);
+  line-height: var(--ds-type-display-leading);
+  font-weight: var(--ds-type-weight-bold);
+  letter-spacing: var(--ds-type-tracking-display);
   text-wrap: balance;
 }
 
 .text-h1 {
-  font-size: clamp(1.375rem, 1.2rem + 0.75vw, 1.75rem);
-  line-height: 1.3;
-  font-weight: 700;
-  letter-spacing: -0.022em;
+  font-size: var(--ds-type-h1);
+  line-height: var(--ds-type-h1-leading);
+  font-weight: var(--ds-type-weight-bold);
+  letter-spacing: var(--ds-type-tracking-heading);
   text-wrap: balance;
 }
 
 .text-h2 {
-  font-size: clamp(1.1875rem, 1.05rem + 0.6vw, 1.5rem);
-  line-height: 1.35;
-  font-weight: 600;
-  letter-spacing: -0.022em;
+  font-size: var(--ds-type-h2);
+  line-height: var(--ds-type-h2-leading);
+  font-weight: var(--ds-type-weight-semibold);
+  letter-spacing: var(--ds-type-tracking-heading);
   text-wrap: balance;
 }
 
 .text-h3 {
-  font-size: 1.25rem;
-  line-height: 1.4;
-  font-weight: 600;
-  letter-spacing: -0.022em;
+  font-size: var(--ds-type-h3);
+  line-height: var(--ds-type-h3-leading);
+  font-weight: var(--ds-type-weight-semibold);
+  letter-spacing: var(--ds-type-tracking-heading);
   text-wrap: balance;
 }
 
 .text-h4 {
-  font-size: 1.125rem;
-  line-height: 1.35;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-size: var(--ds-type-h4);
+  line-height: var(--ds-type-h4-leading);
+  font-weight: var(--ds-type-weight-semibold);
+  letter-spacing: var(--ds-type-tracking-body);
 }
 
 .text-body-lg {
-  font-size: 1.0625rem;
-  line-height: 1.7;
+  font-size: var(--ds-type-body-lg);
+  line-height: var(--ds-type-body-lg-leading);
+  font-weight: var(--ds-type-weight-regular);
+  letter-spacing: var(--ds-type-tracking-body);
 }
 
 .text-body {
-  font-size: 0.9375rem;
-  line-height: 1.6;
+  font-size: var(--ds-type-body);
+  line-height: var(--ds-type-body-leading);
+  font-weight: var(--ds-type-weight-regular);
+  letter-spacing: var(--ds-type-tracking-body);
 }
 
 .text-body-sm {
-  font-size: 0.875rem;
-  line-height: 1.45;
+  font-size: var(--ds-type-body-sm);
+  line-height: var(--ds-type-body-sm-leading);
+  font-weight: var(--ds-type-weight-regular);
+  letter-spacing: var(--ds-type-tracking-body);
 }
 
 .text-label {
-  font-size: 0.8125rem;
-  line-height: 1.15;
-  font-weight: 600;
+  font-size: var(--ds-type-label);
+  line-height: var(--ds-type-label-leading);
+  font-weight: var(--ds-type-weight-semibold);
+  letter-spacing: var(--ds-type-tracking-label);
 }
 
 .text-caption {
-  font-size: 0.75rem;
-  line-height: 1.3;
-  font-weight: 500;
+  font-size: var(--ds-type-caption);
+  line-height: var(--ds-type-caption-leading);
+  font-weight: var(--ds-type-weight-medium);
+  letter-spacing: var(--ds-type-tracking-label);
 }
 
 .text-overline {
-  font-size: 0.6875rem;
-  line-height: 1.2;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-size: var(--ds-type-caption);
+  line-height: var(--ds-type-caption-leading);
+  font-weight: var(--ds-type-weight-semibold);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .text-metric {
-  font-size: 1.875rem;
+  font-size: var(--ds-type-h1);
   line-height: 1.2;
-  font-weight: 700;
+  font-weight: var(--ds-type-weight-bold);
   font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ds-type-tracking-display);
+}
+
+.ds-prose p + p {
+  margin-top: var(--ds-type-stack);
+}
+
+html:not(:lang(en)) {
+  --ds-type-body-leading: 1.75;
+  --ds-type-body-lg-leading: 1.8;
+  --ds-type-body-sm-leading: 1.6;
+  --ds-type-h1-leading: 1.35;
+  --ds-type-h2-leading: 1.4;
+  --ds-type-tracking-display: 0;
+  --ds-type-tracking-heading: 0;
+  --ds-type-tracking-body: 0;
+}
+
+html:lang(en) {
+  --ds-font-sans: var(--ds-font-latin);
 }

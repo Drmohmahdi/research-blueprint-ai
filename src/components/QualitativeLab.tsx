@@ -286,7 +286,7 @@ export const QualitativeLab: React.FC = () => {
             </h3>
 
             <div className="space-y-1.5 text-xs font-bold">
-              <label className="text-[10px] text-[var(--ds-text-muted)] uppercase block">
+              <label className="text-caption text-[var(--ds-text-muted)] uppercase block">
                 {language === 'ar' ? 'الصق نص المقابلة أو التفريغ الصوتي للمشارك:' : 'Paste participant transcript:'}
               </label>
               <textarea
@@ -304,14 +304,14 @@ export const QualitativeLab: React.FC = () => {
             </div>
 
             {redactionNotice && (
-              <p role="status" className="text-[10px] font-semibold text-success bg-success/10 border border-success rounded-md p-2 m-0">
+              <p role="status" className="text-caption font-semibold text-success bg-success/10 border border-success rounded-md p-2 m-0">
                 {redactionNotice}
               </p>
             )}
 
             {/* Presets Row */}
             <div className="space-y-1.5 pt-2 border-t border-[var(--ds-border-subtle)]">
-              <span className="text-[9px] text-[var(--ds-text-muted)] font-black uppercase tracking-wider block">
+              <span className="text-caption text-[var(--ds-text-muted)] font-black uppercase tracking-wider block">
                 {language === 'ar' ? 'اختر مقابلة استرشادية للتجربة:' : 'Select a sample transcript:'}
               </span>
               <div className="flex flex-col gap-1.5">
@@ -319,7 +319,7 @@ export const QualitativeLab: React.FC = () => {
                   <button
                     key={idx}
                     onClick={() => handlePresetClick(language === 'ar' ? p.textAr : p.textEn)}
-                    className="w-full text-start px-3 py-2 rounded-lg text-[10px] font-bold bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] border border-[var(--ds-border-subtle)] hover:bg-[var(--ds-primary-soft)] hover:border-[var(--ds-primary)]/30 transition-all cursor-pointer truncate"
+                    className="w-full text-start px-3 py-2 rounded-lg text-caption font-bold bg-[var(--ds-surface-secondary)] text-[var(--ds-text-secondary)] border border-[var(--ds-border-subtle)] hover:bg-[var(--ds-primary-soft)] hover:border-[var(--ds-primary)]/30 transition-all cursor-pointer truncate"
                   >
                     {language === 'ar' ? p.titleAr : p.titleEn}
                   </button>
@@ -345,7 +345,7 @@ export const QualitativeLab: React.FC = () => {
             <AlertTriangle size={18} className="shrink-0 text-warning" />
             <div className="space-y-1">
               <span>{language === 'ar' ? 'أمان البيانات النوعية:' : 'Qualitative Data Security:'}</span>
-              <p className="text-[10px] text-[var(--ds-text-secondary)] font-medium m-0 leading-normal">
+              <p className="text-caption text-[var(--ds-text-secondary)] font-medium m-0 leading-normal">
                 {language === 'ar'
                   ? 'يتم تصفية نصوص المقابلات محلياً وإزالة أي بيانات شخصية أو معايير حساسة قبل معالجتها لضمان سرية هوية أفراد العينة.'
                   : 'Transcript metadata is filtered locally to anonymize personal identifiable details before processing.'}
@@ -394,7 +394,7 @@ export const QualitativeLab: React.FC = () => {
                         <span className="text-xs font-black text-[var(--ds-text-primary)]">
                           {language === 'ar' ? theme.themeAr : theme.themeEn}
                         </span>
-                        <span className="bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] px-2.5 py-1 rounded-full font-black border border-[var(--ds-primary)]/20 text-[9px] uppercase tracking-wider">
+                        <span className="bg-[var(--ds-primary-soft)] text-[var(--ds-primary)] px-2.5 py-1 rounded-full font-black border border-[var(--ds-primary)]/20 text-caption uppercase tracking-wider">
                           {language === 'ar' ? theme.codeAr : theme.codeEn}
                         </span>
                       </div>
@@ -412,7 +412,7 @@ export const QualitativeLab: React.FC = () => {
                         <div className="flex justify-end pt-1">
                           <button
                             onClick={() => handleAddVariable(theme)}
-                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[9px] font-black bg-action hover:bg-action-hover text-on-action shadow-sm cursor-pointer"
+                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-caption font-black bg-action hover:bg-action-hover text-on-action shadow-sm cursor-pointer"
                           >
                             <Plus size={12} />
                             <span>{language === 'ar' ? 'إضافة كمتغير كمي للمشروع' : 'Add as Quantitative Variable'}</span>
@@ -433,7 +433,7 @@ export const QualitativeLab: React.FC = () => {
                       {language === 'ar' ? 'توصيات البحث المنهجي المختلط (Mixed Methods Integration)' : 'Mixed Methods Integration'}
                     </h4>
                   </div>
-                  <p className="text-[10px] text-[var(--ds-text-secondary)] leading-relaxed m-0">
+                  <p className="text-caption text-[var(--ds-text-secondary)] leading-relaxed m-0">
                     {language === 'ar'
                       ? 'يسمح لك المنهج المختلط بتحويل الظواهر المستكشفة نوعياً بمقابلاتك إلى مقاييس رقمية وتضمينها كمتغيرات لغرض النمذجة الرياضية والمحاكاة. انقر على الأزرار أعلاه لتحويل الرموز لمتغيرات كمية مباشرة.'
                       : 'Mixed methods research allows converting qualitative themes into Likert-scale metrics for statistical modeling. Click the buttons above to map themes to project variables.'}

@@ -22,7 +22,7 @@ export const EmptyActiveProject: React.FC<EmptyActiveProjectProps> = ({
   return (
     <EmptyState
       illustration={illustration}
-      title={title ?? (ar ? 'لا يوجد مشروع نشط' : 'No active project')}
+      title={title ?? (ar ? 'ابدأ بمشروع بحثي' : 'Start a research project')}
       description={description}
       actionButton={
         <Button type="button" variant="primary" size="sm" onClick={() => navigate(ROUTES.PATHS)}>

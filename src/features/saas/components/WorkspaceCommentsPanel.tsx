@@ -38,19 +38,19 @@ export const WorkspaceCommentsPanel: React.FC<WorkspaceCommentsPanelProps> = ({ 
           required
           value={newCommentText}
           onChange={(e) => setNewCommentText(e.target.value)}
-          className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-[10px] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
+          className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3 py-2 text-caption focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
         />
         <div className="flex justify-between items-center gap-2">
           <select
             value={commentPriority}
             onChange={(e) => setCommentPriority(e.target.value)}
-            className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg px-2 py-1 text-[9px] text-[var(--ds-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
+            className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-lg px-2 py-1 text-caption text-[var(--ds-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]"
           >
             <option value="NORMAL">NORMAL</option>
             <option value="HIGH">HIGH</option>
             <option value="CRITICAL">CRITICAL</option>
           </select>
-          <Button type="submit" className="px-3 py-1 rounded-xl text-[9px] font-black cursor-pointer">
+          <Button type="submit" className="px-3 py-1 rounded-xl text-caption font-black cursor-pointer">
             {language === 'ar' ? 'إرسال' : 'Send'}
           </Button>
         </div>
@@ -64,7 +64,7 @@ export const WorkspaceCommentsPanel: React.FC<WorkspaceCommentsPanelProps> = ({ 
               <span>{comm.authorUsername || 'Guest'}</span>
               <span>{new Date(comm.createdAt).toLocaleDateString()}</span>
             </div>
-            <p className="m-0 mt-1 text-[10px] text-[var(--ds-text-secondary)] leading-relaxed font-semibold">{comm.contentAr}</p>
+            <p className="m-0 mt-1 text-caption text-[var(--ds-text-secondary)] leading-relaxed font-semibold">{comm.contentAr}</p>
             <div className="flex justify-between items-center mt-2">
               <span className={`px-1.5 py-0.5 rounded text-[7px] font-black uppercase ${
                 comm.priority === 'CRITICAL' ? 'bg-danger/10 text-danger' : 'bg-warning/10 text-warning'

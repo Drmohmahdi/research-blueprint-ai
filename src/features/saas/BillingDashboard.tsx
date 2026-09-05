@@ -27,12 +27,12 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
       const bill = await apiGetBilling();
       const list = await apiListPlans();
       if (!bill && !list) {
-        setError(language === 'ar' ? 'تعذر تحميل بيانات الاشتراك.' : 'Could not load billing data.');
+        setError(language === 'ar' ? 'تعذر تحميل بيانات الاشتراك. حدّث الصفحة أو اطلب المساعدة من مالك المؤسسة.' : 'Could not load billing. Refresh the page or ask the organization owner for help.');
       }
       if (bill) setBilling(bill);
       if (list) setPlans(list);
     } catch {
-      setError(language === 'ar' ? 'تعذر تحميل بيانات الاشتراك.' : 'Could not load billing data.');
+      setError(language === 'ar' ? 'تعذر تحميل بيانات الاشتراك. حدّث الصفحة أو اطلب المساعدة من مالك المؤسسة.' : 'Could not load billing. Refresh the page or ask the organization owner for help.');
     } finally {
       setLoading(false);
     }
@@ -113,8 +113,8 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
 
       <div role="status" className="rounded-2xl border border-[var(--ds-information)]/25 bg-[var(--ds-information-soft)] p-3.5 text-xs font-semibold text-[var(--ds-text-primary)]">
         {language === 'ar'
-          ? 'بيئة الدفع الحالية تجريبية؛ لا تُحصّل أي مبالغ حقيقية من هذه الشاشة ما لم ينقلك الخادم صراحةً إلى بوابة دفع حية.'
-          : 'The current payment environment is sandboxed. No real charge is collected from this screen unless the server explicitly redirects you to a live payment gateway.'}
+          ? 'الدفع من هذه الشاشة تجريبي الآن، ولن يُحصَّل مبلغ حقيقي إلا إذا نُقلت إلى بوابة دفع رسمية.'
+          : 'Checkout on this screen is in trial mode. You are not charged unless you are sent to an official payment page.'}
       </div>
 
       {/* Subscription and Usage Summary */}
@@ -123,7 +123,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
         {/* Active subscription card */}
         <Card className="lg:col-span-1 p-6 border-[var(--ds-border-subtle)] rounded-2xl bg-[var(--ds-surface-primary)] relative">
           <div className="space-y-4">
-            <span className="text-[10px] font-black text-[var(--ds-text-muted)] uppercase tracking-widest block">
+            <span className="text-caption font-black text-[var(--ds-text-muted)] uppercase tracking-widest block">
               {language === 'ar' ? 'الاشتراك الحالي' : 'Current Subscription'}
             </span>
             <div className="flex items-center gap-3">
@@ -132,7 +132,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
               </div>
               <div>
                 <h4 className="text-h4 m-0">{activePlan ? activePlan.name : (quota.plan_name || 'Free Plan')}</h4>
-                <div className="text-[10px] text-[var(--ds-text-muted)] font-semibold mt-0.5">
+                <div className="text-caption text-[var(--ds-text-muted)] font-semibold mt-0.5">
                   {activeSub?.status === 'ACTIVE' 
                     ? (language === 'ar' ? 'استحقاقات الخطة نشطة' : 'Plan entitlements active') 
                     : (language === 'ar' ? 'منتهي أو ملغي' : 'Expired / Cancelled')}
@@ -159,7 +159,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
 
         {/* Usage meters card */}
         <Card className="lg:col-span-2 p-6 border-[var(--ds-border-subtle)] rounded-2xl bg-[var(--ds-surface-primary)]">
-          <span className="text-[10px] font-black text-[var(--ds-text-muted)] uppercase tracking-widest block mb-4">
+          <span className="text-caption font-black text-[var(--ds-text-muted)] uppercase tracking-widest block mb-4">
             {language === 'ar' ? 'استهلاك الحصص والحدود' : 'Entitlements & Usage Limits'}
           </span>
           <div className="space-y-6">
@@ -228,7 +228,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
                 <div className="space-y-5">
                   <div>
                     <h4 className="text-h4 m-0">{plan.name}</h4>
-                    <p className="text-[10px] text-[var(--ds-text-muted)] font-semibold mt-1 leading-relaxed">
+                    <p className="text-caption text-[var(--ds-text-muted)] font-semibold mt-1 leading-relaxed">
                       {plan.description}
                     </p>
                   </div>
@@ -308,7 +308,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
                       <td className="px-6 py-4">{new Date(inv.created_at).toLocaleDateString()}</td>
                       <td className="px-6 py-4 text-ink ds-numeric">{inv.amount} {inv.currency}</td>
                       <td className="px-6 py-4">
-                        <span className="px-2.5 py-0.5 rounded-full bg-[var(--ds-success-soft)] text-success border border-success/20 text-[10px] font-extrabold">
+                        <span className="px-2.5 py-0.5 rounded-full bg-[var(--ds-success-soft)] text-success border border-success/20 text-caption font-extrabold">
                           {inv.status}
                         </span>
                       </td>

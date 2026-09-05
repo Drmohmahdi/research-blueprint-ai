@@ -70,12 +70,12 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
 
         <div className="flex items-center gap-2 shrink-0">
           {isCompleted ? (
-            <Button variant="secondary" onClick={handleMarkStepIncomplete} className="px-3.5 py-1.5 text-[10px] font-black rounded-xl text-success cursor-pointer">
+            <Button variant="secondary" onClick={handleMarkStepIncomplete} className="px-3.5 py-1.5 text-caption font-black rounded-xl text-success cursor-pointer">
               <Check size={12} />
               <span>{language === 'ar' ? 'مكتملة ✓' : 'Completed ✓'}</span>
             </Button>
           ) : (
-            <Button variant="primary" onClick={handleMarkStepCompleted} className="px-3.5 py-1.5 text-[10px] font-black rounded-xl cursor-pointer">
+            <Button variant="primary" onClick={handleMarkStepCompleted} className="px-3.5 py-1.5 text-caption font-black rounded-xl cursor-pointer">
               <span>{language === 'ar' ? 'تحديد كمكتملة' : 'Mark Completed'}</span>
             </Button>
           )}
@@ -91,7 +91,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
             <div className="space-y-4 text-xs font-bold">
               <div className="grid grid-cols-1 gap-4">
                 <div>
-                  <label className="text-[10px] text-[var(--ds-text-secondary)] block mb-1">{language === 'ar' ? 'عنوان البحث بالعربية' : 'Research Title (Arabic)'}</label>
+                  <label className="text-caption text-[var(--ds-text-secondary)] block mb-1">{language === 'ar' ? 'عنوان البحث بالعربية' : 'Research Title (Arabic)'}</label>
                   <input
                     type="text"
                     value={activeProject.titleAr}
@@ -100,7 +100,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] text-[var(--ds-text-secondary)] block mb-1">{language === 'ar' ? 'عنوان البحث بالإنجليزية' : 'Research Title (English)'}</label>
+                  <label className="text-caption text-[var(--ds-text-secondary)] block mb-1">{language === 'ar' ? 'عنوان البحث بالإنجليزية' : 'Research Title (English)'}</label>
                   <input
                     type="text"
                     value={activeProject.titleEn}
@@ -109,7 +109,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] text-[var(--ds-text-secondary)] block mb-1">{language === 'ar' ? 'مقدمة / ملخص الفكرة البحثية (العربية)' : 'Abstract / Idea summary (Arabic)'}</label>
+                  <label className="text-caption text-[var(--ds-text-secondary)] block mb-1">{language === 'ar' ? 'مقدمة / ملخص الفكرة البحثية (العربية)' : 'Abstract / Idea summary (Arabic)'}</label>
                   <textarea
                     rows={4}
                     value={descriptionAr}
@@ -132,7 +132,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
           {activeStep === 'problemGap' && (
             <div className="space-y-4 text-xs font-bold">
               <div>
-                <label className="text-[10px] text-[var(--ds-text-secondary)] block mb-1">{language === 'ar' ? 'صياغة مشكلة البحث وتبرير فجوتها العلمية' : 'Formulate problem statement and justify the study gap'}</label>
+                <label className="text-caption text-[var(--ds-text-secondary)] block mb-1">{language === 'ar' ? 'صياغة مشكلة البحث وتبرير فجوتها العلمية' : 'Formulate problem statement and justify the study gap'}</label>
                 <textarea
                   rows={6}
                   value={problemStatementAr}
@@ -151,7 +151,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
           {activeStep === 'objectives' && (
             <div className="space-y-4 text-xs font-bold">
               <div>
-                <label className="text-[10px] text-[var(--ds-text-secondary)] block mb-1">{language === 'ar' ? 'الأهداف البحثية العامة والفرعية' : 'Define general and specific objectives'}</label>
+                <label className="text-caption text-[var(--ds-text-secondary)] block mb-1">{language === 'ar' ? 'الأهداف البحثية العامة والفرعية' : 'Define general and specific objectives'}</label>
                 <textarea
                   rows={6}
                   value={objectives}
@@ -280,7 +280,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
           {activeStep === 'methodologyDesign' && (
             <div className="space-y-4 text-xs font-bold">
               <div>
-                <label className="text-[10px] text-[var(--ds-text-secondary)] block mb-1">{language === 'ar' ? 'اختر تصميم الدراسة' : 'Select Study Design'}</label>
+                <label className="text-caption text-[var(--ds-text-secondary)] block mb-1">{language === 'ar' ? 'اختر تصميم الدراسة' : 'Select Study Design'}</label>
                 <select
                   value={activeProject.studyDesign}
                   onChange={(e) => updateProject({ ...activeProject, studyDesign: e.target.value as any })}
@@ -320,7 +320,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
             <div className="space-y-4 text-xs font-bold">
               <div className="grid grid-cols-1 gap-4">
                 <div>
-                  <label className="text-[10px] text-[var(--ds-text-secondary)] block mb-1">{language === 'ar' ? 'الموافقات الرسمية وإجراءات سرية البيانات' : 'Official ethical approvals and privacy procedures'}</label>
+                  <label className="text-caption text-[var(--ds-text-secondary)] block mb-1">{language === 'ar' ? 'الموافقات الرسمية وإجراءات سرية البيانات' : 'Official ethical approvals and privacy procedures'}</label>
                   <textarea
                     rows={3}
                     value={ethics}
@@ -329,7 +329,7 @@ export const WorkspaceStepContent: React.FC<WorkspaceStepContentProps> = ({ engi
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] text-[var(--ds-text-secondary)] block mb-1">{language === 'ar' ? 'الجدول الزمني للتدخل وإجراءات تقليل الفاقد' : 'Timeline for intervention implementation'}</label>
+                  <label className="text-caption text-[var(--ds-text-secondary)] block mb-1">{language === 'ar' ? 'الجدول الزمني للتدخل وإجراءات تقليل الفاقد' : 'Timeline for intervention implementation'}</label>
                   <textarea
                     rows={3}
                     value={timeline}

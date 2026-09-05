@@ -57,6 +57,7 @@ def test_readiness_reports_optional_providers_truthfully():
     assert response.status_code == 200
     body = response.json()
     assert body["database"] == "ready"
+    assert body["storage"] in {"ready", "not_ready"}
     assert body["ai_live_provider"] in {"configured", "not_configured"}
     assert body["payment_live_provider"] in {"configured", "not_configured"}
     assert body["email_live_provider"] in {"configured", "not_configured"}

@@ -166,7 +166,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
               <Building2 size={24} />
             </div>
             <div>
-              <span className="text-[10px] font-black text-[var(--ds-text-muted)] uppercase tracking-widest block">
+              <span className="text-caption font-black text-[var(--ds-text-muted)] uppercase tracking-widest block">
                 {language === 'ar' ? 'مساحة العمل النشطة' : 'Active Workspace'}
               </span>
               <h3 className="text-h3 text-[var(--ds-text-primary)] m-0">
@@ -237,7 +237,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
               </div>
               
               <div>
-                <label className="text-[10px] font-black text-[var(--ds-text-muted)] uppercase tracking-wider block mb-1">
+                <label className="text-caption font-black text-[var(--ds-text-muted)] uppercase tracking-wider block mb-1">
                   {language === 'ar' ? 'المؤسسة الأب (اختياري):' : 'Parent Organization (Optional):'}
                 </label>
                 <select
@@ -270,7 +270,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
                   <div key={invite.id} className="p-3.5 bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-2xl flex items-center justify-between gap-4">
                     <div>
                       <div className="text-xs font-black">{invite.email}</div>
-                      <div className="text-[10px] text-[var(--ds-text-muted)] font-semibold mt-1">
+                      <div className="text-caption text-[var(--ds-text-muted)] font-semibold mt-1">
                         {language === 'ar' ? `الدور المقترح: ${invite.role}` : `Role: ${invite.role}`}
                       </div>
                     </div>
@@ -297,7 +297,7 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
               </Button>
             </form>
             {issuedToken && (
-              <p className="mt-3 m-0 text-[10px] font-bold text-[var(--ds-text-secondary)] break-all">
+              <p className="mt-3 m-0 text-caption font-bold text-[var(--ds-text-secondary)] break-all">
                 {language === 'ar' ? 'آخر رمز صادر:' : 'Last issued token:'} {issuedToken}
               </p>
             )}
@@ -316,9 +316,9 @@ export const OrganizationSwitcher: React.FC<OrganizationSwitcherProps> = ({ lang
                 <div key={member.id} className="p-3 bg-[var(--ds-surface-secondary)] rounded-2xl flex items-center justify-between gap-4 border border-[var(--ds-border-subtle)]">
                   <div>
                     <div className="text-xs font-black">{member.username}</div>
-                    <div className="text-[10px] text-[var(--ds-text-muted)] font-semibold mt-0.5">{canViewPii ? member.email : '—'}</div>
+                    <div className="text-caption text-[var(--ds-text-muted)] font-semibold mt-0.5">{canViewPii ? member.email : '—'}</div>
                   </div>
-                  <div className="px-3 py-1 rounded-full bg-[var(--ds-information-soft)] text-[var(--ds-information)] text-[10px] font-extrabold uppercase border border-info/20">
+                  <div className="px-3 py-1 rounded-full bg-[var(--ds-information-soft)] text-[var(--ds-information)] text-caption font-extrabold uppercase border border-info/20">
                     {member.role}
                   </div>
                 </div>

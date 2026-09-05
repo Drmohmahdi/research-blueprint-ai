@@ -1,10 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Brain, ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
-
-const CONTACT_EMAIL = 'info@ehaastore.com';
-const CONTACT_PHONE = '0566007625';
+import { PublicFooter, PublicHeader } from './PublicChrome';
+import { CONTACT_EMAIL, CONTACT_PHONE } from './contact';
 const LAST_UPDATED = '2026-09-05';
 
 interface Section {
@@ -181,21 +180,14 @@ export const PrivacyPolicy: React.FC = () => {
   const BackIcon = isAr ? ArrowRight : ArrowLeft;
 
   return (
-    <div className="min-h-screen bg-[var(--ds-background-canvas)]" dir={isAr ? 'rtl' : 'ltr'}>
-      <header className="border-b border-[var(--ds-border-subtle)] bg-[var(--ds-surface-elevated)]">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5 no-underline text-inherit">
-            <div className="p-2 rounded-xl bg-action text-on-action"><Brain size={16} /></div>
-            <span className="text-sm font-black">{isAr ? 'بصيرة للبحث العلمي' : 'Baseerah Academic Suite'}</span>
-          </Link>
-          <Link to="/" className="flex items-center gap-1.5 text-body-sm font-bold text-[var(--ds-text-secondary)] no-underline hover:text-[var(--ds-primary)]">
-            <BackIcon size={15} />
-            {isAr ? 'العودة للرئيسية' : 'Back to home'}
-          </Link>
-        </div>
-      </header>
+    <div className="min-h-screen bg-[var(--ds-background-canvas)] flex flex-col" dir={isAr ? 'rtl' : 'ltr'}>
+      <PublicHeader isAr={isAr} />
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
+      <main className="ds-measure mx-auto px-4 sm:px-6 py-12 flex-1 w-full">
+        <Link to="/" className="inline-flex items-center gap-1.5 text-caption font-semibold text-[var(--ds-text-secondary)] no-underline hover:text-[var(--ds-primary)] mb-6">
+          <BackIcon size={15} />
+          {isAr ? 'العودة للرئيسية' : 'Back to home'}
+        </Link>
         <h1 className="text-display-lg m-0 mb-2">{isAr ? 'سياسة الخصوصية' : 'Privacy Policy'}</h1>
         <p className="text-caption text-[var(--ds-text-muted)] m-0 mb-10">
           {isAr ? `آخر تحديث: ${LAST_UPDATED}` : `Last updated: ${LAST_UPDATED}`}
@@ -219,6 +211,7 @@ export const PrivacyPolicy: React.FC = () => {
           </section>
         </div>
       </main>
+      <PublicFooter isAr={isAr} />
     </div>
   );
 };

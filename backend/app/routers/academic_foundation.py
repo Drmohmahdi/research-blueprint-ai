@@ -109,7 +109,7 @@ def get_public_profile(username: str, db: Session = Depends(get_db)):
         ScholarlyAsset.owner_user_id == user.id,
         ScholarlyAsset.visibility == "PUBLIC",
         ScholarlyAsset.lifecycle_status == "PUBLISHED"
-    ).order_by(ScholarlyAsset.publication_date.desc()).all()
+    ).order_by(ScholarlyAsset.publication_date.desc()).limit(100).all()
 
     submitted = compute_publication_provenance(db, [a.id for a in assets])
     public_assets = []
@@ -346,7 +346,7 @@ def list_scholarly_assets(
     else:
         query = query.filter(ScholarlyAsset.owner_user_id == context.user.id)
 
-    assets = query.order_by(ScholarlyAsset.created_at.desc()).all()
+    assets = query.order_by(ScholarlyAsset.created_at.desc()).limit(200).all()
     submitted = compute_publication_provenance(db, [a.id for a in assets])
     results = []
     for a in assets:

@@ -36,15 +36,15 @@ export const ResearchDesignStepper: React.FC<ResearchDesignStepperProps> = ({
   const getStatusBadge = (status: StepStatus) => {
     switch (status) {
       case 'COMPLETED':
-        return <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-success/10 text-success">{isAr ? 'مكتمل' : 'Done'}</span>;
+        return <span className="px-1.5 py-0.5 text-caption font-bold rounded bg-success/10 text-success">{isAr ? 'مكتمل' : 'Done'}</span>;
       case 'IN_PROGRESS':
-        return <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-[var(--ds-information-soft)] text-[var(--ds-information)]">{isAr ? 'قيد العمل' : 'Progress'}</span>;
+        return <span className="px-1.5 py-0.5 text-caption font-bold rounded bg-[var(--ds-information-soft)] text-[var(--ds-information)]">{isAr ? 'قيد العمل' : 'Progress'}</span>;
       case 'NEEDS_REVIEW':
-        return <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-warning/10 text-warning">{isAr ? 'مراجعة' : 'Review'}</span>;
+        return <span className="px-1.5 py-0.5 text-caption font-bold rounded bg-warning/10 text-warning">{isAr ? 'مراجعة' : 'Review'}</span>;
       case 'BLOCKED':
-        return <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-danger/10 dark:bg-danger/10 text-danger">{isAr ? 'محظور' : 'Blocked'}</span>;
+        return <span className="px-1.5 py-0.5 text-caption font-bold rounded bg-danger/10 dark:bg-danger/10 text-danger">{isAr ? 'محظور' : 'Blocked'}</span>;
       default:
-        return <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-surface-subtle text-[var(--ds-text-secondary)]">{isAr ? 'جديد' : 'New'}</span>;
+        return <span className="px-1.5 py-0.5 text-caption font-bold rounded bg-surface-subtle text-[var(--ds-text-secondary)]">{isAr ? 'جديد' : 'New'}</span>;
     }
   };
 

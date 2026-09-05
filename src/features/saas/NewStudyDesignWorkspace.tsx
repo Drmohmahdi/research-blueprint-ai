@@ -73,11 +73,11 @@ export const NewStudyDesignWorkspace: React.FC = () => {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-md text-[9px] font-black bg-[var(--ds-primary-soft)] border border-[var(--ds-primary)]/25 text-[var(--ds-primary)] tracking-wider">
+              <span className="px-2.5 py-0.5 rounded-md text-caption font-black bg-[var(--ds-primary-soft)] border border-[var(--ds-primary)]/25 text-[var(--ds-primary)] tracking-wider">
                 {language === 'ar' ? 'مساحة تصميم الدراسة' : 'STUDY DESIGN WORKSPACE'}
               </span>
               {isSecureMode && (
-                <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--ds-success-soft)] text-[var(--ds-success)] border border-[var(--ds-success)]/30 text-[9px] font-bold">
+                <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--ds-success-soft)] text-[var(--ds-success)] border border-[var(--ds-success)]/30 text-caption font-bold">
                   <Unlock size={10} />
                   <span>{language === 'ar' ? 'وضع آمن' : 'SECURE'}</span>
                 </div>
@@ -133,7 +133,7 @@ export const NewStudyDesignWorkspace: React.FC = () => {
           { key: 'readiness', labelAr: 'جاهزية النشر', labelEn: 'Ready Score', val: activeProject.preRegistrationLockedAt ? '92%' : '64%', col: 'text-ink' }
         ].map((m) => (
           <Card key={m.key} className="p-3 text-center border-[var(--ds-border-subtle)] space-y-1 rounded-2xl shadow-sm">
-            <span className="text-[10px] font-bold text-[var(--ds-text-muted)] uppercase block truncate">
+            <span className="text-caption font-bold text-[var(--ds-text-muted)] uppercase block truncate">
               {language === 'ar' ? m.labelAr : m.labelEn}
             </span>
             <span className={`text-base font-black ${m.col} block`}>{m.val}</span>

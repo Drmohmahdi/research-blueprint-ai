@@ -72,6 +72,11 @@ export const AdminCenter: React.FC = () => {
   const saveSettings = async () => {
     setSaving(true);
     setSaveMessage('');
+    if (contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail.trim())) {
+      setSaveMessage(language === 'ar' ? 'أدخل بريد تواصل صالحًا' : 'Enter a valid contact email');
+      setSaving(false);
+      return;
+    }
     const updates: Record<string, unknown> = {
       'platform.title_ar': platformTitleAr,
       'platform.title_en': platformTitleEn,
@@ -172,7 +177,7 @@ export const AdminCenter: React.FC = () => {
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className="text-[10px] font-black text-[var(--ds-text-primary)] truncate max-w-[120px]">{status?.ai_provider?.includes('LIVE') ? (language === 'ar' ? 'موفر مباشر' : 'Live') : (language === 'ar' ? 'محاكي' : 'Fake')}</span>
               <span className={`px-1.5 py-0.5 rounded-md text-[8px] font-black uppercase ${status?.ai_provider?.includes('LIVE') ? 'bg-[var(--ds-success-soft)] text-success' : 'bg-warning/10 text-warning'}`}>
-                {status?.ai_provider?.includes('LIVE') ? 'لive' : 'fake'}
+                {status?.ai_provider?.includes('LIVE') ? 'Live' : 'fake'}
               </span>
             </div>
           </div>
@@ -242,28 +247,28 @@ export const AdminCenter: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-bold text-secondary">
                   <div className="space-y-1">
-                    <label className="text-[10px] text-muted block">{language === 'ar' ? 'اسم المنصة بالعربية' : 'Arabic Platform Title'}</label>
-                    <input type="text" value={platformTitleAr} onChange={e => setPlatformTitleAr(e.target.value)}
+                    <label htmlFor="admin-title-ar" className="text-[10px] text-muted block">{language === 'ar' ? 'اسم المنصة بالعربية' : 'Arabic Platform Title'}</label>
+                    <input id="admin-title-ar" type="text" value={platformTitleAr} onChange={e => setPlatformTitleAr(e.target.value)} maxLength={120}
                       className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3.5 py-2.5 text-ink focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] text-muted block">{language === 'ar' ? 'اسم المنصة بالإنجليزية' : 'English Platform Title'}</label>
-                    <input type="text" value={platformTitleEn} onChange={e => setPlatformTitleEn(e.target.value)}
+                    <label htmlFor="admin-title-en" className="text-[10px] text-muted block">{language === 'ar' ? 'اسم المنصة بالإنجليزية' : 'English Platform Title'}</label>
+                    <input id="admin-title-en" type="text" value={platformTitleEn} onChange={e => setPlatformTitleEn(e.target.value)} maxLength={120}
                       className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3.5 py-2.5 text-ink focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] text-muted block">{language === 'ar' ? 'البريد الإلكتروني للتواصل' : 'Contact Email'}</label>
-                    <input type="email" value={contactEmail} onChange={e => setContactEmail(e.target.value)} dir="ltr"
+                    <label htmlFor="admin-contact-email" className="text-[10px] text-muted block">{language === 'ar' ? 'البريد الإلكتروني للتواصل' : 'Contact Email'}</label>
+                    <input id="admin-contact-email" type="email" value={contactEmail} onChange={e => setContactEmail(e.target.value)} dir="ltr" maxLength={254}
                       className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3.5 py-2.5 text-ink focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] text-muted block">{language === 'ar' ? 'رقم الجوال للتواصل' : 'Contact Phone'}</label>
-                    <input type="text" value={contactPhone} onChange={e => setContactPhone(e.target.value)} dir="ltr"
+                    <label htmlFor="admin-contact-phone" className="text-[10px] text-muted block">{language === 'ar' ? 'رقم الجوال للتواصل' : 'Contact Phone'}</label>
+                    <input id="admin-contact-phone" type="tel" value={contactPhone} onChange={e => setContactPhone(e.target.value)} dir="ltr" maxLength={32}
                       className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3.5 py-2.5 text-ink focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] text-muted block">{language === 'ar' ? 'نموذج الذكاء الاصطناعي الافتراضي' : 'Default AI Model'}</label>
-                    <select value={aiModel} onChange={e => setAiModel(e.target.value)}
+                    <label htmlFor="admin-ai-model" className="text-[10px] text-muted block">{language === 'ar' ? 'نموذج الذكاء الاصطناعي الافتراضي' : 'Default AI Model'}</label>
+                    <select id="admin-ai-model" value={aiModel} onChange={e => setAiModel(e.target.value)}
                       className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3.5 py-2.5 text-ink focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]">
                       <option value="gemini-2.0-flash">gemini-2.0-flash (Recommended)</option>
                       <option value="gemini-1.5-pro">gemini-1.5-pro (Deep Reasoning)</option>
@@ -273,13 +278,13 @@ export const AdminCenter: React.FC = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] text-muted block">{language === 'ar' ? 'إعلان المنصة (عربي)' : 'Platform Announcement (Arabic)'}</label>
-                  <textarea value={announcementAr} onChange={e => setAnnouncementAr(e.target.value)} rows={2}
+                  <label htmlFor="admin-announcement-ar" className="text-[10px] text-muted block">{language === 'ar' ? 'إعلان المنصة (عربي)' : 'Platform Announcement (Arabic)'}</label>
+                  <textarea id="admin-announcement-ar" value={announcementAr} onChange={e => setAnnouncementAr(e.target.value)} rows={2} maxLength={500}
                     className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3.5 py-2.5 text-ink text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] text-muted block">{language === 'ar' ? 'إعلان المنصة (إنجليزي)' : 'Platform Announcement (English)'}</label>
-                  <textarea value={announcementEn} onChange={e => setAnnouncementEn(e.target.value)} rows={2}
+                  <label htmlFor="admin-announcement-en" className="text-[10px] text-muted block">{language === 'ar' ? 'إعلان المنصة (إنجليزي)' : 'Platform Announcement (English)'}</label>
+                  <textarea id="admin-announcement-en" value={announcementEn} onChange={e => setAnnouncementEn(e.target.value)} rows={2} maxLength={500}
                     className="w-full bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl px-3.5 py-2.5 text-ink text-xs focus:outline-none focus:ring-2 focus:ring-[var(--ds-primary-soft)]" />
                 </div>
 
@@ -302,7 +307,7 @@ export const AdminCenter: React.FC = () => {
                     <Layers size={16} className="text-path-identity" />
                     <span>{language === 'ar' ? 'مفاتيح الميزات (Feature Flags)' : 'Platform Feature Flags'}</span>
                   </h3>
-                  <p className="text-[10px] text-muted font-bold leading-normal mt-1 m-0">
+                  <p className="text-caption text-muted font-bold leading-normal mt-1 m-0">
                     {language === 'ar' ? 'تمكين أو تعطيل أجزاء من النظام بشكل فوري. التغييرات محفوظة على الخادم وتنعكس فورًا على جميع المستخدمين.' : 'Instantly toggle frontend routes and experimental features. Changes are persisted server-side and affect all users.'}
                   </p>
                 </div>
@@ -314,7 +319,7 @@ export const AdminCenter: React.FC = () => {
                       <div key={key} className="p-3 rounded-xl border border-[var(--ds-border-subtle)] bg-[var(--ds-surface-secondary)]/50 flex justify-between items-center gap-4 hover:border-subtle transition-all">
                         <div>
                           <div className="text-[11px] font-black text-ink">{key}</div>
-                          <div className="text-[9px] text-muted font-bold leading-none mt-1">
+                          <div className="text-caption text-muted font-bold leading-none mt-1">
                             {language === 'ar' ? (currentValue ? 'مفعل' : 'معطل') : (currentValue ? 'Enabled' : 'Disabled')}
                           </div>
                         </div>

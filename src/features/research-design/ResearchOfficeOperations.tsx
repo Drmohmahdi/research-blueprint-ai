@@ -37,8 +37,8 @@ export const ResearchOfficeOperations: React.FC<ResearchOfficeOperationsProps> =
       } else {
         setData(res);
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed');
+    } catch {
+      setError(isAr ? 'تعذر تحميل عمليات مكتب البحث. أعد المحاولة.' : 'Could not load research office operations. Try again.');
     } finally {
       setLoading(false);
     }
@@ -111,7 +111,7 @@ export const ResearchOfficeOperations: React.FC<ResearchOfficeOperationsProps> =
         <div className="bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] rounded-xl p-4 space-y-2" data-testid="office-readiness">
           <h3 className="text-h3 text-[var(--ds-text-secondary)] uppercase">{t('توزيع الجاهزية', 'Readiness distribution')}</h3>
           {Object.keys(readiness).length === 0 ? (
-            <p className="text-caption text-[var(--ds-text-secondary)]">{t('لا بيانات', 'No data')}</p>
+            <p className="text-caption text-[var(--ds-text-secondary)]">{t('لا توجد مشاريع في قائمة انتظار المكتب البحثي بعد.', 'No projects are waiting in the research office queue yet.')}</p>
           ) : (
             Object.entries(readiness).map(([k, v]) => (
               <div key={k} className="flex items-center justify-between text-xs">
@@ -158,7 +158,7 @@ export const ResearchOfficeOperations: React.FC<ResearchOfficeOperationsProps> =
             {(data.projects ?? []).map((p, i) => (
               <tr key={i} className="border-b border-[var(--ds-border-subtle)]" data-testid={`office-project-${i}`}>
                 <td className="py-2 font-semibold text-[var(--ds-text-primary)]">{String(p.title_en ?? p.title_ar ?? p.id ?? '')}</td>
-                <td className="py-2"><span className={`px-2 py-0.5 rounded text-[10px] font-bold ${String(p.readiness_status) === 'READY' ? 'bg-[var(--ds-surface-secondary)] text-[var(--ds-success)]' : 'bg-[var(--ds-surface-secondary)] text-[var(--ds-danger)]'}`}>{String(p.readiness_status ?? '')}</span> {String(p.readiness_score ?? '')}%</td>
+                <td className="py-2"><span className={`px-2 py-0.5 rounded text-caption font-bold ${String(p.readiness_status) === 'READY' ? 'bg-[var(--ds-surface-secondary)] text-[var(--ds-success)]' : 'bg-[var(--ds-surface-secondary)] text-[var(--ds-danger)]'}`}>{String(p.readiness_status ?? '')}</span> {String(p.readiness_score ?? '')}%</td>
                 <td className="py-2 text-[var(--ds-text-primary)]">{String(p.blocker_count ?? 0)}</td>
                 <td className="py-2 text-[var(--ds-text-primary)]">{String(p.protocol_status ?? 'NO_PROTOCOL')}</td>
               </tr>

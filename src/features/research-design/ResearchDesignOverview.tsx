@@ -151,7 +151,7 @@ export const ResearchDesignOverview: React.FC<ResearchDesignOverviewProps> = ({
                 </span>
                 <span className={`text-base font-black ${ind.color}`}>{ind.value}</span>
               </div>
-              <p className="text-[10px] text-[var(--ds-text-secondary)] leading-relaxed border-t border-[var(--ds-border-subtle)] pt-1.5 mt-1">
+              <p className="text-caption text-[var(--ds-text-secondary)] leading-relaxed border-t border-[var(--ds-border-subtle)] pt-1.5 mt-1">
                 {isAr ? ind.explanationAr : ind.explanationEn}
               </p>
             </div>

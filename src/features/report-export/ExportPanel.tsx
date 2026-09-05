@@ -68,8 +68,8 @@ export const ExportPanel: React.FC = () => {
         filename: res.filename,
         integrityHash: res.integrityHash
       });
-    } catch (e: any) {
-      setErrorMsg(e?.message || (isAr ? 'حدث خطأ أثناء تنزيل الملف' : 'An error occurred during file download'));
+    } catch {
+      setErrorMsg(isAr ? 'حدث خطأ أثناء تنزيل الملف' : 'An error occurred during file download');
     } finally {
       setIsGenerating(false);
     }
@@ -120,7 +120,7 @@ export const ExportPanel: React.FC = () => {
         <Card className="p-6 bg-[var(--ds-surface-primary)] border border-[var(--ds-border-subtle)] rounded-2xl space-y-5 lg:col-span-2">
           <h3 className="text-h3 text-[var(--ds-text-primary)] m-0 pb-3 border-b border-[var(--ds-border-subtle)] flex items-center justify-between">
             <span>{isAr ? 'إعدادات وثيقة التقرير' : 'Report Document Configuration'}</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--ds-surface-secondary)] text-secondary font-mono">
+            <span className="text-caption px-2 py-0.5 rounded-full bg-[var(--ds-surface-secondary)] text-secondary font-mono">
               Phase 05 Engine
             </span>
           </h3>
@@ -215,7 +215,7 @@ export const ExportPanel: React.FC = () => {
             <div className="text-[var(--ds-text-secondary)] truncate">
               {isAr ? activeProject.titleAr : activeProject.titleEn}
             </div>
-            <div className="text-[10px] text-[var(--ds-text-muted)] flex gap-4 pt-1">
+            <div className="text-caption text-[var(--ds-text-muted)] flex gap-4 pt-1">
               <span>ID: <code className="font-mono">{activeProject.id}</code></span>
               <span>Design: {activeProject.studyDesign}</span>
             </div>
@@ -257,7 +257,7 @@ export const ExportPanel: React.FC = () => {
           )}
 
           {lastGenerated?.integrityHash && (
-            <div className="p-3 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-[10px] text-ink font-mono flex items-center gap-2 break-all">
+            <div className="p-3 rounded-xl bg-[var(--ds-surface-secondary)] border border-[var(--ds-border-subtle)] text-caption text-ink font-mono flex items-center gap-2 break-all">
               <ShieldCheck size={14} className="shrink-0 text-secondary" />
               <span>SHA-256 Integrity: {lastGenerated.integrityHash}</span>
             </div>
