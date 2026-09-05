@@ -487,7 +487,7 @@ export const LayoutV2: React.FC<LayoutV2Props> = ({ children }) => {
               {language === 'ar' ? 'ب' : 'B'}
             </div>
             <div className="min-w-0">
-              <div className="max-w-[92px] truncate text-xs font-black leading-none tracking-tight text-[var(--ds-text-primary)] min-[380px]:max-w-[130px] sm:max-w-[180px] lg:max-w-none sm:text-base">
+              <div className="max-w-[92px] truncate text-xs font-black leading-tight tracking-tight text-[var(--ds-text-primary)] min-[380px]:max-w-[130px] sm:max-w-[180px] lg:max-w-none sm:text-base">
                 {getTranslation(language, 'title')}
               </div>
               <p className="text-[10px] text-[var(--ds-text-muted)] m-0 mt-1.5 hidden sm:block font-bold">
