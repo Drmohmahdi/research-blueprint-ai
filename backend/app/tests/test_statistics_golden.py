@@ -79,8 +79,6 @@ class TestPowerSampleSize:
 class TestCohensD:
     def test_cohens_d_known_values(self):
         """M1=76, M2=54, SD pooled ≈ 15.52 → d ≈ 1.417"""
-        group_a = [76.0] * 30  # simplified: all same value for exact test
-        group_b = [54.0] * 30
         # With real data:
         import numpy as np
         np.random.seed(42)

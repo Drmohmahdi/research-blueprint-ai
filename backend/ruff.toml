@@ -1,0 +1,7 @@
+# Deliberately narrow: only the rule categories already cleaned to zero
+# across the codebase (2026-09-05). Broadening this set is a separate,
+# deliberate decision — each new category should be reviewed and the
+# existing codebase brought to zero under it before being added here,
+# the same way F401/F811/F841/F541 were.
+[lint]
+select = ["F401", "F811", "F841", "F541"]

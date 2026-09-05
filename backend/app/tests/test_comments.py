@@ -57,7 +57,7 @@ def client():
 
 def test_comment_creation_and_isolation(client):
     # 1. Register User A
-    res = client.post("/api/auth/register", json={
+    client.post("/api/auth/register", json={
         "username": "comment_user_a", "password": "securepassword123",
         "email": "a@example.com", "role": "Researcher"
     })
@@ -87,7 +87,7 @@ def test_comment_creation_and_isolation(client):
     }
     res_comment = client.post("/api/comments", json=comment_payload, headers=headers_a)
     assert res_comment.status_code == 200
-    comment_id = res_comment.json()["id"]
+    res_comment.json()["id"]
     
     # 6. List Comments for Project (User A)
     res_list = client.get(f"/api/comments/project/{proj_id}", headers=headers_a)

@@ -90,7 +90,7 @@ def test_postgresql_cross_tenant_dataset_and_analysis_idor_are_blocked(domain):
 
 def test_same_tenant_viewer_cannot_modify_dataset(domain):
     with SessionLocal() as db:
-        user=db.get(models.User,domain["user_id"]);org=db.get(models.Organization,domain["org_id"])
+        db.get(models.User,domain["user_id"]);org=db.get(models.Organization,domain["org_id"])
         # A researcher with no project relationship and no grant is metadata-only
         viewer=models.User(id=f"{PREFIX}-viewer",username=f"{PREFIX}-viewer",email=f"{PREFIX}-viewer@example.invalid",hashed_password="unused",role="Researcher",created_at=stamp())
         db.add(viewer);db.commit()

@@ -178,8 +178,6 @@ def command_center(project_id: str, db: Session = Depends(get_db), context: Tena
     variables = sum(db.query(models.DatasetVariable).filter(models.DatasetVariable.dataset_id == d.id).count() for d in datasets)
     open_issues = sum(db.query(models.DatasetQualityIssue).filter(models.DatasetQualityIssue.dataset_id == d.id, models.DatasetQualityIssue.status == "OPEN").count() for d in datasets)
     analyses = db.query(models.ResearchAnalysis).filter(models.ResearchAnalysis.project_id == project_id, models.ResearchAnalysis.organization_id == context.organization.id).all()
-    defined = sum(db.query(models.DatasetVariable).filter(models.DatasetVariable.dataset_id == d.id, models.DatasetVariable.measurement_level.isnot(None), models.DatasetVariable.role.isnot(None)).count() for d in datasets)
-    definition = round(defined / max(1, variables) * 100)
     quality = max(0, 100 - min(60, open_issues * 5)); structure = 100 if datasets else 0
     plan = 100 if analyses else 40 if datasets else 0
     approved = sum(1 for a in analyses if _analysis_status(_dataset_of(db, a.dataset_id), a) == "APPROVED")

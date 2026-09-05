@@ -474,7 +474,6 @@ def cancel_subscription(
     now_str = datetime.datetime.now(datetime.UTC).isoformat()
 
     if body.immediately:
-        free_plan = db.query(models.Plan).filter(models.Plan.code == "FREE").first()
         sub.status = SubscriptionStatus.CANCELED.value
         sub.cancelled_at = now_str
         sub.updated_at = now_str

@@ -127,7 +127,7 @@ def upload_file(
             mime_type=detected_mime,
             org_id=context.organization.id
         )
-    except Exception as e:
+    except Exception:
         # Release the quota reservation so a failed upload does not leak quota.
         try:
             db.rollback()
@@ -184,7 +184,7 @@ def upload_file(
 
         db.commit()
         db.refresh(db_file)
-    except Exception as db_exc:
+    except Exception:
         db.rollback()
         # Compensation: Delete the written storage blob so no silent orphan remains.
         if storage_key:

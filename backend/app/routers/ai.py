@@ -89,7 +89,7 @@ def ai_assist(
         )
     except AIServiceError as exc:
         raise HTTPException(status_code=exc.http_status, detail=exc.message)
-    except AuthorizationError as exc:
+    except AuthorizationError:
         raise HTTPException(status_code=403, detail="AI context authorization failed")
     except ContextBuildError as exc:
         raise HTTPException(status_code=400, detail=str(exc))

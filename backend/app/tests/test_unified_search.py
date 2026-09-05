@@ -521,7 +521,7 @@ def test_search_stable_ordering(db_session: Session):
 def test_search_pagination_no_duplicates(db_session: Session):
     _seed_plans(db_session)
     t_a = create_test_tenant(db_session, "pagin", "pln-enterprise")
-    t_b = create_test_tenant(db_session, "pagin_b", "pln-enterprise")
+    create_test_tenant(db_session, "pagin_b", "pln-enterprise")
     # Seed 5 projects, page size 2
     for i in range(5):
         db_session.add(_make_project(
@@ -545,7 +545,7 @@ def test_search_count_is_authorized_only(db_session: Session):
     t_b = create_test_tenant(db_session, "countb", "pln-enterprise")
     _seed_projects(db_session, t_a, t_b)
     headers_a = get_auth_headers(t_a["researcher"].username, t_a["org"].id)
-    headers_b = get_auth_headers(t_b["researcher"].username, t_b["org"].id)
+    get_auth_headers(t_b["researcher"].username, t_b["org"].id)
 
     r_a = client.get("/api/search", params={"q": "PROJECT_ALPHA_VISIBLE", "domains": "PROJECT"}, headers=headers_a)
     r_b = client.get("/api/search", params={"q": "PROJECT_SECRET_OTHER_TENANT", "domains": "PROJECT"}, headers=headers_a)
@@ -935,7 +935,7 @@ def test_runtime_scenario_domain_status_date_filters(db_session: Session):
     """Apply domain + status-like filter and year filter to get correct subset."""
     _seed_plans(db_session)
     t_a = create_test_tenant(db_session, "rt_filt", "pln-enterprise")
-    t_b = create_test_tenant(db_session, "rt_filt_b", "pln-enterprise")
+    create_test_tenant(db_session, "rt_filt_b", "pln-enterprise")
     # Need a project to satisfy NOT NULL projectId
     ref_proj = _make_project(t_a, "proj-rt-filt-ref", "مشروع مرجع", "Reference Project")
     db_session.add(ref_proj)
@@ -968,7 +968,7 @@ def test_runtime_scenario_pagination_no_duplicates(db_session: Session):
     """Pagination next page contains no duplicate items."""
     _seed_plans(db_session)
     t_a = create_test_tenant(db_session, "rt_pag", "pln-enterprise")
-    t_b = create_test_tenant(db_session, "rt_pag_b", "pln-enterprise")
+    create_test_tenant(db_session, "rt_pag_b", "pln-enterprise")
     for i in range(5):
         db_session.add(_make_project(t_a, f"proj-rt-pag-{i}", f"مشروع RT {i}", f"Runtime Page Project {i}"))
     db_session.commit()

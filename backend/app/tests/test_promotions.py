@@ -399,7 +399,7 @@ def test_evidence_snapshot_immutability_and_ownership():
     db.close()
 
     headers_a = get_auth_headers(f"res_snapa_{suffix}", org_id)
-    headers_b = get_auth_headers(f"res_snapb_{suffix}", org_id)
+    get_auth_headers(f"res_snapb_{suffix}", org_id)
 
     app_res = client.post("/api/promotions/applications", json={"target_rank": "ASSOCIATE_PROFESSOR"}, headers=headers_a)
     app_id = app_res.json()["id"]

@@ -410,7 +410,7 @@ def test_10_protocol_approval_snapshot(domain):
 def test_11_protocol_versioning_and_history(domain):
     """11. Protocol versions are append-only; history preserved."""
     d = domain
-    state = get_or_create_design_state(d.db, d.project, d.owner.id)
+    get_or_create_design_state(d.db, d.project, d.owner.id)
     v1 = create_protocol(d.db, d.project, d.owner.id)
     d.db.commit()
     assert v1.version_number == 1
@@ -455,7 +455,7 @@ def test_12_protocol_staleness_after_design_change(domain):
 def test_13_pi_and_co_researcher_collaboration(domain):
     """13. PI manages project; co-researcher contributes within assigned project."""
     d = domain
-    state = get_or_create_design_state(d.db, d.project, d.owner.id)
+    get_or_create_design_state(d.db, d.project, d.owner.id)
     # Owner is PI
     # Add co-researcher
     member = add_project_member(d.db, d.project, d.colleague.id, "CO_RESEARCHER", d.owner.id)
@@ -469,7 +469,7 @@ def test_13_pi_and_co_researcher_collaboration(domain):
 def test_14_research_assistant_restricted(domain):
     """14. Research assistant can only edit assigned sections."""
     d = domain
-    assistant = add_project_member(d.db, d.project, d.assistant.id, "RESEARCH_ASSISTANT",
+    add_project_member(d.db, d.project, d.assistant.id, "RESEARCH_ASSISTANT",
                                    d.owner.id, assigned_sections=["measurement", "literature"])
     d.db.commit()
     # Can edit assigned sections
@@ -490,7 +490,7 @@ def test_15_methodology_reviewer_exact_version(domain):
     """15. Methodology reviewer reviews exact protocol version."""
     d = domain
     # Create protocol
-    state = get_or_create_design_state(d.db, d.project, d.owner.id)
+    get_or_create_design_state(d.db, d.project, d.owner.id)
     proto = create_protocol(d.db, d.project, d.owner.id)
     d.db.commit()
     # Add methodology reviewer

@@ -141,9 +141,6 @@ def run_pilot_forecast(
     lower_95 = post_mean_t - z_95 * math.sqrt(post_variance_t)
     upper_95 = post_mean_t + z_95 * math.sqrt(post_variance_t)
     
-    # Attrition prediction based on pilot drop-outs
-    completion_rate = 0.90
-    
     # Probability of future data aligning with hypothesis direction
     diff_mean = post_mean_t - post_mean_c
     diff_se = math.sqrt(post_variance_t + post_variance_c)

@@ -242,7 +242,6 @@ def run_prediction(
         confidence = res["confidence_score"]
         provenance = res["data_provenance"]
         assumptions = res["assumptions"]
-        power = res["power"]
         prob_hyp = res["prob_supported"]
     elif req.forecastMode == "PILOT_UPDATED_FORECAST":
         pd = req.pilotData
@@ -255,7 +254,6 @@ def run_prediction(
         confidence = res["confidence_score"]
         provenance = res["data_provenance"]
         assumptions = res["assumptions"]
-        power = 0.75 # Pilot derived expectation
         prob_hyp = res["prob_supported"]
     elif req.forecastMode == "IN_STUDY_DYNAMIC_FORECAST":
         cohort_dicts = [c.model_dump() for c in req.cohortData] if req.cohortData else []
@@ -267,7 +265,6 @@ def run_prediction(
         confidence = res["confidence_score"]
         provenance = res["data_provenance"]
         assumptions = res["assumptions"]
-        power = 0.85
         prob_hyp = 0.90 if point_est > 0 else 0.50
     elif req.forecastMode == "HISTORICAL_MODEL_PREDICTION":
         # Check if version exists
@@ -297,7 +294,6 @@ def run_prediction(
         confidence = 88
         provenance = res["data_provenance"]
         assumptions = res["assumptions"]
-        power = 0.82
         prob_hyp = 0.85
     else:
         raise HTTPException(status_code=400, detail="Invalid forecastMode")

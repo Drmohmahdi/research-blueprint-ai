@@ -716,7 +716,7 @@ def test_rt_research_assistance(db_session: Session):
     """Authorized researcher asks research assistance → safe answer with sources."""
     _seed_plans(db_session)
     t = create_test_tenant(db_session, "rt1", "pln-enterprise")
-    now = datetime.datetime.now(datetime.UTC).isoformat()
+    datetime.datetime.now(datetime.UTC).isoformat()
     proj = _make_project(t, "proj-rt1", "دراسة تجريبية", "Experimental Study RT1")
     db_session.add(proj); db_session.commit()
     headers = get_auth_headers(t["researcher"].username, t["org"].id)

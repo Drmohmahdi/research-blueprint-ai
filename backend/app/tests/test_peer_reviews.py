@@ -733,7 +733,7 @@ def test_internal_reviewer_idor_prevention(test_tenants):
     """Ensures Reviewer A cannot view, modify, or submit Reviewer B's assignment (Same Tenant Horizontal IDOR)."""
     h_editor = test_tenants["headers_editor_a"]
     h_author = test_tenants["headers_author_a"]
-    h_reviewer_1 = test_tenants["headers_reviewer_a"]
+    test_tenants["headers_reviewer_a"]
     h_reviewer_2 = test_tenants["headers_reviewer_a2"]
 
     res_case = client.post(

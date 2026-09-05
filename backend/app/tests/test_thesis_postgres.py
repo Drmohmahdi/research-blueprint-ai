@@ -35,7 +35,7 @@ def _local_postgres_url() -> str:
     bin_dir = Path(r"C:\Program Files\PostgreSQL\16\bin")
     pg_ctl = bin_dir / "pg_ctl.exe"
     initdb = bin_dir / "initdb.exe"
-    createdb = bin_dir / "createdb.exe"
+    bin_dir / "createdb.exe"
     if not pg_ctl.exists():
         raise FileNotFoundError("PostgreSQL 16 pg_ctl was not found")
     root = Path(os.environ.get("TEMP", ".")) / "baseerah-thesis-pg"

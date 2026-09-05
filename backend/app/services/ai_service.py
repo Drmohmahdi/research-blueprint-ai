@@ -12,7 +12,6 @@ def run_local_fallback_analyzer(title: str) -> TitleAnalysisResponse:
     independent_variables = []
     dependent_variables = []
     population = ""
-    context = ""
     suggested_methodology = "descriptive"
     confidence = 0.7
     ambiguities = []

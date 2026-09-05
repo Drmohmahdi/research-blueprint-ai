@@ -494,7 +494,6 @@ def test_cross_tenant_billing_isolation():
     db = SessionLocal()
     user_a, org_a = create_test_tenant(db, "usr_iso_a", "ORGANIZATION_ADMIN")
     user_b, org_b = create_test_tenant(db, "usr_iso_b", "ORGANIZATION_ADMIN")
-    username_a = user_a.username
     username_b = user_b.username
     org_a_id = org_a.id
     org_b_id = org_b.id

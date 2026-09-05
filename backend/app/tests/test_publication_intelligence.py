@@ -200,7 +200,7 @@ def test_5_stale_data_dependency_blocked(domain):
 
 def test_6_manuscript_readiness_gap(domain):
     d = domain
-    v = create_manuscript_version(d)
+    create_manuscript_version(d)
     r = client.get(f"/api/publication-intelligence/assets/{d.asset.id}/command-center", headers=d.owner_h)
     readiness = r.json()["manuscript_readiness"]
     assert readiness["status"] == "NOT_READY"
@@ -210,7 +210,6 @@ def test_6_manuscript_readiness_gap(domain):
 # ── Scenario 7: Reporting guideline selection deterministic ──────────────────
 
 def test_7_reporting_guideline_selection(domain):
-    d = domain
     # Cross-sectional quantitative study → STROBE
     assert select_reporting_guidelines("ORIGINAL_RESEARCH", "cross_sectional") == ["STROBE"]
     # Systematic review → PRISMA
@@ -390,7 +389,7 @@ def test_15_journal_metric_integrity(domain):
 
 def test_16_human_journal_selection(domain):
     d = domain
-    v = create_manuscript_version(d)
+    create_manuscript_version(d)
     j = client.post("/api/publication-intelligence/journals", json={
         "title": "Human Select Journal", "publisher": "P",
         "metadata": {"article_types": ["ORIGINAL_RESEARCH"]},

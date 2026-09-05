@@ -383,10 +383,6 @@ def _detect_design_conflicts(project: models.ResearchProject, state: models.Rese
 def _detect_causal_claims(project: models.ResearchProject, state: models.ResearchDesignState) -> list[dict[str, Any]]:
     warnings: list[dict[str, Any]] = []
     design = (project.studyDesign or "").casefold()
-    non_causal = any(token in design for token in (
-        "cross_sectional", "descriptive", "correlational", "survey",
-        "qualitative", "conceptual", "theoretical", "systematic", "review",
-    ))
     causal = any(token in design for token in ("experimental", "quasi_experimental", "randomized", "intervention", "longitudinal"))
     claims: list[tuple[str, str]] = []
     for qid, q in (_j(state.question_ext_json, {}) or {}).items():

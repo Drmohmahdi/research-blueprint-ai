@@ -142,7 +142,7 @@ class ProjectProvider(BaseProvider):
         return schemas.SearchResultItem(
             domain=self.domain, entity_id=row.id, title=title,
             subtitle=subtitle, snippet=snippet, updated_at=None,
-            target=f"/app/research",
+            target="/app/research",
             metadata={"studyDesign": row.studyDesign, "version": row.version}
         )
 
@@ -212,7 +212,7 @@ class LiteratureProvider(BaseProvider):
             domain=self.domain, entity_id=row.id, title=title,
             subtitle=subtitle, snippet=snippet, status=None,
             updated_at=row.createdAt,
-            target=f"/app/research/literature/synthesizer",
+            target="/app/research/literature/synthesizer",
             metadata={"year": row.year, "source": row.source, "doi": row.doi}
         )
 
