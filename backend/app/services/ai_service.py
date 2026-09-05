@@ -1,8 +1,10 @@
+import logging
 import re
 import json
 from google import genai
 from google.genai import types as genai_types
 from ..config import settings
+from ..observability import log_event
 from ..schemas import TitleAnalysisResponse
 
 def run_local_fallback_analyzer(title: str) -> TitleAnalysisResponse:
@@ -196,9 +198,9 @@ def analyze_research_title_ai(title: str) -> TitleAnalysisResponse:
                 isFallback=False
             )
         except Exception as e:
-            print(f"Gemini API call attempt {attempt+1}/{attempts} failed: {e}")
+            log_event(logging.WARNING, "ai.gemini.attempt_failed", attempt=attempt + 1, attempts=attempts, exception_type=type(e).__name__)
             if attempt == attempts - 1:
-                print("All Gemini API attempts failed. Falling back to local rules...")
+                log_event(logging.WARNING, "ai.gemini.all_attempts_failed_falling_back_to_local_rules")
                 return run_local_fallback_analyzer(cleaned_title)
     
     return run_local_fallback_analyzer(cleaned_title)

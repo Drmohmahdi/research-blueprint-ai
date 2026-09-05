@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { apiGetBilling, apiSubscribe, apiListPlans, apiGetDownloadUrl } from '../../utils/api';
 import { CreditCard, Check, ArrowUpCircle, Download, Activity, HardDrive } from 'lucide-react';
 import { Card } from '../../design-system/components/Card';
@@ -20,7 +20,7 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -31,16 +31,16 @@ export const BillingDashboard: React.FC<BillingDashboardProps> = ({ language }) 
       }
       if (bill) setBilling(bill);
       if (list) setPlans(list);
-    } catch (e) {
+    } catch {
       setError(language === 'ar' ? 'تعذر تحميل بيانات الاشتراك.' : 'Could not load billing data.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [language]);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   const handleUpgrade = async (planCode: string) => {
     if (upgrading) return;
